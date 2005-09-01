@@ -38,6 +38,16 @@ the site-wide
 .SH LAYOUT OPTIONS
 
 .TP
+.B -A
+All files in the current directory will get a slides,
+except .html or dot-begining files.
+Files are matched as images or movies first, and then
+reverted as simple files instead.
+See
+.B -S
+for details about adding slides for subdirectories.
+
+.TP
 .B -a
 Write image dimensions and sizes under each thumbnail on the index page,
 and under each slide if --bigy or --bigxy was passed.
@@ -142,10 +152,18 @@ or go crazy with
 may be used several times on the same command line.
 
 .TP
+.BI --exclude " <s>"
+Exclude files whose name matches \fBs\fR.
+
+.TP
 .BI -i " <file>"
 Name of the main thumbnail index file.  The default is
 .IR index.html ,
 as desirable for most web servers.
+
+.TP
+.BI --include " <s>"
+Include files whose name matches \fBs\fR and where previously excluded.
 
 .TP
 .BI -k
@@ -176,9 +194,35 @@ index page background with the tile background-color option in the
 .IR llgal.css " file."
 
 .TP
+.BI -S
+Each subdirectory will get a dedicated slide.
+If a caption file exists, only the subdirectories that
+it defines will be processed.
+If no caption file exists,
+.B llgal
+will process all subdirectories but those whose name begins
+with a dot.
+
+Contrary to
+.B -R
+this option will not make
+.B llgal
+run recursively in subdirectories.
+.B -S
+does only define the list of subdirectories that appear
+in the current gallery.
+
+.TP
 .B -s
 For the simplest setup, omit all HTML slides.  Clicking the thumbnails on 
 the main page will just take users to the plain image files.
+
+.TP
+.BI --sort " <name|time|none>"
+Change sort criteria when scanning files in the working directory.
+Default is \fBname\fR.
+Setting to the empty string means \fBnone\fR.
+\fBdate\fR means \fBtime\fR.
 
 .TP
 .BI --sp " <s>"
@@ -329,15 +373,18 @@ may be used several times on the same command line.
 
 .TP
 .BI -R
-Enable recursive mode. Each subdirectory will get a dedicated
-slide and
+Enable recursive mode.
 .B llgal
-will be run inside it (except those whose name begins with
-a dot).
-This option might be used either to generate captions file
-in all directories, or actual galleries.
-If a caption file is used, only the subdirectories that
-are set inside will be processed.
+will be run inside subdirectories.
+The list of subdirectories has to be either detected by
+.B -S
+(which is not implied by
+.B -R
+) or defined in the captions file with
+.B DIR:
+entries.
+This option might be used either to generate galleries
+in all subdirectories, or their captions files.
 
 Note that recursive cleaning (
 .BI -R
@@ -345,7 +392,9 @@ used together with
 .BI --clean
 or
 .BI --cleanall
-) will _not_ check that a subdirectory is in the caption file.
+) will
+.B not
+check that a subdirectory is in the caption file.
 All not-dot-begining subdirectories will be cleaned.
 
 .TP
@@ -396,6 +445,10 @@ defines a text slide.
 .B LNK: <url> ---- <linktext> ---- <caption>
 .RS
 defines a link slide.
+.RE
+.B FIL: <url> ---- <linktext> ---- <caption>
+.RS
+defines a link to another file (typically neither an image nor a movie)
 .RE
 .B DIR: <dir> ---- <linktext> ---- <caption>
 .RS
@@ -643,8 +696,30 @@ Unit to be used when printing sizes [-asu <s>]
 Use a caption file [-c].
 .RE
 
+.B Exclude:
+
+.I exclude = "string"
+.RS
+Exclude files whose name matches [--exclude <s>].
+This option may be used several times.
+.RE
+.I include = "string"
+.RS
+Include files whose name matches and were previously excluded [--include <s>].
+This option may be used several times.
+The order of includes and excludes is respected.
+.RE
+
 .B Various:
 
+.I add_all_files = <0/1>
+.RS
+Add all files to the list of entries, not only images and movies [-A].
+.RE
+.I add_subdirs = <0/1>
+.RS
+Add subdirectories to the list of entries [-S].
+.RE
 .I convert_options = "string"
 .RS
 Options to pass to convert [--con <s>].
@@ -663,9 +738,21 @@ Additional options to pass to convert when creating thumbnails.
 Additional configuration file [--config <s>].
 This option may be used several times.
 .RE
+.I image_extensions = "ext1|ext2|..."
+.RS
+Extensions that are matched when searching images
+.RE
+.I movie_extensions = "ext1|ext2|..."
+.RS
+Extensions that are matched when searching movies
+.RE
 .I make_recursive = <0/1>
 .RS
-Look at subdirectories [-R].
+Run recursively in subdirectories [-R].
+.RE
+.I sort_criteria = "name|time|none"
+.RS
+Change sort criteria when scanning files in the working directory.
 .RE
 .I www_access_rights = <0/1>
 .RS
