@@ -12,17 +12,20 @@ use strict ;
 no strict "refs" ;
 
 Getopt::Long::Configure('noignorecase', 'noautoabbrev', 'bundling') ;
-STDOUT->autoflush("1");
+STDOUT->autoflush("1") ;
+
+my $version = "@VERSION@" ;
 
 ######################################################################
 # store command-line options upfront to write in the index <HEAD>
-my @llgal_options = @ARGV;
+my @llgal_options = @ARGV ;
 
 ######################################################################
 # process general command-line options
 
 my $destination_dir = "." ;	# look in current directory "."
 my $force_regen_asked = 0 ;	# force thumbnail regeneration
+my $version_asked = 0 ;		# show version
 my $help_asked = 0 ;		# displays brief usage message
 my $clean_asked = 0 ;		# clean up all generated files
 my $cleanall_asked = 0 ;	# clean up all generated and user modified files
@@ -35,6 +38,7 @@ GetOptions(
 	   'cleanall'	=> \$cleanall_asked,
 	   'd=s' 	=> \$destination_dir,
 	   'f'		=> \$force_regen_asked,
+	   'v|version'	=> \$version_asked,
 	   'h|help'	=> \$help_asked,
 	   'gencfg=s'   => \$generate_config,
 	) ;
@@ -181,7 +185,7 @@ my $www_access_rights = 0 ;
 # create usage now to use defaults values
 
 my $usage = << "END_OF_USAGE";
-This is llgal 0.1 the Loulous HTML image slide show generator.
+This is llgal $version the Loulous HTML image slide show generator.
 Syntax:  llgal [-option -option ...]
 Options:  -a              write image sizes under thumbnails on index page
           --ad            like -a, but write only the image dimensions
@@ -220,6 +224,7 @@ Options:  -a              write image sizes under thumbnails on index page
           --option <s>    pass an additional option as in configuration files
           -f              force thumbnail and scaled slide regeneration
           --gencfg <file> generate the configuration <file>
+          -v, --version   show version
           -h, --help      displays this brief help
 Note:      default values are given in parentheses (where applicable).
 Author:    Brice Goglin <Brice.Goglin\@ens-lyon.org>
@@ -363,6 +368,7 @@ foreach my $conf ( @additional_config_files ) {
 
 ######################################################################
 # process command-line arguments (overriding defaults above)
+
 GetOptions(
 	   'a'		=> sub { $show_dimensions = $show_size = 1 ; },
 	   'ad'		=> \$show_dimensions,
@@ -398,6 +404,7 @@ GetOptions(
 	) or die $usage ;
 
 die $usage if ($help_asked) ;
+die "This is llgal version $version.\n" if ($version_asked) ;
 
 ######################################################################
 # sanity checks and restore defaults of numerical options
@@ -605,6 +612,7 @@ if ($slide_height_max > 0) {
 my $slide_copy_command = "cp -f " ;
 
 ######################################################################
+
 # find generic llgal file
 sub find_generic_llgal_file {
     my ($filename, $check) = (shift, shift) ;
@@ -758,8 +766,12 @@ my @footers = () ;
 my $only_generation_caption_file = $use_caption_file
     && (! -r "$destination_dir/$local_llgal_dir/$captions_filename") ;
 
+# global variable for exception messages
+my $tmp_warning ;
+
 ###################################################################################
 # generating safe url
+
 my $unsafe_url_warning = 0 ;
 my $first_unsafe_url ;
 sub make_safe_url {
@@ -777,7 +789,32 @@ sub make_safe_url {
 my $local_llgal_url = make_safe_url ($local_llgal_dir) ;
 
 ###################################################################################
+# checking files
+
+sub check_movie {
+    my $filename = shift ;
+    if (! -r $filename) {
+	$tmp_warning = "Cannot find movie $filename, skipping it.\n" ;
+	return -1 ;
+    }
+    return 0 ;
+}
+
+sub check_image {
+    my $filename = shift ;
+    if (! -r $filename) {
+	$tmp_warning = "Cannot find image $filename, skipping it.\n" ;
+	return -1 ;
+    } elsif (system("identify \"$filename\" > /dev/null 2>&1")) {
+	$tmp_warning = "Bad image file $filename, skipping it.\n" ;
+	return -1 ;
+    }
+    return 0 ;
+}
+
+###################################################################################
 # generate entries
+
 sub make_entry {
     my $entry ;
     my $type = shift ;
@@ -787,6 +824,13 @@ sub make_entry {
     my $linktext = shift ;
     my $caption = shift ;
 
+    # check files
+    if ($type == $TYPE_IMG) {
+	return undef if check_image ("$destination_dir/$filename") < 0 ;
+    } elsif ($type == $TYPE_MVI) {
+	return undef if	check_movie ("$destination_dir/$filename") < 0 ;
+    }
+
     # set the type
     $entry->{type} = $type ;
 
@@ -794,9 +838,6 @@ sub make_entry {
     if (not defined $filename) {
 	$filename = $slide_filenameprefix_nofile.($nofiles++) ;
 	$basename = $slide_filenameprefix_nofile.($nofiles++) ;
-    } else {
-	# check its existence
-	die "Can't open $filename\n" unless (-r "$destination_dir/$filename");
     }
     $entry->{filename} = $filename ;
 
@@ -914,8 +955,11 @@ sub make_entry {
 	my $real_thumb_filename = "$destination_dir/$entry->{thumb_filename}" ;
 	if ((! -e "$real_thumb_filename") or $force_regen_asked) {
 	    my $output = `$thumbnail_create_command "$real_filename" "$real_thumb_filename" 2>&1` ;
-	    chomp $output ;
-	    die "Failed ($output)\n" if $? ;
+	    if ($?) {
+		chomp $output ;
+		$tmp_warning = "Failed to create $real_filename thumbnail ($output)\n" ;
+		return undef ;
+	    }
 	}
 	($entry->{thumb_xdim},$entry->{thumb_ydim}) = imgsize("$real_thumb_filename") ;
     } else {
@@ -943,8 +987,11 @@ sub make_entry {
 	    } else {
 		$output = `$slide_create_command "$real_filename" "$real_scaled_filename" 2>&1` ;
 	    }
-	    chomp $output ;
-	    die "Failed ($output)\n" if $? ;
+	    if ($?) {
+		chomp $output ;
+		$tmp_warning = "Failed to create $real_filename scaled image ($output)\n" ;
+		return undef ;
+	    }
 	}
 	($x,$y) = imgsize("$real_scaled_filename");
 	$entry->{scaled_xdim} = $x;
@@ -996,13 +1043,20 @@ sub get_entries {
     init_percentage () ;
     my $i = 0 ;
 
+    my $warnings = "" ;
+
     # add entries
     while (@imgfiles) {
 	my $filename = shift @imgfiles ;
 	my @parts = split (/\./, $filename) ;
 	pop @parts ;
 	my $basename = join (".", @parts) ;
-	push @entries, make_entry ($TYPE_IMG, $filename, $basename, undef, undef, undef) ;
+	my $entry = make_entry ($TYPE_IMG, $filename, $basename, undef, undef, undef) ;
+	if (not defined $entry) {
+	    $warnings .= $tmp_warning ;
+	} else {
+	    push @entries, $entry ;
+	}
 	print_percentage (($i++)+1, $nentries) ;
     }
 
@@ -1011,22 +1065,36 @@ sub get_entries {
 	my @parts = split (/\./, $filename) ;
 	pop @parts ;
 	my $basename = join (".", @parts) ;
-	push @entries, make_entry ($TYPE_MVI, $filename, $basename, undef, undef, undef) ;
+	my $entry = make_entry ($TYPE_MVI, $filename, $basename, undef, undef, undef) ;
+	if (not defined $entry) {
+	    $warnings .= $tmp_warning ;
+	} else {
+	    push @entries, $entry ;
+	}
 	print_percentage (($i++)+1, $nentries) ;
     }
 
     while (@subdirs) {
 	my $dirname = shift @subdirs ;
-	push @entries, make_entry ($TYPE_DIR, $dirname, $dirname, undef, undef, undef) ;
+	my $entry = make_entry ($TYPE_DIR, $dirname, $dirname, undef, undef, undef) ;
+	if (not defined $entry) {
+	    $warnings .= $tmp_warning ;
+	} else {
+	    push @entries, $entry ;
+	}
 	print_percentage (($i++)+1, $nentries) ;
     }
+
+    # recompute nentries since wrong entries might have been skipped
+    # (do recompute it before to avoid breaking percentage)
+    $nentries = @entries ;
 
     # sort alphabetically, by file name
     @entries = sort { $a->{filename} cmp $b->{filename} } @entries ;
 
-    die "Please select more files for your slide show!\n" if ($nentries < 1);
-
     print "\n" ;
+    print $warnings ;
+    die "Please select more files for your slide show!\n" if ($nentries < 1);
 }
 
 #######################################################################
@@ -1039,6 +1107,7 @@ if (!-r "$destination_dir/$local_llgal_dir") {
 
 #######################################################################
 # If the -c option was supplied let user specify captions, else see below
+
 if ($only_generation_caption_file) {
     # create and fill $captions_filename file if it doesn't exist
     get_entries ;
@@ -1091,6 +1160,8 @@ if ($only_generation_caption_file) {
     open(CAP,"$destination_dir/$local_llgal_dir/$captions_filename")
 	or die "Can't open $destination_dir/$local_llgal_dir/$captions_filename file\n";
 
+    my $warnings = "" ;
+
     my $line;
     while (defined($line = <CAP>)) {
 	chomp($line); $line =~ s/^\s*//; $line =~ s/\s\(\s*\)$/\1/;
@@ -1139,15 +1210,21 @@ if ($only_generation_caption_file) {
 		    die "Unrecognized line #$. in caption file: \"$line\"\n" ;
 		}
 
-		# really add this entry
-		push @entries, $entry ;
+		if (not defined $entry) {
+		    $warnings .= $tmp_warning ;
+		} else {
+		    # really add this entry
+		    push @entries, $entry ;
+		}
 	    }
 	}
 	print_percentage (tell CAP, (stat CAP)[7]) ;
     }
     close(CAP);
     $nentries = @entries ;
-    print "\nFound $nentries files.\n";
+    print "\n" ;
+    print $warnings ;
+    print "Found $nentries files.\n";
 
 } else {
     # generate the gallery without caring about the caption file
@@ -1167,6 +1244,7 @@ if ($unsafe_url_warning) {
 }
 
 #######################################################################
+
 # Get the indextemplate
 get_generic_llgal_file ($indextemplate_filename) ;
 

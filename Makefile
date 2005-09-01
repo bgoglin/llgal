@@ -1,5 +1,5 @@
 NAME	=	llgal
-VERSION	=	0.9.5
+VERSION	=	0.9.6
 
 .PHONY: install uninstall tarball
 
@@ -14,9 +14,11 @@ MANDIR	=	$(PREFIX)/man
 TARBALL	=	$(NAME)-$(VERSION)
 DEBIAN_TARBALL	=	$(NAME)_$(VERSION).orig
 
-install::
+llgal::
+	sed -e 's!@DATADIR@!$(DATADIR)!g' -e 's!@SYSCONFDIR@!$(SYSCONFDIR)!g' -e 's!@VERSION@!$(VERSION)!g' < llgal.in > llgal
+
+install:: llgal
 	install -d -m 0755 $(DESTDIR)$(BINDIR) $(DESTDIR)$(DATADIR)/llgal $(DESTDIR)$(MANDIR)/man1 $(DESTDIR)$(SYSCONFDIR)
-	sed -e 's!@DATADIR@!$(DATADIR)!g' -e 's!@SYSCONFDIR@!$(SYSCONFDIR)!g' < llgal.in > llgal
 	install -m 0755 llgal $(DESTDIR)$(BINDIR)/llgal
 	install -m 0644 indextemplate.html llgal.css slidetemplate.html tile.png $(DESTDIR)$(DATADIR)/llgal
 	install -m 0644 llgalrc $(DESTDIR)$(SYSCONFDIR)
@@ -35,6 +37,7 @@ tarball::
 	cp llgalrc /tmp/$(TARBALL)
 	cp llgal.1 /tmp/$(TARBALL)
 	cp Makefile /tmp/$(TARBALL)
+	cp README /tmp/$(TARBALL)
 	cd /tmp && cp -a $(TARBALL) $(DEBIAN_TARBALL) && tar cfz $(DEBIAN_TARBALL).tar.gz $(DEBIAN_TARBALL) && rm -rf $(DEBIAN_TARBALL)
 	cd /tmp && tar cfj $(TARBALL).tar.bz2 $(TARBALL) && rm -rf /tmp/$(TARBALL)
 	mv /tmp/$(DEBIAN_TARBALL).tar.gz /tmp/$(TARBALL).tar.bz2 ..
