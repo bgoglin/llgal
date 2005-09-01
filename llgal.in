@@ -623,10 +623,10 @@ sub find_generic_llgal_file {
 sub get_generic_llgal_file {
     my ($filename) = (shift) ;
     if (-e "$destination_dir/$local_llgal_dir/$filename") {
-	print "Found $filename in $destination_dir/$local_llgal_dir/ ... using it.\n" ;
+	print "Found $filename in $destination_dir/$local_llgal_dir/, using it.\n" ;
     } else {
 	my $srcdir = find_generic_llgal_file ($filename, 1);
-	print "No $filename in $destination_dir/$local_llgal_dir/ ... getting a copy from $srcdir\n" ;
+	print "No $filename in $destination_dir/$local_llgal_dir/, getting a copy from $srcdir\n" ;
 	system("cp -f \"$srcdir/$filename\" \"$destination_dir/$local_llgal_dir/$filename\"") ;
     }
 }
@@ -754,6 +754,10 @@ my $nofiles = 0 ;
 my @headers = () ;
 my @footers = () ;
 
+# are we just generating the caption file ?
+my $only_generation_caption_file = $use_caption_file
+    && (! -r "$destination_dir/$local_llgal_dir/$captions_filename") ;
+
 ###################################################################################
 # generating safe url
 my $unsafe_url_warning = 0 ;
@@ -861,6 +865,11 @@ sub make_entry {
     $title =~ s/&/&amp;/g ;
 #    $title =~ s/"/&\#34;/g ;
     $entry->{title} = $title ;
+
+    # do not generate more if we are only generating captions
+    if ($only_generation_caption_file) {
+	return $entry ;
+    }
 
     # HTML slide and its url
     if (!$make_no_slides) {
@@ -1030,111 +1039,118 @@ if (!-r "$destination_dir/$local_llgal_dir") {
 
 #######################################################################
 # If the -c option was supplied let user specify captions, else see below
-if ($use_caption_file) {
-    if (! -r "$destination_dir/$local_llgal_dir/$captions_filename") {
-	get_entries ;
+if ($only_generation_caption_file) {
+    # create and fill $captions_filename file if it doesn't exist
+    get_entries ;
 
-	# create and fill $captions_filename file if it doesn't exist
-	print "Found $nentries files in " .
-	    ($destination_dir eq "." ? "current directory" : "directory $destination_dir") ."\n" ;
-	open(CAP, ">$destination_dir/$local_llgal_dir/$captions_filename")
-	    or die "Can't create $destination_dir/$local_llgal_dir/$captions_filename file\n" ;
-	print "Creating the $captions_filename file...\n" ;
-	print CAP "# This is llgal's $captions_filename file, first generated ", scalar localtime, ".\n" ;
-	print CAP "# TITLE: title of the index\n" ;
-	print CAP "# INDEXHEAD: one header line in the index\n" ;
-	print CAP "# INDEXFOOT: one header line in the index\n" ;
-	print CAP "# TXT: text ---- caption\n" ;
-	print CAP "# IMG: imagefile.{gif,png,jpg} ---- caption\n" ;
-	print CAP "# LNK: url ---- slide link text ---- caption\n" ;
-	print CAP "# MVI: movie.{avi,mpg,mpeg} ---- slide link text ---- caption\n" ;
-	print CAP "\n" ;
-	print CAP "# $caption_removal_line\n" ;
-	print CAP "\n" ;
+    print "Found $nentries files in " .
+	($destination_dir eq "." ? "current directory" : "directory $destination_dir") ."\n" ;
+    open(CAP, ">$destination_dir/$local_llgal_dir/$captions_filename")
+	or die "Can't create $destination_dir/$local_llgal_dir/$captions_filename file\n" ;
+    print "Creating the $captions_filename file: " ;
+    init_percentage () ;
+    print CAP "# This is llgal's $captions_filename file, first generated ", scalar localtime, ".\n" ;
+    print CAP "# TITLE: title of the index\n" ;
+    print CAP "# INDEXHEAD: one header line in the index\n" ;
+    print CAP "# INDEXFOOT: one header line in the index\n" ;
+    print CAP "# TXT: text ---- caption\n" ;
+    print CAP "# IMG: imagefile.{gif,png,jpg} ---- caption\n" ;
+    print CAP "# LNK: url ---- slide link text ---- caption\n" ;
+    print CAP "# MVI: movie.{avi,mpg,mpeg} ---- slide link text ---- caption\n" ;
+    print CAP "\n" ;
+    print CAP "# $caption_removal_line\n" ;
+    print CAP "\n" ;
+    my $caption_header_lines = $. ;
+    print_percentage ($caption_header_lines, $caption_header_lines+$nentries) ;
 
-	for (my $i = 0; $i < $nentries; $i++) {
-	    my $type = $entries[$i]->{type} ;
-	    if ($type == $TYPE_IMG) {
-		print CAP "IMG: ". $entries[$i]->{filename}
-		." ---- ". $entries[$i]->{caption} ."\n";
-	    } elsif ($type == $TYPE_MVI) {
-	        print CAP "MVI: " . $entries[$i]->{filename}
-		." ---- ". $entries[$i]->{linktext}
-		." ---- ". $entries[$i]->{caption} ."\n";
-	    } elsif ($type == $TYPE_DIR) {
-	        print CAP "DIR: " . $entries[$i]->{filename}
-		." ---- ". $entries[$i]->{linktext}
-		." ---- ". $entries[$i]->{caption} ."\n";
-	    }
+    for (my $i = 0; $i < $nentries; $i++) {
+	my $type = $entries[$i]->{type} ;
+	if ($type == $TYPE_IMG) {
+	    print CAP "IMG: ". $entries[$i]->{filename}
+	    ." ---- ". $entries[$i]->{caption} ."\n";
+	} elsif ($type == $TYPE_MVI) {
+	    print CAP "MVI: " . $entries[$i]->{filename}
+	    ." ---- ". $entries[$i]->{linktext}
+	    ." ---- ". $entries[$i]->{caption} ."\n";
+	} elsif ($type == $TYPE_DIR) {
+	    print CAP "DIR: " . $entries[$i]->{filename}
+	    ." ---- ". $entries[$i]->{linktext}
+	    ." ---- ". $entries[$i]->{caption} ."\n";
 	}
-	close(CAP);
-	die "Now edit the $captions_filename file to your liking and rerun llgal -c\n";
-    } else {
-	# read in files specified in the .captions file if it exists
-	print "Reading the $captions_filename file and preparing entries: ";
-	init_percentage ();
+	print_percentage ($caption_header_lines+$i+1, $caption_header_lines+$nentries) ;
+    }
+    close(CAP);
+    print "\n";
+    die "Now edit the $captions_filename file to your liking and rerun llgal -c\n";
 
-	open(CAP,"$destination_dir/$local_llgal_dir/$captions_filename")
-	    or die "Can't open $destination_dir/$local_llgal_dir/$captions_filename file\n";
-	my $line;
-	while (defined($line = <CAP>)) {
-	    chomp($line); $line =~ s/^\s*//; $line =~ s/\s\(\s*\)$/\1/;
-	    # only lines that don't start with # and are not empty
-	    if (!($line =~ m/^\#/) && !($line =~ /^$/)) {
-		if ($line =~ m/TITLE:\s*(.*)\s*/) {
-		    # title
-		    $index_title = $1;
+} elsif ($use_caption_file) {
+    # read in files specified in the .captions file if it exists
+    print "Reading the $captions_filename file and preparing entries: ";
+    init_percentage ();
 
-		} elsif ($line =~ m/^INDEXHEAD:\s+(.*)\s*$/) {
-		    # header for the index
-		    push @headers, $1 ;
+    open(CAP,"$destination_dir/$local_llgal_dir/$captions_filename")
+	or die "Can't open $destination_dir/$local_llgal_dir/$captions_filename file\n";
 
-		} elsif ($line =~ m/^INDEXFOOT:\s+(.*)\s*$/) {
-		    # footer for the index
-		    push @footers, $1 ;
+    my $line;
+    while (defined($line = <CAP>)) {
+	chomp($line); $line =~ s/^\s*//; $line =~ s/\s\(\s*\)$/\1/;
+	# only lines that don't start with # and are not empty
+	if (!($line =~ m/^\#/) && !($line =~ /^$/)) {
+	    if ($line =~ m/TITLE:\s*(.*)\s*/) {
+		# title
+		$index_title = $1;
+
+	    } elsif ($line =~ m/^INDEXHEAD:\s+(.*)\s*$/) {
+		# header for the index
+		push @headers, $1 ;
+
+	    } elsif ($line =~ m/^INDEXFOOT:\s+(.*)\s*$/) {
+		# footer for the index
+		push @footers, $1 ;
+
+	    } else {
+		# that's a slide, create its entry
+		my $entry;
+		# flexibility:
+		# - the last \s might be omitted when there's no caption
+		# - \s is facultative after TYP: at the begining
+		if ($line =~ m/^TXT:\s*(.+)\s+----\s*(?:\s(.*))?\s*$/) {
+		    # text slide
+		    $entry = make_entry ($TYPE_TXT, undef, undef, undef, $1, $2) ;
+
+		} elsif ($line =~ m/^LNK:\s*(.+)\s+----\s+(.+)\s+----\s*(?:\s(.*))?\s*$/) {
+		    # link slide
+		    $entry = make_entry ($TYPE_LNK, undef, undef, $1, $2, $3) ;
+
+		} elsif ($line =~ m/^DIR:\s*(.+)\s+----\s+(.+)\s+----\s*(?:\s(.*))?\s*$/) {
+		    # directory slide
+		    $entry = make_entry ($TYPE_DIR, $1, $1, undef, $2, $3) ;
+
+		} elsif ($line =~ m/^MVI:\s*(.+)\.(.+)\s+----\s+(.+)\s+----\s*(?:\s(.*))?\s*$/) {
+		    # movie slide
+		    $entry = make_entry ($TYPE_MVI, $1.".".$2, $1, undef, $3, $4) ;
+
+		} elsif ($line =~ m/^IMG:\s*(.+)\.(.+)\s+----\s*(?:\s(.*))?\s*$/
+			 or $line =~ m/^(.+)\.(.+)\s+----\s*(?:\s(.*))?\s*$/) {
+		    # image slide (default)
+		    $entry = make_entry ($TYPE_IMG, $1.".".$2, $1, undef, undef, $3) ;
 
 		} else {
-		    # that's a slide, create its entry
-		    my $entry;
-		    # flexibility:
-		    # - the last \s might be omitted when there's no caption
-		    # - \s is facultative after TYP: at the begining
-		    if ($line =~ m/^TXT:\s*(.+)\s+----\s*(?:\s(.*))?\s*$/) {
-			# text slide
-			$entry = make_entry ($TYPE_TXT, undef, undef, undef, $1, $2) ;
-
-		    } elsif ($line =~ m/^LNK:\s*(.+)\s+----\s+(.+)\s+----\s*(?:\s(.*))?\s*$/) {
-			# link slide
-			$entry = make_entry ($TYPE_LNK, undef, undef, $1, $2, $3) ;
-
-		    } elsif ($line =~ m/^DIR:\s*(.+)\s+----\s+(.+)\s+----\s*(?:\s(.*))?\s*$/) {
-			# directory slide
-			$entry = make_entry ($TYPE_DIR, $1, $1, undef, $2, $3) ;
-
-		    } elsif ($line =~ m/^MVI:\s*(.+)\.(.+)\s+----\s+(.+)\s+----\s*(?:\s(.*))?\s*$/) {
-			# movie slide
-			$entry = make_entry ($TYPE_MVI, $1.".".$2, $1, undef, $3, $4) ;
-
-		    } elsif ($line =~ m/^IMG:\s*(.+)\.(.+)\s+----\s*(?:\s(.*))?\s*$/
-			     or $line =~ m/^(.+)\.(.+)\s+----\s*(?:\s(.*))?\s*$/) {
-			# image slide (default)
-			$entry = make_entry ($TYPE_IMG, $1.".".$2, $1, undef, undef, $3) ;
-
-		    } else {
-			die "Unrecognized line #$. in caption file: \"$line\"\n" ;
-		    }
-
-		    # really add this entry
-		    push @entries, $entry ;
+		    die "Unrecognized line #$. in caption file: \"$line\"\n" ;
 		}
+
+		# really add this entry
+		push @entries, $entry ;
 	    }
-	    print_percentage (tell CAP, (stat CAP)[7]) ;
 	}
-	close(CAP);
-	$nentries = @entries ;
-	print "\nFound $nentries files.\n";
+	print_percentage (tell CAP, (stat CAP)[7]) ;
     }
+    close(CAP);
+    $nentries = @entries ;
+    print "\nFound $nentries files.\n";
+
 } else {
+    # generate the gallery without caring about the caption file
     get_entries ;
     print "Found $nentries files in directory $destination_dir\n";
 }
@@ -1241,12 +1257,12 @@ if ($make_no_slides) {
 			$line =~ s/<!--THIS-SLIDE-->/<img src="$entries[$i]->{url}" alt="$altname" title="$altname" \/>/g ;
 
 		    }
-		} elsif (defined $entries[$i]->{url}) {
-		    # link or movie or directory slide
-		    $line =~ s/<!--THIS-SLIDE-->/<a href="$entries[$i]->{url}">$entries[$i]->{linktext}<\/a>/ ;
-		} else {
+		} elsif ($type == $TYPE_TXT) {
 		    # text slide
 		    $line =~ s/<!--THIS-SLIDE-->/$entries[$i]->{linktext}/ ;
+		} else {
+		    # link or movie or directory slide
+		    $line =~ s/<!--THIS-SLIDE-->/<a href="$entries[$i]->{url}">$entries[$i]->{linktext}<\/a>/ ;
 		}
 	    }
 

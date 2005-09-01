@@ -1,3 +1,12 @@
+llgal (0.9.5)
+
+  * Fix text slides (do not make a link).
+  * Do not generate thumbnails or scaled images when generating captions.
+  * Show percentage when generating captions.
+  * Fix some messages.
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Sun, 24 Apr 2005 00:02:27 +0200
+
 llgal (0.9.4)
 
   * Show progession with percentage instead of dots.
