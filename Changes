@@ -1,3 +1,11 @@
+llgal (0.9.1)
+
+  * Allow slide_filenameprefix to be empty in configuration file.
+  * Fix timestamp saving in configuration file.
+  * Remove version from manpage.
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Sun, 27 Mar 2005 00:29:05 +0100
+
 llgal (0.9)
 
   * Add --bigxy and slide_width_max option.

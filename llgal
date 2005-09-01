@@ -289,7 +289,7 @@ sub process_option {
 	    $make_slide_title_from_caption = $1 ;
 	} elsif (/^show_no_slide_counter\s*=\s*(.+)$/) {
 	    $show_no_slide_counter = $1 ;
-	} elsif (/^slide_filenameprefix\s*=\s*"(.+)"$/) {
+	} elsif (/^slide_filenameprefix\s*=\s*"(.*)"$/) {
 	    $slide_filenameprefix = $1 ;
 	} elsif (/^slide_filenameprefix_nofile\s*=\s*"(.+)"$/) {
 	    $slide_filenameprefix_nofile = $1 ;
@@ -1506,7 +1506,7 @@ if (defined $generate_config) {
     print NEWCFG "caption_removal_line = \"$caption_removal_line\"\n" ;
     print NEWCFG "make_caption_from_image_comment = $make_caption_from_image_comment\n" ;
     print NEWCFG "make_caption_from_image_timestamp = $make_caption_from_image_timestamp\n" ;
-    print NEWCFG "timestamp_format_in_caption = $timestamp_format_in_caption\n" ;
+    print NEWCFG "timestamp_format_in_caption = \"$timestamp_format_in_caption\"\n" ;
     print NEWCFG "make_caption_from_filename = $make_caption_from_filename\n" ;
     print NEWCFG "show_caption_under_thumbnails = $show_caption_under_thumbnails\n" ;
     print NEWCFG "show_dimensions = $show_dimensions\n" ;
