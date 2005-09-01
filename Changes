@@ -1,3 +1,9 @@
+llgal (0.9.4)
+
+  * Show progession with percentage instead of dots.
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Wed, 13 Apr 2005 00:16:02 +0200
+
 llgal (0.9.3)
 
   * Fix caption parsing so that "IMG: " is the default type.
