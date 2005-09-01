@@ -3,12 +3,15 @@
 .\"
 .TH LLGAL 1 "FEBRUARY 2005" "Version 0.4" "Version 0.4"
 
+
 .SH NAME
 llgal \- Loulous Image Gallery generator
+
 
 .SH SYNOPSIS
 .B llgal 
 .I [-option1 -option2 ...]
+
 
 .SH DESCRIPTION
 .B llgal
@@ -32,27 +35,33 @@ directory where users can store their own templates, overriding
 the site-wide 
 .IR "/usr/share/llgal" .
 
-.SH OPTIONS
+
+.SH OPTIONS DE MISE EN FORME
+
 .TP
 .B -a
 Write image dimensions and sizes under each thumbnail on the index page,
 and under each slide if -bigy was passed.
 This only works if the ImageMagick command
 .BR identify " is present."
+
 .TP
 .B --ad
 Like
 .B -a
 but write only the image dimensions.
+
 .TP
 .B --as
 Like
 .B -a
 but write only the image sizes.
+
 .TP
 .B --asu " <s>"
 Allow to define the unit used to show file sizes. Default is
 .IR kB "."
+
 .TP
 .BI --bigy " <n>"
 Like
@@ -70,6 +79,7 @@ You must use
 .B -f
 between two consecutive runs when you've changed the value of
 .BR "--bigy" .
+
 .TP
 .BI -c
 First generate and then publish image slide captions. The first invocation of
@@ -88,16 +98,19 @@ A second invocation of
 will read your
 .I captions
 file, include your captions in the slides and rearrange them if necessary.
+
 .TP
 .BI -C
 Generates
 .I captions
 from file names (strips suffix).
+
 .TP
 .BI --ce
 Generates
 .I captions
 from EXIF tags that may exist in JPEG files
+
 .TP
 .BI --con " options"
 Command line options to pass on to
@@ -111,12 +124,146 @@ or go crazy with
 .IR -negate ", " -noise ", etc."
 (the last two only work with
 .BR convert " if " ImageMagick " is installed)."
+.BI --con
+may be used several times on the same command line.
+
 .TP
 .BI -d " <dir>"
 Operate on image files in directory
 .IR <dir> ,
 which is also where the HTML and thumbnail files will be generated.
 The default is the current directory.
+
+.TP
+.BI -i " <file>"
+Name of the main thumbnail index file.  The default is
+.IR index.html ,
+as desirable for most web servers.
+
+.TP
+.BI -k
+Use the image captions for the HTML slide titles.
+The default behavior is to use the image names.
+
+.TP
+.BI -n
+Use the image file names for the HTML slide files.  Otherwise
+the default behavior is to simply name your slides
+.IR 1.html ", " 2.html ", "
+and so on.
+
+.TP
+.BI -p " <n>"
+The cellpadding value of the thumbnail index tables.
+The default is 3.
+
+.TP
+.BI -r
+Omit the film reel effect altogether.  For a simpler look you
+can also set the thumbnail background to be the same as the main
+index page background with the tile background-color option in the
+.IR llgal.css " file."
+
+.TP
+.B -s
+For the simplest setup, omit all HTML slides.  Clicking the thumbnails on 
+the main page will just take users to the plain image files.
+
+.TP
+.BI --sp " <s>"
+Change slide image filename prefix
+
+.TP
+.BI -t " <n>"
+Height (in pixels) of the tiled image used to simulate the top
+and bottom "film reel" effect on the thumbnail index page.  This
+is 21 for the default
+.I .tile.png
+image used, but you should set it otherwise if you replace that
+file with your own design.
+
+.TP
+.BI --title " <s>"
+Substitutes the string 
+.I <s>
+for "<!--TITLE-->" in the index. The default is "Index of Pictures".
+
+.TP
+.BI --tp " <s>"
+Change thumbnail image filename prefix.
+
+.TP
+.BI -u
+Write image captions under each thumbnail on the index page.
+If you have a
+.I captions
+file (see options -c or -C) then the captions are read from there,
+else the file names are used (but the file extension is stripped).
+
+.TP
+.BI -w " <n>"
+Set the thumbnail rows to be
+.I <n>
+images wide in the main index file.  Default is 5.
+
+.TP
+.BI --wx " <n>"
+Set the thumbnail rows to be 
+.I <n>
+pixels wide at maximum. The number of thumbnails per row, given in
+.BI -w
+is reduced if necessary. Default is to honor
+.BI -w
+without regard to the resulting row width.
+
+.TP
+.BI -x
+Omit the image count from the captions.
+
+.TP
+.BI --xy " <n>"
+Scale thumbnails to
+.I <n>
+pixels along their longest dimension.  This value is passed to
+.B pnmscale
+and only works properly for
+.I jpg
+images.
+
+.TP
+.BI -y " <n>"
+Scale all thumbnails to the same height of 
+.IR <n> " pixels."
+The default is 75 pixels.
+
+
+.SH OPTIONS DE COMPORTEMENT
+
+.TP
+.BI --clean
+Remove all files
+.B llgal
+may have created earlier and that user did not modify since.
+
+.TP
+.BI --cleanall
+Remove all files
+.B llgal
+may have created earlier. This includes thumbnails, scaled down slides, all 
+HTML files, caption file, reel-effect picture, indextemplate and slidetemplate 
+and the stylesheet file.
+
+.TP
+.BI --config " <file>"
+Read the file
+.I file
+as a configuration.
+See
+.SM
+.B CONFIGURATION
+.BI --config
+may be used several times on the same command line.
+
 .TP
 .BI -f
 Force thumbnail regeneration.  Also forces medium-slide regeneration if
@@ -128,111 +275,11 @@ end up with stale copies.  Definitely use
 .BI -f
 between two runs where you've changed the value of 
 .BR --bigy " or " --con "."
+
 .TP
-.BI -h
-Display brief help, same as
-.BR "--help" .
-.TP
-.BI --help
-Display brief help, same as
-.BR "-h" .
-.TP
-.BI -i " <file>"
-Name of the main thumbnail index file.  The default is
-.IR index.html ,
-as desirable for most web servers.
-.TP
-.BI -k
-Use the image captions for the HTML slide titles.
-The default behavior is to use the image names.
-.TP
-.BI -n
-Use the image file names for the HTML slide files.  Otherwise
-the default behavior is to simply name your slides
-.IR 1.html ", " 2.html ", "
-and so on.
-.TP
-.BI -p " <n>"
-The cellpadding value of the thumbnail index tables.
-The default is 3.
-.TP
-.BI -r
-Omit the film reel effect altogether.  For a simpler look you
-can also set the thumbnail background to be the same as the main
-index page background with the tile background-color option in the
-.IR llgal.css " file."
-.TP
-.B -s
-For the simplest setup, omit all HTML slides.  Clicking the thumbnails on 
-the main page will just take users to the plain image files.
-.TP
-.BI -t " <n>"
-Height (in pixels) of the tiled image used to simulate the top
-and bottom "film reel" effect on the thumbnail index page.  This
-is 21 for the default
-.I .tile.png
-image used, but you should set it otherwise if you replace that
-file with your own design.
-.TP
-.BI -u
-Write image captions under each thumbnail on the index page.
-If you have a
-.I captions
-file (see options -c or -C) then the captions are read from there,
-else the file names are used (but the file extension is stripped).
-.TP
-.BI -w " <n>"
-Set the thumbnail rows to be
-.I <n>
-images wide in the main index file.  Default is 5.
-.TP
-.BI -wx " <n>"
-Set the thumbnail rows to be 
-.I <n>
-pixels wide at maximum. The number of thumbnails per row, given in
-.BI -w
-is reduced if necessary. Default is to honor
-.BI -w
-without regard to the resulting row width.
-.TP
-.BI -x
-Omit the image count from the captions.
-.TP
-.BI -y " <n>"
-Scale all thumbnails to the same height of 
-.IR <n> " pixels."
-The default is 75 pixels.
-.TP
-.BI --xy " <n>"
-Scale thumbnails to
-.I <n>
-pixels along their longest dimension.  This value is passed to
-.B pnmscale
-and only works properly for
-.I jpg
-images.
-.TP
-.BI --www
-Make all
-.B llgal
-files world-readable.
-.TP
-.BI --title " <s>"
-Substitutes the string 
-.I <s>
-for "<!--TITLE-->" in the index. The default is "Index of Pictures".
-.TP
-.BI --cleanall
-Remove all files
-.B llgal
-may have created earlier. This includes thumbnails, scaled down slides, all 
-HTML files, caption file, reel-effect picture, indextemplate and slidetemplate 
-and the stylesheet file.
-.TP
-.BI --clean
-Remove all files
-.B llgal
-may have created earlier and that user did not modify since.
+.BI "-h, --help"
+Display brief help.
+
 .TP
 .BI --option " 'variable = value'"
 Modify llgal configuration.
@@ -241,16 +288,13 @@ See
 .B CONFIGURATION
 .BI --option
 may be used several times on the same command line.
+
 .TP
-.BI --config " <file>"
-Read the file
-.I file
-as a configuration.
-See
-.SM
-.B CONFIGURATION
-.BI --option
-may be used several times on the same command line.
+.BI --www
+Make all
+.B llgal
+files world-readable.
+
 
 .SH CAPTIONS
 When called with
@@ -309,7 +353,9 @@ Line begining with a
 .RI #
 are ignored.
 
+
 .SH CONFIGURATION
+
 Before parsing command line options, llgal reads several configuration
 files. It starts with
 .IR /etc/llgalrc
@@ -325,10 +371,17 @@ Additional configuration files may also be defined with the
 .I --config
 option.
 
-All these file may change llgal configuration in the same way command
+These files may change llgal configuration in the same way command
 line options do, and even more.
+All following options may also be used on the command line through
+.I "--option 'variable = value'"\fR.
 
-.RE
+See also
+.IR /etc/llgalrc
+for details about these options and their default values.
+
+.B llgal directories:
+
 .I llgal_share_dir = "path"
 .RS
 The location of llgal share directory where template are stored.
@@ -338,9 +391,16 @@ The location of llgal share directory where template are stored.
 The location of the per-user share directory wher template are stored.
 If they exists, these files are used instead of the system-wide files.
 .RE
-.I local_llgal_dir = "subdirectory"
+
+.B Names of generic llgal files:
+
+.I css_filename = "filename.css"
 .RS
-The name of the subdirectory where llgal generated files will be stored.
+Name of the CSS file.
+.RE
+.I filmtile_filename = "filename.png"
+.RS
+Name of the film tile image.
 .RE
 .I indextemplate_filename = "filename"
 .RS
@@ -350,14 +410,106 @@ Name of the HTML index template that will be taken from common directories.
 .RS
 Name of the HTML slide template that will be taken from common directories.
 .RE
-.I css_filename = "filename.css"
+
+.B Location and name of generated files:
+
+.I destination_dir = "path"
 .RS
-Name of the CSS file.
+Directory of the gallery [-d <s>].
 .RE
-.I filmtile_filename = "filename.png"
+.I local_llgal_dir = "subdirectory"
 .RS
-Name of the film tile image.
+The name of the subdirectory where llgal generated files will be stored.
 .RE
+.I slide_filenameprefix = "filenameprefix"
+.RS
+Prefix used to determine slide-image filenames from
+original images (in case of --bigy) [--sp <s>].
+.RE
+.I thumb_filenameprefix = "filenameprefix"
+.RS
+Prefix used to determine thumbnail filenames from
+original images [--tp <s>].
+.RE
+
+.B Index:
+
+.I index_filename = "index.html"
+.RS
+Name of the generated index file [-i <s>].
+.RE
+.I index_title = "string"
+.RS
+Title of the gallery [--title <s>].
+.RE
+.I index_cellpadding = <n>
+.RS
+Cellpadding in the index table [-p <n>].
+.RE
+.I pixels_per_row = <n>
+.RS
+Pixels per row of thumbnails in index [-wx <n>].
+.RE
+
+.B Film effect:
+
+.I no_film_effect = <0/1>
+.RS
+Omit film reel effect [-r].
+.RE
+.I tile_height = <n>
+.RS
+Film tile height [-t <n>].
+.RE
+
+.B Thumbnails:
+
+.I thumbnail_height_max = <n>
+.RS
+Maximal height of thumbnails [-y <n>].
+.RE
+.I thumbnail_width_max = <n>
+.RS
+Maximal width of thumbnails [-xy <n>]
+.RE
+.I thumbnails_per_row = <n>
+.RS
+Thumbnails per row in index [-w <n>].
+.RE
+
+.B Slides:
+
+.I no_slide_counter = <0/1>
+.RS
+Do not show slide counter in captions [-x].
+.RE
+.I make_no_slides = <0/1>
+.RS
+Make no slides [-s].
+.RE
+.I slide_height_max = <n>
+.RS
+Maximal height of slides [--bigy <n>].
+.RE
+.I slidename_from_filename = <0/1>
+.RS
+Use filenames as slidenames [-n].
+.RE
+.I slidetitle_from_caption = <0/1>
+.RS
+Generate slide titles from captions [-k].
+.RE
+.I text_slide_width = <n>
+.RS
+Default width of text slides.
+.RE
+.I text_slide_height = <n>
+.RS
+Default height of text slides.
+.RE
+
+.B Captions:
+
 .I captions_filename = "filename"
 .RS
 Name of the caption file that will be generated the first time llgal
@@ -370,27 +522,17 @@ first time it is called with -c. If the user doesn't want igal to
 remove this caption file when called with -clean, it just needs to
 remove this line from the file.
 .RE
-.I index_filename = "index.html"
+.I caption_from_filename = <0/1>
 .RS
-Name of the generated index file [-i <s>].
+Generate captions from filenames [-C].
 .RE
-.I index_title = "string"
+.I caption_from_exif = <0/1>
 .RS
-Title of the gallery [--title <s>].
+Generate captions from EXIF tags in JPEG images [--ce].
 .RE
-.I thumb_filenameprefix = "filenameprefix"
+.I caption_under_thumbnails = <0/1>
 .RS
-Prefix used to determine thumbnail filenames from
-original images [-tp <s>].
-.RE
-.I slide_filenameprefix = "filenameprefix"
-.RS
-Prefix used to determine slide-image filenames from
-original images (in case of --bigy) [-sp <s>].
-.RE
-.I destination_dir = "path"
-.RS
-Directory of the gallery [-d <s>].
+Write captions under thumbnails [-u].
 .RE
 .I show_dimensions = <0/1>
 .RS
@@ -408,90 +550,29 @@ Unit to be used when printing sizes [-asu <s>]
 .RS
 Use a caption file [-c].
 .RE
-.I caption_from_filename = <0/1>
-.RS
-Generate captions from filenames [-C].
-.RE
-.I caption_from_exif = <0/1>
-.RS
-Generate captions from EXIF tags in JPEG images [--ce].
-.RE
+
+.B Various:
+
 .I convert_options = "string"
 .RS
 Options to pass to convert [--con <s>].
+This option may be used several times.
 .RE
-.I slidetitle_from_caption = <0/1>
+.I config_file = <s>
 .RS
-Generate slide titles from captions [-k].
-.RE
-.I slidename_from_filename = <0/1>
-.RS
-Use filenames as slidenames [-n].
-.RE
-.I index_cellpadding = <n>
-.RS
-Cellpadding in the index table [-p <n>].
-.RE
-.I no_film_effect = <0/1>
-.RS
-Omit film reel effect [-r].
-.RE
-.I tile_height = <n>
-.RS
-Film tile height [-t <n>].
-.RE
-.I make_no_slides = <0/1>
-.RS
-Make no slides [-s].
-.RE
-.I pixels_per_row = <n>
-.RS
-Pixels per row of thumbnails in index [-wx <n>].
-.RE
-.I thumbnails_per_row = <n>
-.RS
-Thumbnails per row in index [-w <n>].
-.RE
-.I thumbnail_dimension_max = <n>
-.RS
-Maximal height or width of thumbnails [-xy <n>]
-.RE
-.I thumbnail_height_max = <n>
-.RS
-Maximal height of thumbnails [-y <n>].
-.RE
-.I caption_under_thumbnails = <0/1>
-.RS
-Write captions under thumbnails [-u].
-.RE
-.I no_slide_counter = <0/1>
-.RS
-Do not show slide counter in captions [-x].
+Additional configuration file [--config <s>].
+This option may be used several times.
 .RE
 .I www_access_rights = <0/1>
 .RS
 Make all generated files world readable [-www].
 .RE
-.I slide_height_max = <n>
-.RS
-Maximal height of slides [--bigy <n>].
-.RE
-.I text_slide_width = <n>
-.RS
-Default width of text slides.
-.RE
-.I text_slide_height = <n>
-.RS
-Default height of text slides.
-.RE
 
-See also
-.IR /etc/llgalrc
-for details about these options and their default values.
 
-Note that
-.I --option 'variable = value'
-may be used to set such variable command line.
+.SH NOTES
+Note that all numerical options may be resetted to their default value
+by setting them a negative value.
+
 
 .SH FILES
 .RE
@@ -534,6 +615,7 @@ directory where users can store their own templates, overriding
 the site-wide 
 .IR "/usr/share/llgal" .
 
+
 .SH EXAMPLES
 Run
 .B llgal
@@ -544,8 +626,10 @@ play with the options described above and use
 .B -h
 if you need a quick listing.
 
+
 .SH BUGS
 There are always some.  If you find any let me know.
+
 
 .SH AUTHOR
 Brice Goglin <Brice.Goglin@ens-lyon.org>

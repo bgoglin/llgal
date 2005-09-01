@@ -1,3 +1,30 @@
+llgal (0.7-1) unstable; urgency=low
+
+  * Add --gencfg to generate a config file.
+  * --con or convert_options may be used several times.
+  * Fix URL for images and movies when there are multiple dots
+    in the filename.
+  * Passing a negative number to a numeric options restores it to default.
+  * It is now possible to limit pixels per row without limiting
+    thumbnails per row (--wx <n> -w 0)
+  * When combining --ce and -C, caption are generated from EXIF tags
+    first. If nothing was obtained, filename is used instead.
+  * Replace thumbnail_height/dimension_max with width/height and cleanup.
+  * Add additional_configuration_file for --config in config files.
+  * Fix missing --sp and --tp in manpage.
+  * Fix missing double-dash in long options in various files.
+  * Check non-emptyness of several string options.
+  * Check additional config file existency.
+  * Sort options in llgal, llgalrc and manpage.
+  * Large cleanup of numerical options processing, with integer checks.
+  * Check slide and thumbnail creation return value.
+  * Warning are shown only once, afterwards.
+  * Use real defaults in usage().
+  * Cleanup usage().
+  * Remove useless convert_options_list.
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Sat, 26 Feb 2005 19:57:16 +0100
+
 llgal (0.6-1) unstable; urgency=medium
 
   * Fix thumbnails address in index when running llgal with -d.
