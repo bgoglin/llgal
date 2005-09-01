@@ -141,15 +141,14 @@
 
 ##### Captions #####
 
-# Name of the caption file that will be generated the first time llgal
-# is called with -c.
-# This file will be stored under $local_llgal_dir.
+# Name of the caption file that will be generated when llgal is called
+# with --gc. This file will be stored under $local_llgal_dir.
 # captions_filename = "captions"
 
-# This line will be added to the caption file llgal will generate the
-# first time it is called with -c. If the user doesn't want igal to
-# remove this caption file when called with -clean, it just needs to
-# remove this line from the file.
+# This line will be added to the caption file llgal will generate when
+# called with --gc. If the user doesn't want igal to remove this caption
+# file when called with --clean, it just needs to remove this line from
+# the file.
 # caption_removal_line = "REMOVE THIS LINE IF LLGAL SHOULD NOT REMOVE THIS FILE"
 
 # Generate captions from comment stored in images [--cc]
