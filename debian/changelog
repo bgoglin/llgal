@@ -1,3 +1,10 @@
+llgal (0.9.1-1) unstable; urgency=low
+
+  * Add homepage to debian/copyright.
+  * New upstream release. 
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Sun, 27 Mar 2005 00:29:05 +0100
+
 llgal (0.9-1) unstable; urgency=low
 
   * New upstream release.
