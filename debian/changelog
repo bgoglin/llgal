@@ -1,115 +1,52 @@
+llgal (0.8-1) unstable; urgency=low
+
+  * New upstream release.
+  * Split Debian and upstream changelogs
+  * Use upstream Makefile in debian/rules.
+  * Check with lintian.
+  * exiftags is now only suggested since upstream checks its avaibility.
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Mon, 28 Feb 2005 20:31:11 +0100
+
 llgal (0.7-1) unstable; urgency=low
 
-  * Add --gencfg to generate a config file.
-  * --con or convert_options may be used several times.
-  * Fix URL for images and movies when there are multiple dots
-    in the filename.
-  * Passing a negative number to a numeric options restores it to default.
-  * It is now possible to limit pixels per row without limiting
-    thumbnails per row (--wx <n> -w 0)
-  * When combining --ce and -C, caption are generated from EXIF tags
-    first. If nothing was obtained, filename is used instead.
-  * Replace thumbnail_height/dimension_max with width/height and cleanup.
-  * Add additional_configuration_file for --config in config files.
-  * Fix missing --sp and --tp in manpage.
-  * Fix missing double-dash in long options in various files.
-  * Check non-emptyness of several string options.
-  * Check additional config file existency.
-  * Sort options in llgal, llgalrc and manpage.
-  * Large cleanup of numerical options processing, with integer checks.
-  * Check slide and thumbnail creation return value.
-  * Warning are shown only once, afterwards.
-  * Use real defaults in usage().
-  * Cleanup usage().
-  * Remove useless convert_options_list.
+  * New upstream release.
 
  -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Sat, 26 Feb 2005 19:57:16 +0100
 
 llgal (0.6-1) unstable; urgency=medium
 
-  * Fix thumbnails address in index when running llgal with -d.
-  * Fix text slide dimension calculation in case of --bigy.
-  * Respect POSIX command line options naming convention.
-  * Merge all command line options with configuration options.
-  * Allow to pass additional options through --option.
-  * Allow to pass additional configuration files through --config. 
-  * Add index_title and index_filename configuration options.
-  * text_slide_width/height configuration options become numeric.
-  * The local .llgalrc file is now read after all other configuration files
-    so that the .llgalrc in the destination (llgal called with -d) with 
-    directory might be overridden.
-  * Allow spaces in configuration options.
-  * Several special options are processed before reading configuration files.
-  * Cleanup GetOpt configuration.
-  * Add missing configuration examples to llgalrc and manpage.
-  * Merge -h and --help options processing.
-  * Fix --clean message.
-  * Fix /etc creation in debian/rules.
+  * New upstream release.
 
  -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Tue, 22 Feb 2005 00:12:00 +0200
 
 llgal (0.5-1) unstable; urgency=low
 
-  * llgal now generates XHTML1.1 compliant pages.
-  * Cleanup index and slide layout.
-  * Cleanup CSS and HTML codes.
-  * Text slide dimensions are now configurable and will be limited by --bigy.
-  * Fix infinite loop when opt_wx is too small by adding a warning and forcing
-    image placement when it's too large for being inserted alone on a row.
-  * Cleanup messages about generic files.
+  * New upstream release.
 
  -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Sun, 20 Feb 2005 16:28:00 +0200
 
 llgal (0.4-1) unstable; urgency=medium
 
-  * Add support for subdirectories: process them as links for now.
-  * Index points to url instead of slides for non-image slides.
-  * Fix llgal.css where center was broken for tables.
-  * Reduce default size of captions when showed in index with -u.
-  * Enable all configuration options in /etc/llgalrc, $HOME/.llgalrc and local .llgalrc files.
-  * Fix man page.
+  * New upstream release.
 
  -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Sun, 20 Feb 2005 01:17:00 +0200
 
 llgal (0.3-1) unstable; urgency=low
 
-  * Add --ce to generate captions from EXIF tags.
-  * Don't remove the generated caption file when the user removed a special line.
-  * Don't remove llgal files when they are different from generic files.
-  * --cleanall removes everything, even if modified.
-  * Show big image dimensions and size in slide when -bigy.
-  * Fix image alternatives and titles, and slide titles.
-  * Remove useless javascript and NEXT-IMAGE in slides.
-  * Cleanup support of files with several dot in their names.
-  * Cleanup generated HTML, almost XHTML 1.1 compliant.
-  * Fix copyright and description.
-  * A few fixes.
+  * New upstream release.
 
  -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Sat, 19 Feb 2005 16:00:00 +0200
 
 llgal (0.2-1) unstable; urgency=medium
 
-  * Enable -n to set slide filenames as image names.
-  * Add .html to slide filenames generated from image names.
-  * Enable -w and -wx options to fix index width.
-  * Fix -wx option processing (reinitialize total width for each row).
-  * Enable -a, -ad and -as options to show dimensions and sizes.
-  * Fix size and dimension calculations and showing.
-  * Add -asu option to change file size unit.
-  * Enable and fix -www option.
-  * Enable -s option and fix movie, link and text links.
-  * Enable -h, -i, -k, -p, -r, -t, -u, -x, -con, -sp and -tp options.
-  * Prevent -s and -bigy at same time.
-  * Reduce default font-size for size and dimension in index.
-  * Add an empty line after comments at top of generated caption file.
-  * Fix alphabetic order of files in generated caption file.
-  * Merge slide array with main entry array.
+  * New upstream release.
 
  -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Sat, 19 Feb 2005 12:00:00 +0200
 
 llgal (0.1-1) unstable; urgency=low
 
-  * Initial release.
+  * Initial upstream release.
 
  -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Mon, 07 Feb 2005 20:30:00 +0200
 

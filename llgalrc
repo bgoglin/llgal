@@ -54,12 +54,12 @@
 # Prefix used to determine slide-image filenames from
 # original images (in case of --bigy) [--sp <s>]
 # These files will be stored under $local_llgal_dir.
-# slide_filenameprefix = "slide_"
+# bigy_image_filenameprefix = "bigy_"
 
 # Prefix used to determine thumbnail filenames from
 # original images [--tp <s>]
 # These files will be stored under $local_llgal_dir.
-# thumb_filenameprefix = "thumb_"
+# thumbnail_image_filenameprefix = "thumb_"
 
 ##### Index #####
 
@@ -80,7 +80,7 @@
 ##### Film effect #####
 
 # Omit film reel effect [-r]
-# no_film_effect = 0
+# show_no_film_effect = 0
 
 # Film tile height [-t <n>]
 # Must be >= 0, setting to < 0 resets to default
@@ -105,18 +105,29 @@
 # Make no slides [-s]
 # make_no_slides = 0
 
+# Use filename as slide filename [-n]
+# make_slide_filename_from_filename = 0
+
+# Also use extension in the slide filename to differenciate
+# slide filename of images that have same filenames.
+# make_slide_filename_from_extension = 0
+
+# Generate slide titles from captions [-k]
+# make_slide_title_from_caption = 0
+
 # Do not show slide counter in captions [-x]
-# no_slide_counter = 0
+# show_no_slide_counter = 0
+
+# Prefix of generated HTML slide filenames
+# slide_filenameprefix = ""
+
+# Prefix of slide filenames when generated from filename
+# while there's no file associated (text, link, ...)
+# slide_filenameprefix_nofile = "NOFILE"
 
 # Maximal height of slides [--bigy <n>]
 # Must be > 0, 0 means unlimited, setting to < 0 resets to default
 # slide_height_max = 0
-
-# Use filenames as slidenames [-n]
-# slidename_from_filename = 0
-
-# Generate slide titles from captions [-k]
-# slidetitle_from_caption = 0
 
 # Default size of non-image slides.
 # Must be > 0, setting to < 0 resets to default
@@ -138,13 +149,13 @@
 # caption_removal_line = "REMOVE THIS LINE IF LLGAL SHOULD NOT REMOVE THIS FILE"
 
 # Generate captions from EXIF tags in JPEG images [--ce]
-# caption_from_exif = 0
+# make_caption_from_exif = 0
 
 # Generate captions from filenames [-C]
-# caption_from_filename = 0
+# make_caption_from_filename = 0
 
 # Write captions under thumbnails [-u]
-# caption_under_thumbnails = 0
+# show_caption_under_thumbnails = 0
 
 # Show dimensions and/or size of the images and movies [-a, --ad, --as]
 # show_dimensions = 0
@@ -166,6 +177,14 @@
 # Options to pass to convert [--con <s>]
 # This option may be used multiple times.
 # convert_options = ""
+
+# Additional options to pass to convert for
+# slide or thumbnail creation.
+# bigy_convert_options = ""
+# thumbnail_convert_options = ""
+
+# Look at subdirectories [-R]
+# make_recursive = 0
 
 # Give access rights for www access [--www]
 # www_access_rights = 0
