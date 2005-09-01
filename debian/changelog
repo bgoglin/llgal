@@ -1,3 +1,23 @@
+llgal (0.2-1) unstable; urgency=medium
+
+  * Enable -n to set slide filenames as image names.
+  * Add .html to slide filenames generated from image names.
+  * Enable -w and -wx options to fix index width.
+  * Fix -wx option processing (reinitialize total width for each row).
+  * Enable -a, -ad and -as options to show dimensions and sizes.
+  * Fix size and dimension calculations and showing.
+  * Add -asu option to change file size unit.
+  * Enable and fix -www option.
+  * Enable -s option and fix movie, link and text links.
+  * Enable -h, -i, -k, -p, -r, -t, -u, -x, -con, -sp and -tp options.
+  * Prevent -s and -bigy at same time.
+  * Reduce default font-size for size and dimension in index.
+  * Add an empty line after comments at top of generated caption file.
+  * Fix alphabetic order of files in generated caption file.
+  * Merge slide array with main entry array.
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Sat, 19 Feb 2005 12:00:00 +0200
+
 llgal (0.1-1) unstable; urgency=low
 
   * Initial release.

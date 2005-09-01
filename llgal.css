@@ -50,6 +50,10 @@ a:hover {
   vertical-align: middle;
 }
 
+.thumbdim {
+  font-size: 50%;
+}
+
 .slide {
   background-color: #ffffff;
   text-align: center;
