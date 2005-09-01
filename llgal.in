@@ -31,7 +31,7 @@ my $clean_asked = 0 ;		# clean up all generated files
 my $cleanall_asked = 0 ;	# clean up all generated and user modified files
 my $generate_config = undef ;   # generate a config file
 my $generate_captions = 0 ;     # generate (or update) captions
-my $make_recursive = 0 ;        # do we look at subdirectories ?
+my $make_recursive = 0 ;        # do we run recursively in subdirectories ?
 
 # process these options but kept other options in @ARGV for later
 Getopt::Long::Configure('passthrough') ;
@@ -154,7 +154,7 @@ my $text_slide_height = $text_slide_height_default ;
 # Captions
 my $captions_filename = "captions" ;
 # this line will be placed in caption generated file
-# the user may remove it to prevent llgal from removing the caption file with -clean
+# the user may remove it to prevent llgal from removing the caption file with --clean
 my $caption_removal_line = "REMOVE THIS LINE IF LLGAL SHOULD NOT REMOVE THIS FILE" ;
 # use image comment as captions (--cc)
 my $make_caption_from_image_comment = 0 ;
@@ -175,12 +175,24 @@ my $show_size_unit = "kB" ;
 # use user-supplied captions (-c)
 my $use_caption_file = 0 ;
 
+# Exclude
+my @excludes = () ;
+
 # Various
+# add all files, not only images and movies (-A)
+my $add_all_files = 0 ;
+# add subdirectories to entry list (-S)
+my $add_subdirs = 0 ;
 # options to be passed to convert (--con)
-my $convert_options = "" ;
-my $scaled_convert_options = "" ;
-my $thumbnail_convert_options = "" ;
-# makes everything world-readable (-www)
+my @convert_options = () ;
+my @scaled_convert_options = () ;
+my @thumbnail_convert_options = () ;
+# image and movie extensions
+my $image_extensions = "jpe?g|png|gif" ;
+my $movie_extensions = "mpe?g|avi" ;
+# sort criteria
+my $sort_criteria = "name" ;
+# makes everything world-readable (--www)
 my $www_access_rights = 0 ;
 
 # Recursion
@@ -207,6 +219,14 @@ sub add_warning {
     $tmp_warning .= "!! ".(shift)."\n" ;
 }
 
+sub add_external_warnings {
+    while (@_) {
+	my $line = shift ;
+	chomp $line ;
+	add_warning "# $line" ;
+    }
+}
+
 sub show_warnings {
     print $tmp_warning ;
     $tmp_warning = "" ;
@@ -214,6 +234,14 @@ sub show_warnings {
 
 sub immediate_warning {
     print "!! ".(shift)."\n" ;
+}
+
+sub immediate_external_warnings {
+    while (@_) {
+	my $line = shift ;
+	chomp $line ;
+	immediate_warning "# $line" ;
+    }
 }
 
 ######################################################################
@@ -237,6 +265,36 @@ sub print_percentage {
 }
 
 ######################################################################
+# system routine which:
+# - takes a description followed by cmdline arguments
+# - returns a table composed of the status followed by STDERR and STDOUT lines
+
+sub system_with_output {
+    my $descr = shift ;
+    pipe (my $pipe_out, my $pipe_in) ;
+    my $pid = fork() ;
+    if ($pid < 0) {
+	return ( -1, "Fork failed while trying to $descr\n" ) ;
+    } elsif ($pid > 0) {
+	close $pipe_in ;
+	waitpid ($pid, 0);
+	my $status = $? >> 8 ;
+	$status = -1
+	    if $status == 255 ;
+	my @lines = <$pipe_out> ;
+	close $pipe_out ;
+	return ( $status , @lines ) ;
+    } else {
+	close $pipe_out ;
+	open STDERR, ">&", $pipe_in ;
+	open STDOUT, ">&", $pipe_in ;
+	{ exec @_ } ;
+	print $pipe_in "Exec of @_[0] failed while trying to $descr\n" ;
+	exit -1 ;
+    }
+}
+
+######################################################################
 # Create usage now to use defaults values
 
 my $usage = << "END_OF_USAGE";
@@ -245,7 +303,7 @@ Syntax:  llgal [-option -option ...]
 Behavior Options:
           -d <dir>        operate on files in directory <dir> ($destination_dir)
           -f              force thumbnail and scaled slide regeneration
-          -R              look at subdirectories
+          -R              run recursively in subdirectories
           --gc            generate or update the caption file
           --gencfg <file> generate the configuration file <file>
           --clean         remove all generated files
@@ -253,6 +311,7 @@ Behavior Options:
           -v, --version   show version
           -h, --help      displays this brief help
 Layout Options:
+          -A              add all non-image non-video files to the list of slides
           -a              write image sizes under thumbnails on index page
           --ad            like -a, but write only the image dimensions
           --as            like -a, but write only the file size (in kbytes)
@@ -265,13 +324,17 @@ Layout Options:
           --ct            use image timestamps as captions
           --ctf <s>       timestamp format in captions (strftime format)
           --con <s>       options to pass to convert (e.g. -quality N)
+          --exclude <s>   exclude matching files
           -i <file>       name of the main thumbnail index file ($index_filename)
+          --include <s>   include matching files that were excluded
           -k              use the image captions for the HTML slide titles
           -n              use image file names for the HTML slide files
           --nc            omit the image count from the captions
           -p <n>          cellpadding value of thumbnail index tables ($index_cellpadding)
           -r              omit the film reel effect altogether
+          -S              add subdirectories to the list of slides
           -s              make no HTML slides, link thumbnails to images
+          --sort <s>      sort files with criteria <s>
           --sp <s>        sets the slide image prefix (\"$scaled_image_filenameprefix\")
           -t <n>          height of the film reel tiled image ($tile_height)
           --title <s>     string to substitute for TITLE in index template
@@ -387,17 +450,38 @@ sub process_option {
 	    $show_size_unit = $1 ;
 	} elsif (/^use_caption_file\s*=\s*(.+)$/) {
 	    $use_caption_file = $1 ;
+# Exclude
+	} elsif (/^exclude\s*=\s*"(.*)"$/) {
+	    my $entry ;
+	    $entry->{excluded} = 1 ;
+	    $entry->{filter} = $1 ;
+	    push (@excludes, $entry) ;
+	} elsif (/^include\s*=\s*"(.*)"$/) {
+	    my $entry ;
+	    $entry->{excluded} = 0 ;
+	    $entry->{filter} = $1 ;
+	    push (@excludes, $entry) ;
 # Various
 	} elsif (/^additional_configuration_file\s*=\s*"(.+)"/) {
 	    push (@additional_config_files, $1) ;
 	} elsif (/^convert_options\s*=\s*"(.*)"$/) {
-	    $convert_options .= " ".$1 ;
+	    push (@convert_options, split (' +', $1)) ;
 	} elsif (/^scaled_convert_options\s*=\s*"(.*)"$/) {
-	    $scaled_convert_options .= " ".$1 ;
+	    push (@scaled_convert_options, split (' +', $1)) ;
 	} elsif (/^thumbnail_convert_options\s*=\s*"(.*)"$/) {
-	    $thumbnail_convert_options .= " ".$1 ;
+	    push (@thumbnail_convert_options, split (' +', $1)) ;
+	} elsif (/^image_extensions\s*=\s*"(.*)"$/) {
+	    $image_extensions = $1 ;
+	} elsif (/^movie_extensions\s*=\s*"(.*)"$/) {
+	    $movie_extensions = $1 ;
 	} elsif (/^make_recursive\s*=\s*(.+)$/) {
 	    $make_recursive = $1 ;
+	} elsif (/^add_all_files\s*=\s*(.+)$/) {
+	    $add_all_files = $1 ;
+	} elsif (/^add_subdirs\s*=\s*(.+)$/) {
+	    $add_subdirs = $1 ;
+	} elsif (/^sort_criteria\s*=\s*"(.+)"$/) {
+	    $sort_criteria = $1 ;
 	} elsif (/^www_access_rights\s*=\s*(.+)$/) {
 	    $www_access_rights = $1 ;
 # Error
@@ -416,8 +500,12 @@ foreach my $conf ( @config_files ) {
 }
 
 foreach my $conf ( @additional_config_files ) {
-    die "Cannot read additional configuration files '$conf'.\n"
-	unless (-r "$conf") ;
+    die "Additional configuration file '$conf' does not exists.\n"
+	unless -e "$conf" ;
+    die "Additional configuration file '$conf' is not a file.\n"
+	unless -f _ ;
+    die "Cannot read additional configuration file '$conf'.\n"
+	unless -r _ ;
     open CONF, $conf ;
     while (<CONF>) {
 	process_option $_ ;
@@ -429,6 +517,7 @@ foreach my $conf ( @additional_config_files ) {
 # process command-line arguments (overriding defaults above)
 
 GetOptions(
+           'A'          => \$add_all_files,
 	   'a'		=> sub { $show_dimensions = $show_size = 1 ; },
 	   'ad'		=> \$show_dimensions,
 	   'as'		=> \$show_size,
@@ -446,6 +535,7 @@ GetOptions(
 	   'p=i'	=> \$index_cellpadding,
 	   'parent'     => \$parent_link,
            'r'		=> \$show_no_film_effect,
+           'S'          => \$add_subdirs,
 	   's'		=> \$make_no_slides,
 	   't=i'	=> \$tile_height,
 	   'u'		=> \$show_caption_under_thumbnails,
@@ -453,7 +543,8 @@ GetOptions(
 	   'y=i'	=> \$thumbnail_height_max,
 	   'bigy=i'	=> \$slide_height_max,
 	   'bigxy=i'    => sub { shift ; $slide_width_max = $slide_height_max = shift ; },
-           'con=s'	=> sub { shift ; $convert_options .= " ".shift ; },
+           'con=s'	=> sub { shift ; push (@convert_options, split (' +', shift)) ; },
+           'sort=s'     => \$sort_criteria,
 	   'sp=s'	=> \$scaled_image_filenameprefix,
 	   'title=s'	=> \$index_title,
            'tp=s'	=> \$thumbnail_image_filenameprefix,
@@ -461,6 +552,8 @@ GetOptions(
 	   'wx=i'	=> \$pixels_per_row,
 	   'xy=i'	=> sub { shift ; $thumbnail_width_max = $thumbnail_height_max = shift ; },
 	   'option=s'	=> sub { shift ; process_option (shift) ; },
+           'exclude=s'  => sub { shift ; my $entry ; $entry->{filter} = shift ; $entry->{excluded} = 1 ; push @excludes, $entry ; },
+           'include=s'  => sub { shift ; my $entry ; $entry->{filter} = shift ; $entry->{excluded} = 0 ; push @excludes, $entry ; },
 	) or die $usage ;
 
 die $usage
@@ -623,14 +716,6 @@ die "Please give a non-empty caption removal line\n"
 ######################################################################
 # prepare a few globals for later
 
-# cleanup convert options
-$convert_options =~ s/ +/ /g ;
-$convert_options =~ s/ +$//g ;
-$scaled_convert_options =~ s/ +/ /g ;
-$scaled_convert_options =~ s/ +$//g ;
-$thumbnail_convert_options =~ s/ +/ /g ;
-$thumbnail_convert_options =~ s/ +$//g ;
-
 # adapt text slide width and height in case of --bigxy or --bigy
 if ($slide_height_max > 0) {
     $text_slide_width = $text_slide_width / $text_slide_height * $slide_height_max ;
@@ -650,28 +735,28 @@ if ($thumbnail_width_max > 0) {
 }
 
 # convert options for thumbnails
-my $thumbnail_scale_options;
+my @thumbnail_scale_options ;
 if ($thumbnail_width_max > 0) {
-    $thumbnail_scale_options = "-scale \"".$thumbnail_width_max."x".$thumbnail_height_max.">\"" ;
+    @thumbnail_scale_options = ("-scale", $thumbnail_width_max."x".$thumbnail_height_max.">") ;
 } else {
-    $thumbnail_scale_options = "-scale x".$thumbnail_height_max ;
+    @thumbnail_scale_options = ("-scale", "x".$thumbnail_height_max) ;
 }
-my $thumbnail_create_command = "convert  +profile '*' $convert_options $thumbnail_convert_options $thumbnail_scale_options" ;
+my @thumbnail_create_command = ("convert", "+profile", "*", @convert_options, @thumbnail_convert_options, @thumbnail_scale_options) ;
 
 # convert options for slides
-my $slide_create_command = "convert  +profile '*' $convert_options $scaled_convert_options " ;
+my @slide_create_command = ("convert", "+profile", "*", @convert_options, @scaled_convert_options ) ;
 if ($slide_height_max > 0) {
     if ($slide_width_max > 0) {
-	$slide_create_command .= "-scale ${slide_width_max}x$slide_height_max " ;
+	push (@slide_create_command, ("-scale", "${slide_width_max}x$slide_height_max")) ;
     } else {
-	$slide_create_command .= "-scale x$slide_height_max " ;
+	push (@slide_create_command, ("-scale", "x$slide_height_max")) ;
     }
 } else {
     if ($slide_width_max > 0) {
-	$slide_create_command .= "-scale ${slide_width_max}x " ;
+	push (@slide_create_command, ("-scale", "${slide_width_max}x")) ;
     }
 }
-my $slide_copy_command = "cp -f " ;
+my @slide_copy_command = ("cp", "-f") ;
 
 ######################################################################
 
@@ -695,11 +780,15 @@ sub get_generic_llgal_file {
     } else {
 	my $srcdir = find_generic_llgal_file ($filename, 1);
 	indprint "No $filename in $destination_dir/$local_llgal_dir/, getting a copy from $srcdir\n" ;
-	system ("cp", "-f", "$srcdir/$filename", "$destination_dir/$local_llgal_dir/$filename") ;
-	die "Failed to execute 'cp' to get generic '$filename' file ($!).\n"
-	    if $? == -1;
-	die "Failed to get generic '$filename' file.\n"
-	    if $? ;
+	my @output = system_with_output
+	    ("get generic '$filename' file",
+	     "cp", "-f", "$srcdir/$filename", "$destination_dir/$local_llgal_dir/$filename") ;
+	my $status = shift @output ;
+	if ($status) {
+	    # die on whatever error
+	    immediate_external_warnings @output ;
+	    die "Failed to get generic '$filename' file.\n" ;
+	}
     }
 }
 
@@ -711,7 +800,7 @@ sub clean_files {
     my $notdeleted = 0 ;
 
     die "Can't open directory $destination_dir\n"
-	if (!-r $destination_dir) ;
+	if (! -r $destination_dir) ;
 
     opendir DIR, "$destination_dir/$local_llgal_dir" ;
     while ($_ = readdir DIR) {
@@ -725,9 +814,15 @@ sub clean_files {
 	    my $diff = 0 ;
 	    # default is cleanall, which removes everything, as if file were not changed
 	    if (!$cleanall) {
-		$diff = system ("cmp", "-s", "$destination_dir/$local_llgal_dir/$_", "$original") ;
-		die "Failed to execute 'cmp' to check whether '$destination_dir/$local_llgal_dir/$_' has been modified ($!).\n"
-		    if $diff == -1 ;
+		my @output = system_with_output
+		    ("compare $_ with its original",
+		     "cmp", "-s", "$destination_dir/$local_llgal_dir/$_", "$original") ;
+		my $diff = shift @output ;
+		if ($diff == -1) {
+		    immediate_external_warnings @output ;
+		    die "Failed to execute 'cmp' to check whether '$destination_dir/$local_llgal_dir/$_' has been modified ($!).\n" ;
+		}
+		add_external_warnings @output ;
 		# on other errors, assume files are different ($diff != 0)
 	    }
 	    if ($diff) {
@@ -742,9 +837,15 @@ sub clean_files {
 	    my $grep = 0 ;
 	    # default is cleanall, which removes everything, as if the removal line was here
 	    if (!$cleanall) {
-		$grep = system("grep", "-q", "$caption_removal_line", "$destination_dir/$local_llgal_dir/$_") ;
-		die "Failed to execute 'grep' to check whether '$destination_dir/$local_llgal_dir/$_' has been modified ($!).\n"
-		    if $grep == -1 ;
+		my @output = system_with_output
+		    ("check for caption removal line",
+		     "grep", "-q", "$caption_removal_line", "$destination_dir/$local_llgal_dir/$_") ;
+		my $grep = shift @output ;
+		if ($grep == -1) {
+		    immediate_external_warnings @output ;
+		    die "Failed to execute 'grep' to check whether '$destination_dir/$local_llgal_dir/$_' has been modified ($!).\n" ;
+		}
+		add_external_warnings @output ;
 		# on other errors, assume file doesn't contain the caption removal line ($grep != 0)
 	    }
 	    if ($grep) {
@@ -856,7 +957,8 @@ my $TYPE_TXT = 0 ;
 my $TYPE_LNK = 1 ;
 my $TYPE_IMG = 2 ;
 my $TYPE_MVI = 3 ;
-my $TYPE_DIR = 4 ;
+my $TYPE_FIL = 4 ;
+my $TYPE_DIR = 5 ;
 
 # number of entries that don't have any file associated with them
 my $nofiles = 0 ;
@@ -893,24 +995,48 @@ my $local_llgal_url = make_safe_url_nowarn ($local_llgal_dir) ;
 ###################################################################################
 # checking files
 
-sub check_movie {
+my $nexcludes = @excludes ;
+
+sub check_file {
     my $filename = shift ;
+
     if (! -r $filename) {
-	add_warning "Cannot find movie '$filename', skipping it." ;
+	add_warning "Cannot find file '$filename', skipping it." ;
 	return -1 ;
     }
+
+    my $excluded = 0 ;
+    for(my $i = 0; $i < $nexcludes; $i++) {
+	my $entry = @excludes[$i] ;
+	if ($filename =~ /^(.*\/)*$entry->{filter}$/) {
+	    $excluded = $entry->{excluded}
+	}
+    }
+    return -1
+	if $excluded ;
+
     return 0 ;
 }
 
 sub check_image {
     my $filename = shift ;
-    if (! -r $filename) {
-	add_warning "Cannot find image '$filename', skipping it." ;
-	return -1 ;
-    } elsif (system("identify \"$filename\" > /dev/null 2>&1")) {
+    my @output = system_with_output
+	( "check \"$filename\" validity",
+	  "identify", $filename ) ;
+    my $status = shift @output ;
+    if ($status == -1) {
+	immediate_external_warnings @output ;
+	die "Failed to check \"$filename\" validity\n" ;
+    } elsif ($status) {
+	# do not show external warnings
 	add_warning "Bad image file '$filename', skipping it." ;
 	return -1 ;
     }
+    return 0 ;
+}
+
+sub check_movie {
+    # TODO
     return 0 ;
 }
 
@@ -927,10 +1053,16 @@ sub make_entry {
     my $caption = shift ;
 
     # check files
-    if ($type == $TYPE_IMG) {
-	return undef if check_image ("$destination_dir/$filename") < 0 ;
-    } elsif ($type == $TYPE_MVI) {
-	return undef if	check_movie ("$destination_dir/$filename") < 0 ;
+    if ($type == $TYPE_IMG or $type == $TYPE_MVI or $type == $TYPE_FIL) {
+	return undef
+	    if check_file ("$destination_dir/$filename") < 0 ;
+	if ($type == $TYPE_IMG) {
+	    return undef
+		if check_image ("$destination_dir/$filename") < 0 ;
+	} elsif ($type == $TYPE_MVI) {
+	    return undef
+		if check_movie ("$destination_dir/$filename") < 0 ;
+	}
     }
 
     # set the type
@@ -1039,8 +1171,8 @@ sub make_entry {
 	$entry->{scaled_xdim} = $x ;
 	$entry->{scaled_ydim} = $y ;
     }
-    if ($type == $TYPE_IMG or $type == $TYPE_MVI) {
-	my $kbytes = ((stat("$destination_dir/$filename"))[7]) >> 10;
+    if ($type == $TYPE_IMG or $type == $TYPE_MVI or $type == $TYPE_FIL) {
+	my $kbytes = (-s "$destination_dir/$filename") >> 10 ;
 	$entry->{kbytes} = $kbytes ;
 	# initialize here so that we can use it even when scaled are not used
 	$entry->{scaled_kbytes} = $kbytes ;
@@ -1056,10 +1188,16 @@ sub make_entry {
 	# thumbnails dimensions
 	my $real_thumb_filename = "$destination_dir/$entry->{thumb_filename}" ;
 	if ((! -e "$real_thumb_filename") or $force_regen_asked) {
-	    my $output = `$thumbnail_create_command "$real_filename" "$real_thumb_filename" 2>&1` ;
-	    if ($?) {
-		chomp $output ;
-		add_warning "Failed to create '$real_filename' thumbnail ($output)." ;
+	    my @output = system_with_output
+		( "create '$real_filename' thumbnail",
+		  @thumbnail_create_command, "$real_filename", "$real_thumb_filename" ) ;
+	    my $status = shift @output ;
+	    if ($status == -1) {
+		immediate_external_warnings @output ;
+		die "Failed to create '$real_filename' thumbnail\n" ;
+	    } elsif ($status) {
+		add_warning "Failed to create '$real_filename' thumbnail" ;
+		add_external_warnings @output ;
 		return undef ;
 	    }
 	}
@@ -1083,22 +1221,30 @@ sub make_entry {
 	if ((! -e "$real_scaled_filename") or $force_regen_asked) {
 	    # only scale down, never up.
 	    ($x,$y) = imgsize("$real_filename");
-	    my $output ;
+	    my @output ;
 	    if ($x <= $slide_width_max and $y <= $slide_height_max) {
-		$output = `$slide_copy_command "$real_filename" "$real_scaled_filename" 2>&1` ;
+		@output = system_with_output
+		    ( "copy '$real_filename' scaled image",
+		      @slide_copy_command, "$real_filename", "$real_scaled_filename" ) ;
 	    } else {
-		$output = `$slide_create_command "$real_filename" "$real_scaled_filename" 2>&1` ;
+		@output = system_with_output
+		    ( "create '$real_filename' scaled image",
+		      @slide_create_command, "$real_filename", "$real_scaled_filename" ) ;
 	    }
-	    if ($?) {
-		chomp $output ;
-		add_warning "Failed to create '$real_filename' scaled image ($output)." ;
+	    my $status = shift @output ;
+	    if ($status == -1) {
+		immediate_external_warnings @output ;
+		die "Failed to create '$real_filename' scaled image\n" ;
+	    } elsif ($status) {
+		add_warning "Failed to create '$real_filename' scaled image" ;
+		add_external_warnings @output ;
 		return undef ;
 	    }
 	}
 	($x,$y) = imgsize("$real_scaled_filename");
 	$entry->{scaled_xdim} = $x;
 	$entry->{scaled_ydim} = $y;
-	$entry->{scaled_kbytes} = ((stat("$real_scaled_filename"))[7])>>10 ;
+	$entry->{scaled_kbytes} = (-s "$real_scaled_filename") >> 10 ;
     }
 
     return $entry ;
@@ -1107,114 +1253,114 @@ sub make_entry {
 # generating entry table from files in target directory
 sub get_entries {
 
-    # load up image files from $destination_dir into array @imgfiles
+    @subdirs = () ;
+
     opendir DIR, $destination_dir
 	or die "Can't open directory $destination_dir\n";
-
-    # find and read all jp(e)g, gif and png files
-    my @imgfiles = () ;
-    push @imgfiles, grep((!/^\.thumb/ and !/^\.slide/ and !/^\.tile/ and /\.jpe?g$/i), readdir DIR) ;
-    rewinddir DIR ;   # this is CRUCIAL here!!!
-    push @imgfiles, grep((!/^\.thumb/ and !/^\.slide/ and !/^\.tile/ and /\.gif$/i), readdir DIR) ;
-    rewinddir DIR ;   # this is CRUCIAL here!!!
-    push @imgfiles, grep((!/^\.thumb/ and !/^\.slide/ and !/^\.tile/ and /\.png$/i), readdir DIR) ;
-    rewinddir DIR ;   # this is CRUCIAL here!!!
-
-    # find and read all mp(e)g and avi files
-    my @mvifiles = () ;
-    push @mvifiles, grep((!/^\.thumb/ and !/^\.slide/ and !/^\.tile/ and /\.mpe?g$/i), readdir DIR) ;
-    rewinddir DIR ;   # this is CRUCIAL here!!!
-    push @mvifiles, grep((!/^\.thumb/ and !/^\.slide/ and !/^\.tile/ and /\.avi$/i), readdir DIR) ;
-    rewinddir DIR ;   # this is CRUCIAL here!!!
-
-    # find all subdirectories
-    if ($make_recursive) {
-	@subdirs = () ;
-	while ($_ = readdir DIR) {
-	    if (/^[^.]/ && -d "$destination_dir/$_") {
-		push @subdirs, $_ ;
-	    }
-	}
-    }
-
+    # get all files, except dot-starting ones and .html ending ones
+    my @filenames = grep ((!/\.html$/i and !/^\./), readdir DIR) ;
     closedir DIR ;
 
-    # how many total files
-    $nentries = @imgfiles + @mvifiles + @subdirs ;
+    # sort now so that slide numbering doesn't become wrong later
+    if ($sort_criteria eq "name") {
+	@filenames = sort @filenames ;
+    } elsif ($sort_criteria eq "date" or $sort_criteria eq "time") {
+	@filenames = sort { (-M $a) <=> (-M $b) } @filenames ;
+    } elsif ($sort_criteria eq "none" or $sort_criteria eq "") {
+	# do not sort
+    } else {
+	die "Unknown sort criteria '$sort_criteria'.\n" ;
+    }
 
     indprint "Preparing entries: " ;
     init_percentage () ;
-    my $i = 0 ;
 
-    # add entries
-    foreach my $filename (@imgfiles) {
-	my @parts = split (/\./, $filename) ;
-	pop @parts ;
-	my $basename = join (".", @parts) ;
-	my $entry = make_entry ($TYPE_IMG, $filename, $basename, undef, undef, undef) ;
-	if (defined $entry) {
-	    push @entries, $entry ;
+    for(my $i = 0; $i < @filenames; $i++) {
+	my $filename = @filenames[$i] ;
+	if (-d "$destination_dir/$filename") {
+	    # directory
+	    if ($add_subdirs) {
+		push @subdirs, $_ ;
+		my $entry = make_entry ($TYPE_DIR, $filename, $filename, undef, undef, undef) ;
+		if (defined $entry) {
+		    push @entries, $entry ;
+		}
+	    }
+
+	} else {
+	    # file
+	    my $entry = undef ;
+
+	    if ($filename =~ /($image_extensions)$/i) {
+		# image
+		my @parts = split (/\./, $filename) ;
+		pop @parts ;
+		my $basename = join (".", @parts) ;
+		my $entry = make_entry ($TYPE_IMG, $filename, $basename, undef, undef, undef) ;
+		goto JUST_A_FILE
+		    if not defined $entry ;
+		push @entries, $entry ;
+
+	    } elsif ($filename =~ /($movie_extensions)$/i) {
+		# movie
+		my @parts = split (/\./, $filename) ;
+		pop @parts ;
+		my $basename = join (".", @parts) ;
+		my $entry = make_entry ($TYPE_MVI, $filename, $basename, undef, undef, undef) ;
+		goto JUST_A_FILE
+		    if not defined $entry ;
+		push @entries, $entry ;
+
+	    } else {
+	      JUST_A_FILE:
+		if ($add_all_files) {
+		    # not an image, not a movie, just a file
+		    my $entry = make_entry ($TYPE_FIL, $filename, $filename, undef, undef, undef) ;
+		    push @entries, $entry
+			if defined $entry ;
+		}
+	    }
 	}
-	print_percentage (($i++)+1, $nentries) ;
+
+	print_percentage ($i+1, scalar @filenames) ;
     }
 
-    foreach my $filename (@mvifiles) {
-	my @parts = split (/\./, $filename) ;
-	pop @parts ;
-	my $basename = join (".", @parts) ;
-	my $entry = make_entry ($TYPE_MVI, $filename, $basename, undef, undef, undef) ;
-	if (defined $entry) {
-	    push @entries, $entry ;
-	}
-	print_percentage (($i++)+1, $nentries) ;
-    }
-
-    foreach my $dirname (@subdirs) {
-	my $entry = make_entry ($TYPE_DIR, $dirname, $dirname, undef, undef, undef) ;
-	if (defined $entry) {
-	    push @entries, $entry ;
-	}
-	print_percentage (($i++)+1, $nentries) ;
-    }
-
-    # recompute nentries since wrong entries might have been skipped
-    # (do recompute it before to avoid breaking percentage)
-    $nentries = @entries ;
-
-    # sort alphabetically, by file name
-    @entries = sort { $a->{filename} cmp $b->{filename} } @entries ;
-
+    # end percentage
     print "\n" ;
     show_warnings ;
+
+    # compute nentries now since some entries (subdirs, non-image non-movies, ...)
+    # might have been skipped
+    $nentries = @entries ;
     die "Please select more files for your slide show!\n"
 	if ($nentries < 1);
 }
+
 
 #######################################################################
 # Check acces rights and create local subdirectory to place all llgal files
 
 die "Destination directory '$destination_dir' is not a directory.\n"
-    if !-d "$destination_dir" ;
+    if ! -d "$destination_dir" ;
 die "Cannot enter in destination directory '$destination_dir'.\n"
-    if !-x "$destination_dir" ;
+    if ! -x _ ;
 die "Cannot read destination directory '$destination_dir'.\n"
-    if !-r "$destination_dir" ;
+    if ! -r _ ;
 die "Cannot modify destination directory '$destination_dir'.\n"
-    if !-w "$destination_dir" ;
+    if ! -w _ ;
 
-if (!-e "$destination_dir/$local_llgal_dir") {
+if (! -e "$destination_dir/$local_llgal_dir") {
     mkdir "$destination_dir/$local_llgal_dir"
 	or die "Failed to create $destination_dir/$local_llgal_dir directory ($!)" ;
 }
-
 die "Local llgal '$destination_dir/$local_llgal_dir' is not a directory.\n"
-    if !-d "$destination_dir/$local_llgal_dir" ;
+    if ! -d _ ;
 die "Cannot enter in local llgal directory '$destination_dir/$local_llgal_dir'.\n"
-    if !-x "$destination_dir/$local_llgal_dir" ;
+    if ! -x _ ;
 die "Cannot read local llgal directory '$destination_dir/$local_llgal_dir'.\n"
-    if !-r "$destination_dir/$local_llgal_dir" ;
+    if ! -r _ ;
 die "Cannot write local llgal directory '$destination_dir/$local_llgal_dir'.\n"
-    if !-w "$destination_dir/$local_llgal_dir" ;
+    if ! -w _ ;
 
 #######################################################################
 # Generate captions if asked
@@ -1256,6 +1402,11 @@ if ($generate_captions) {
 		." ---- ". $entries[$i]->{linktext}
 		." ---- ". $entries[$i]->{caption} ."\n"
 		    unless grep { $captions[$_] =~ m/^\s*MVI:\s*$entries[$i]->{filename}\s+----\s/ } ( 0 .. $#captions ) ;
+	    } elsif ($type == $TYPE_FIL) {
+		print CAP "FIL: " . $entries[$i]->{filename}
+		." ---- ". $entries[$i]->{linktext}
+		." ---- ". $entries[$i]->{caption} ."\n"
+		    unless grep { $captions[$_] =~ m/^\s*FIL:\s*$entries[$i]->{filename}\s+----\s/ } ( 0 .. $#captions ) ;
 	    } elsif ($type == $TYPE_DIR) {
 		print CAP "DIR: " . $entries[$i]->{filename}
 		." ---- ". $entries[$i]->{linktext}
@@ -1275,9 +1426,11 @@ if ($generate_captions) {
 	print CAP "# INDEXHEAD: one header line in the index\n" ;
 	print CAP "# INDEXFOOT: one header line in the index\n" ;
 	print CAP "# TXT: text ---- caption\n" ;
-	print CAP "# IMG: imagefile.{gif,png,jpg} ---- caption\n" ;
 	print CAP "# LNK: url ---- slide link text ---- caption\n" ;
+	print CAP "# IMG: imagefile.{gif,png,jpg} ---- caption\n" ;
 	print CAP "# MVI: movie.{avi,mpg,mpeg} ---- slide link text ---- caption\n" ;
+	print CAP "# FIL: file ---- slide link text ---- caption\n" ;
+	print CAP "# DIR: directory ---- slide link text ---- caption\n" ;
 	print CAP "\n" ;
 	print CAP "# $caption_removal_line\n" ;
 	print CAP "\n" ;
@@ -1291,6 +1444,10 @@ if ($generate_captions) {
 		." ---- ". $entries[$i]->{caption} ."\n";
 	    } elsif ($type == $TYPE_MVI) {
 		print CAP "MVI: " . $entries[$i]->{filename}
+		." ---- ". $entries[$i]->{linktext}
+		." ---- ". $entries[$i]->{caption} ."\n";
+	    } elsif ($type == $TYPE_FIL) {
+		print CAP "FIL: " . $entries[$i]->{filename}
 		." ---- ". $entries[$i]->{linktext}
 		." ---- ". $entries[$i]->{caption} ."\n";
 	    } elsif ($type == $TYPE_DIR) {
@@ -1336,8 +1493,9 @@ if ($use_caption_file) {
     open(CAP,"$destination_dir/$local_llgal_dir/$captions_filename")
 	or die "Can't open $destination_dir/$local_llgal_dir/$captions_filename file\n";
 
+    my $size = (-s CAP) ;
     my $line;
-    while (defined($line = <CAP>)) {
+    while (defined ($line = <CAP>)) {
 	chomp($line); $line =~ s/^\s*//; $line =~ s/\s\(\s*\)$/\1/;
 	# only lines that don't start with # and are not empty
 	if (!($line =~ m/^\#/) && !($line =~ /^$/)) {
@@ -1376,6 +1534,10 @@ if ($use_caption_file) {
 		    # movie slide
 		    $entry = make_entry ($TYPE_MVI, $1.".".$2, $1, undef, $3, $4) ;
 
+		} elsif ($line =~ m/^FIL:\s*(.+)\s+----\s+(.+)\s+----\s*(?:\s(.*))?\s*$/) {
+		    # movie slide
+		    $entry = make_entry ($TYPE_FIL, $1, $1, undef, $2, $3) ;
+
 		} elsif ($line =~ m/^IMG:\s*(.+)\.(.+)\s+----\s*(?:\s(.*))?\s*$/
 			 or $line =~ m/^(.+)\.(.+)\s+----\s*(?:\s(.*))?\s*$/) {
 		    # image slide (default)
@@ -1391,7 +1553,7 @@ if ($use_caption_file) {
 		}
 	    }
 	}
-	print_percentage (tell CAP, (stat CAP)[7]) ;
+	print_percentage (tell CAP, $size) ;
     }
     close(CAP);
     $nentries = @entries ;
@@ -1436,11 +1598,15 @@ if ($show_no_film_effect) {
 if (!$show_no_film_effect) {
     my $tileh = (imgsize("$destination_dir/$local_llgal_dir/$filmtile_filename"))[1] ;
     if ($tile_height != $tileh) {
-	system ("mogrify", "-scale", "x$tile_height", "$destination_dir/$local_llgal_dir/$filmtile_filename") ;
-	die "Failed to execute 'mogrify' to reduce the film tile ($!).\n"
-	    if $? == -1 ;
-	die "'mogrify' failed while reducing the film tile.\n"
-	    if $? ;
+	my @output = system_with_output
+	    ( "reduce film tile",
+	      "mogrify", "-scale", "x$tile_height", "$destination_dir/$local_llgal_dir/$filmtile_filename" ) ;
+	my $status = shift @output ;
+	if ($status) {
+	    # die on whatever error
+	    immediate_external_warnings @output ;
+	    die "Failed to execute 'mogrify' to reduce the film tile.\n" ;
+	}
     }
 }
 
@@ -1532,7 +1698,8 @@ if ($make_no_slides) {
 	    }
 
 	    # add dimensions and size to the caption
-	    if (($slide_width_max or $slide_height_max) and ($show_dimensions or $show_size) and ($type == $TYPE_IMG || $type == $TYPE_MVI)) {
+	    if (($slide_width_max or $slide_height_max) and ($show_dimensions or $show_size)
+		and ($type == $TYPE_IMG or $type == $TYPE_MVI or $type == $TYPE_FIL)) {
 		my $printdim = "$entries[$i]->{xdim}x$entries[$i]->{ydim}" ;
 		my $printsize = "$entries[$i]->{kbytes}$show_size_unit" ;
 		if ($show_dimensions && $show_size && $type == $TYPE_IMG) {
@@ -1636,10 +1803,10 @@ for (my $i = 0; $i < $nentries; $i += $num) {
 	my $width = $entries[$i+$j]->{thumb_xdim} ;
 	my $height = $entries[$i+$j]->{thumb_ydim} ;
 
-	if ($type == $TYPE_TXT || $type == $TYPE_LNK || $type == $TYPE_MVI || $type == $TYPE_DIR) {
+	if ($type == $TYPE_TXT or $type == $TYPE_LNK or $type == $TYPE_MVI or $type == $TYPE_FIL or $type == $TYPE_DIR) {
 	    print IXW "    <td class=\"text-thumb\" style=\"width: ", $width, "px; height: ", $height, "px;\">\n" ;
             print IXW "      " ;
-	    if ($type == $TYPE_MVI) {
+	    if ($type == $TYPE_MVI or $type == $TYPE_FIL) {
 		# directly open the movies from the index
 		print IXW "<a href=\"", $entries[$i+$j]->{url}, "\">", $entries[$i+$j]->{linktext}, "</a>" ;
 	    } else {
@@ -1677,7 +1844,7 @@ for (my $i = 0; $i < $nentries; $i += $num) {
 	for (my $j = 0; $j < $num; $j++) {
 	    print IXW "    <td class=\"thumb-dim\">" ;
 	    my $type = $entries[$i+$j]->{type} ;
-	    if ($type == $TYPE_IMG || $type == $TYPE_MVI) {
+	    if ($type == $TYPE_IMG or $type == $TYPE_MVI or $type ==$TYPE_FIL) {
 		my $printdim = "$entries[$i+$j]->{scaled_xdim}x$entries[$i+$j]->{scaled_ydim}" ;
 		my $printsize = "$entries[$i+$j]->{scaled_kbytes}$show_size_unit" ;
 		if ($show_dimensions && $show_size && $type == $TYPE_IMG) {
@@ -1761,8 +1928,9 @@ if ($www_access_rights) {
 
     for(my $i = 0; $i < $nentries; $i++) {
 	next if ($entries[$i]->{type} != $TYPE_IMG
-		 && $entries[$i]->{type} != $TYPE_MVI
-		 && $entries[$i]->{type} != $TYPE_DIR) ;
+		 and $entries[$i]->{type} != $TYPE_MVI
+		 and $entries[$i]->{type} != $TYPE_FIL
+		 and $entries[$i]->{type} != $TYPE_DIR) ;
 	my $file = $entries[$i]->{filename} ;
 	if ($entries[$i]->{type} == $TYPE_DIR) {
 	    system ("chmod a+rx $dir$file 2> /dev/null") ;
@@ -1785,6 +1953,7 @@ if (defined $generate_config) {
 	if -r "$generate_config" ;
     open NEWCFG, ">$generate_config"
 	or die "Cannot open $generate_config configuration file.\n" ;
+
     print NEWCFG "# This is a llgal configuration file.\n" ;
     print NEWCFG "# It was automatically generated.\n" ;
     print NEWCFG "# You may modify and reuse it as you want.\n" ;
@@ -1837,13 +2006,23 @@ if (defined $generate_config) {
     print NEWCFG "show_dimensions = $show_dimensions\n" ;
     print NEWCFG "show_size = $show_size\n" ;
     print NEWCFG "show_size_unit = \"$show_size_unit\"\n" ;
+    print NEWCFG "sort_criteria = \"$sort_criteria\"\n" ;
     print NEWCFG "use_caption_file = $use_caption_file\n" ;
+    print NEWCFG "# Exclude:\n" ;
+    map {
+	print NEWCFG ($_->{excluded} ? "exclude" : "include"). " = \"". $_->{filter} ."\"\n" ;
+    } @excludes ;
     print NEWCFG "# Various:\n" ;
-    print NEWCFG "convert_options = \"$convert_options\"\n" ;
-    print NEWCFG "scaled_convert_options = \"$scaled_convert_options\"\n" ;
-    print NEWCFG "thumbnail_convert_options = \"$thumbnail_convert_options\"\n" ;
+    print NEWCFG "add_all_files = $add_all_files\n" ;
+    print NEWCFG "add_subdirs = $add_subdirs\n" ;
+    print NEWCFG "convert_options = \"". join (' ', @convert_options) ."\"\n" ;
+    print NEWCFG "scaled_convert_options = \"". join (' ', @scaled_convert_options) ."\"\n" ;
+    print NEWCFG "thumbnail_convert_options = \"". join (' ', @thumbnail_convert_options) ."\"\n" ;
+    print NEWCFG "image_extensions = \"$image_extensions\"\n" ;
+    print NEWCFG "movie_extensions = \"$movie_extensions\"\n" ;
     print NEWCFG "make_recursive = $make_recursive\n" ;
     print NEWCFG "www_access_rights = $www_access_rights\n" ;
+
     close NEWCFG ;
 }
 

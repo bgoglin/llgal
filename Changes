@@ -1,3 +1,39 @@
+llgal (0.10)
+
+  * Add the FIL type for files that are neither an image nor a movie. FIL is similar
+    to LNK, but the file size is shown since it can be locally accessed.
+  * Improve scanning of files in the working directory when no captions file exists:
+    - By default, only images and movies are added to the gallery.
+    - Add image/movie_extensions options to change which files are
+      recognized as images or movies.
+    - Add -A to force addition of all files to the gallery, not only images an movies.
+    - Add -S to force addition of all subdirectories to the gallery.
+    - Add --exclude and --include to remove or re-add files to the list of processed
+      files in the working directory. Multiple instances are allowed and the order
+      is respected.
+    - Add --sort to sort with another criteria than name.
+    - Sort filenames before creating entries so that slide numbering does not become
+      wrong later.
+  * -R now does only run recursively in subdirectories, it does not scan existing
+    subdirectories in the working directory anymore:
+    - If no captions file exists, -R should now be used together with -S to both define
+      the list of subdirectories and then process them recursively.
+    - If a captions file exists, all subdirectories that it defines are processed
+      when -R is passed.
+  * convert options are now converted into an array, spaces inside options are not supported for now.
+  * Check that additional configuration files (--config <file>) exist and are regular files.
+  * Fix captions file header.
+  * Fix Debian tarball generation.
+  * Fix typos in the README.
+  * Remove version number in slidetemplate.html since it's useless and never up-to-date.
+  * Remove useless check for old igal filenames.
+  * Cleanup system usage and error reporting.
+  * Use -s to get file size.
+  * Use _ to optimize consecutive file test operations.
+  * A few typos.
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Wed, 17 Aug 2005 11:29:59 +0200
+
 llgal (0.9.10)
 
   * Fix cleaning (not recursive by default).

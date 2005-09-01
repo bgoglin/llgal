@@ -177,7 +177,25 @@
 # It will be stored under $local_llgal_dir.
 # use_caption_file = 0
 
+##### Exclude #####
+
+# Exclude files whose name matches [--exclude <s>]
+# This option may be used several times.
+# exclude = "string"
+
+# Include files whose name matches and were previously excluded [--include <s>].
+# This option may be used several times.
+# The order of includes and excludes is respected.
+# include = "string"
+
 ##### Various #####
+
+# Add all files to the list of entries
+# not only images and movies [-A]
+# add_all_files = 0
+
+# Add subdirectories to the list of entries [-S]
+# add_subdirs = 0
 
 # Additional configuration file [--config <s>]
 # This option may be used multiple times.
@@ -192,8 +210,17 @@
 # scaled_convert_options = ""
 # thumbnail_convert_options = ""
 
-# Look at subdirectories [-R]
+# Extensions that are matched when searching images
+# image_extensions = "jpe?g|gif|png"
+
+# Extensions that are matched when searching movies
+# movie_extensions = "mpe?g|avi"
+
+# Run recursively in subdirectories [-R]
 # make_recursive = 0
+
+# Change sort criteria when scanning files in the working directory [--sort]
+# sort_criteria = "name"
 
 # Give access rights for www access [--www]
 # www_access_rights = 0
