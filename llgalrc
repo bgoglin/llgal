@@ -54,7 +54,7 @@
 # Prefix used to determine slide-image filenames from
 # original images (in case of --bigy) [--sp <s>]
 # These files will be stored under $local_llgal_dir.
-# bigy_image_filenameprefix = "bigy_"
+# scaled_image_filenameprefix = "scaled_"
 
 # Prefix used to determine thumbnail filenames from
 # original images [--tp <s>]
@@ -180,7 +180,7 @@
 
 # Additional options to pass to convert for
 # slide or thumbnail creation.
-# bigy_convert_options = ""
+# scaled_convert_options = ""
 # thumbnail_convert_options = ""
 
 # Look at subdirectories [-R]
