@@ -115,7 +115,7 @@
 # Generate slide titles from captions [-k]
 # make_slide_title_from_caption = 0
 
-# Do not show slide counter in captions [-x]
+# Do not show slide counter in captions [--nc]
 # show_no_slide_counter = 0
 
 # Prefix of generated HTML slide filenames
@@ -161,7 +161,7 @@
 # Set timestamp format in caption using strftime format [--ctf]
 # timestamp_format_in_caption = "%Y-%m-%d %H:%M:%S"
 
-# Generate captions from filenames [-C]
+# Generate captions from filenames [--cf]
 # make_caption_from_filename = 0
 
 # Write captions under thumbnails [-u]

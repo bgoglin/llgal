@@ -1,7 +1,7 @@
 NAME	=	llgal
-VERSION	=	0.9.6
+VERSION	=	0.9.7
 
-.PHONY: install uninstall tarball
+.PHONY: llgal clean install uninstall tarball
 
 DESTDIR	=	
 PREFIX	=	/usr/local
@@ -16,6 +16,9 @@ DEBIAN_TARBALL	=	$(NAME)_$(VERSION).orig
 
 llgal::
 	sed -e 's!@DATADIR@!$(DATADIR)!g' -e 's!@SYSCONFDIR@!$(SYSCONFDIR)!g' -e 's!@VERSION@!$(VERSION)!g' < llgal.in > llgal
+
+clean::
+	rm -f llgal
 
 install:: llgal
 	install -d -m 0755 $(DESTDIR)$(BINDIR) $(DESTDIR)$(DATADIR)/llgal $(DESTDIR)$(MANDIR)/man1 $(DESTDIR)$(SYSCONFDIR)
