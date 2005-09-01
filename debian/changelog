@@ -1,3 +1,9 @@
+llgal (0.9-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Fri,  4 Mar 2005 22:41:37 +0100
+
 llgal (0.8.2-1) unstable; urgency=low
 
   * New upstream release.

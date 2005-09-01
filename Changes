@@ -1,3 +1,21 @@
+llgal (0.9)
+
+  * Add --bigxy and slide_width_max option.
+  * Replace --ce and make_caption_from_exif with --cc
+    and make_caption_from_image_comment.
+  * Add --ct and make_caption_from_image_timestamp to get timestamp
+    for image tags (based on James R. Van Zandt's patch proposed
+    in igal's Debian Bug Report #162720).
+  * Add --ctf and timestamp_format_in_caption to change timestamp
+    format in caption.
+  * Cleanup EXIF comment by removing end \0 and \n.
+  * Captions and textlink are now stored in a HTML-safe manner.
+  * Delay unsafe url warning after the last entry preparation.
+  * Merge and cleanup all processing of each entry.
+  * Cleanup llgal file obtention.
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Fri,  4 Mar 2005 22:41:37 +0100
+
 llgal (0.8.2)
 
   * Use Perl Image::Info to get JPEG EXIF or GIF comment.
@@ -5,7 +23,8 @@ llgal (0.8.2)
   * Support non-ascii filenames.
   * Fix filename sort.
   * Replace & and " with html codes in title, text and caption.
-  * Final fix of caption reading regexps to force required fields to be non-empty.
+  * Final fix of caption reading regexps to force required fields to be
+    non-empty.
   * Replace bigy_* option with scaled_*.
   * Default scaled image prefix is now "scaled_".
   * Don't always reopen the slidetemplate file.
