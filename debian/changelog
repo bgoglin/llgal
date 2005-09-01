@@ -1,3 +1,10 @@
+llgal (0.8.1-1) unstable; urgency=low
+
+  * New upstream release.
+  * Add igalwriter to Replaces.
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Tue,  1 Mar 2005 16:45:53 +0100
+
 llgal (0.8-1) unstable; urgency=low
 
   * New upstream release.
@@ -6,7 +13,7 @@ llgal (0.8-1) unstable; urgency=low
   * Check with lintian.
   * exiftags is now only suggested since upstream checks its avaibility.
 
- -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Mon, 28 Feb 2005 20:31:11 +0100
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Tue,  1 Mar 2005 15:18:23 +0100
 
 llgal (0.7-1) unstable; urgency=low
 

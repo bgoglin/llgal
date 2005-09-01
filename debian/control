@@ -10,7 +10,7 @@ Architecture: all
 Depends: imagemagick, ${perl:Depends}, libimage-size-perl
 Suggests: exiftags
 Provides: igal
-Replaces: igal, igal-text
+Replaces: igal, igal-text, igalwriter
 Description: Loulous gallery
  llgal is a on-line gallery generator.
  It is based on igal (most of the interface is the same).
