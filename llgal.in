@@ -49,7 +49,7 @@ $destination_dir =~ s/\/$// ;
 # configuration files
 
 my @config_files = () ;
-push (@config_files, "/etc/llgalrc") ;
+push (@config_files, "@SYSCONFDIR@/llgalrc") ;
 push (@config_files, $ENV{HOME}."/.llgalrc") ;
 push (@config_files, "$destination_dir/.llgalrc") unless ($destination_dir eq ".") ;
 push (@config_files, ".llgalrc") ;
@@ -80,7 +80,7 @@ my $text_slide_height_default = 300 ;
 # all configuration variables
 
 # llgal directories
-my $llgal_share_dir = "/usr/share/llgal" ;
+my $llgal_share_dir = "@DATADIR@/llgal" ;
 my $user_share_dir = $ENV{HOME}."/.llgal" ;
 
 # Name of generic llgal files

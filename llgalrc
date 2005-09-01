@@ -15,7 +15,7 @@
 
 # Default installation path for generic llgal files after
 # installation (index and slide templates, tile image and CSS file).
-# llgal_share_dir = "/usr/share/llgal"
+# llgal_share_dir = "/usr/share/llgal" (for a standard installation)
 
 # Default per-user generic llgal files.
 # This configuration option should probably not be changed in /etc/llgalrc
