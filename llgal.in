@@ -595,7 +595,7 @@ if ($slide_height_max > 0) {
     if ($slide_width_max > 0) {
 	$slide_create_command .= "-scale ${slide_width_max}x$slide_height_max " ;
     } else {
-	$slide_create_command .= "-scale x$slide_height_max " ;	
+	$slide_create_command .= "-scale x$slide_height_max " ;
     }
 } else {
     if ($slide_width_max > 0) {
@@ -681,15 +681,35 @@ sub clean_files {
 if ($clean_asked) {
     print "Removing all non-modified llgal files: ";
     clean_files 0 ;
-    print "done!\n";
+    print "Done!\n";
     exit 0 ;
 }
 
 if ($cleanall_asked) {
     print "Removing all llgal files: ";
     clean_files 1 ;
-    print "done!\n";
+    print "Done!\n";
     exit 0;
+}
+
+######################################################################
+# Print percentage
+
+sub init_percentage {
+    print "  0%" ;
+}
+
+sub print_percentage {
+    my ($i,$n) = (shift,shift) ;
+    my $val = int($i*100/$n) ;
+    print "\b\b\b\b" ;
+    if ($val == 100) {
+	print "100%" ;
+    } elsif ($val >= 10) {
+	print " ".$val."%" ;
+    } else {
+	print "  ".$val."%" ;
+    }
 }
 
 #####################################################################
@@ -698,7 +718,7 @@ if ($cleanall_asked) {
 # The whole entry list
 my @entries ;
 my $nentries ;
-# Entries are hashed composed of 
+# Entries are hashed composed of
 # - type: see below
 # - filename (original filename with extension)
 # - basename (original filename without extension)
@@ -775,7 +795,7 @@ sub make_entry {
 	die "Can't open $filename\n" unless (-r "$destination_dir/$filename");
     }
     $entry->{filename} = $filename ;
-    
+
     # keep real filename for later
     my $real_filename = "$destination_dir/$filename" ;
 
@@ -894,7 +914,7 @@ sub make_entry {
 	$entry->{thumb_xdim} = $default_thumb_xdim ;
 	$entry->{thumb_ydim} = $default_thumb_ydim ;
     }
-    
+
     # scaled image, its url and dimensions
     if ($type == $TYPE_IMG and ($slide_width_max > 0 or $slide_height_max > 0) and !$make_no_slides) {
 	# filename and url
@@ -922,8 +942,6 @@ sub make_entry {
 	$entry->{scaled_ydim} = $y;
 	$entry->{scaled_kbytes} = ((stat("$real_scaled_filename"))[7])>>10 ;
     }
-
-    print "." ;
 
     return $entry ;
 }
@@ -962,7 +980,12 @@ sub get_entries {
 
     closedir DIR ;
 
-    print "Preparing entries" ;
+    # how many total files
+    $nentries = @imgfiles + @mvifiles + @subdirs ;
+
+    print "Preparing entries: " ;
+    init_percentage () ;
+    my $i = 0 ;
 
     # add entries
     while (@imgfiles) {
@@ -971,30 +994,30 @@ sub get_entries {
 	pop @parts ;
 	my $basename = join (".", @parts) ;
 	push @entries, make_entry ($TYPE_IMG, $filename, $basename, undef, undef, undef) ;
+	print_percentage (($i++)+1, $nentries) ;
     }
-    
+
     while (@mvifiles) {
         my $filename = shift @mvifiles ;
 	my @parts = split (/\./, $filename) ;
 	pop @parts ;
 	my $basename = join (".", @parts) ;
 	push @entries, make_entry ($TYPE_MVI, $filename, $basename, undef, undef, undef) ;
+	print_percentage (($i++)+1, $nentries) ;
     }
 
     while (@subdirs) {
 	my $dirname = shift @subdirs ;
 	push @entries, make_entry ($TYPE_DIR, $dirname, $dirname, undef, undef, undef) ;
+	print_percentage (($i++)+1, $nentries) ;
     }
-
-    print " Done!\n" ;
-
-    # how many total files
-    $nentries = @entries ;
 
     # sort alphabetically, by file name
     @entries = sort { $a->{filename} cmp $b->{filename} } @entries ;
 
     die "Please select more files for your slide show!\n" if ($nentries < 1);
+
+    print "\n" ;
 }
 
 #######################################################################
@@ -1048,7 +1071,8 @@ if ($use_caption_file) {
 	die "Now edit the $captions_filename file to your liking and rerun llgal -c\n";
     } else {
 	# read in files specified in the .captions file if it exists
-	print "Reading the $captions_filename file and preparing entries ";
+	print "Reading the $captions_filename file and preparing entries: ";
+	init_percentage ();
 
 	open(CAP,"$destination_dir/$local_llgal_dir/$captions_filename")
 	    or die "Can't open $destination_dir/$local_llgal_dir/$captions_filename file\n";
@@ -1104,10 +1128,11 @@ if ($use_caption_file) {
 		    push @entries, $entry ;
 		}
 	    }
+	    print_percentage (tell CAP, (stat CAP)[7]) ;
 	}
 	close(CAP);
 	$nentries = @entries ;
-	print "found $nentries image files.\n";
+	print "\nFound $nentries files.\n";
     }
 } else {
     get_entries ;
@@ -1163,12 +1188,12 @@ if ($make_no_slides) {
     open(SR,"$destination_dir/$local_llgal_dir/$slidetemplate_filename") or die "Can't open the slide template file\n";
     @slidetemplate_text = <SR>;
     close SR;
-       
+
     # create slides
     print "Creating individual slides: ";
+    init_percentage ();
     for (my $i = 0; $i < $nentries; $i++) {
 	open(SW, ">$destination_dir/$entries[$i]->{slide_filename}") or die "Can't create slide file\n";
-	print ".";
 
 	my $type = $entries[$i]->{type} ;
 
@@ -1263,14 +1288,15 @@ if ($make_no_slides) {
 	    }
 	    $line =~ s/<!--PREV-SLIDE-->/\"$entries[$i-1]->{slide_url}\" title=\"$prev\"/g ;
 	    $line =~ s/<!--NEXT-SLIDE-->/\"$entries[($i==$nentries-1?0:$i+1)]->{slide_url}\" title=\"$next\"/g ;
-			
+
 	    # output the line
 	    print SW "$line" ;
 	}
 	close(SW) ;
+	print_percentage ($i+1, $nentries) ;
     }
-    print " done!\n" ;
 }
+print "\n" ;
 
 #######################################################################
 # Creating the index file
@@ -1299,6 +1325,7 @@ while (defined($line = <IXR>)) {
 # for each row
 my $num;
 my $forced_width_warning = 0;
+init_percentage ();
 for (my $i = 0; $i < $nentries; $i += $num) {
     $num = 0;
 
@@ -1333,7 +1360,7 @@ for (my $i = 0; $i < $nentries; $i += $num) {
 	my $type = $entries[$i+$j]->{type} ;
 	my $width = $entries[$i+$j]->{thumb_xdim} ;
 	my $height = $entries[$i+$j]->{thumb_ydim} ;
-	
+
 	if ($type == $TYPE_TXT || $type == $TYPE_LNK || $type == $TYPE_MVI || $type == $TYPE_DIR) {
 	    print IXW "    <td class=\"text-thumb\" style=\"width: ", $width, "px; height: ", $height, "px;\">\n" ;
             print IXW "      " ;
@@ -1358,13 +1385,13 @@ for (my $i = 0; $i < $nentries; $i += $num) {
 	    } else {	# otherwise use the image name (strip suffix)
 		$altname = $entries[$i+$j]->{title};
 	    }
-	    
+
 	    print IXW "<img src=\"$entries[$i+$j]->{thumb_url}\" alt=\"$altname\" title=\"$altname\" />";
 	    print IXW "</a></td>\n" ;
 	} else {
 	    die "Unknown type $type.\n" ;
 	}
-	print "." ;
+	print_percentage ($i+$j+1, $nentries) ;
     }
     print IXW "    <td class=\"thumb\">&nbsp;</td>\n" unless ($show_no_film_effect) ;
     print IXW "  </tr>\n" ;
@@ -1417,9 +1444,9 @@ while (defined($line = <IXR>)) {
 	print IXW "$line";
     }
 }
-close(IXW);
-close(IXR);
-print " done!\n";
+close(IXW) ;
+close(IXR) ;
+print "\n" ;
 
 if ($forced_width_warning) {
     print "(Warning: Row width max ($pixels_per_row) was too low even for one single image per row. "
