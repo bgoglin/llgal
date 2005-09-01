@@ -30,10 +30,12 @@ my $help_asked = 0 ;		# displays brief usage message
 my $clean_asked = 0 ;		# clean up all generated files
 my $cleanall_asked = 0 ;	# clean up all generated and user modified files
 my $generate_config = undef ;   # generate a config file
+my $generate_captions = 0 ;     # generate (or update) captions
 
 # process these options but kept other options in @ARGV for later
 Getopt::Long::Configure('passthrough') ;
 GetOptions(
+	   'gc'         => \$generate_captions,
 	   'clean'	=> \$clean_asked,
 	   'cleanall'	=> \$cleanall_asked,
 	   'd=s' 	=> \$destination_dir,
@@ -193,13 +195,14 @@ Options:  -a              write image sizes under thumbnails on index page
           --asu <s>       change file size unit ($show_size_unit)
           --bigy <n>      like -y, use it if you have very large image files
           --bigxy <n>     like --xy, use it if you have very large image files
-          -c              first generate and then use captions
+          -c              use captions from caption file
           --cf            use file names as captions
           --cc            use image comments as captions
           --ct            use image timestamps as captions
           --ctf <s>       timestamp format in captions (strftime format)
           --con <s>       options to pass to convert (e.g. -quality N)
           -d <dir>        operate on files in directory <dir> ($destination_dir)
+          --gc            generate or update the caption file
           -i <file>       name of the main thumbnail index file ($index_filename)
           -k              use the image captions for the HTML slide titles
           -n              use image file names for the HTML slide files
@@ -762,10 +765,6 @@ my $nofiles = 0 ;
 my @headers = () ;
 my @footers = () ;
 
-# are we just generating the caption file ?
-my $only_generation_caption_file = $use_caption_file
-    && (! -r "$destination_dir/$local_llgal_dir/$captions_filename") ;
-
 # global variable for exception messages
 my $tmp_warning ;
 
@@ -908,7 +907,7 @@ sub make_entry {
     $entry->{title} = $title ;
 
     # do not generate more if we are only generating captions
-    if ($only_generation_caption_file) {
+    if ($generate_captions) {
 	return $entry ;
     }
 
@@ -1106,53 +1105,100 @@ if (!-r "$destination_dir/$local_llgal_dir") {
 }
 
 #######################################################################
-# If the -c option was supplied let user specify captions, else see below
+# Generate captions if asked
 
-if ($only_generation_caption_file) {
+if ($generate_captions) {
     # create and fill $captions_filename file if it doesn't exist
     get_entries ;
 
     print "Found $nentries files in " .
 	($destination_dir eq "." ? "current directory" : "directory $destination_dir") ."\n" ;
-    open(CAP, ">$destination_dir/$local_llgal_dir/$captions_filename")
-	or die "Can't create $destination_dir/$local_llgal_dir/$captions_filename file\n" ;
-    print "Creating the $captions_filename file: " ;
-    init_percentage () ;
-    print CAP "# This is llgal's $captions_filename file, first generated ", scalar localtime, ".\n" ;
-    print CAP "# TITLE: title of the index\n" ;
-    print CAP "# INDEXHEAD: one header line in the index\n" ;
-    print CAP "# INDEXFOOT: one header line in the index\n" ;
-    print CAP "# TXT: text ---- caption\n" ;
-    print CAP "# IMG: imagefile.{gif,png,jpg} ---- caption\n" ;
-    print CAP "# LNK: url ---- slide link text ---- caption\n" ;
-    print CAP "# MVI: movie.{avi,mpg,mpeg} ---- slide link text ---- caption\n" ;
-    print CAP "\n" ;
-    print CAP "# $caption_removal_line\n" ;
-    print CAP "\n" ;
-    my $caption_header_lines = $. ;
-    print_percentage ($caption_header_lines, $caption_header_lines+$nentries) ;
 
-    for (my $i = 0; $i < $nentries; $i++) {
-	my $type = $entries[$i]->{type} ;
-	if ($type == $TYPE_IMG) {
-	    print CAP "IMG: ". $entries[$i]->{filename}
-	    ." ---- ". $entries[$i]->{caption} ."\n";
-	} elsif ($type == $TYPE_MVI) {
-	    print CAP "MVI: " . $entries[$i]->{filename}
-	    ." ---- ". $entries[$i]->{linktext}
-	    ." ---- ". $entries[$i]->{caption} ."\n";
-	} elsif ($type == $TYPE_DIR) {
-	    print CAP "DIR: " . $entries[$i]->{filename}
-	    ." ---- ". $entries[$i]->{linktext}
-	    ." ---- ". $entries[$i]->{caption} ."\n";
+    if (-e "$destination_dir/$local_llgal_dir/$captions_filename") {
+	print "Reading existing captions from $captions_filename.\n" ;
+	open (CAP, "$destination_dir/$local_llgal_dir/$captions_filename")
+	    or die "Can't open $destination_dir/$local_llgal_dir/$captions_filename for reading\n" ;
+	my @captions = <CAP>;
+	close(CAP) ;
+
+	print "Appending new captions to $captions_filename: " ;
+	open (CAP, ">>$destination_dir/$local_llgal_dir/$captions_filename")
+	    or die "Can't open $destination_dir/$local_llgal_dir/$captions_filename file to append\n" ;
+
+	init_percentage () ;
+
+	print CAP "\n" ;
+	print CAP "# Appended new captions (", scalar localtime, ").\n" ;
+	print CAP "\n" ;
+	# it's not easy to count lines in an append-only file
+	# so we don't count them when computing the percentage
+
+	for (my $i = 0; $i < $nentries; $i++) {
+	    my $type = $entries[$i]->{type} ;
+	    if ($type == $TYPE_IMG) {
+		print CAP "IMG: ". $entries[$i]->{filename}
+		." ---- ". $entries[$i]->{caption} ."\n"
+		    unless grep { $captions[$_] =~ m/^(\s*IMG:)?\s*$entries[$i]->{filename}\s+----\s/ } ( 0 .. $#captions ) ;
+	    } elsif ($type == $TYPE_MVI) {
+		print CAP "MVI: " . $entries[$i]->{filename}
+		." ---- ". $entries[$i]->{linktext}
+		." ---- ". $entries[$i]->{caption} ."\n"
+		    unless grep { $captions[$_] =~ m/^\s*MVI:\s*$entries[$i]->{filename}\s+----\s/ } ( 0 .. $#captions ) ;
+	    } elsif ($type == $TYPE_DIR) {
+		print CAP "DIR: " . $entries[$i]->{filename}
+		." ---- ". $entries[$i]->{linktext}
+		." ---- ". $entries[$i]->{caption} ."\n"
+		    unless grep { $captions[$_] =~ m/^\s*DIR:\s*$entries[$i]->{filename}\s+----\s/ } ( 0 .. $#captions ) ;
+	    }
+	    print_percentage ($i+1, $nentries) ;
 	}
-	print_percentage ($caption_header_lines+$i+1, $caption_header_lines+$nentries) ;
+    } else {
+	print "Creating the $captions_filename file: " ;
+	open (CAP, ">$destination_dir/$local_llgal_dir/$captions_filename")
+	    or die "Can't create $destination_dir/$local_llgal_dir/$captions_filename file\n" ;
+
+	init_percentage () ;
+	print CAP "# This is llgal's $captions_filename file, first generated ", scalar localtime, ".\n" ;
+	print CAP "# TITLE: title of the index\n" ;
+	print CAP "# INDEXHEAD: one header line in the index\n" ;
+	print CAP "# INDEXFOOT: one header line in the index\n" ;
+	print CAP "# TXT: text ---- caption\n" ;
+	print CAP "# IMG: imagefile.{gif,png,jpg} ---- caption\n" ;
+	print CAP "# LNK: url ---- slide link text ---- caption\n" ;
+	print CAP "# MVI: movie.{avi,mpg,mpeg} ---- slide link text ---- caption\n" ;
+	print CAP "\n" ;
+	print CAP "# $caption_removal_line\n" ;
+	print CAP "\n" ;
+	my $caption_header_lines = $. ;
+	print_percentage ($caption_header_lines, $caption_header_lines+$nentries) ;
+
+	for (my $i = 0; $i < $nentries; $i++) {
+	    my $type = $entries[$i]->{type} ;
+	    if ($type == $TYPE_IMG) {
+		print CAP "IMG: ". $entries[$i]->{filename}
+		." ---- ". $entries[$i]->{caption} ."\n";
+	    } elsif ($type == $TYPE_MVI) {
+		print CAP "MVI: " . $entries[$i]->{filename}
+		." ---- ". $entries[$i]->{linktext}
+		." ---- ". $entries[$i]->{caption} ."\n";
+	    } elsif ($type == $TYPE_DIR) {
+		print CAP "DIR: " . $entries[$i]->{filename}
+		." ---- ". $entries[$i]->{linktext}
+		." ---- ". $entries[$i]->{caption} ."\n";
+	    }
+	    print_percentage ($caption_header_lines+$i+1, $caption_header_lines+$nentries) ;
+	}
     }
     close(CAP);
     print "\n";
-    die "Now edit the $captions_filename file to your liking and rerun llgal -c\n";
+    die "Now edit the $captions_filename file to your liking and run llgal -c\n";
 
-} elsif ($use_caption_file) {
+}
+
+#######################################################################
+# Use caption file
+
+if ($use_caption_file) {
     # read in files specified in the .captions file if it exists
     print "Reading the $captions_filename file and preparing entries: ";
     init_percentage ();

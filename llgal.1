@@ -97,22 +97,13 @@ between two consecutive runs when you've changed the value of
 
 .TP
 .BI -c
-First generate and then publish image slide captions. The first invocation of
-.B llgal -c
-generates in
-.I .llgal.files
-a
-.I captions
-file that you may edit.  The format of this file is very simple.
+Read the
+.IR ".llgal.files/captions"
+file, include your captions in the slides and rearrange them if necessary.
 See
 .SM
 .B CAPTIONS
 for details.
-A second invocation of
-.B llgal -c
-will read your
-.I captions
-file, include your captions in the slides and rearrange them if necessary.
 
 .TP
 .BI --cf
@@ -304,6 +295,19 @@ between two runs where you've changed the value of
 .BR --bigxy, --bigy " or " --con "."
 
 .TP
+.BI --gc
+Generate slide captions in
+.IR ".llgal.files/captions"
+file that you may edit.  The format of this file is very simple.
+See
+.SM
+.B CAPTIONS
+for details.
+These captions may then be modified by the user and used by invocating
+.B llgal -c
+later.
+
+.TP
 .BI "-h, --help"
 Display brief help.
 
@@ -329,19 +333,23 @@ files world-readable.
 
 .SH CAPTIONS
 When called with
-.I -c
+.I --gc
 .B llgal
-check whether a
+generates (or updates if already existing) the
 .IR captions
-file exists in the
+file in the
 .IR .llgal.files
 subdirectory.
-If not, it does nothing but generating it from images and movies
-that exists in the local directory.
-If it exists, it uses it to generate
+If called with
+.I -c
+.B llgal
+uses the
 .IR captions
-in the gallery.
+file to generate slide captions in the gallery.
 The order of the captions in this file determines the order in the gallery.
+The user may modify this file between the two invocations of
+.B llgal
+to change captions order or text.
 
 .B IMG: <filename> ---- <caption>
 .RS
@@ -567,7 +575,7 @@ is called with -c.
 .RS
 This line will be added to the caption file llgal will generate the
 first time it is called with -c. If the user doesn't want igal to
-remove this caption file when called with -clean, it just needs to
+remove this caption file when called with --clean, it just needs to
 remove this line from the file.
 .RE
 .I make_caption_from_filename = <0/1>
