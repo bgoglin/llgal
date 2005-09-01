@@ -3,17 +3,16 @@ Section: web
 Priority: optional
 Maintainer: Brice Goglin <Brice.Goglin@ens-lyon.org>
 Build-Depends-Indep: debhelper (>= 4.0.2)
-Standards-Version: 3.6.1.1
+Standards-Version: 3.6.2.1
 
 Package: llgal
 Architecture: all
 Depends: imagemagick, ${perl:Depends}, libimage-size-perl, libimage-info-perl, liburi-perl
 Provides: igal
 Replaces: igal, igal-text, igalwriter
-Description: Loulous gallery
- llgal is a on-line gallery generator.
- It is based on igal (most of the interface is the same).
- llgal adds supports for different types of slides including movies,
- text, links and subdirectories, addition of headers and footers in
- generated HTML files, and a few other options.
+Description: Online gallery generator
+ llgal is a on-line gallery generator for images, videos, text and links.
+ It is based on igal and adds supports for different types of slides
+ including movies, text, links and subdirectories, and several options such
+ as the addition of headers and footers in generated HTML files.
  Caption may be automatically generated from JPEG EXIF or GIF comments.
