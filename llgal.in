@@ -1092,7 +1092,7 @@ if ($use_caption_file) {
 			$entry = make_entry ($TYPE_MVI, $1.".".$2, $1, undef, $3, $4) ;
 
 		    } elsif ($line =~ m/^IMG:\s*(.+)\.(.+)\s+----\s*(?:\s(.*))?\s*$/
-			     or $line =~ m/\s*(.+)\.(.+)\s+----\s*(?:\s(.*))?\s*^/) {
+			     or $line =~ m/^(.+)\.(.+)\s+----\s*(?:\s(.*))?\s*$/) {
 			# image slide (default)
 			$entry = make_entry ($TYPE_IMG, $1.".".$2, $1, undef, undef, $3) ;
 
