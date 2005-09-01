@@ -28,6 +28,10 @@ my $slide_filenameprefix = "slide_" ;
 # the user may remove it to prevent llgal from removing the caption file with -clean
 my $caption_removal_line = "REMOVE THIS LINE IF LLGAL SHOULD NOT REMOVE THIS FILE" ;
 
+# default text slide dimensions
+my $text_slide_width = 400;
+my $text_slide_height = 300;
+
 # parse config files
 foreach my $conf ( "/etc/llgalrc", $ENV{HOME}."/.llgalrc", ".llgalrc" ) {
     open CONF, $conf ;
@@ -54,6 +58,10 @@ foreach my $conf ( "/etc/llgalrc", $ENV{HOME}."/.llgalrc", ".llgalrc" ) {
 	    $slide_filenameprefix = $1 ;
 	} elsif (/^caption_removal_line = "(.+)"$/) {
 	    $caption_removal_line = $1 ;
+	} elsif (/^text_slide_width = "(.+)"$/) {
+	    $text_slide_width = $1 ;
+	} elsif (/^text_slide_height = "(.+)"$/) {
+	    $text_slide_height = $1 ;
 	} elsif (/^[^#]/ && !/^(\s*)$/) {
 	    die "Unrecognized option line: ". $_ ;
 	}
@@ -240,11 +248,10 @@ sub find_generic_llgal_file {
 sub get_generic_llgal_file {
     my ($filename) = (shift) ;
     if (-e "$opt_d/$local_llgal_dir/$filename") {
-	print "Found $opt_d/$local_llgal_dir/$filename ... using it.\n" ;
+	print "Found $filename in $opt_d/$local_llgal_dir/ ... using it.\n" ;
     } else {
-	print "No $opt_d/$local_llgal_dir/$filename file ... getting a copy from " ;
 	my $srcdir = find_generic_llgal_file ($filename, 1);
-	print "$srcdir\n" ;
+	print "No $filename in $opt_d/$local_llgal_dir/ ... getting a copy from $srcdir\n" ;
 	system("cp -f \"$srcdir/$filename\" \"$opt_d/$local_llgal_dir/$filename\"") ;
     }
 }
@@ -636,6 +643,11 @@ get_generic_llgal_file ($css_filename) ;
 #######################################################################
 # Create the individual slide show files
 
+if ($opt_bigy && $opt_bigy < $text_slide_width) {
+    $text_slide_width = $opt_bigy ;
+    $text_slide_height = $text_slide_width * 3/4 ;
+}
+
 if ($opt_s) {
     print "Linking thumbnails directly to image files...  Making no html slides.\n";
 } else {
@@ -687,21 +699,29 @@ if ($opt_s) {
 	    $line =~ s/<!--TITLE-->/$opt_title/g;
 	    $line =~ s/<!--CSS-->/$local_llgal_dir\/$css_filename/g;
 
-	    if ($line =~ m/<!--THIS-IMAGE-->/g) {
+	    if ($line =~ m/<!--THIS-SLIDE-STYLE-->/g) {
+		if ($type == $TYPE_TXT || $type == $TYPE_LNK || $type == $TYPE_MVI || $type == $TYPE_DIR) {
+		    $line =~ s/<!--THIS-SLIDE-STYLE-->/text-slide" style="width: ${text_slide_width}px; height: ${text_slide_height}px;/ ;
+		} else {
+		    $line =~ s/<!--THIS-SLIDE-STYLE-->/image-slide/ ;
+		}
+	    }
+
+	    if ($line =~ m/<!--THIS-SLIDE-->/g) {
 		if ($type == $TYPE_TXT) {
 		    # text slide
-		    $line =~ s/(<.*)<!--THIS-IMAGE-->(.)(.*>)/<div class="text-slide">$entries[$i]->{text}<\/div>/;
+		    $line =~ s/<!--THIS-SLIDE-->/$entries[$i]->{text}/ ;
 		} elsif ($type == $TYPE_LNK || $type == $TYPE_MVI || $type == $TYPE_DIR) {
 		    # link or movie or directory slide
-		    $line =~ s/(<.*)<!--THIS-IMAGE-->(.)(.*>)/<div class="text-slide"><a href="$entries[$i]->{url}">$entries[$i]->{text}<\/a><\/div>/ ;
+		    $line =~ s/<!--THIS-SLIDE-->/<a href="$entries[$i]->{url}">$entries[$i]->{text}<\/a>/ ;
 		} elsif ($type == $TYPE_IMG) {
 		    my $file = $entries[$i]->{url} ;
 		    if ($opt_bigy) {
 			# image slide with link to the real image
-			$line =~ s/(<.*)<!--THIS-IMAGE-->(.)(.*>)/<a href="$file">$1$local_llgal_dir\/$slide_filenameprefix$file$2 alt="$altname" title="click to see full-size ($altname)"$3<\/a>/ ;
+			$line =~ s/<!--THIS-SLIDE-->/<a href="$file"><img src="$local_llgal_dir\/$slide_filenameprefix$file" alt="$altname" title="click to see full-size ($altname)" \/><\/a>/ ;
 		    } else {
 			# image slide with the real image
-			$line =~ s/<!--THIS-IMAGE-->(.)/$file$1 alt="$altname" title="$altname"/g ;
+			$line =~ s/<!--THIS-SLIDE-->/<img src="$file" alt="$altname" title="$altname" \/>/g ;
 		    }
 		} else {
 		    die "Unknown type $type.\n" ;
@@ -808,32 +828,50 @@ for (my $i = 0; $i < $nentries; $i += $num) {
 	$width += $entries[$num+$i]->{thumbxdim} ;
 	$num++ ;
 	# add cellpadding
-	$width += 2*$opt_p ;
+	$width += $opt_p ;
     }
-    $num-- if (defined($opt_wx) && $width > $opt_wx) ;
+    if ($opt_wx && $width > $opt_wx) {
+	if ($num >= 2) {
+	    $num-- ;
+	} else {
+	    print "(Warning: Row width max ($opt_wx) is too slow for this image alone ($width), Forcing)" ;
+	}
+    }
 
 # Now output the row of thumbnails.
-    print IXW "<table border=\"0\" cellspacing=\"0\" cellpadding=\"$opt_p\">\n";
-    print IXW "  <tr><td class=\"tiled\" height=\"$opt_t\" colspan=\"", ($opt_r?$num:$num+2), "\">&nbsp;</td></tr>\n" unless ($opt_r);
-    print IXW "  <tr>";
-    print IXW "\n    <td class=\"thumb\">&nbsp;</td>\n" unless ($opt_r);
+    if ($opt_r) {
+	print IXW "<table class=\"index\" style=\"border-spacing: ", $opt_p, "px 0px;\">\n";
+    } else {
+	print IXW "<table class=\"index with-tile\" style=\"border-spacing: ", $opt_p, "px 0px;\">\n";
+    }
+    print IXW "  <tr><td class=\"tiled\" style=\"height: ", $opt_t, "px;\" colspan=\"", ($opt_r?$num:$num+2), "\">&nbsp;</td></tr>\n" unless ($opt_r);
+    print IXW "  <tr>\n";
+    print IXW "    <td class=\"thumb\">&nbsp;</td>\n" unless ($opt_r);
     for (my $j = 0; $j < $num; $j++) {
-	print IXW "    <td class=\"thumb\" width=\"$entries[$i+$j]->{thumbxdim}\" height=\"$entries[$i+$j]->{thumbydim}\">\n      ";
 	my $type = $entries[$i+$j]->{type} ;
-	if ($type == $TYPE_LNK || $type == $TYPE_MVI || $type == $TYPE_DIR) {
-	    print IXW "<div class=\"text-thumb\"><a href=\"" ;
-	    # always link to url instead of slides here
-	    print IXW $entries[$i+$j]->{url} ;
-	    print IXW "\">", $entries[$i+$j]->{text}, "</a></div></td>\n" ;
-	} elsif ($type == $TYPE_TXT) {
-	    print IXW "<div class=\"text-thumb\">", $entries[$i+$j]->{text}, "</div></td>\n" ;
-	} elsif ($type == $TYPE_IMG) {
-	    my $altname;
-	    if ($opt_s) {
-		print IXW "<a href=\"", $entries[$i+$j]->{url}, "\">" ;
+	my $width = $entries[$i+$j]->{thumbxdim} ;
+	my $height = $entries[$i+$j]->{thumbydim} ;
+	if ($type == $TYPE_TXT || $type == $TYPE_LNK || $type == $TYPE_MVI || $type == $TYPE_DIR) {
+	    print IXW "    <td class=\"text-thumb\" style=\"width: ", $width, "px; height: ", $height, "px;\">\n" ;
+            print IXW "      " ;
+	    if ($type == $TYPE_TXT) {
+		print IXW $entries[$i+$j]->{text} ;
 	    } else {
-		print IXW "<a href=\"", $entries[$i+$j]->{slide}, "\">" ;
+		print IXW "<a href=\"" ;
+		# always link to url instead of slides here
+		print IXW $entries[$i+$j]->{url} ;
+		print IXW "\">", $entries[$i+$j]->{text}, "</a>" ;
 	    }
+	    print IXW "</td>\n" ;
+	} elsif ($type == $TYPE_IMG) {
+	    print IXW "    <td class=\"thumb\" style=\"width: ", $width, "px; height: ", $height, "px;\">\n";
+	    if ($opt_s) {
+		print IXW "      <a href=\"", $entries[$i+$j]->{url}, "\">" ;
+	    } else {
+		print IXW "      <a href=\"", $entries[$i+$j]->{slide}, "\">" ;
+	    }
+
+	    my $altname;
 	    if ($opt_k) {	# use image caption for image alternative
 		$altname = "$entries[$i+$j]->{filename} - $entries[$i+$j]->{caption}" ;
 	    } else {	# otherwise use the image name (strip suffix)
@@ -841,16 +879,16 @@ for (my $i = 0; $i < $nentries; $i += $num) {
 	    }
 	    
 	    my $thumb = "$opt_d/$local_llgal_dir/$thumb_filenameprefix" . $entries[$i+$j]->{url} ;
-	    print IXW "<img src=\"$thumb\" alt=\"$altname\" title=\"$altname\" border=\"0\" />";
+	    print IXW "<img src=\"$thumb\" alt=\"$altname\" title=\"$altname\" />";
 	    print IXW "</a></td>\n" ;
 	} else {
 	    die "Unknown type $type.\n" ;
 	}
 	print "." ;
     }
-    print IXW "    <td class=\"thumb\">&nbsp;</td>" unless ($opt_r) ;
-    print IXW "\n  </tr>\n" ;
-    print IXW "  <tr><td class=\"tiled\" height=\"$opt_t\" colspan=\"", $num+2, "\">&nbsp;</td></tr>\n" unless ($opt_r) ;
+    print IXW "    <td class=\"thumb\">&nbsp;</td>\n" unless ($opt_r) ;
+    print IXW "  </tr>\n" ;
+    print IXW "  <tr><td class=\"tiled\" colspan=\"", $num+2, "\" style=\"", $opt_t, "\">&nbsp;</td></tr>\n" unless ($opt_r) ;
     if ($opt_a or $opt_ad or $opt_as) {
 	print IXW "  <tr>\n";
 	print IXW "    <td>&nbsp;</td>\n" unless ($opt_r) ;

@@ -1,12 +1,4 @@
-.center { 
-  text-align: center;
-}
-
-.center table { 
-  margin-left: auto;
-  margin-right: auto;
-  text-align: center;
-}
+/* Body */
 
 body {
   font-family: verdana, sans-serif;
@@ -14,20 +6,22 @@ body {
   color: #DDDDDD;
 }
 
+/* Links */
+
 a:link {
   color: #95DDFF;
-  background: transparent;
 }
 
 a:visited {
   color: #AAAAAA;
-  background: transparent;
 }
 
 a:hover {
   color: #BBDDFF;
   background: #555555;
 }
+
+/* Various */
 
 .small {
   font-size: 75%;
@@ -37,46 +31,80 @@ a:hover {
   font-size: 200%;
 }
 
-.tiled {
-  background-image: url("tile.png");
-  background-repeat: repeat-x;
-  background-color: #000000;
-  padding: 0;
-}
-
-.thumb {
-  background-color: #000000;
+.center { 
   text-align: center;
-  vertical-align: middle;
 }
 
-.thumb-dim {
+.center table { 
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Index table */
+
+table.index {
+  border: 0px;
+  padding: 0px;
+}
+
+table.with-tile {
+  background-color: #000000;
+}
+
+table.index td {
+  padding: 0px;
+}
+
+table.index td.thumb img {
+  vertical-align: middle;
+  border-style: none;  
+}
+
+table.index td.text-thumb {
+  border: 1px solid #ffffff;
+  text-align: center;
   font-size: 50%;
 }
 
-.thumb-caption {
+table.index td.tiled {
+  background-image: url("tile.png");
+  background-repeat: repeat-x;
+}
+
+table.index td.thumb-dim {
+  font-size: 50%;
+}
+
+table.index td.thumb-caption {
   font-size: 75%;
+  background: none;
 }
 
-.slide {
-  background-color: #ffffff;
-  text-align: center;
-  vertical-align: middle;
-}
+/* Slides */
 
-.text-slide {
+table.slide {
   background-color: #000000;
+  border: 3px solid #ffffff;
+  border-spacing: 0px;
+}
+
+table.slide td.image-slide {
+  padding: 0px;
+}
+
+table.slide td.image-slide img {
+  vertical-align: middle;
+  border-style: none;  
+}
+
+table.slide td.text-slide {
   text-align: center;
   vertical-align: middle;
-  padding: 96px;
   font-size: 200%;
   font-style: italic;
 }
 
-.text-thumb {
-  font-size: 50%;
-  width: 100px;
-}
+/* Headers and footers */
 
 .header {
   font-size: 120%;
