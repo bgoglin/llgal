@@ -1,0 +1,14 @@
+Source: llgal
+Section: web
+Priority: optional
+Maintainer: Brice Goglin <Brice.Goglin@ens-lyon.org>
+
+Package: llgal
+Architecture: all
+Depends: imagemagick, ${perl:Depends}, libimage-size-perl
+Provides: llgal
+Replaces: igal igal-text
+Description: Loulous gallery
+  llgal provides the igal interface to automatically generate
+ image galleries. It improve igal by adding text and video slides
+ support.
