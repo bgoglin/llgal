@@ -1,5 +1,5 @@
 NAME	=	llgal
-VERSION	=	0.10
+VERSION	=	0.10.1
 
 .PHONY: llgal clean install uninstall tarball
 
@@ -43,6 +43,7 @@ tarball::
 	cp README /tmp/$(TARBALL)
 	cp COPYING /tmp/$(TARBALL)
 	cp Changes /tmp/$(TARBALL)
+	cp UPGRADE /tmp/$(TARBALL)
 	cd /tmp && tar cfz $(DEBIAN_TARBALL).tar.gz $(TARBALL)
 	cd /tmp && tar cfj $(TARBALL).tar.bz2 $(TARBALL)
 	mv /tmp/$(DEBIAN_TARBALL).tar.gz /tmp/$(TARBALL).tar.bz2 ..

@@ -1,3 +1,10 @@
+llgal (0.10.1-1) unstable; urgency=low
+
+  * New upstream release.
+  * Install the UPGRADE file.
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Fri, 19 Aug 2005 16:42:10 +0200
+
 llgal (0.10-1) unstable; urgency=low
 
   * New upstream release.
