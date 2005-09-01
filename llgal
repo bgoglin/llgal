@@ -24,6 +24,10 @@ my $caption_filename = "captions" ;
 my $thumb_filenameprefix = "thumb_" ;
 my $slide_filenameprefix = "slide_" ;
 
+# this line will be placed in caption generated file
+# the user may remove it to prevent llgal from removing the caption file with -clean
+my $caption_removal_line = "REMOVE THIS LINE IF LLGAL SHOULD NOT REMOVE THIS FILE" ;
+
 # parse config files
 foreach my $conf ( "/etc/llgalrc", $ENV{HOME}."/.llgalrc", ".llgalrc" ) {
     open CONF, $conf ;
@@ -43,9 +47,10 @@ $Getopt::Long::ignorecase = 0;
 STDOUT->autoflush("1");
 
 # default command-line argument values
-my $opt_a = "0" ;          # to write image size under thumbnails in index page
+my $opt_a = "0" ;          # to write image size under thumbnails in index page and under slide images in -bigy
 my $opt_c = "0" ;          # -c to use user-supplied captions
 my $opt_C = "0" ;          # same as -c, but preserve image names as captions
+my $opt_ce = "0" ;         # same as -c, but use exiftags as captions
 my $opt_d = "." ;          # look in current directory "."
 my $opt_f = "0" ;          # -f to force thumbnail regeneration
 my $opt_h = "0" ;
@@ -99,6 +104,7 @@ Options:      -a          write image sizes under thumbnails on index page
               --ad        like -a, but write only the image dimensions
               --as        like -a, but write only the file size (in kbytes)
               --asu <s>   change file size unit (kB)
+              --ce        like -c, but use exiftags as captions
               --bigy <n>  like -y, use it if you have very large image files
               --con <>    options to pass to convert (e.g. -quality N)
               --help      displays this brief help; same as -h
@@ -127,6 +133,7 @@ GetOptions(
 	   'asu=s'=>\$opt_asu,
 	   'c'=>\$opt_c,
 	   'C'=>\$opt_C,
+	   'ce'=>\$opt_ce,
 	   'd=s'=>\$opt_d,
 	   'f'=>\$opt_f,
 	   'i=s'=>\$opt_i,
@@ -162,7 +169,70 @@ $thumb_filenameprefix = $opt_tp if ($opt_tp);
 $slide_filenameprefix = $opt_sp if ($opt_sp);
 
 ######################################################################
+
+# deal with the competing -y and --xy options
+die "Please only specify one of the -y and --xy options\n" if ($opt_y and $opt_xy);
+if (($opt_y == 0) and ($opt_xy == 0)) {
+    $opt_y = 75;    # default, if neither -y nor --xy is specified
+}
+
+# other error (sanity) checks
+die "Please enter nonnegative thumbnail dimensions\n" if (($opt_y < 0) or ($opt_xy < 0)) ;
+die "Please enter a nonnegative cellpadding value\n" if ($opt_p < 0) ;
+die "Please choose at least one image per index row\n" if ($opt_w <= 0) ;
+die "Please allow at least one pixel per index row\n" if (defined $opt_wx && $opt_wx <= 0) ;
+die "Please enter a nonnegative tiled image height\n" if ($opt_t < 0) ;
+die "Please choose between --bigy and -s\n" if ($opt_bigy && $opt_s) ;
+
+#####################################################################
+# Main variables
+
+# the whole entry list
+# stored each as a hash table with type, filename, url, caption, text, xdim, ydim, kbytes, slide, slidexdim, slideydim, slidekbytes
+my @entries ;
+my $nentries ;
+my $nofiles = 0 ;
+
+my $TYPE_TXT = 0 ;
+my $TYPE_LNK = 1 ;
+my $TYPE_IMG = 2 ;
+my $TYPE_MVI = 3 ;
+
+# headers and footers
+my @headers = () ;
+my @footers = () ;
+
+######################################################################
+# find generic llgal file
+sub find_generic_llgal_file {
+    my ($filename, $check) = (shift, shift) ;
+    if (-r "$user_share_dir/$filename") {
+	return $user_share_dir ;
+    } else {
+	die "$llgal_share_dir cannot be read or does not exist.\nPlease install llgal properly.\n"
+	    unless (-r $llgal_share_dir || !$check) ;
+	die "$llgal_share_dir/$filename cannot be read or does not exist.\nPlease install llgal properly.\n"
+	    unless (-r "$llgal_share_dir/$filename" || !$check) ;
+        return $llgal_share_dir ;
+    }
+}
+
+# get generic llgal file
+sub get_generic_llgal_file {
+    my ($filename) = (shift) ;
+    if (-e "$opt_d/$local_llgal_dir/$filename") {
+	print "Found $opt_d/$local_llgal_dir/$filename ... using it.\n" ;
+    } else {
+	print "No $opt_d/$local_llgal_dir/$filename file ... getting a copy from " ;
+	my $srcdir = find_generic_llgal_file ($filename, 1);
+	print "$srcdir\n" ;
+	system("cp -f \"$srcdir/$filename\" \"$opt_d/$local_llgal_dir/$filename\"") ;
+    }
+}
+
+######################################################################
 # -clean and -cleanall option
+
 sub clean_files {
     my $all = shift ;
     my $notdeleted = 0 ;
@@ -171,15 +241,24 @@ sub clean_files {
 
     opendir DIR, "$opt_d/$local_llgal_dir" ;
     while ($_ = readdir DIR) {
-	if (/^$indextemplate_filename$/
+	if (/^$thumb_filenameprefix/ or /^$slide_filenameprefix/) {
+	    unlink "$opt_d/$local_llgal_dir/$_";
+	} elsif (/^$indextemplate_filename$/
 	    or /^$slidetemplate_filename$/
 	    or /^$filmtile_filename$/
-	    or /^$css_filename$/
-	    or ($all && /^$caption_filename$/)
-	    or /^$thumb_filenameprefix/
-	    or /^$slide_filenameprefix/
-	    ) {
-	    unlink "$opt_d/$local_llgal_dir/$_";
+	    or /^$css_filename$/) {
+	    my $original = (find_generic_llgal_file $_, 0)."/".$_ ;
+	    if ($all or !system("diff -q \"$opt_d/$local_llgal_dir/$_\" \"$original\" > /dev/null 2>&1")) {
+		unlink "$opt_d/$local_llgal_dir/$_";
+	    } else {
+		print "(preserved $_) " ;
+	    }
+	} elsif (/^$caption_filename$/) {
+	    if ($all or !system("grep -q \"$caption_removal_line\" \"$opt_d/$local_llgal_dir/$_\"")) {
+		unlink "$opt_d/$local_llgal_dir/$_";
+	    } else {
+		print "(preserved $_) " ;
+	    }
 	} else {
 	    $notdeleted++;
 	}
@@ -212,75 +291,28 @@ if ($opt_cleanall) {
     exit 0;
 }
 
-######################################################################
-
-# deal with the competing -y and --xy options
-die "Please only specify one of the -y and --xy options\n" if ($opt_y and $opt_xy);
-if (($opt_y == 0) and ($opt_xy == 0)) {
-    $opt_y = 75;    # default, if neither -y nor --xy is specified
-}
-
-# other error (sanity) checks
-die "Please enter nonnegative thumbnail dimensions\n" if (($opt_y < 0) or ($opt_xy < 0)) ;
-die "Please enter a nonnegative cellpadding value\n" if ($opt_p < 0) ;
-die "Please choose at least one image per index row\n" if ($opt_w <= 0) ;
-die "Please allow at least one pixel per index row\n" if (defined $opt_wx && $opt_wx <= 0) ;
-die "Please enter a nonnegative tiled image height\n" if ($opt_t < 0) ;
-die "Please choose between -bigy and -s\n" if ($opt_bigy && $opt_s) ;
-
-#####################################################################
-# Main variables
-
-# the whole entry list
-# stored each as a hash table with type, filename, url, caption, text, xdim, ydim, kbytes, slide
-my @entries ;
-my $nentries ;
-my $nofiles = 0 ;
-
-my $TYPE_TXT = 0 ;
-my $TYPE_LNK = 1 ;
-my $TYPE_IMG = 2 ;
-my $TYPE_MVI = 3 ;
-
-# headers and footers
-my @headers = () ;
-my @footers = () ;
-
-######################################################################
-# A few helper functions
-
-# get generic llgal file
-sub get_generic_llgal_file {
-    my ($filename) = (shift) ;
-    if (-e "$opt_d/$local_llgal_dir/$filename") {
-	print "Found $opt_d/$local_llgal_dir/$filename ... using it.\n" ;
-    } else {
-	print "No $opt_d/$local_llgal_dir/$filename file ... getting a copy from " ;
-	my $srcdir;
-	if (-r "$user_share_dir/$filename") {
-	    $srcdir = "$user_share_dir" ;
-	    print "$user_share_dir\n" ;
-	} else {
-	    $srcdir = "$llgal_share_dir" ;
-	    print "$llgal_share_dir\n" ;
-	    die "$llgal_share_dir cannot be read or does not exist.\nPlease install llgal properly.\n"
-		unless (-r $llgal_share_dir) ;
-	    die "$llgal_share_dir/$filename cannot be read or does not exist.\nPlease install llgal properly.\n"
-		unless (-r "$llgal_share_dir/$filename") ;
-	}
-	system("cp -f \"$srcdir/$filename\" \"$opt_d/$local_llgal_dir/$filename\"") ;
-    }
-}
-
+###################################################################################
 # generating captions based on filename
 sub make_filename_caption {
     my $file = shift ;
     return $file;
 }
 
+# generating captions based on exiftags
+sub make_exiftags_caption {
+    my $file = shift ;
+    my $ext = shift ;
+    my $caption = `exifcom $file.$ext 2> /dev/null` ;
+    chomp $caption ;
+    return $caption ;
+}
+
 # generating captions
 sub make_caption {
     my $file = shift ;
+    my $ext = shift ;
+    my $type = shift ;
+    return make_exiftags_caption ($file, $ext) if ($opt_ce && $type == $TYPE_IMG) ;
     return make_filename_caption ($file) if ($opt_C) ;
     return "" ;
 }
@@ -312,22 +344,26 @@ sub get_entries {
     while (@imgfiles) {
         my $file = shift @imgfiles;
 	my $entry ;
-	my ($filename, $ext) = split(/\./, $file) ;
+        my @parts = split (/\./, $file) ;
+        my $filename = shift @parts ;
+        my $ext = join (".", @parts) ;
 	$entry->{type} = $TYPE_IMG ;
 	$entry->{filename} = $filename ;
 	$entry->{url} = $file ;
-	$entry->{caption} = make_caption ($filename) ;
+	$entry->{caption} = make_caption ($filename, $ext, $TYPE_IMG) ;
         push @entries, $entry ;
     }
     
     while (@mvifiles) {
         my $file = shift @mvifiles ;
 	my $entry ;
-	my ($filename, $ext) = split(/\./, $file) ;
+        my @parts = split (/\./, $file) ;
+        my $filename = shift @parts ;
+        my $ext = join (".", @parts) ;
 	$entry->{type} = $TYPE_MVI ;
 	$entry->{filename} = $filename ;
 	$entry->{url} = $file ;
-	$entry->{caption} = make_caption ($filename) ;
+	$entry->{caption} = make_caption ($filename, $ext, $TYPE_MVI) ;
 	$entry->{text} = make_filename_caption ($filename) ;
         push @entries, $entry ;
     }
@@ -368,6 +404,8 @@ if ($opt_c or $opt_C) {
 	print CAP "# IMG: imagefile.{gif,png,jpg} ---- caption\n" ;
 	print CAP "# LNK: url ---- slide link text ---- caption\n" ;
 	print CAP "# MVI: movie.{avi,mpg,mpeg} ---- slide link text ---- caption\n" ;
+	print CAP "\n" ;
+	print CAP "# $caption_removal_line\n" ;
 	print CAP "\n" ;
 
 	for (my $i = 0; $i < $nentries; $i++) {
@@ -492,23 +530,24 @@ print " done!\n";
 #######################################################################
 # Determine image file sizes
 
-if (!($opt_bigy)) {
-    print "Determining image sizes: ";
-    for (my $i = 0; $i < $nentries; $i++) {
-	if ($entries[$i]->{type} == $TYPE_IMG || $entries[$i]->{type} == $TYPE_MVI) {
-	    my $filename = "$opt_d/$entries[$i]->{url}" ;
-	    die "Can't open $filename\n" unless (-r $filename);
-	    $entries[$i]->{kbytes} = ((stat($filename))[7])>>10 ;
-	    if ($entries[$i]->{type} == $TYPE_IMG) {
-		my ($x,$y) = imgsize($filename) ;
-		$entries[$i]->{xdim} = $x ;
-		$entries[$i]->{ydim} = $y ;
-	    }
+print "Determining image sizes: ";
+for (my $i = 0; $i < $nentries; $i++) {
+    if ($entries[$i]->{type} == $TYPE_IMG || $entries[$i]->{type} == $TYPE_MVI) {
+	my $filename = "$opt_d/$entries[$i]->{url}" ;
+	die "Can't open $filename\n" unless (-r $filename);
+	if ($entries[$i]->{type} == $TYPE_IMG) {
+	    my ($x,$y) = imgsize($filename) ;
+	    $entries[$i]->{xdim} = $x ;
+	    $entries[$i]->{ydim} = $y ;
+	    $entries[$i]->{slidexdim} = $x ;
+	    $entries[$i]->{slideydim} = $y ;
 	}
+	$entries[$i]->{kbytes} = ((stat($filename))[7])>>10 ;
+	$entries[$i]->{slidekbytes} = ((stat($filename))[7])>>10 ;
 	print "." ;
     }
-    print " done!\n";
 }
+print " done!\n";
 
 #######################################################################
 # Scale down slides if the --bigy <n> option was given
@@ -516,30 +555,26 @@ if (!($opt_bigy)) {
 if ($opt_bigy and !($opt_s)) {
     print "Scaling down big slides and determining new slide sizes: ";
     for (my $i = 0; $i < $nentries; $i++) {
-	if ($entries[$i]->{type} == $TYPE_IMG || $entries[$i]->{type} == $TYPE_MVI) {
+	if ($entries[$i]->{type} == $TYPE_IMG) {
 	    my $filename = "$opt_d/$entries[$i]->{url}" ;
 	    die "Can't open $filename\n" unless (-r $filename);
-	    if ($entries[$i]->{type} == $TYPE_IMG) {
-		my $slide_filename = "$opt_d/$local_llgal_dir/$slide_filenameprefix$entries[$i]->{url}" ;
-		my ($x,$y) ;
-		if ((! -e $slide_filename) or $opt_f) {
-		    # only scale down, never up.
-		    ($x,$y) = imgsize($filename);
-		    if ($y<=$opt_bigy) {
-			$command="cp -f \"$filename\" \"$slide_filename\"";
-		    } else {
-			$command = "convert  +profile '*' $opt_con -scale x$opt_bigy \"$filename\" \"$slide_filename\"";
-		    }
-		    system("$command") if ($command);
-		    print "." if ($command);
+	    my $slide_filename = "$opt_d/$local_llgal_dir/$slide_filenameprefix$entries[$i]->{url}" ;
+	    my ($x,$y) ;
+	    if ((! -e $slide_filename) or $opt_f) {
+		# only scale down, never up.
+		($x,$y) = imgsize($filename);
+		if ($y<=$opt_bigy) {
+		    $command = "cp -f \"$filename\" \"$slide_filename\"";
+		} else {
+		    $command = "convert  +profile '*' $opt_con -scale x$opt_bigy \"$filename\" \"$slide_filename\"";
 		}
-        	($x,$y) = imgsize($slide_filename);
-		$entries[$i]->{xdim} = $x;
-		$entries[$i]->{ydim} = $y;
-		$entries[$i]->{kbytes} = ((stat($slide_filename))[7])>>10 ;
-	    } else { # this is a movie
-		$entries[$i]->{kbytes} = ((stat($filename))[7])>>10 ;
-            }
+		system("$command") if ($command);
+		print "." if ($command);
+	    }
+            ($x,$y) = imgsize($slide_filename);
+	    $entries[$i]->{slidexdim} = $x;
+	    $entries[$i]->{slideydim} = $y;
+	    $entries[$i]->{slidekbytes} = ((stat($slide_filename))[7])>>10 ;
 	}
     }
     print " done!\n";
@@ -555,14 +590,14 @@ get_generic_llgal_file ($css_filename) ;
 if ($opt_s) {
     print "Linking thumbnails directly to image files...  Making no html slides.\n";
 } else {
-    # create slide titles
+    # create slide filenames
     if ($opt_n) {
 	# use filename to generated slide name
 	for (my $i = 0; $i < $nentries; $i++) {
 	    $entries[$i]->{slide} = $entries[$i]->{filename} . ".html" ;
 	}
     } else {
-	# use number as title
+	# use number to generated slide name
 	for (my $i = 0; $i < $nentries; $i++) {
 	    $entries[$i]->{slide} = $i+1 . ".html" ;
 	}
@@ -581,10 +616,19 @@ if ($opt_s) {
 	open(SW,">$opt_d/$entries[$i]->{slide}") or die "Can't create slide file\n";
 	print ".";
 
-	my $title;
-	if ($opt_k) {    # use image caption for the HTML slide title
-	    $title = $entries[$i]->{caption};
-	} else {# otherwise use the image name (strip suffix)
+	my $type = $entries[$i]->{type} ;
+
+	my $altname ;
+	if ($opt_k) {	# use image caption for the image alternative
+	    $altname = "$entries[$i]->{filename} - $entries[$i]->{caption}" ;
+	} else {	# otherwise use the image name (strip suffix)
+	    $altname = $entries[$i]->{filename};
+	}
+
+	my $title ;
+	if ($opt_k) {	# use image caption for the HTML slide title
+	    $title = $entries[$i]->{caption} ;
+	} else {	# otherwise use the image name (strip suffix)
 	    $title = $entries[$i]->{filename};
 	}
 
@@ -593,8 +637,8 @@ if ($opt_s) {
 	    $line =~ s/<!--SLIDE-TITLE-->/$title/g;
 	    $line =~ s/<!--TITLE-->/$opt_title/g;
 	    $line =~ s/<!--CSS-->/$local_llgal_dir\/$css_filename/g;
+
 	    if ($line =~ m/<!--THIS-IMAGE-->/g) {
-		my $type = $entries[$i]->{type} ;
 		if ($type == $TYPE_TXT) {
 		    # text slide
 		    $line =~ s/(<.*)<!--THIS-IMAGE-->(.)(.*>)/<div class="text-slide">$entries[$i]->{text}<\/div>/;
@@ -605,10 +649,10 @@ if ($opt_s) {
 		    my $file = $entries[$i]->{url} ;
 		    if ($opt_bigy) {
 			# image slide with link to the real image
-			$line =~ s/(<.*)<!--THIS-IMAGE-->(.)(.*>)/<A href="$file">$1$file$2 width=$entries[$i]->{xdim} height=$entries[$i]->{ydim} alt="$title" title="click to see full-size"$3<\/a>/ ;
+			$line =~ s/(<.*)<!--THIS-IMAGE-->(.)(.*>)/<a href="$file">$1$local_llgal_dir\/$slide_filenameprefix$file$2 alt="$altname" title="click to see full-size ($altname)"$3<\/a>/ ;
 		    } else {
 			# image slide with the real image
-			$line =~ s/<!--THIS-IMAGE-->(.)/$file$1 width=$entries[$i]->{xdim} height=$entries[$i]->{ydim} alt="$title"/g ;
+			$line =~ s/<!--THIS-IMAGE-->(.)/$file$1 alt="$altname" title="$altname"/g ;
 		    }
 		} else {
 		    die "Unknown type $type.\n" ;
@@ -622,6 +666,20 @@ if ($opt_s) {
 	    } else{
 		$imagecaption = $entries[$i]->{caption} . "&nbsp;&nbsp;&nbsp;(" . ($i+1) ."/$nentries)" if (! $opt_x) ;
 	    }
+
+	    # add dimensions and size to the caption
+	    if ($opt_bigy and ($opt_a or $opt_ad or $opt_as) and ($type == $TYPE_IMG || $type == $TYPE_MVI)) {
+		my $printdim = "";
+		if ($opt_a && $type == $TYPE_IMG) {
+		    $printdim = "$entries[$i]->{xdim}x$entries[$i]->{ydim} ($entries[$i]->{kbytes}$opt_asu)" ;
+		} elsif ($opt_a || $opt_as) {
+		    $printdim = "$entries[$i]->{kbytes}$opt_asu" ;
+		} elsif ($opt_ad) {
+		    $printdim = "$entries[$i]->{xdim}x$entries[$i]->{ydim}" if $type == $TYPE_IMG ;
+		}
+		$imagecaption .= "&nbsp;&nbsp;&nbsp;".$printdim ;
+	    }
+
 	    $line =~ s/<!--IMAGE-CAPTION-->/$imagecaption/g ;
 	    $line =~ s/<!--INDEX-FILE-->/$opt_i/g ;
 	    $line =~ s/<!--THIS-SLIDE-->/$entries[$i]->{slide}/g ;
@@ -639,15 +697,6 @@ if ($opt_s) {
 	    $line =~ s/<!--PREV-SLIDE-->/\"$entries[$i-1]->{slide}\" title=\"$prev\"/g ;
 	    $line =~ s/<!--NEXT-SLIDE-->/\"$entries[($i==$nentries-1?0:$i+1)]->{slide}\" title=\"$next\"/g ;
 			
-	    # define prefix for NEXT IMAGE
-	    my $prefix ;
-	    if ($opt_bigy) {
-		$prefix = $slide_filenameprefix ;
-	    } else {
-		$prefix = "" ;
-	    }
-	    $line =~ s/<!--NEXT-IMAGE-->/$prefix$entries[($i==$nentries-1?0:$i+1)]->{url}/g ;
-
 	    # output the line
 	    print SW "$line" ;
 	}
@@ -687,7 +736,7 @@ my $line ;
 while (defined($line = <IXR>)) {
     if ($line =~ m/<!--HEADERS-->/) {
 	foreach my $header (@headers) {
-	    print IXW "    <DIV CLASS=\"header\">" . $header . "</DIV>\n" ;
+	    print IXW "    <div class=\"header\">" . $header . "</div>\n" ;
 	}
     } else {
 	$line =~ s/LLGAL-OPTIONS/@llgal_options/g ;
@@ -715,78 +764,79 @@ for (my $i = 0; $i < $nentries; $i += $num) {
     $num-- if (defined($opt_wx) && $width > $opt_wx) ;
 
 # Now output the row of thumbnails.
-    print IXW "<TABLE border=0 cellspacing=0 cellpadding=$opt_p>\n";
-    print IXW "  <TR><TD class=\"tiled\" height=$opt_t colspan=", ($opt_r?$num:$num+2), ">&nbsp;</TD></TR>\n" unless ($opt_r);
-    print IXW "  <TR>";
-    print IXW "\n    <TD class=\"thumb\">&nbsp;</TD>\n" unless ($opt_r);
+    print IXW "<table border=\"0\" cellspacing=\"0\" cellpadding=\"$opt_p\">\n";
+    print IXW "  <tr><td class=\"tiled\" height=\"$opt_t\" colspan=\"", ($opt_r?$num:$num+2), "\">&nbsp;</td></tr>\n" unless ($opt_r);
+    print IXW "  <tr>";
+    print IXW "\n    <td class=\"thumb\">&nbsp;</td>\n" unless ($opt_r);
     for (my $j = 0; $j < $num; $j++) {
-	print IXW "    <TD class=\"thumb\">\n      ";
+	print IXW "    <td class=\"thumb\" width=\"$entries[$i+$j]->{thumbxdim}\" height=\"$entries[$i+$j]->{thumbydim}\">\n      ";
 	my $type = $entries[$i+$j]->{type} ;
 	if ($type == $TYPE_LNK || $type == $TYPE_MVI) {
-	    print IXW "<div class=\"text-thumb\"><A href=\"" ;
+	    print IXW "<div class=\"text-thumb\"><a href=\"" ;
 	    if ($opt_s) {
 		print IXW $entries[$i+$j]->{url} ;
 	    } else {
 		print IXW $entries[$i+$j]->{slide} ;
 	    }
-	    print IXW "\">", $entries[$i+$j]->{text}, "</A></div></TD>\n" ;
+	    print IXW "\">", $entries[$i+$j]->{text}, "</a></div></td>\n" ;
 	} elsif ($type == $TYPE_TXT) {
-	    print IXW "<div class=\"text-thumb\">", $entries[$i+$j]->{text}, "</div></TD>\n" ;
+	    print IXW "<div class=\"text-thumb\">", $entries[$i+$j]->{text}, "</div></td>\n" ;
 	} elsif ($type == $TYPE_IMG) {
 	    my $altname;
 	    if ($opt_s) {
-		print IXW "<A href=\"", $entries[$i+$j]->{url}, "\">" ;
+		print IXW "<a href=\"", $entries[$i+$j]->{url}, "\">" ;
 	    } else {
-		print IXW "<A href=\"", $entries[$i+$j]->{slide}, "\">" ;
+		print IXW "<a href=\"", $entries[$i+$j]->{slide}, "\">" ;
 	    }
-	    print "." ;
-	    if ($opt_k) {    # use image caption for the alt attribute
-		$altname = $entries[$i+$j]->{caption} ;
-	    } else { # use the text
-		$altname = $entries[$i+$j]->{text} ;
+	    if ($opt_k) {	# use image caption for image alternative
+		$altname = "$entries[$i+$j]->{filename} - $entries[$i+$j]->{caption}" ;
+	    } else {	# otherwise use the image name (strip suffix)
+		$altname = $entries[$i+$j]->{filename};
 	    }
 	    
 	    my $thumb = "$opt_d/$local_llgal_dir/$thumb_filenameprefix" . $entries[$i+$j]->{url} ;
-	    print IXW "<IMG src=\"$thumb\" width=$entries[$i+$j]->{thumbxdim} height=$entries[$i+$j]->{thumbydim} alt=\"$altname\" title=\"$altname\" border=0>";
-	    print IXW "</A></TD>\n"  ;
+	    print IXW "<img src=\"$thumb\" alt=\"$altname\" title=\"$altname\" border=\"0\" />";
+	    print IXW "</a></td>\n" ;
 	} else {
 	    die "Unknown type $type.\n" ;
 	}
+	print "." ;
     }
-    print IXW "    <TD class=\"thumb\">&nbsp;</TD>" unless ($opt_r) ;
-    print IXW "\n  </TR>\n" ;
-    print IXW "  <TR><TD class=\"tiled\" height=$opt_t colspan=", $num+2, ">&nbsp;</TD></TR>\n" unless ($opt_r) ;
+    print IXW "    <td class=\"thumb\">&nbsp;</td>" unless ($opt_r) ;
+    print IXW "\n  </tr>\n" ;
+    print IXW "  <tr><td class=\"tiled\" height=\"$opt_t\" colspan=\"", $num+2, "\">&nbsp;</td></tr>\n" unless ($opt_r) ;
     if ($opt_a or $opt_ad or $opt_as) {
-	print IXW "  <TR>\n";
-	print IXW "<TD>&nbsp;</TD>\n" unless ($opt_r) ;
+	print IXW "  <tr>\n";
+	print IXW "    <td>&nbsp;</td>\n" unless ($opt_r) ;
 	for (my $j = 0; $j < $num; $j++) {
-	    print IXW "    <TD class=\"thumbdim\" width=\"".$entries[$i+$j]->{thumbxdim}."\">" ;
+	    print IXW "    <td class=\"thumbdim\">" ;
 	    my $type = $entries[$i+$j]->{type} ;
 	    my $printdim = "";
 	    if ($type == $TYPE_IMG || $type == $TYPE_MVI) {
 		if ($opt_a && $type == $TYPE_IMG) {
-		    $printdim = "$entries[$i+$j]->{xdim}x$entries[$i+$j]->{ydim} ($entries[$i+$j]->{kbytes}$opt_asu" ;
+		    $printdim = "$entries[$i+$j]->{slidexdim}x$entries[$i+$j]->{slideydim} ($entries[$i+$j]->{slidekbytes}$opt_asu)" ;
 		} elsif ($opt_a || $opt_as) {
-		    $printdim = "$entries[$i+$j]->{kbytes}$opt_asu" ;
+		    $printdim = "$entries[$i+$j]->{slidekbytes}$opt_asu" ;
 		} elsif ($opt_ad) {
-		    $printdim = "$entries[$i+$j]->{xdim}x$entries[$i+$j]->{ydim}" if $type == $TYPE_IMG ;
+		    $printdim = "$entries[$i+$j]->{slidexdim}x$entries[$i+$j]->{slideydim}" if $type == $TYPE_IMG ;
 	    	}
 	    }
 	    print IXW $printdim ;
-	    print IXW "</TD>\n" ;
+	    print IXW "</td>\n" ;
 	}
-	print IXW "  </TR>\n" ;
+	print IXW "    <td>&nbsp;</td>\n" unless ($opt_r) ;
+	print IXW "  </tr>\n" ;
     }
 #	write image captions under images if option -u is given
     if ($opt_u) {
-	print IXW "  <TR>\n" ;
-	print IXW "<TD>&nbsp;</TD>\n" unless ($opt_r) ;
+	print IXW "  <tr>\n" ;
+	print IXW "<td>&nbsp;</td>\n" unless ($opt_r) ;
 	for (my $j = 0; $j < $num; $j++) {
-	    print IXW "    <TD>$entries[$i+$j]->{caption}</TD>\n" ;
+	    print IXW "    <td>$entries[$i+$j]->{caption}</td>\n" ;
 	}
-	print IXW "  </TR>\n" ;
+	print IXW "  </tr>\n" ;
     }
-    print IXW "</TABLE>\n<BR>\n" ;
+    print IXW "</table>\n<br />\n" ;
 }
 
 # search next <!-- ********** -->
@@ -796,7 +846,7 @@ while (!(<IXR> =~ m/\*{10}/)) {};
 while (defined($line = <IXR>)) {
     if ($line =~ m/<!--FOOTERS-->/) {
 	foreach my $footer (@footers) {
-	    print IXW "    <DIV CLASS=\"footer\">" . $footer . "</DIV>\n";
+	    print IXW "    <div class=\"footer\">" . $footer . "</div>\n";
 	}
     } else {
 	$line =~ s/<!--TITLE-->/$opt_title/g;
