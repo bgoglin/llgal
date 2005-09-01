@@ -27,9 +27,10 @@ install: build
 	dh_testroot
 	dh_clean -k
 	install -D -m 0755 llgal $(CURDIR)/debian/llgal/usr/bin/llgal
-	install -d -m 0755 $(CURDIR)/debian/llgal/usr/share/llgal $(CURDIR)/debian/llgal/usr/share/man/man1
+	install -d -m 0755 $(CURDIR)/debian/llgal/usr/share/llgal $(CURDIR)/debian/llgal/usr/share/man/man1 $(CURDIR)/debian/llgal/etc
 	install -m 0644 indextemplate.html llgal.css slidetemplate.html tile.png $(CURDIR)/debian/llgal/usr/share/llgal
 	install -m 0644 llgal.1 $(CURDIR)/debian/llgal/usr/share/man/man1/ 
+	install -m 0644 llgalrc $(CURDIR)/debian/llgal/etc/
 
 # Build architecture-independent files here.
 binary-indep: build install

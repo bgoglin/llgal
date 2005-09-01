@@ -90,14 +90,12 @@ will read your
 file, include your captions in the slides and rearrange them if necessary.
 .TP
 .BI -C
-.RI Like " -c"
-but preserve file names as captions when generating the
+Generates
 .I captions
-file (strips file name suffix).
+from file names (strips suffix).
 .TP
 .BI --ce
-.RI Like " -c"
-but generates
+Generates
 .I captions
 from EXIF tags that may exist in JPEG files
 .TP
@@ -235,6 +233,24 @@ and the stylesheet file.
 Remove all files
 .B llgal
 may have created earlier and that user did not modify since.
+.TP
+.BI --option " 'variable = value'"
+Modify llgal configuration.
+See
+.SM
+.B CONFIGURATION
+.BI --option
+may be used several times on the same command line.
+.TP
+.BI --config " <file>"
+Read the file
+.I file
+as a configuration.
+See
+.SM
+.B CONFIGURATION
+.BI --option
+may be used several times on the same command line.
 
 .SH CAPTIONS
 When called with
@@ -293,7 +309,202 @@ Line begining with a
 .RI #
 are ignored.
 
+.SH CONFIGURATION
+Before parsing command line options, llgal reads several configuration
+files. It starts with
+.IR /etc/llgalrc
+then reads
+.IR $HOME/.llgalrc
+then the 
+.IR .llgalrc
+file in the gallery directory
+and finally the local
+.IR .llgalrc
+file.
+Additional configuration files may also be defined with the
+.I --config
+option.
+
+All these file may change llgal configuration in the same way command
+line options do, and even more.
+
+.RE
+.I llgal_share_dir = "path"
+.RS
+The location of llgal share directory where template are stored.
+.RE
+.I user_share_dir = "path"
+.RS
+The location of the per-user share directory wher template are stored.
+If they exists, these files are used instead of the system-wide files.
+.RE
+.I local_llgal_dir = "subdirectory"
+.RS
+The name of the subdirectory where llgal generated files will be stored.
+.RE
+.I indextemplate_filename = "filename"
+.RS
+Name of the HTML index template that will be taken from common directories.
+.RE
+.I slidetemplate_filename = "filename"
+.RS
+Name of the HTML slide template that will be taken from common directories.
+.RE
+.I css_filename = "filename.css"
+.RS
+Name of the CSS file.
+.RE
+.I filmtile_filename = "filename.png"
+.RS
+Name of the film tile image.
+.RE
+.I captions_filename = "filename"
+.RS
+Name of the caption file that will be generated the first time llgal
+is called with -c.
+.RE
+.I caption_removal_line = "string"
+.RS
+This line will be added to the caption file llgal will generate the
+first time it is called with -c. If the user doesn't want igal to
+remove this caption file when called with -clean, it just needs to
+remove this line from the file.
+.RE
+.I index_filename = "index.html"
+.RS
+Name of the generated index file [-i <s>].
+.RE
+.I index_title = "string"
+.RS
+Title of the gallery [--title <s>].
+.RE
+.I thumb_filenameprefix = "filenameprefix"
+.RS
+Prefix used to determine thumbnail filenames from
+original images [-tp <s>].
+.RE
+.I slide_filenameprefix = "filenameprefix"
+.RS
+Prefix used to determine slide-image filenames from
+original images (in case of --bigy) [-sp <s>].
+.RE
+.I destination_dir = "path"
+.RS
+Directory of the gallery [-d <s>].
+.RE
+.I show_dimensions = <0/1>
+.RS
+Show image dimensions [-a, -ad].
+.RE
+.I show_size = <0/1>
+.RS
+Show file sizes [-a, -as].
+.RE
+.I show_size_unit = "string"
+.RS
+Unit to be used when printing sizes [-asu <s>]
+.RE
+.I use_caption_file = <0/1>
+.RS
+Use a caption file [-c].
+.RE
+.I caption_from_filename = <0/1>
+.RS
+Generate captions from filenames [-C].
+.RE
+.I caption_from_exif = <0/1>
+.RS
+Generate captions from EXIF tags in JPEG images [--ce].
+.RE
+.I convert_options = "string"
+.RS
+Options to pass to convert [--con <s>].
+.RE
+.I slidetitle_from_caption = <0/1>
+.RS
+Generate slide titles from captions [-k].
+.RE
+.I slidename_from_filename = <0/1>
+.RS
+Use filenames as slidenames [-n].
+.RE
+.I index_cellpadding = <n>
+.RS
+Cellpadding in the index table [-p <n>].
+.RE
+.I no_film_effect = <0/1>
+.RS
+Omit film reel effect [-r].
+.RE
+.I tile_height = <n>
+.RS
+Film tile height [-t <n>].
+.RE
+.I make_no_slides = <0/1>
+.RS
+Make no slides [-s].
+.RE
+.I pixels_per_row = <n>
+.RS
+Pixels per row of thumbnails in index [-wx <n>].
+.RE
+.I thumbnails_per_row = <n>
+.RS
+Thumbnails per row in index [-w <n>].
+.RE
+.I thumbnail_dimension_max = <n>
+.RS
+Maximal height or width of thumbnails [-xy <n>]
+.RE
+.I thumbnail_height_max = <n>
+.RS
+Maximal height of thumbnails [-y <n>].
+.RE
+.I caption_under_thumbnails = <0/1>
+.RS
+Write captions under thumbnails [-u].
+.RE
+.I no_slide_counter = <0/1>
+.RS
+Do not show slide counter in captions [-x].
+.RE
+.I www_access_rights = <0/1>
+.RS
+Make all generated files world readable [-www].
+.RE
+.I slide_height_max = <n>
+.RS
+Maximal height of slides [--bigy <n>].
+.RE
+.I text_slide_width = <n>
+.RS
+Default width of text slides.
+.RE
+.I text_slide_height = <n>
+.RS
+Default height of text slides.
+.RE
+
+See also
+.IR /etc/llgalrc
+for details about these options and their default values.
+
+Note that
+.I --option 'variable = value'
+may be used to set such variable command line.
+
 .SH FILES
+.RE
+.I /etc/llgalrc
+.I $HOME/.llgalrc
+.I .llgalrc
+.RS
+System-wide, per-user and local configuration files. See
+.SM
+.B CONFIGURATION
+for details.
+
+.RE
 .I /usr/share/llgal/indextemplate.html
 .RS
 The default index template file.

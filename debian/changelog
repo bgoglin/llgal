@@ -1,3 +1,26 @@
+llgal (0.6-1) unstable; urgency=medium
+
+  * Fix thumbnails address in index when running llgal with -d.
+  * Fix text slide dimension calculation in case of --bigy.
+  * Respect POSIX command line options naming convention.
+  * Merge all command line options with configuration options.
+  * Allow to pass additional options through --option.
+  * Allow to pass additional configuration files through --config. 
+  * Add index_title and index_filename configuration options.
+  * text_slide_width/height configuration options become numeric.
+  * The local .llgalrc file is now read after all other configuration files
+    so that the .llgalrc in the destination (llgal called with -d) with 
+    directory might be overridden.
+  * Allow spaces in configuration options.
+  * Several special options are processed before reading configuration files.
+  * Cleanup GetOpt configuration.
+  * Add missing configuration examples to llgalrc and manpage.
+  * Merge -h and --help options processing.
+  * Fix --clean message.
+  * Fix /etc creation in debian/rules.
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Tue, 22 Feb 2005 00:12:00 +0200
+
 llgal (0.5-1) unstable; urgency=low
 
   * llgal now generates XHTML1.1 compliant pages.

@@ -1,0 +1,145 @@
+# llgal configuration options.
+# These options may be defined in /etc/llgalrc, a per -user
+# ${HOME}/.llgalrc file or a directory-specific .llgalrc.
+
+# Most of these options may later be overriden by command line options.
+# Default are shown in examples below.
+# Syntax is one of these:
+# variable = "string"
+# variable = decimal number
+# variable = 0 or 1 for disabling or enabled
+# For now, only static values are supported.
+# Brackets indicate corresponding command line options.
+
+
+# Default installation path for generic llgal files after
+# installation (index and slide templates, tile image and CSS file).
+# llgal_share_dir = "/usr/share/llgal"
+
+# Default per-user generic llgal files.
+# This configuration option should probably not be changed in /etc/llgalrc
+# since dynamic values are not supported for now.
+# user_share_dir = $ENV{HOME}."/.llgal"
+
+# Local subdirectory where llgal files generated files will be stored.
+# Note that HTML files are generated in place while templates, captions
+# and CSS are kept in this subdirectory.
+# local_llgal_dir = ".llgal.files"
+
+
+# Name of the index template.
+# This file will be stored under $local_llgal_dir.
+# indextemplate_filename = "indextemplate.html"
+
+# Name of the slide template.
+# This file will be stored under $local_llgal_dir.
+# slidetemplate_filename = "slidetemplate.html"
+
+# Name of the CSS file.
+# This file will be stored under $local_llgal_dir.
+# css_filename = "llgal.css"
+
+# Name of the film tile image.
+# This file will be stored under $local_llgal_dir.
+# filmtile_filename = "tile.png"
+
+# Name of the caption file that will be generated the first time llgal
+# is called with -c.
+# This file will be stored under $local_llgal_dir.
+# captions_filename = "captions"
+
+# This line will be added to the caption file llgal will generate the
+# first time it is called with -c. If the user doesn't want igal to
+# remove this caption file when called with -clean, it just needs to
+# remove this line from the file.
+# caption_removal_line = "REMOVE THIS LINE IF LLGAL SHOULD NOT REMOVE THIS FILE"
+
+
+# Name of the generated index file [-i <s>]
+# index_filename = "index.html"
+
+# Title of the gallery [--title <s>]
+# index_title = "Index of pictures"
+
+# Prefix used to determine thumbnail filenames from
+# original images [-tp <s>]
+# These files will be stored under $local_llgal_dir.
+# thumb_filenameprefix = "thumb_"
+
+# Prefix used to determine slide-image filenames from
+# original images (in case of --bigy) [-sp <s>]
+# These files will be stored under $local_llgal_dir.
+# slide_filenameprefix = "slide_"
+
+# Directory of the gallery [-d <s>]
+# All images and generated files will be placed there.
+# destination_dir = "."
+
+# Show dimensions and/or size of the images and movies [-a, -ad, -as]
+# show_dimensions = 0
+# show_size = 0
+
+# Unit to be used when printing sizes [-asu <s>]
+# show_size_unit = "kB"
+
+# Use a caption file (defined by caption_filename) [-c]
+# It will be stored under $local_llgal_dir.
+# use_caption_file = 0
+
+# Generate captions from filenames [-C]
+# caption_from_filename = 0
+
+# Generate captions from EXIF tags in JPEG images [--ce]
+# caption_from_exif = 0
+
+# Options to pass to convert [--con <s>]
+# convert_options = ""
+
+# Generate slide titles from captions [-k]
+# slidetitle_from_caption = 0
+
+# Use filenames as slidenames [-n]
+# slidename_from_filename = 0
+
+# Cellpadding in the index table [-p <n>]
+# index_cellpadding = 3
+
+# Omit film reel effect [-r]
+# no_film_effect = 0
+
+# Film tile height [-t <n>]
+# tile_height = 21
+
+# Make no slides [-s]
+# make_no_slides = 0
+
+# Pixels per row of thumbnails in index [-wx <n>]
+# pixels_per_row = undef
+
+# Thumbnails per row in index [-w <n>]
+# thumbnails_per_row = 5
+
+# Maximal width or height of thumbnails [-xy <n>]
+# thumbnail_dimension_max = 0
+
+# Maximal height of thumbnails [-y <n>]
+# thumbnail_height_max = 0
+
+# Write captions under thumbnails [-u]
+# caption_under_thumbnails = 0
+
+# Do not show slide counter in captions [-x]
+# no_slide_counter = 0
+
+# Give access rights for www access [-www]
+# www_access_rights = 0
+
+# Maximal height of slides [--bigy <n>]
+# slide_height_max = 0
+
+
+# Default size of non-image slides.
+# Note that the --bigy <n> option may lead to reduction of these values
+# (height would be <n> while width would be <n*4/3>).
+# text_slide_width = 400
+# text_slide_height = 300
