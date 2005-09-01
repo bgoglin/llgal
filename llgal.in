@@ -189,13 +189,55 @@ my $parent_link = 0 ;
 # add indentation to the begining of messages
 my $indent = "" ;
 
+######################################################################
+# Print messages with indentation according to recursion level
+
 sub indprint {
     print $indent ;
     print @_ ;
 }
 
+###################################################################################
+# Warnings are shown after each step of processing to avoid
+# breaking precentage progressions and so
+
+my $tmp_warning = "" ;
+
+sub add_warning {
+    $tmp_warning .= "!! ".(shift)."\n" ;
+}
+
+sub show_warnings {
+    print $tmp_warning ;
+    $tmp_warning = "" ;
+}
+
+sub immediate_warning {
+    print "!! ".(shift)."\n" ;
+}
+
 ######################################################################
-# create usage now to use defaults values
+# Print percentage
+
+sub init_percentage {
+    print "  0%" ;
+}
+
+sub print_percentage {
+    my ($i,$n) = (shift,shift) ;
+    my $val = int($i*100/$n) ;
+    print "\b\b\b\b" ;
+    if ($val == 100) {
+	print "100%" ;
+    } elsif ($val >= 10) {
+	print " ".$val."%" ;
+    } else {
+	print "  ".$val."%" ;
+    }
+}
+
+######################################################################
+# Create usage now to use defaults values
 
 my $usage = << "END_OF_USAGE";
 This is llgal $version the Loulous HTML image slide show generator.
@@ -374,7 +416,7 @@ foreach my $conf ( @config_files ) {
 }
 
 foreach my $conf ( @additional_config_files ) {
-    die "Cannot find additional configuration files \"$conf\".\n"
+    die "Cannot read additional configuration files '$conf'.\n"
 	unless (-r "$conf") ;
     open CONF, $conf ;
     while (<CONF>) {
@@ -421,7 +463,8 @@ GetOptions(
 	   'option=s'	=> sub { shift ; process_option (shift) ; },
 	) or die $usage ;
 
-die $usage if ($help_asked) ;
+die $usage
+    if ($help_asked) ;
 die "This is llgal version $version.\n"
     if ($version_asked) ;
 
@@ -545,9 +588,9 @@ die "Please limit pixels or thumbnails per row\n"
 ######################################################################
 # other sanity check
 
-# cannot have --bigy and -s
-die "Please choose between --bigy and -s\n"
-    if ($slide_height_max && $make_no_slides) ;
+# cannot have --bigy/xy and -s
+die "Please choose between --bigy/xy and -s\n"
+    if (($slide_height_max or $slide_width_max) && $make_no_slides) ;
 
 # check a few string that have to be non-empty
 die "Please give a non-empty llgal share directory\n"
@@ -635,15 +678,13 @@ my $slide_copy_command = "cp -f " ;
 # find generic llgal file
 sub find_generic_llgal_file {
     my ($filename, $check) = (shift, shift) ;
-    if (-r "$user_share_dir/$filename") {
-	return $user_share_dir ;
-    } else {
-	die "$llgal_share_dir cannot be read or does not exist.\nPlease install llgal properly.\n"
-	    unless (-r $llgal_share_dir || !$check) ;
-	die "$llgal_share_dir/$filename cannot be read or does not exist.\nPlease install llgal properly.\n"
-	    unless (-r "$llgal_share_dir/$filename" || !$check) ;
-        return $llgal_share_dir ;
-    }
+    return $user_share_dir
+	if -r "$user_share_dir/$filename" ;
+    die "$llgal_share_dir cannot be read or does not exist.\nPlease install llgal properly.\n"
+	unless -r $llgal_share_dir || !$check ;
+    die "$llgal_share_dir/$filename cannot be read or does not exist.\nPlease install llgal properly.\n"
+	unless -r "$llgal_share_dir/$filename" || !$check ;
+    return $llgal_share_dir ;
 }
 
 # get generic llgal file
@@ -654,7 +695,11 @@ sub get_generic_llgal_file {
     } else {
 	my $srcdir = find_generic_llgal_file ($filename, 1);
 	indprint "No $filename in $destination_dir/$local_llgal_dir/, getting a copy from $srcdir\n" ;
-	system("cp -f \"$srcdir/$filename\" \"$destination_dir/$local_llgal_dir/$filename\"") ;
+	system ("cp", "-f", "$srcdir/$filename", "$destination_dir/$local_llgal_dir/$filename") ;
+	die "Failed to execute 'cp' to get generic '$filename' file ($!).\n"
+	    if $? == -1;
+	die "Failed to get generic '$filename' file.\n"
+	    if $? ;
     }
 }
 
@@ -662,7 +707,7 @@ sub get_generic_llgal_file {
 # --clean and --cleanall option
 
 sub clean_files {
-    my $all = shift ;
+    my $cleanall = shift ;
     my $notdeleted = 0 ;
 
     die "Can't open directory $destination_dir\n"
@@ -677,24 +722,48 @@ sub clean_files {
 	    or /^$filmtile_filename$/
 	    or /^$css_filename$/) {
 	    my $original = (find_generic_llgal_file $_, 0)."/".$_ ;
-	    if ($all or !system("diff -q \"$destination_dir/$local_llgal_dir/$_\" \"$original\" > /dev/null 2>&1")) {
-		unlink "$destination_dir/$local_llgal_dir/$_";
+	    my $diff = 0 ;
+	    # default is cleanall, which removes everything, as if file were not changed
+	    if (!$cleanall) {
+		$diff = system ("cmp", "-s", "$destination_dir/$local_llgal_dir/$_", "$original") ;
+		die "Failed to execute 'cmp' to check whether '$destination_dir/$local_llgal_dir/$_' has been modified ($!).\n"
+		    if $diff == -1 ;
+		# on other errors, assume files are different ($diff != 0)
+	    }
+	    if ($diff) {
+		add_warning "Preserved '$destination_dir/$local_llgal_dir/$_' since it seems to be modified." ;
+		$notdeleted++;
 	    } else {
-		print "(preserved $_) " ;
+		if (!unlink "$destination_dir/$local_llgal_dir/$_" and ! $!{ENOENT}) {
+		    add_warning "Failed to remove file '$destination_dir/$local_llgal_dir/$_'." ;
+		}
 	    }
 	} elsif (/^$captions_filename$/) {
-	    if ($all or !system("grep -q \"$caption_removal_line\" \"$destination_dir/$local_llgal_dir/$_\"")) {
-		unlink "$destination_dir/$local_llgal_dir/$_";
+	    my $grep = 0 ;
+	    # default is cleanall, which removes everything, as if the removal line was here
+	    if (!$cleanall) {
+		$grep = system("grep", "-q", "$caption_removal_line", "$destination_dir/$local_llgal_dir/$_") ;
+		die "Failed to execute 'grep' to check whether '$destination_dir/$local_llgal_dir/$_' has been modified ($!).\n"
+		    if $grep == -1 ;
+		# on other errors, assume file doesn't contain the caption removal line ($grep != 0)
+	    }
+	    if ($grep) {
+		add_warning "Preserved '$destination_dir/$local_llgal_dir/$_' since it seems to be modified." ;
+		$notdeleted++;
 	    } else {
-		print "(preserved $_) " ;
+		if (!unlink "$destination_dir/$local_llgal_dir/$_" and ! $!{ENOENT}) {
+		    add_warning "Failed to remove file '$destination_dir/$local_llgal_dir/$_'." ;
+		}
 	    }
 	} else {
 	    $notdeleted++;
 	}
     }
     closedir DIR ;
-    if ($notdeleted <= 2 && $all) {
-	rmdir "$destination_dir/$local_llgal_dir" ;
+    if ($notdeleted <= 2 && $cleanall) {
+	if (!rmdir "$destination_dir/$local_llgal_dir"  and ! $!{ENOENT}) {
+	    add_warning "Failed to remove directory '$destination_dir/$local_llgal_dir' ($!)." ;
+	}
     }
 
     opendir DIR, "$destination_dir" ;
@@ -707,17 +776,23 @@ sub clean_files {
 }
 
 if ($clean_asked) {
-    indprint "Removing all non-modified llgal files: ";
+    indprint "Removing all non-modified llgal files...\n";
     clean_files 0 ;
-    print "Done!\n";
+    show_warnings ;
 
-    opendir DIR, "$destination_dir" ;
-    while (my $dir = readdir DIR) {
-	if ($dir =~ /^[^.]/ && -d "$destination_dir/$dir") {
-	    print "\n" ;
-	    indprint "Entering subdirectory '$dir'...\n" ;
-	    system ( $0, @llgal_options, "-d", "$destination_dir/$dir", "--indent", $indent."  " ) ;
-	    indprint "Leaving subdirectory '$dir'.\n" ;
+    if ($make_recursive) {
+	opendir DIR, "$destination_dir" ;
+	while (my $dir = readdir DIR) {
+	    if ($dir =~ /^[^.]/ && -d "$destination_dir/$dir") {
+		print "\n" ;
+		indprint "Entering subdirectory '$dir'...\n" ;
+		system ( $0, @llgal_options, "-d", "$destination_dir/$dir", "--indent", $indent."  " ) ;
+		die "Failed to call $0 for subdirectory $destination_dir/$dir ($!).\n"
+		    if $? == -1 ;
+		immediate_warning "$0 failed for subdirectory $destination_dir/$dir."
+		    if $? ;
+		indprint "Leaving subdirectory '$dir'.\n" ;
+	    }
 	}
     }
     closedir DIR ;
@@ -725,41 +800,27 @@ if ($clean_asked) {
 }
 
 if ($cleanall_asked) {
-    indprint "Removing all llgal files: ";
+    indprint "Removing all llgal files...\n";
     clean_files 1 ;
-    print "Done!\n";
+    show_warnings ;
 
-    opendir DIR, "$destination_dir" ;
-    while (my $dir = readdir DIR) {
-	if ($dir =~ /^[^.]/ && -d "$destination_dir/$dir") {
-	    print "\n" ;
-	    indprint "Entering subdirectory '$dir'...\n" ;
-	    system ( $0, @llgal_options, "-d", "$destination_dir/$dir", "--indent", $indent."  " ) ;
-	    indprint "Leaving subdirectory '$dir'.\n" ;
+    if ($make_recursive) {
+	opendir DIR, "$destination_dir" ;
+	while (my $dir = readdir DIR) {
+	    if ($dir =~ /^[^.]/ && -d "$destination_dir/$dir") {
+		print "\n" ;
+		indprint "Entering subdirectory '$dir'...\n" ;
+		system ( $0, @llgal_options, "-d", "$destination_dir/$dir", "--indent", $indent."  " ) ;
+		die "Failed to call $0 for subdirectory $destination_dir/$dir ($!).\n"
+		    if $? == -1 ;
+		immediate_warning "$0 failed for subdirectory $destination_dir/$dir."
+		    if $? ;
+		indprint "Leaving subdirectory '$dir'.\n" ;
+	    }
 	}
     }
     closedir DIR ;
     exit 0;
-}
-
-######################################################################
-# Print percentage
-
-sub init_percentage {
-    print "  0%" ;
-}
-
-sub print_percentage {
-    my ($i,$n) = (shift,shift) ;
-    my $val = int($i*100/$n) ;
-    print "\b\b\b\b" ;
-    if ($val == 100) {
-	print "100%" ;
-    } elsif ($val >= 10) {
-	print " ".$val."%" ;
-    } else {
-	print "  ".$val."%" ;
-    }
 }
 
 #####################################################################
@@ -804,30 +865,30 @@ my $nofiles = 0 ;
 my @headers = () ;
 my @footers = () ;
 
-# global variable for exception messages
-my $tmp_warning ;
-
 # list of subdirectories
 my @subdirs ;
 
 ###################################################################################
 # generating safe url
 
-my $unsafe_url_warning = 0 ;
-my $first_unsafe_url ;
+sub make_safe_url_nowarn {
+    my $file = shift ;
+    my $safe = uri_escape ($file) ;
+    return $safe ;
+}
+
 sub make_safe_url {
     my $file = shift ;
-    my $safe = uri_escape($file) ;
+    my $safe = uri_escape ($file) ;
 
-    if (!$unsafe_url_warning and $safe ne $file and $file =~ /[\x80-\xFF]/) {
-	$unsafe_url_warning = 1 ;
-	$first_unsafe_url = $file ;
-    }
+    add_warning "Non-ascii characters were escaped in filename '$file'."
+	if $safe ne $file and $file =~ /[\x80-\xFF]/ ;
+
     return $safe ;
 }
 
 # Create the url of the local llgal directory
-my $local_llgal_url = make_safe_url ($local_llgal_dir) ;
+my $local_llgal_url = make_safe_url_nowarn ($local_llgal_dir) ;
 
 ###################################################################################
 # checking files
@@ -835,7 +896,7 @@ my $local_llgal_url = make_safe_url ($local_llgal_dir) ;
 sub check_movie {
     my $filename = shift ;
     if (! -r $filename) {
-	$tmp_warning = $indent."Cannot find movie $filename, skipping it.\n" ;
+	add_warning "Cannot find movie '$filename', skipping it." ;
 	return -1 ;
     }
     return 0 ;
@@ -844,10 +905,10 @@ sub check_movie {
 sub check_image {
     my $filename = shift ;
     if (! -r $filename) {
-	$tmp_warning = $indent."Cannot find image $filename, skipping it.\n" ;
+	add_warning "Cannot find image '$filename', skipping it." ;
 	return -1 ;
     } elsif (system("identify \"$filename\" > /dev/null 2>&1")) {
-	$tmp_warning = $indent."Bad image file $filename, skipping it.\n" ;
+	add_warning "Bad image file '$filename', skipping it." ;
 	return -1 ;
     }
     return 0 ;
@@ -966,7 +1027,7 @@ sub make_entry {
 	    $slide_filename = $slide_filenameprefix . (@entries+1) . ".html" ;
 	}
 	$entry->{slide_filename} = $slide_filename ;
-	$entry->{slide_url} = make_safe_url ($slide_filename) ;
+	$entry->{slide_url} = make_safe_url_nowarn ($slide_filename) ;
     }
 
     # xdim, ydim, kbytes of the image or movie
@@ -979,7 +1040,7 @@ sub make_entry {
 	$entry->{scaled_ydim} = $y ;
     }
     if ($type == $TYPE_IMG or $type == $TYPE_MVI) {
-	my $kbytes = ((stat($filename))[7]) >> 10;
+	my $kbytes = ((stat("$destination_dir/$filename"))[7]) >> 10;
 	$entry->{kbytes} = $kbytes ;
 	# initialize here so that we can use it even when scaled are not used
 	$entry->{scaled_kbytes} = $kbytes ;
@@ -990,7 +1051,7 @@ sub make_entry {
 	# filename and url
 	my $thumbnail_filename = "$thumbnail_image_filenameprefix$filename" ;
 	$entry->{thumb_filename} = "$local_llgal_dir/$thumbnail_filename" ;
-	$entry->{thumb_url} = "$local_llgal_url/". make_safe_url ($thumbnail_filename) ;
+	$entry->{thumb_url} = "$local_llgal_url/". make_safe_url_nowarn ($thumbnail_filename) ;
 
 	# thumbnails dimensions
 	my $real_thumb_filename = "$destination_dir/$entry->{thumb_filename}" ;
@@ -998,7 +1059,7 @@ sub make_entry {
 	    my $output = `$thumbnail_create_command "$real_filename" "$real_thumb_filename" 2>&1` ;
 	    if ($?) {
 		chomp $output ;
-		$tmp_warning = $indent."Failed to create $real_filename thumbnail ($output)\n" ;
+		add_warning "Failed to create '$real_filename' thumbnail ($output)." ;
 		return undef ;
 	    }
 	}
@@ -1014,7 +1075,7 @@ sub make_entry {
 	# filename and url
 	my $scaled_filename = "$scaled_image_filenameprefix$filename" ;
 	$entry->{scaled_filename} = "$local_llgal_dir/$scaled_filename" ;
-	$entry->{scaled_url} = "$local_llgal_url/". make_safe_url ($scaled_filename) ;
+	$entry->{scaled_url} = "$local_llgal_url/". make_safe_url_nowarn ($scaled_filename) ;
 
 	# scaled image dimensions
 	my $real_scaled_filename = "$destination_dir/$entry->{scaled_filename}" ;
@@ -1030,7 +1091,7 @@ sub make_entry {
 	    }
 	    if ($?) {
 		chomp $output ;
-		$tmp_warning = $indent."Failed to create $real_filename scaled image ($output)\n" ;
+		add_warning "Failed to create '$real_filename' scaled image ($output)." ;
 		return undef ;
 	    }
 	}
@@ -1085,17 +1146,13 @@ sub get_entries {
     init_percentage () ;
     my $i = 0 ;
 
-    my $warnings = "" ;
-
     # add entries
     foreach my $filename (@imgfiles) {
 	my @parts = split (/\./, $filename) ;
 	pop @parts ;
 	my $basename = join (".", @parts) ;
 	my $entry = make_entry ($TYPE_IMG, $filename, $basename, undef, undef, undef) ;
-	if (not defined $entry) {
-	    $warnings .= $tmp_warning ;
-	} else {
+	if (defined $entry) {
 	    push @entries, $entry ;
 	}
 	print_percentage (($i++)+1, $nentries) ;
@@ -1106,9 +1163,7 @@ sub get_entries {
 	pop @parts ;
 	my $basename = join (".", @parts) ;
 	my $entry = make_entry ($TYPE_MVI, $filename, $basename, undef, undef, undef) ;
-	if (not defined $entry) {
-	    $warnings .= $tmp_warning ;
-	} else {
+	if (defined $entry) {
 	    push @entries, $entry ;
 	}
 	print_percentage (($i++)+1, $nentries) ;
@@ -1116,9 +1171,7 @@ sub get_entries {
 
     foreach my $dirname (@subdirs) {
 	my $entry = make_entry ($TYPE_DIR, $dirname, $dirname, undef, undef, undef) ;
-	if (not defined $entry) {
-	    $warnings .= $tmp_warning ;
-	} else {
+	if (defined $entry) {
 	    push @entries, $entry ;
 	}
 	print_percentage (($i++)+1, $nentries) ;
@@ -1132,18 +1185,36 @@ sub get_entries {
     @entries = sort { $a->{filename} cmp $b->{filename} } @entries ;
 
     print "\n" ;
-    print $warnings ;
+    show_warnings ;
     die "Please select more files for your slide show!\n"
 	if ($nentries < 1);
 }
 
 #######################################################################
-# Create local subdirectory to place all llgal files
+# Check acces rights and create local subdirectory to place all llgal files
 
-if (!-r "$destination_dir/$local_llgal_dir") {
+die "Destination directory '$destination_dir' is not a directory.\n"
+    if !-d "$destination_dir" ;
+die "Cannot enter in destination directory '$destination_dir'.\n"
+    if !-x "$destination_dir" ;
+die "Cannot read destination directory '$destination_dir'.\n"
+    if !-r "$destination_dir" ;
+die "Cannot modify destination directory '$destination_dir'.\n"
+    if !-w "$destination_dir" ;
+
+if (!-e "$destination_dir/$local_llgal_dir") {
     mkdir "$destination_dir/$local_llgal_dir"
-	or die "Cannot create $destination_dir/$local_llgal_dir directory" ;
+	or die "Failed to create $destination_dir/$local_llgal_dir directory ($!)" ;
 }
+
+die "Local llgal '$destination_dir/$local_llgal_dir' is not a directory.\n"
+    if !-d "$destination_dir/$local_llgal_dir" ;
+die "Cannot enter in local llgal directory '$destination_dir/$local_llgal_dir'.\n"
+    if !-x "$destination_dir/$local_llgal_dir" ;
+die "Cannot read local llgal directory '$destination_dir/$local_llgal_dir'.\n"
+    if !-r "$destination_dir/$local_llgal_dir" ;
+die "Cannot write local llgal directory '$destination_dir/$local_llgal_dir'.\n"
+    if !-w "$destination_dir/$local_llgal_dir" ;
 
 #######################################################################
 # Generate captions if asked
@@ -1232,6 +1303,7 @@ if ($generate_captions) {
     }
     close(CAP);
     print "\n";
+    show_warnings ;
 
     if ($make_recursive) {
 	print "\n"
@@ -1239,6 +1311,10 @@ if ($generate_captions) {
 	foreach my $dir (@subdirs) {
 	    indprint "Entering subdirectory '$dir'...\n" ;
 	    system ( $0, @llgal_options, "-d", "$destination_dir/$dir", "--indent", "  ".$indent ) ;
+	    die "Failed to call $0 for subdirectory $destination_dir/$dir ($!).\n"
+		if $? == -1 ;
+	    immediate_warning "$0 failed for subdirectory $destination_dir/$dir."
+		if $? ;
 	    indprint "Leaving subdirectory '$dir'.\n" ;
 	    print "\n" ;
 	}
@@ -1259,8 +1335,6 @@ if ($use_caption_file) {
 
     open(CAP,"$destination_dir/$local_llgal_dir/$captions_filename")
 	or die "Can't open $destination_dir/$local_llgal_dir/$captions_filename file\n";
-
-    my $warnings = "" ;
 
     my $line;
     while (defined($line = <CAP>)) {
@@ -1311,9 +1385,7 @@ if ($use_caption_file) {
 		    die "Unrecognized line #$. in caption file: \"$line\"\n" ;
 		}
 
-		if (not defined $entry) {
-		    $warnings .= $tmp_warning ;
-		} else {
+		if (defined $entry) {
 		    # really add this entry
 		    push @entries, $entry ;
 		}
@@ -1324,24 +1396,14 @@ if ($use_caption_file) {
     close(CAP);
     $nentries = @entries ;
     print "\n" ;
-    print $warnings ;
+    show_warnings ;
     indprint "Found $nentries files.\n";
 
 } else {
     # generate the gallery without caring about the caption file
     get_entries ;
+    show_warnings ;
     indprint "Found $nentries files in directory $destination_dir\n";
-}
-
-if ($unsafe_url_warning) {
-    print "\n" ;
-    indprint "At least one of your files ($first_unsafe_url) contains non-ascii characters\n" ;
-    indprint "which are not safely representable in a URL. llgal has escaped them\n" ;
-    indprint "using the method RFC 2396 specifies, but this may not work out if\n" ;
-    indprint "your web server has a different notion of character encoding\n" ;
-    indprint "than the machine llgal runs on.\n" ;
-    indprint "See also: http://www.w3.org/TR/html4/appendix/notes.html#h-B.2\n" ;
-    print "\n" ;
 }
 
 #######################################################################
@@ -1373,8 +1435,13 @@ if ($show_no_film_effect) {
 # rescale the tiled image if needed
 if (!$show_no_film_effect) {
     my $tileh = (imgsize("$destination_dir/$local_llgal_dir/$filmtile_filename"))[1] ;
-    system("mogrify -scale x$tile_height $destination_dir/$local_llgal_dir/$filmtile_filename")
-	if ($tile_height != $tileh) ;
+    if ($tile_height != $tileh) {
+	system ("mogrify", "-scale", "x$tile_height", "$destination_dir/$local_llgal_dir/$filmtile_filename") ;
+	die "Failed to execute 'mogrify' to reduce the film tile ($!).\n"
+	    if $? == -1 ;
+	die "'mogrify' failed while reducing the film tile.\n"
+	    if $? ;
+    }
 }
 
 #######################################################################
@@ -1384,7 +1451,9 @@ if ($make_no_slides) {
     indprint "Linking thumbnails directly to image files...  Making no html slides.\n";
 } else {
     # remove old .html files
-    system("rm -f \"$destination_dir/$local_llgal_dir/*.html\"");
+    system ("rm -f \"$destination_dir/*.html\"") ;
+    die "Failed to remove existing HTML slides.\n"
+	if $? ;
 
     # keep the slidetemplate in memory instead of always reopening it
     my @slidetemplate_text;
@@ -1433,7 +1502,6 @@ if ($make_no_slides) {
 
 	    # fill the main part
 	    if ($line =~ m/<!--THIS-SLIDE-->/g) {
-# TOFIX: pas de TYPE_IMG
 		if ($type == $TYPE_IMG) {
 		    # image slide
 
@@ -1464,7 +1532,6 @@ if ($make_no_slides) {
 	    }
 
 	    # add dimensions and size to the caption
-# TOFIX: defined size/dim
 	    if (($slide_width_max or $slide_height_max) and ($show_dimensions or $show_size) and ($type == $TYPE_IMG || $type == $TYPE_MVI)) {
 		my $printdim = "$entries[$i]->{xdim}x$entries[$i]->{ydim}" ;
 		my $printsize = "$entries[$i]->{kbytes}$show_size_unit" ;
@@ -1502,6 +1569,7 @@ if ($make_no_slides) {
     }
 }
 print "\n" ;
+show_warnings ;
 
 #######################################################################
 # Creating the index file
@@ -1656,28 +1724,57 @@ close(IXR) ;
 print "\n" ;
 
 if ($forced_width_warning) {
-    indprint "(Warning: Row width max ($pixels_per_row) was too low even for one single image per row. "
-	. "Forced $forced_width_warning time". ($forced_width_warning>1?"s":"") .")\n" ;
+    add_warning "Row width max ($pixels_per_row) too low for one single thumbnail. "
+	. "Forced $forced_width_warning time". ($forced_width_warning>1?"s":"") ."." ;
 }
+show_warnings ;
 
 #######################################################################
 # If --www was invoked make all files world-readable at the END
 if ($www_access_rights) {
-    my $dir = "$destination_dir/";
-    $dir = "" if $destination_dir eq ".";
-    indprint "\nMaking all llgal files world-readable for WWW publishing...\n";
-    system("chmod a+r $destination_dir/$local_llgal_dir/$css_filename");
-    system("chmod a+r $destination_dir/*.html");
-    system("chmod a+r $destination_dir/$local_llgal_dir/$thumbnail_image_filenameprefix*.*");
-    system("chmod a+r $destination_dir/$local_llgal_dir/$scaled_image_filenameprefix*.*");
-    system("chmod a+r $destination_dir/$local_llgal_dir/$filmtile_filename");
+    my $dir = "$destination_dir/" ;
+    $dir = ""
+	if $destination_dir eq "." ;
+    indprint "Making all llgal files world-readable for WWW publishing.\n" ;
+
+    system ("chmod a+r $destination_dir/$local_llgal_dir/$css_filename 2> /dev/null") ;
+    add_warning "Failed to make '$destination_dir/$local_llgal_dir/$css_filename' world readable."
+	if $? ;
+
+    system ("chmod a+r $destination_dir/*.html 2> /dev/null") ;
+    add_warning "Failed to make '$destination_dir/*.html' world readable."
+	if $? ;
+
+    system ("chmod a+r $destination_dir/$local_llgal_dir/$thumbnail_image_filenameprefix*.* 2> /dev/null") ;
+    add_warning "Failed to make '$destination_dir/$local_llgal_dir/$thumbnail_image_filenameprefix*.*' world readable."
+	if $? ;
+
+    if (($slide_width_max > 0 or $slide_height_max > 0) and !$make_no_slides) {
+	system ("chmod a+r $destination_dir/$local_llgal_dir/$scaled_image_filenameprefix*.* 2> /dev/null") ;
+	add_warning "Failed to make '$destination_dir/$local_llgal_dir/$scaled_image_filenameprefix*.*' world readable."
+	    if $? ;
+    }
+
+    system ("chmod a+r $destination_dir/$local_llgal_dir/$filmtile_filename 2> /dev/null") ;
+    add_warning "Failed to make '$destination_dir/$local_llgal_dir/$filmtile_filename' world readable."
+	if $? ;
+
     for(my $i = 0; $i < $nentries; $i++) {
 	next if ($entries[$i]->{type} != $TYPE_IMG
-		 && $entries[$i]->{type} != $TYPE_MVI);
+		 && $entries[$i]->{type} != $TYPE_MVI
+		 && $entries[$i]->{type} != $TYPE_DIR) ;
 	my $file = $entries[$i]->{filename} ;
-	system("chmod a+r $dir$file");
+	if ($entries[$i]->{type} == $TYPE_DIR) {
+	    system ("chmod a+rx $dir$file 2> /dev/null") ;
+	    add_warning "Failed to make '$dir$file' world readable and traversable."
+		if $? ;
+	} else {
+	    system ("chmod a+r $dir$file") ;
+	    add_warning "Failed to make '$dir$file' world readable."
+		if $? ;
+	}
     }
-    die "\nDone!\n";
+    show_warnings ;
 }
 
 #######################################################################
@@ -1754,12 +1851,14 @@ if (defined $generate_config) {
 # Process subdirectories
 
 if ($make_recursive) {
-    print "\n"
-	if @subdirs;
     foreach my $dir ( @subdirs ) {
+	print "\n" ;
 	indprint "Entering subdirectory '$dir'...\n" ;
 	system ( $0, @llgal_options, "-d", "$destination_dir/$dir", "--parent", "--indent", $indent."  " ) ;
+	die "Failed to call $0 for subdirectory $destination_dir/$dir ($!).\n"
+	    if $? == -1 ;
+	immediate_warning "$0 failed for subdirectory $destination_dir/$dir."
+	    if $? ;
 	indprint "Leaving subdirectory '$dir'.\n" ;
-	print "\n" ;
     }
 }

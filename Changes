@@ -1,3 +1,22 @@
+llgal (0.9.10)
+
+  * Fix cleaning (not recursive by default).
+  * Fix directory when stating of images/movies.
+  * Make subdirectory world readable and traversable for --www.
+  * Don't make scaled images world readable for --www when there's no scaled images.
+  * Do not exit after processing --www.
+  * Don't allow --bigxy with -s (same than --bigy with -s).
+  * Old HTML files have to be removed from the main directory, not local_llgal_dir.
+  * Add Character Encoding section to the manpage.
+  * Make non-ascii character warning shorter.
+  * Use cmp instead of diff to avoid verbose messages.
+  * Cleanup system usage and check return value.
+  * Large cleanup of warning code.
+  * Don't forget to include Changes and COPYING in the tarball.
+  * A few typos.
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Fri,  5 Aug 2005 00:59:07 +0200
+
 llgal (0.9.9)
 
   * Implement recursive caption and subgallery generation with -R.
