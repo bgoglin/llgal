@@ -5,10 +5,13 @@ Maintainer: Brice Goglin <Brice.Goglin@ens-lyon.org>
 
 Package: llgal
 Architecture: all
-Depends: imagemagick, ${perl:Depends}, libimage-size-perl
+Depends: imagemagick, exiftags, ${perl:Depends}, libimage-size-perl
 Provides: llgal
 Replaces: igal igal-text
 Description: Loulous gallery
-  llgal provides the igal interface to automatically generate
- image galleries. It improve igal by adding text and video slides
- support.
+  llgal is a on-line gallery generator.
+ It is based on igal (most of the interface is the same).
+ llgal adds supports for different types of slides including text,
+ link and movies, addition of headers and footers in generated HTML
+ files, and a few other options.
+ Caption may be automatically generated from JPEG EXIF tags.

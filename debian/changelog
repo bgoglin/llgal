@@ -1,3 +1,19 @@
+llgal (0.3-1) unstable; urgency=low
+
+  * Add --ce to generate captions from EXIF tags.
+  * Don't remove the generated caption file when the user removed a special line.
+  * Don't remove llgal files when they are different from generic files.
+  * --cleanall removes everything, even if modified.
+  * Show big image dimensions and size in slide when -bigy.
+  * Fix image alternatives and titles, and slide titles.
+  * Remove useless javascript and NEXT-IMAGE in slides.
+  * Cleanup support of files with several dot in their names.
+  * Cleanup generated HTML, almost XHTML 1.1 compliant.
+  * Fix copyright and description.
+  * A few fixes.
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Sat, 19 Feb 2005 16:00:00 +0200
+
 llgal (0.2-1) unstable; urgency=medium
 
   * Enable -n to set slide filenames as image names.
