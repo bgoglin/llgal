@@ -1,3 +1,11 @@
+llgal (0.9.7)
+
+  * -C becomes --cf (use file names as captions).
+  * -x becomes --nc (do not show image counter in caption)
+  * Add a clean target to the Makefile.
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Mon,  1 Aug 2005 21:54:12 +0200
+
 llgal (0.9.6)
 
   * Check file existency and image validity.

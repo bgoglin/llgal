@@ -64,7 +64,7 @@ Allow to define the unit used to show file sizes. Default is
 .TP
 .BI --bigxy " <n>"
 Like
-.B -xy
+.B --xy
 but operates on the image slides, not the thumbnails.  Scales image
 slides to some medium width and height (e.g.
 .IR 400 "),"
@@ -115,7 +115,7 @@ will read your
 file, include your captions in the slides and rearrange them if necessary.
 
 .TP
-.BI -C
+.BI --cf
 Generates
 .I captions
 from file names (strips suffix).
@@ -174,6 +174,10 @@ Use the image file names for the HTML slide files.  Otherwise
 the default behavior is to simply name your slides
 .IR 1.html ", " 2.html ", "
 and so on.
+
+.TP
+.BI --nc
+Omit the image count from the captions.
 
 .TP
 .BI -p " <n>"
@@ -242,10 +246,6 @@ pixels wide at maximum. The number of thumbnails per row, given in
 is reduced if necessary. Default is to honor
 .BI -w
 without regard to the resulting row width.
-
-.TP
-.BI -x
-Omit the image count from the captions.
 
 .TP
 .BI --xy " <n>"
@@ -501,7 +501,7 @@ Maximal height of thumbnails [-y <n>].
 .RE
 .I thumbnail_width_max = <n>
 .RS
-Maximal width of thumbnails [-xy <n>]
+Maximal width of thumbnails [--xy <n>]
 .RE
 .I thumbnails_per_row = <n>
 .RS
@@ -528,7 +528,7 @@ Generate slide titles from captions [-k].
 .RE
 .I show_no_slide_counter = <0/1>
 .RS
-Do not show slide counter in captions [-x].
+Do not show slide counter in captions [--nc].
 .RE
 .I slide_filenameprefix = <s>
 .RS

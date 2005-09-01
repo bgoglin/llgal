@@ -115,9 +115,9 @@ my $show_no_film_effect = 0 ;
 my $tile_height = $tile_height_default ;
 
 # Thumbnails
-# max height of a thumbnail (-xy or -y)
+# max height of a thumbnail (--xy or -y)
 my $thumbnail_height_max = $thumbnail_height_max_default ;
-# scale thumb longer dimension (-xy)
+# scale thumb longer dimension (--xy)
 my $thumbnail_width_max = $thumbnail_width_max_default ;
 # how many thumbnails per row at most in index (-w)
 my $thumbnails_per_row = $thumbnails_per_row_default ;
@@ -131,7 +131,7 @@ my $make_slide_filename_from_filename = 0 ;
 my $make_slide_filename_from_extension = 0 ;
 # use captions as slide titles (-k)
 my $make_slide_title_from_caption = 0 ;
-# omit the image slide from the caption (-x)
+# omit the image slide from the caption (--nc)
 my $show_no_slide_counter = 0 ;
 # prefix of HTML slide filenames
 my $slide_filenameprefix = "" ;
@@ -158,7 +158,7 @@ my $make_caption_from_image_comment = 0 ;
 my $make_caption_from_image_timestamp = 0 ;
 # format of the timestamp in captions (--ctf)
 my $timestamp_format_in_caption = "%Y-%m-%d %H:%M:%S" ;
-# preserve image names as captions (-C)
+# preserve image names as captions (--cf)
 my $make_caption_from_filename = 0 ;
 # write captions under thumbnails on index page (-u)
 my $show_caption_under_thumbnails = 0 ;
@@ -192,9 +192,9 @@ Options:  -a              write image sizes under thumbnails on index page
           --as            like -a, but write only the file size (in kbytes)
           --asu <s>       change file size unit ($show_size_unit)
           --bigy <n>      like -y, use it if you have very large image files
-          --bigxy <n>     like -xy, use it if you have very large image files
+          --bigxy <n>     like --xy, use it if you have very large image files
           -c              first generate and then use captions
-          -C              use file names as captions
+          --cf            use file names as captions
           --cc            use image comments as captions
           --ct            use image timestamps as captions
           --ctf <s>       timestamp format in captions (strftime format)
@@ -203,6 +203,7 @@ Options:  -a              write image sizes under thumbnails on index page
           -i <file>       name of the main thumbnail index file ($index_filename)
           -k              use the image captions for the HTML slide titles
           -n              use image file names for the HTML slide files
+          --nc            omit the image count from the captions
           -p <n>          cellpadding value of thumbnail index tables ($index_cellpadding)
           -r              omit the film reel effect altogether
           -R              look at subdirectories
@@ -215,7 +216,6 @@ Options:  -a              write image sizes under thumbnails on index page
           -w <n>          rows in thumbnail index are at most <n> images wide ($thumbnails_per_row)
           --www           make all llgal files world-readable
           --wx <n>        rows in thumbnail index are at most <n> pixels wide
-          -x              omit the image count from the captions
           --xy <n>        scale thumbs to <n> pixels in their longer dimension
           -y <n>          scale all thumbnails to the same height <n> ($thumbnail_height_max)
           --clean         remove all generated files
@@ -375,13 +375,14 @@ GetOptions(
 	   'as'		=> \$show_size,
 	   'asu=s'	=> \$show_size_unit,
 	   'c'		=> \$use_caption_file,
-	   'C'		=> \$make_caption_from_filename,
+	   'cf'		=> \$make_caption_from_filename,
 	   'cc'		=> \$make_caption_from_image_comment,
 	   'ct'		=> \$make_caption_from_image_timestamp,
 	   'ctf=s'      => \$timestamp_format_in_caption,
 	   'i=s'	=> \$index_filename,
 	   'k'		=> \$make_slide_title_from_caption,
 	   'n'		=> \$make_slide_filename_from_filename,
+	   'nc'		=> \$show_no_slide_counter,
 	   'p=i'	=> \$index_cellpadding,
            'r'		=> \$show_no_film_effect,
            'R'          => \$make_recursive,
@@ -389,7 +390,6 @@ GetOptions(
 	   't=i'	=> \$tile_height,
 	   'u'		=> \$show_caption_under_thumbnails,
 	   'w=i'	=> \$thumbnails_per_row,
-	   'x'		=> \$show_no_slide_counter,
 	   'y=i'	=> \$thumbnail_height_max,
 	   'bigy=i'	=> \$slide_height_max,
 	   'bigxy=i'    => sub { shift ; $slide_width_max = $slide_height_max = shift ; },
@@ -1344,7 +1344,7 @@ if ($make_no_slides) {
 		}
 	    }
 
-	    # add the caption, with the image counter unless -x is specified
+	    # add the caption, with the image counter unless --nc is specified
 	    my $imagecaption ;
 	    if ($show_no_slide_counter) {
 		$imagecaption = $entries[$i]->{caption} ;
