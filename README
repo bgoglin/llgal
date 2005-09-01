@@ -1,0 +1,34 @@
+llgal installation instructions
+===============================
+
+You don't care about this if you use Debian or Gentoo prepackaged
+versions that are available on http://bgoglin.free.fr/llgal
+
+Run 'make install' as root.
+
+By default, everything is installed in /usr/local/.
+Most directories might be replaced by overriding their default values
+on the command line.
+For instance, a traditional installation might be achieved with
+ make install PREFIX=/usr SYSCONFDIR=/etc MANDIR=/usr/share/man
+
+Note that 'make uninstall' (with same options) allows to uninstall.
+
+llgal requirements
+==================
+
+llgal requires perl and imagemagick packages.
+The following perl library are also needed:
+* libimage-info-perl
+* libimage-size-perl
+* liburi-perl
+These dependencies are automatically installed when installing
+Debian or Gentoo prepackaged versions.
+
+If you need to install these library by yourself, you may find
+tarballs in Debian source archives (for instance):
+ftp://ftp.debian.org/debian/pool/main/libi/libimage-info-perl/libimage-info-perl_*.orig.tar.gz
+ftp://ftp.debian.org/debian/pool/main/i/image-size/image-size_*.orig.tar.gz
+ftp://ftp.debian.org/debian/pool/main/libu/liburi-perl/liburi-perl_*.orig.tar.gz
+Replace * with the last version that you'll find.
+llgal currently works with versions 1.16/2.992/1.35.

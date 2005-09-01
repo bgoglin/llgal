@@ -1,3 +1,13 @@
+llgal (0.9.6)
+
+  * Check file existency and image validity.
+  * Cleanup error reporting and file skipping on errors.
+  * Add a README file to help manual installation.
+  * Add -v and --version.
+  * Automatically set version in usage at install.
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Sun,  1 May 2005 18:19:09 +0200
+
 llgal (0.9.5)
 
   * Fix text slides (do not make a link).
