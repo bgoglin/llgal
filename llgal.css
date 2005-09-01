@@ -2,7 +2,7 @@
   text-align: center;
 }
 
-table .center { 
+.center table { 
   margin-left: auto;
   margin-right: auto;
   text-align: center;
@@ -50,8 +50,12 @@ a:hover {
   vertical-align: middle;
 }
 
-.thumbdim {
+.thumb-dim {
   font-size: 50%;
+}
+
+.thumb-caption {
+  font-size: 75%;
 }
 
 .slide {

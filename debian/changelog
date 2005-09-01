@@ -1,3 +1,14 @@
+llgal (0.4-1) unstable; urgency=medium
+
+  * Add support for subdirectories: process them as links for now.
+  * Index points to url instead of slides for non-image slides.
+  * Fix llgal.css where center was broken for tables.
+  * Reduce default size of captions when showed in index with -u.
+  * Enable all configuration options in /etc/llgalrc, $HOME/.llgalrc and local .llgalrc files.
+  * Fix man page.
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Sun, 20 Feb 2005 01:17:00 +0200
+
 llgal (0.3-1) unstable; urgency=low
 
   * Add --ce to generate captions from EXIF tags.

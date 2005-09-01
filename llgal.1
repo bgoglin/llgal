@@ -1,26 +1,30 @@
 .\" Process this file with
 .\" groff -man -Tascii foo.1
 .\"
-.TH LLGAL 1 "FEBRUARY 2005" "Version 0.1" "Version 0.1"
+.TH LLGAL 1 "FEBRUARY 2005" "Version 0.4" "Version 0.4"
 
 .SH NAME
 llgal \- Loulous Image Gallery generator
+
 .SH SYNOPSIS
 .B llgal 
 .I [-option1 -option2 ...]
+
 .SH DESCRIPTION
 .B llgal
-is a quick and easy program for placing your images online with just
-one command-line.  It generates a pretty good-looking set of W3-compliant
-static HTML slides even with its default settings.  To try it out just run 
+is a quick and easy program for placing your images and movies online with
+just one command-line. It generates a pretty good-looking set of static HTML
+slides even with its default settings.  To try it out just run 
 .B llgal 
 in a directory with
-.IR jpg ", " gif " or " png
+.IR jpg ", " gif ", " png ", " mpg " or " avi
 files and check the output in a web browser.  You can adjust the
 appearance of the image gallery with the many options listed below or
 (if you know a bit of HTML) by modifying the
-.IR ".indextemplate.html" , " .slidetemplate.html " and " llgal.css"
-files that appeared in your image directory.
+.IR indextemplate.html ", " slidetemplate.html " and " llgal.css
+files in the
+.IR .llgal.files/ " subdirectory that appeared in your"
+image directory.
 .B llgal
 also checks for the existence of a
 .I "$HOME/.llgal"
@@ -28,31 +32,11 @@ directory where users can store their own templates, overriding
 the site-wide 
 .IR "/usr/share/llgal" .
 
-.BR llgal " needs " Perl
-to run and it also relies on a few other programs that come standard
-with most Linux distributions.  It relies on the
-.B ImageMagick
-package first if available, otherwise it falls back onto
-.BR cjpeg "/" djpeg "/" pnmscale " for processing"
-.IR jpg " files.  The command "
-.BR convert " of the " ImageMagick " package is required to process"
-.IR gif " and " png
-files and the
-.BR identify " command enables " llgal
-to include IMG HEIGHT and WIDTH tags in the HTML it generates.
-
-If you really like
-.B llgal
-please see the file
-.IR THANKS " (normally in " /usr/share/llgal/ ")."
-If you wish to make a donation (whatever
-.B llgal
-is worth to you or however small) send it via PayPal to
-.IR epop@stanford.edu "."
 .SH OPTIONS
 .TP
 .B -a
-Write image dimensions and sizes under each thumbnail on the index page.
+Write image dimensions and sizes under each thumbnail on the index page,
+and under each slide if -bigy was passed.
 This only works if the ImageMagick command
 .BR identify " is present."
 .TP
@@ -65,6 +49,10 @@ but write only the image dimensions.
 Like
 .B -a
 but write only the image sizes.
+.TP
+.B --asu " <s>"
+Allow to define the unit used to show file sizes. Default is
+.IR kB "."
 .TP
 .BI --bigy " <n>"
 Like
@@ -86,30 +74,37 @@ between two consecutive runs when you've changed the value of
 .BI -c
 First generate and then publish image slide captions. The first invocation of
 .B llgal -c
-generates a
-.I .captions
+generates in
+.I .llgal.files
+a
+.I captions
 file that you may edit.  The format of this file is very simple.
-You should only have to enter your captions after the
-.I ----
-separator.  You may rearrange the image order at this point and 
-also leave out some pictures by simply placing a pound
-.RI ( # )
-sign at the beginning of their respective lines.  A second invocation of
+See
+.SM
+.B CAPTIONS
+for details.
+A second invocation of
 .B llgal -c
 will read your
-.I .captions
+.I captions
 file, include your captions in the slides and rearrange them if necessary.
 .TP
 .BI -C
 .RI Like " -c"
 but preserve file names as captions when generating the
-.I .captions
+.I captions
 file (strips file name suffix).
+.TP
+.BI --ce
+.RI Like " -c"
+but generates
+.I captions
+from EXIF tags that may exist in JPEG files
 .TP
 .BI --con " options"
 Command line options to pass on to
-.BR convert " or " cjpeg
-internally (see their man pages).  This affects all thumbnails
+.BR convert
+internally (see its man page).  This affects all thumbnails
 and, if
 .BI --bigy
 is given, the medium-size slides too.  You can set the
@@ -117,7 +112,7 @@ is given, the medium-size slides too.  You can set the
 or go crazy with
 .IR -negate ", " -noise ", etc."
 (the last two only work with
-.BR convert " if " ImageMagick " is installed."
+.BR convert " if " ImageMagick " is installed)."
 .TP
 .BI -d " <dir>"
 Operate on image files in directory
@@ -184,7 +179,7 @@ file with your own design.
 .BI -u
 Write image captions under each thumbnail on the index page.
 If you have a
-.I .captions
+.I captions
 file (see options -c or -C) then the captions are read from there,
 else the file names are used (but the file extension is stripped).
 .TP
@@ -229,12 +224,75 @@ Substitutes the string
 .I <s>
 for "<!--TITLE-->" in the index. The default is "Index of Pictures".
 .TP
-.BI --clean
+.BI --cleanall
 Remove all files
 .B llgal
 may have created earlier. This includes thumbnails, scaled down slides, all 
 HTML files, caption file, reel-effect picture, indextemplate and slidetemplate 
 and the stylesheet file.
+.TP
+.BI --clean
+Remove all files
+.B llgal
+may have created earlier and that user did not modify since.
+
+.SH CAPTIONS
+When called with
+.I -c
+.B llgal
+check whether a
+.IR captions
+file exists in the
+.IR .llgal.files
+subdirectory.
+If not, it does nothing but generating it from images and movies
+that exists in the local directory.
+If it exists, it uses it to generate
+.IR captions
+in the gallery.
+The order of the captions in this file determines the order in the gallery.
+
+.B IMG: <filename> ---- <caption>
+.RS
+defines an image (
+.B IMG:
+is the default type).
+.RE
+.B MVI: <filename> ---- <linkname> ---- <caption>
+.RS
+defines a movie.
+.RE
+.B TXT: <text in slide> ---- <caption>
+.RS
+defines a text slide.
+.RE
+.B LNK: <url> ---- <linkname> ---- <caption>
+.RS
+defines a link slide.
+.RE
+.B DIR: <dir> ---- <linkname> ---- <caption>
+.RS
+defines a subdirectory slide.
+.RE
+.B TITLE: <title>
+.RS
+defines the title of the gallery.
+.RE
+.B INDEXHEAD: <one header>
+.RS
+defines a header (multiple ones are possible).
+.RE
+.B INDEXFOOT: <one footer>
+.RS
+defines a footer (multiple ones are possible).
+.RE
+.TP
+Note that you can use whatever HTML syntax in the captions.
+.RE
+Line begining with a
+.RI #
+are ignored.
+
 .SH FILES
 .I /usr/share/llgal/indextemplate.html
 .RS
@@ -264,19 +322,19 @@ also checks for the existence of a
 directory where users can store their own templates, overriding
 the site-wide 
 .IR "/usr/share/llgal" .
+
 .SH EXAMPLES
 Run
 .B llgal
 in a directory with 
-.IR jpg " or " gif
-images to see what it does.  Then
+.IR jpg ", " gif ", " png ", " mpg " or " avi
+files to see what it does.  Then
 play with the options described above and use
 .B -h
 if you need a quick listing.
+
 .SH BUGS
 There are always some.  If you find any let me know.
-I don't have much time to keep tweaking
-.B llgal
-but if any major bugs pop up I probably ought to fix them.
+
 .SH AUTHOR
 Brice Goglin <Brice.Goglin@ens-lyon.org>

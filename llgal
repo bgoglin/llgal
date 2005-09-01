@@ -16,11 +16,11 @@ my $local_llgal_dir = ".llgal.files" ;
 # llgal files
 my $filmtile_filename = "tile.png" ;
 my $css_filename = "llgal.css" ;
-my $slidetemplate_filename = "slidetemplate.html" ;
 my $indextemplate_filename = "indextemplate.html" ;
+my $slidetemplate_filename = "slidetemplate.html" ;
 
 # name or prefix of locally generated files
-my $caption_filename = "captions" ;
+my $captions_filename = "captions" ;
 my $thumb_filenameprefix = "thumb_" ;
 my $slide_filenameprefix = "slide_" ;
 
@@ -34,8 +34,26 @@ foreach my $conf ( "/etc/llgalrc", $ENV{HOME}."/.llgalrc", ".llgalrc" ) {
     while (<CONF>) {
 	if (/^llgal_share_dir = "(.+)"$/) {
 	    $llgal_share_dir = $1 ;
-	} elsif (/user_share_dir = "(.+)"$/) {
+	} elsif (/^user_share_dir = "(.+)"$/) {
 	    $user_share_dir = $ENV{HOME}."/".$1 ;
+	} elsif (/^local_llgal_dir = "(.+)"$/) {
+	    $local_llgal_dir = $1 ;
+	} elsif (/^filmtile_filename = "(.+)"$/) {
+	    $filmtile_filename = $1 ;
+	} elsif (/^css_filename = "(.+)"$/) {
+	    $css_filename = $1 ;
+	} elsif (/^indextemplate_filename = "(.+)"$/) {
+	    $indextemplate_filename = $1 ;
+	} elsif (/^slidetemplate_filename = "(.+)"$/) {
+	    $slidetemplate_filename = $1 ;
+	} elsif (/^captions_filename = "(.+)"$/) {
+	    $captions_filename = $1 ;
+	} elsif (/^thumb_filenameprefix = "(.+)"$/) {
+	    $thumb_filenameprefix = $1 ;
+	} elsif (/^slide_filenameprefix = "(.+)"$/) {
+	    $slide_filenameprefix = $1 ;
+	} elsif (/^caption_removal_line = "(.+)"$/) {
+	    $caption_removal_line = $1 ;
 	} elsif (/^[^#]/ && !/^(\s*)$/) {
 	    die "Unrecognized option line: ". $_ ;
 	}
@@ -197,6 +215,7 @@ my $TYPE_TXT = 0 ;
 my $TYPE_LNK = 1 ;
 my $TYPE_IMG = 2 ;
 my $TYPE_MVI = 3 ;
+my $TYPE_DIR = 4 ;
 
 # headers and footers
 my @headers = () ;
@@ -253,7 +272,7 @@ sub clean_files {
 	    } else {
 		print "(preserved $_) " ;
 	    }
-	} elsif (/^$caption_filename$/) {
+	} elsif (/^$captions_filename$/) {
 	    if ($all or !system("grep -q \"$caption_removal_line\" \"$opt_d/$local_llgal_dir/$_\"")) {
 		unlink "$opt_d/$local_llgal_dir/$_";
 	    } else {
@@ -294,26 +313,25 @@ if ($opt_cleanall) {
 ###################################################################################
 # generating captions based on filename
 sub make_filename_caption {
-    my $file = shift ;
-    return $file;
+    my $filename = shift ;
+    return $filename;
 }
 
 # generating captions based on exiftags
 sub make_exiftags_caption {
     my $file = shift ;
-    my $ext = shift ;
-    my $caption = `exifcom $file.$ext 2> /dev/null` ;
+    my $caption = `exifcom $file 2> /dev/null` ;
     chomp $caption ;
     return $caption ;
 }
 
 # generating captions
 sub make_caption {
+    my $filename = shift ;
     my $file = shift ;
-    my $ext = shift ;
     my $type = shift ;
-    return make_exiftags_caption ($file, $ext) if ($opt_ce && $type == $TYPE_IMG) ;
-    return make_filename_caption ($file) if ($opt_C) ;
+    return make_exiftags_caption ($file) if ($opt_ce && $type == $TYPE_IMG) ;
+    return make_filename_caption ($filename) if ($opt_C) ;
     return "" ;
 }
 
@@ -338,6 +356,14 @@ sub get_entries {
     push @mvifiles, grep((!/^\.thumb/ and !/^\.slide/ and !/^\.tile/ and /\.avi$/i), readdir DIR) ;
     rewinddir DIR ;   # this is CRUCIAL here!!!
 
+    # find all subdirectories
+    my @subdirs = () ;
+    while ($_ = readdir DIR) {
+	if (/^[^.]/ && -d "$opt_d/$_") {
+	    push @subdirs, $_ ;
+	}
+    }
+
     closedir DIR ;
 
     # add files to entries
@@ -350,7 +376,7 @@ sub get_entries {
 	$entry->{type} = $TYPE_IMG ;
 	$entry->{filename} = $filename ;
 	$entry->{url} = $file ;
-	$entry->{caption} = make_caption ($filename, $ext, $TYPE_IMG) ;
+	$entry->{caption} = make_caption ($filename, $file, $TYPE_IMG) ;
         push @entries, $entry ;
     }
     
@@ -363,9 +389,20 @@ sub get_entries {
 	$entry->{type} = $TYPE_MVI ;
 	$entry->{filename} = $filename ;
 	$entry->{url} = $file ;
-	$entry->{caption} = make_caption ($filename, $ext, $TYPE_MVI) ;
+	$entry->{caption} = make_caption ($filename, $file, $TYPE_MVI) ;
 	$entry->{text} = make_filename_caption ($filename) ;
         push @entries, $entry ;
+    }
+
+    while (@subdirs) {
+	my $dirname = shift @subdirs ;
+	my $entry ;
+	$entry->{type} = $TYPE_DIR ;
+	$entry->{filename} = $dirname ;
+	$entry->{url} = $dirname ;
+	$entry->{caption} = make_caption ($dirname, $dirname, $TYPE_DIR) ;
+	$entry->{text} = make_filename_caption ($dirname) ;
+	push @entries, $entry ;
     }
 
     # sort alphabetically, by file name
@@ -389,14 +426,14 @@ if (!-r "$opt_d/$local_llgal_dir") {
 #######################################################################
 # If the -c (or -C) option was supplied let user specify captions, else see below
 if ($opt_c or $opt_C) {
-    if (! -r "$opt_d/$local_llgal_dir/$caption_filename") {
+    if (! -r "$opt_d/$local_llgal_dir/$captions_filename") {
 	get_entries ;
 
-	# create and fill $caption_filename file if it doesn't exist
+	# create and fill $captionw_filename file if it doesn't exist
 	print "Found $nentries files in " . ($opt_d eq "." ? "current directory" : "directory $opt_d") ."\n" ;
-	open(CAP, ">$opt_d/$local_llgal_dir/$caption_filename") or die "Can't create $opt_d/$local_llgal_dir/$caption_filename file\n" ;
-	print "Creating the $caption_filename file...\n" ;
-	print CAP "# This is llgal's $caption_filename file, first generated ", scalar localtime, ".\n" ;
+	open(CAP, ">$opt_d/$local_llgal_dir/$captions_filename") or die "Can't create $opt_d/$local_llgal_dir/$captions_filename file\n" ;
+	print "Creating the $captions_filename file...\n" ;
+	print CAP "# This is llgal's $captions_filename file, first generated ", scalar localtime, ".\n" ;
 	print CAP "# TITLE: title of the index\n" ;
 	print CAP "# INDEXHEAD: one header line in the index\n" ;
 	print CAP "# INDEXFOOT: one header line in the index\n" ;
@@ -409,19 +446,22 @@ if ($opt_c or $opt_C) {
 	print CAP "\n" ;
 
 	for (my $i = 0; $i < $nentries; $i++) {
-	    if ($entries[$i]->{type} == $TYPE_IMG) {
+	    my $type = $entries[$i]->{type} ;
+	    if ($type == $TYPE_IMG) {
 		print CAP "IMG: ". $entries[$i]->{url} ." ---- ". $entries[$i]->{caption} ."\n";
-	    } elsif ($entries[$i]->{type} == $TYPE_MVI) {
+	    } elsif ($type == $TYPE_MVI) {
 	        print CAP "MVI: " . $entries[$i]->{url} ." ---- ". $entries[$i]->{text} ." ---- ". $entries[$i]->{caption} ."\n";
+	    } elsif ($type == $TYPE_DIR) {
+	        print CAP "DIR: " . $entries[$i]->{url} ." ---- ". $entries[$i]->{text} ." ---- ". $entries[$i]->{caption} ."\n";
 	    }
 	}
 	close(CAP);
-	die "Now edit the $caption_filename file to your liking and rerun llgal -c\n";
+	die "Now edit the $captions_filename file to your liking and rerun llgal -c\n";
     } else {
 	# read in files specified in the .captions file if it exists
-	print "Reading the $caption_filename file ... ";
+	print "Reading the $captions_filename file ... ";
 
-	open(CAP,"$opt_d/$local_llgal_dir/$caption_filename") or die "Can't open $opt_d/$local_llgal_dir/$caption_filename file\n";
+	open(CAP,"$opt_d/$local_llgal_dir/$captions_filename") or die "Can't open $opt_d/$local_llgal_dir/$captions_filename file\n";
 	my $line;
 	while (defined($line = <CAP>)) {
 	    chomp($line); $line =~ s/^\s*//; $line =~ s/\s\(\s*\)$/\1/;
@@ -465,6 +505,14 @@ if ($opt_c or $opt_C) {
 			$entry->{caption} = $4 ;
 			$entry->{text} = $3 ;
 
+		    } elsif ($line =~ m/^DIR:\s+(.+)\s+----\s+(.+)\s+----\s+(.*)\s*$/) {
+			# directory slide
+			$entry->{type} = $TYPE_DIR ;
+			$entry->{filename} = $1 ;
+			$entry->{url} = $1 ;
+			$entry->{caption} = $3 ;
+			$entry->{text} = $2 ;
+
 		    } elsif ($line =~ m/^IMG:\s+(.+)\.(.+)\s+----\s+(.*)\s*$/
 			     or $line =~ m/\s+(.+)\.(.+)\s+----\s+(.*)\s*^/) {
 			# image slide (default)
@@ -472,6 +520,7 @@ if ($opt_c or $opt_C) {
 			$entry->{filename} = $1 ;
 			$entry->{url} = $1 .".". $2 ;
 			$entry->{caption} = $3 ;
+
 		    } else {
 			die "Unrecognized line in caption file.\n" ;
 		    }
@@ -642,8 +691,8 @@ if ($opt_s) {
 		if ($type == $TYPE_TXT) {
 		    # text slide
 		    $line =~ s/(<.*)<!--THIS-IMAGE-->(.)(.*>)/<div class="text-slide">$entries[$i]->{text}<\/div>/;
-		} elsif ($type == $TYPE_LNK || $type == $TYPE_MVI) {
-		    # link or movie slide
+		} elsif ($type == $TYPE_LNK || $type == $TYPE_MVI || $type == $TYPE_DIR) {
+		    # link or movie or directory slide
 		    $line =~ s/(<.*)<!--THIS-IMAGE-->(.)(.*>)/<div class="text-slide"><a href="$entries[$i]->{url}">$entries[$i]->{text}<\/a><\/div>/ ;
 		} elsif ($type == $TYPE_IMG) {
 		    my $file = $entries[$i]->{url} ;
@@ -771,13 +820,10 @@ for (my $i = 0; $i < $nentries; $i += $num) {
     for (my $j = 0; $j < $num; $j++) {
 	print IXW "    <td class=\"thumb\" width=\"$entries[$i+$j]->{thumbxdim}\" height=\"$entries[$i+$j]->{thumbydim}\">\n      ";
 	my $type = $entries[$i+$j]->{type} ;
-	if ($type == $TYPE_LNK || $type == $TYPE_MVI) {
+	if ($type == $TYPE_LNK || $type == $TYPE_MVI || $type == $TYPE_DIR) {
 	    print IXW "<div class=\"text-thumb\"><a href=\"" ;
-	    if ($opt_s) {
-		print IXW $entries[$i+$j]->{url} ;
-	    } else {
-		print IXW $entries[$i+$j]->{slide} ;
-	    }
+	    # always link to url instead of slides here
+	    print IXW $entries[$i+$j]->{url} ;
 	    print IXW "\">", $entries[$i+$j]->{text}, "</a></div></td>\n" ;
 	} elsif ($type == $TYPE_TXT) {
 	    print IXW "<div class=\"text-thumb\">", $entries[$i+$j]->{text}, "</div></td>\n" ;
@@ -809,7 +855,7 @@ for (my $i = 0; $i < $nentries; $i += $num) {
 	print IXW "  <tr>\n";
 	print IXW "    <td>&nbsp;</td>\n" unless ($opt_r) ;
 	for (my $j = 0; $j < $num; $j++) {
-	    print IXW "    <td class=\"thumbdim\">" ;
+	    print IXW "    <td class=\"thumb-dim\">" ;
 	    my $type = $entries[$i+$j]->{type} ;
 	    my $printdim = "";
 	    if ($type == $TYPE_IMG || $type == $TYPE_MVI) {
@@ -832,7 +878,7 @@ for (my $i = 0; $i < $nentries; $i += $num) {
 	print IXW "  <tr>\n" ;
 	print IXW "<td>&nbsp;</td>\n" unless ($opt_r) ;
 	for (my $j = 0; $j < $num; $j++) {
-	    print IXW "    <td>$entries[$i+$j]->{caption}</td>\n" ;
+	    print IXW "    <td class=\"thumb-caption\">$entries[$i+$j]->{caption}</td>\n" ;
 	}
 	print IXW "  </tr>\n" ;
     }
