@@ -1,3 +1,9 @@
+llgal (0.9.3)
+
+  * Fix caption parsing so that "IMG: " is the default type.
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Tue, 12 Apr 2005 19:09:41 +0200
+
 llgal (0.9.2)
 
   * Use llgal.in to replace /etc/ and /usr/share/ directories during install.
