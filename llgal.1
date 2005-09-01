@@ -673,6 +673,19 @@ Make all generated files world readable [-www].
 .RE
 
 
+.SH CHARACTER ENCODING
+If a filename contains non-ascii characters which are not safely
+representable in a URL,
+.BI llgal
+will escape them using the method RFC 2396 specifies.
+This may raise problems if the web server has a different notion
+of character encoding than the machine
+.BI llgal
+runs on.
+See also
+.I http://www.w3.org/TR/html4/appendix/notes.html#h-B.2\n"
+
+
 .SH NOTES
 Note that all numerical options may be resetted to their default value
 by setting them a negative value.
