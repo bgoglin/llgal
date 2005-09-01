@@ -31,18 +31,20 @@ my $clean_asked = 0 ;		# clean up all generated files
 my $cleanall_asked = 0 ;	# clean up all generated and user modified files
 my $generate_config = undef ;   # generate a config file
 my $generate_captions = 0 ;     # generate (or update) captions
+my $make_recursive = 0 ;        # do we look at subdirectories ?
 
 # process these options but kept other options in @ARGV for later
 Getopt::Long::Configure('passthrough') ;
 GetOptions(
-	   'gc'         => \$generate_captions,
-	   'clean'	=> \$clean_asked,
-	   'cleanall'	=> \$cleanall_asked,
 	   'd=s' 	=> \$destination_dir,
 	   'f'		=> \$force_regen_asked,
+           'R'          => \$make_recursive,
+	   'gc'         => \$generate_captions,
+	   'gencfg=s'   => \$generate_config,
+	   'clean'	=> \$clean_asked,
+	   'cleanall'	=> \$cleanall_asked,
 	   'v|version'	=> \$version_asked,
 	   'h|help'	=> \$help_asked,
-	   'gencfg=s'   => \$generate_config,
 	) ;
 
 # restore default behavior: process all options and warn on error
@@ -178,10 +180,19 @@ my $use_caption_file = 0 ;
 my $convert_options = "" ;
 my $scaled_convert_options = "" ;
 my $thumbnail_convert_options = "" ;
-# do we look at subdirectories ?
-my $make_recursive = 0 ;
 # makes everything world-readable (-www)
 my $www_access_rights = 0 ;
+
+# Recursion
+# generate header and footer for link to parent gallery
+my $parent_link = 0 ;
+# add indentation to the begining of messages
+my $indent = "" ;
+
+sub indprint {
+    print $indent ;
+    print @_ ;
+}
 
 ######################################################################
 # create usage now to use defaults values
@@ -189,7 +200,18 @@ my $www_access_rights = 0 ;
 my $usage = << "END_OF_USAGE";
 This is llgal $version the Loulous HTML image slide show generator.
 Syntax:  llgal [-option -option ...]
-Options:  -a              write image sizes under thumbnails on index page
+Behavior Options:
+          -d <dir>        operate on files in directory <dir> ($destination_dir)
+          -f              force thumbnail and scaled slide regeneration
+          -R              look at subdirectories
+          --gc            generate or update the caption file
+          --gencfg <file> generate the configuration file <file>
+          --clean         remove all generated files
+          --cleanall      remove all generated and user modified files
+          -v, --version   show version
+          -h, --help      displays this brief help
+Layout Options:
+          -a              write image sizes under thumbnails on index page
           --ad            like -a, but write only the image dimensions
           --as            like -a, but write only the file size (in kbytes)
           --asu <s>       change file size unit ($show_size_unit)
@@ -201,15 +223,12 @@ Options:  -a              write image sizes under thumbnails on index page
           --ct            use image timestamps as captions
           --ctf <s>       timestamp format in captions (strftime format)
           --con <s>       options to pass to convert (e.g. -quality N)
-          -d <dir>        operate on files in directory <dir> ($destination_dir)
-          --gc            generate or update the caption file
           -i <file>       name of the main thumbnail index file ($index_filename)
           -k              use the image captions for the HTML slide titles
           -n              use image file names for the HTML slide files
           --nc            omit the image count from the captions
           -p <n>          cellpadding value of thumbnail index tables ($index_cellpadding)
           -r              omit the film reel effect altogether
-          -R              look at subdirectories
           -s              make no HTML slides, link thumbnails to images
           --sp <s>        sets the slide image prefix (\"$scaled_image_filenameprefix\")
           -t <n>          height of the film reel tiled image ($tile_height)
@@ -221,14 +240,8 @@ Options:  -a              write image sizes under thumbnails on index page
           --wx <n>        rows in thumbnail index are at most <n> pixels wide
           --xy <n>        scale thumbs to <n> pixels in their longer dimension
           -y <n>          scale all thumbnails to the same height <n> ($thumbnail_height_max)
-          --clean         remove all generated files
-          --cleanall      remove all generated and user modified files
           --config <s>    pass an additional configuration files
           --option <s>    pass an additional option as in configuration files
-          -f              force thumbnail and scaled slide regeneration
-          --gencfg <file> generate the configuration <file>
-          -v, --version   show version
-          -h, --help      displays this brief help
 Note:      default values are given in parentheses (where applicable).
 Author:    Brice Goglin <Brice.Goglin\@ens-lyon.org>
 Homepage:  http://bgoglin.free.fr/llgal
@@ -361,7 +374,8 @@ foreach my $conf ( @config_files ) {
 }
 
 foreach my $conf ( @additional_config_files ) {
-    die "Cannot find additional configuration files \"$conf\".\n" unless (-r "$conf") ;
+    die "Cannot find additional configuration files \"$conf\".\n"
+	unless (-r "$conf") ;
     open CONF, $conf ;
     while (<CONF>) {
 	process_option $_ ;
@@ -383,12 +397,13 @@ GetOptions(
 	   'ct'		=> \$make_caption_from_image_timestamp,
 	   'ctf=s'      => \$timestamp_format_in_caption,
 	   'i=s'	=> \$index_filename,
+	   'indent=s'   => \$indent,
 	   'k'		=> \$make_slide_title_from_caption,
 	   'n'		=> \$make_slide_filename_from_filename,
 	   'nc'		=> \$show_no_slide_counter,
 	   'p=i'	=> \$index_cellpadding,
+	   'parent'     => \$parent_link,
            'r'		=> \$show_no_film_effect,
-           'R'          => \$make_recursive,
 	   's'		=> \$make_no_slides,
 	   't=i'	=> \$tile_height,
 	   'u'		=> \$show_caption_under_thumbnails,
@@ -407,7 +422,8 @@ GetOptions(
 	) or die $usage ;
 
 die $usage if ($help_asked) ;
-die "This is llgal version $version.\n" if ($version_asked) ;
+die "This is llgal version $version.\n"
+    if ($version_asked) ;
 
 ######################################################################
 # sanity checks and restore defaults of numerical options
@@ -421,7 +437,7 @@ sub is_integer {
 die "Please give an integer value for thumbnail width max\n"
     unless is_integer($thumbnail_width_max) ;
 if ($thumbnail_width_max < 0) {
-    print "Thumbnail width max value < 0, restoring to default (".
+    indprint "Thumbnail width max value < 0, restoring to default (".
 	($thumbnail_width_max_default?$thumbnail_width_max_default:"unlimited") .")\n" ;
     $thumbnail_width_max = $thumbnail_width_max_default ;
 }
@@ -432,7 +448,7 @@ die "Please give a positive thumbnail width max value (or 0 for unlimited)\n"
 die "Please give an integer value for thumbnail height max\n"
     unless is_integer($thumbnail_height_max) ;
 if ($thumbnail_height_max < 0) {
-    print "Thumbnail height max value < 0, restoring to default ($thumbnail_height_max_default)\n" ;
+    indprint "Thumbnail height max value < 0, restoring to default ($thumbnail_height_max_default)\n" ;
     $thumbnail_height_max = $thumbnail_height_max_default ;
 }
 die "Please give a positive thumbnail height max value\n"
@@ -442,7 +458,7 @@ die "Please give a positive thumbnail height max value\n"
 die "Please give an integer value for thumbnails per row\n"
     unless is_integer($thumbnails_per_row) ;
 if ($thumbnails_per_row < 0) {
-    print "Thumbnails per row value < 0, restoring to default (".
+    indprint "Thumbnails per row value < 0, restoring to default (".
 	($thumbnails_per_row_default?$thumbnails_per_row_default:"unlimited") .")\n" ;
     $thumbnails_per_row = $thumbnails_per_row_default ;
 }
@@ -453,7 +469,7 @@ die "Please give a positive thumbnails per row value (or 0 for unlimited)\n"
 die "Please give an integer value for pixels per row\n"
     unless is_integer($pixels_per_row) ;
 if ($pixels_per_row < 0) {
-    print "Pixels per row value < 0, restoring to default (".
+    indprint "Pixels per row value < 0, restoring to default (".
 	($pixels_per_row_default?$pixels_per_row_default:"unlimited") .")\n" ;
     $pixels_per_row = $pixels_per_row_default ;
 }
@@ -464,7 +480,7 @@ die "Please give a positive pixels per row value (or 0 for unlimited)\n"
 die "Please give an integer value for index cellpadding\n"
     unless is_integer($index_cellpadding) ;
 if ($index_cellpadding < 0) {
-    print "Index cellpadding value < 0, restoring to default ($index_cellpadding_default)\n" ;
+    indprint "Index cellpadding value < 0, restoring to default ($index_cellpadding_default)\n" ;
     $index_cellpadding = $index_cellpadding_default ;
 }
 die "Please give a positive or null index cellpadding value\n"
@@ -474,7 +490,7 @@ die "Please give a positive or null index cellpadding value\n"
 die "Please give an integer value for tile height\n"
     unless is_integer($tile_height) ;
 if ($tile_height < 0) {
-    print "Tile height value < 0, restoring to default value ($tile_height_default)\n" ;
+    indprint "Tile height value < 0, restoring to default value ($tile_height_default)\n" ;
     $tile_height = $tile_height_default ;
 }
 die "Please give a positive or null tile height value\n"
@@ -484,7 +500,7 @@ die "Please give a positive or null tile height value\n"
 die "Please give an integer value for text slide width\n"
     unless is_integer($text_slide_width) ;
 if ($text_slide_width < 0) {
-    print "Text slide width value < 0, restoring to default ($text_slide_width_default)\n" ;
+    indprint "Text slide width value < 0, restoring to default ($text_slide_width_default)\n" ;
     $text_slide_width = $text_slide_width_default ;
 }
 die "Please give a positive text slide width value\n"
@@ -494,7 +510,7 @@ die "Please give a positive text slide width value\n"
 die "Please give an integer value for text slide height\n"
     unless is_integer($text_slide_height) ;
 if ($text_slide_height < 0) {
-    print "Text slide height value < 0, restoring to default ($text_slide_height_default)\n" ;
+    indprint "Text slide height value < 0, restoring to default ($text_slide_height_default)\n" ;
     $text_slide_height = $text_slide_height_default ;
 }
 die "Please give a positive text slide height value\n"
@@ -504,7 +520,7 @@ die "Please give a positive text slide height value\n"
 die "Please give an integer value for slide width max\n"
     unless is_integer($slide_width_max) ;
 if ($slide_width_max < 0) {
-    print "Slide width max value < 0, restoring to default (".
+    indprint "Slide width max value < 0, restoring to default (".
 	($slide_width_max_default?$slide_width_max_default:"unlimited") .")\n" ;
     $slide_width_max = $slide_width_max_default ;
 }
@@ -515,7 +531,7 @@ die "Please give a positive slide width max value (or 0 for unlimited)\n"
 die "Please give an integer value for slide height max\n"
     unless is_integer($slide_height_max) ;
 if ($slide_height_max < 0) {
-    print "Slide height max value < 0, restoring to default (".
+    indprint "Slide height max value < 0, restoring to default (".
 	($slide_height_max_default?$slide_height_max_default:"unlimited") .")\n" ;
     $slide_height_max = $slide_height_max_default ;
 }
@@ -634,22 +650,23 @@ sub find_generic_llgal_file {
 sub get_generic_llgal_file {
     my ($filename) = (shift) ;
     if (-e "$destination_dir/$local_llgal_dir/$filename") {
-	print "Found $filename in $destination_dir/$local_llgal_dir/, using it.\n" ;
+	indprint "Found $filename in $destination_dir/$local_llgal_dir/, using it.\n" ;
     } else {
 	my $srcdir = find_generic_llgal_file ($filename, 1);
-	print "No $filename in $destination_dir/$local_llgal_dir/, getting a copy from $srcdir\n" ;
+	indprint "No $filename in $destination_dir/$local_llgal_dir/, getting a copy from $srcdir\n" ;
 	system("cp -f \"$srcdir/$filename\" \"$destination_dir/$local_llgal_dir/$filename\"") ;
     }
 }
 
 ######################################################################
-# -clean and -cleanall option
+# --clean and --cleanall option
 
 sub clean_files {
     my $all = shift ;
     my $notdeleted = 0 ;
 
-    die "Can't open directory $destination_dir\n" if (!-r $destination_dir) ;
+    die "Can't open directory $destination_dir\n"
+	if (!-r $destination_dir) ;
 
     opendir DIR, "$destination_dir/$local_llgal_dir" ;
     while ($_ = readdir DIR) {
@@ -690,16 +707,38 @@ sub clean_files {
 }
 
 if ($clean_asked) {
-    print "Removing all non-modified llgal files: ";
+    indprint "Removing all non-modified llgal files: ";
     clean_files 0 ;
     print "Done!\n";
+
+    opendir DIR, "$destination_dir" ;
+    while (my $dir = readdir DIR) {
+	if ($dir =~ /^[^.]/ && -d "$destination_dir/$dir") {
+	    print "\n" ;
+	    indprint "Entering subdirectory '$dir'...\n" ;
+	    system ( $0, @llgal_options, "-d", "$destination_dir/$dir", "--indent", $indent."  " ) ;
+	    indprint "Leaving subdirectory '$dir'.\n" ;
+	}
+    }
+    closedir DIR ;
     exit 0 ;
 }
 
 if ($cleanall_asked) {
-    print "Removing all llgal files: ";
+    indprint "Removing all llgal files: ";
     clean_files 1 ;
     print "Done!\n";
+
+    opendir DIR, "$destination_dir" ;
+    while (my $dir = readdir DIR) {
+	if ($dir =~ /^[^.]/ && -d "$destination_dir/$dir") {
+	    print "\n" ;
+	    indprint "Entering subdirectory '$dir'...\n" ;
+	    system ( $0, @llgal_options, "-d", "$destination_dir/$dir", "--indent", $indent."  " ) ;
+	    indprint "Leaving subdirectory '$dir'.\n" ;
+	}
+    }
+    closedir DIR ;
     exit 0;
 }
 
@@ -768,6 +807,9 @@ my @footers = () ;
 # global variable for exception messages
 my $tmp_warning ;
 
+# list of subdirectories
+my @subdirs ;
+
 ###################################################################################
 # generating safe url
 
@@ -793,7 +835,7 @@ my $local_llgal_url = make_safe_url ($local_llgal_dir) ;
 sub check_movie {
     my $filename = shift ;
     if (! -r $filename) {
-	$tmp_warning = "Cannot find movie $filename, skipping it.\n" ;
+	$tmp_warning = $indent."Cannot find movie $filename, skipping it.\n" ;
 	return -1 ;
     }
     return 0 ;
@@ -802,10 +844,10 @@ sub check_movie {
 sub check_image {
     my $filename = shift ;
     if (! -r $filename) {
-	$tmp_warning = "Cannot find image $filename, skipping it.\n" ;
+	$tmp_warning = $indent."Cannot find image $filename, skipping it.\n" ;
 	return -1 ;
     } elsif (system("identify \"$filename\" > /dev/null 2>&1")) {
-	$tmp_warning = "Bad image file $filename, skipping it.\n" ;
+	$tmp_warning = $indent."Bad image file $filename, skipping it.\n" ;
 	return -1 ;
     }
     return 0 ;
@@ -956,7 +998,7 @@ sub make_entry {
 	    my $output = `$thumbnail_create_command "$real_filename" "$real_thumb_filename" 2>&1` ;
 	    if ($?) {
 		chomp $output ;
-		$tmp_warning = "Failed to create $real_filename thumbnail ($output)\n" ;
+		$tmp_warning = $indent."Failed to create $real_filename thumbnail ($output)\n" ;
 		return undef ;
 	    }
 	}
@@ -988,7 +1030,7 @@ sub make_entry {
 	    }
 	    if ($?) {
 		chomp $output ;
-		$tmp_warning = "Failed to create $real_filename scaled image ($output)\n" ;
+		$tmp_warning = $indent."Failed to create $real_filename scaled image ($output)\n" ;
 		return undef ;
 	    }
 	}
@@ -1005,7 +1047,8 @@ sub make_entry {
 sub get_entries {
 
     # load up image files from $destination_dir into array @imgfiles
-    opendir DIR, $destination_dir or die "Can't open directory $destination_dir\n";
+    opendir DIR, $destination_dir
+	or die "Can't open directory $destination_dir\n";
 
     # find and read all jp(e)g, gif and png files
     my @imgfiles = () ;
@@ -1024,8 +1067,8 @@ sub get_entries {
     rewinddir DIR ;   # this is CRUCIAL here!!!
 
     # find all subdirectories
-    my @subdirs = () ;
     if ($make_recursive) {
+	@subdirs = () ;
 	while ($_ = readdir DIR) {
 	    if (/^[^.]/ && -d "$destination_dir/$_") {
 		push @subdirs, $_ ;
@@ -1038,15 +1081,14 @@ sub get_entries {
     # how many total files
     $nentries = @imgfiles + @mvifiles + @subdirs ;
 
-    print "Preparing entries: " ;
+    indprint "Preparing entries: " ;
     init_percentage () ;
     my $i = 0 ;
 
     my $warnings = "" ;
 
     # add entries
-    while (@imgfiles) {
-	my $filename = shift @imgfiles ;
+    foreach my $filename (@imgfiles) {
 	my @parts = split (/\./, $filename) ;
 	pop @parts ;
 	my $basename = join (".", @parts) ;
@@ -1059,8 +1101,7 @@ sub get_entries {
 	print_percentage (($i++)+1, $nentries) ;
     }
 
-    while (@mvifiles) {
-        my $filename = shift @mvifiles ;
+    foreach my $filename (@mvifiles) {
 	my @parts = split (/\./, $filename) ;
 	pop @parts ;
 	my $basename = join (".", @parts) ;
@@ -1073,8 +1114,7 @@ sub get_entries {
 	print_percentage (($i++)+1, $nentries) ;
     }
 
-    while (@subdirs) {
-	my $dirname = shift @subdirs ;
+    foreach my $dirname (@subdirs) {
 	my $entry = make_entry ($TYPE_DIR, $dirname, $dirname, undef, undef, undef) ;
 	if (not defined $entry) {
 	    $warnings .= $tmp_warning ;
@@ -1093,7 +1133,8 @@ sub get_entries {
 
     print "\n" ;
     print $warnings ;
-    die "Please select more files for your slide show!\n" if ($nentries < 1);
+    die "Please select more files for your slide show!\n"
+	if ($nentries < 1);
 }
 
 #######################################################################
@@ -1111,17 +1152,17 @@ if ($generate_captions) {
     # create and fill $captions_filename file if it doesn't exist
     get_entries ;
 
-    print "Found $nentries files in " .
+    indprint "Found $nentries files in " .
 	($destination_dir eq "." ? "current directory" : "directory $destination_dir") ."\n" ;
 
     if (-e "$destination_dir/$local_llgal_dir/$captions_filename") {
-	print "Reading existing captions from $captions_filename.\n" ;
+	indprint "Reading existing captions from $captions_filename.\n" ;
 	open (CAP, "$destination_dir/$local_llgal_dir/$captions_filename")
 	    or die "Can't open $destination_dir/$local_llgal_dir/$captions_filename for reading\n" ;
 	my @captions = <CAP>;
 	close(CAP) ;
 
-	print "Appending new captions to $captions_filename: " ;
+	indprint "Appending new captions to $captions_filename: " ;
 	open (CAP, ">>$destination_dir/$local_llgal_dir/$captions_filename")
 	    or die "Can't open $destination_dir/$local_llgal_dir/$captions_filename file to append\n" ;
 
@@ -1130,7 +1171,7 @@ if ($generate_captions) {
 	print CAP "\n" ;
 	print CAP "# Appended new captions (", scalar localtime, ").\n" ;
 	print CAP "\n" ;
-	# it's not easy to count lines in an append-only file
+	# it's not easy to count chars in an append-only file
 	# so we don't count them when computing the percentage
 
 	for (my $i = 0; $i < $nentries; $i++) {
@@ -1153,7 +1194,7 @@ if ($generate_captions) {
 	    print_percentage ($i+1, $nentries) ;
 	}
     } else {
-	print "Creating the $captions_filename file: " ;
+	indprint "Creating the $captions_filename file: " ;
 	open (CAP, ">$destination_dir/$local_llgal_dir/$captions_filename")
 	    or die "Can't create $destination_dir/$local_llgal_dir/$captions_filename file\n" ;
 
@@ -1191,7 +1232,20 @@ if ($generate_captions) {
     }
     close(CAP);
     print "\n";
-    die "Now edit the $captions_filename file to your liking and run llgal -c\n";
+
+    if ($make_recursive) {
+	print "\n"
+	    if @subdirs ;
+	foreach my $dir (@subdirs) {
+	    indprint "Entering subdirectory '$dir'...\n" ;
+	    system ( $0, @llgal_options, "-d", "$destination_dir/$dir", "--indent", "  ".$indent ) ;
+	    indprint "Leaving subdirectory '$dir'.\n" ;
+	    print "\n" ;
+	}
+    }
+
+    indprint "Now edit the $captions_filename file to your liking and run llgal -c\n";
+    exit 0 ;
 
 }
 
@@ -1200,7 +1254,7 @@ if ($generate_captions) {
 
 if ($use_caption_file) {
     # read in files specified in the .captions file if it exists
-    print "Reading the $captions_filename file and preparing entries: ";
+    indprint "Reading the $captions_filename file and preparing entries: ";
     init_percentage ();
 
     open(CAP,"$destination_dir/$local_llgal_dir/$captions_filename")
@@ -1242,6 +1296,7 @@ if ($use_caption_file) {
 		} elsif ($line =~ m/^DIR:\s*(.+)\s+----\s+(.+)\s+----\s*(?:\s(.*))?\s*$/) {
 		    # directory slide
 		    $entry = make_entry ($TYPE_DIR, $1, $1, undef, $2, $3) ;
+		    push @subdirs, $1 ;
 
 		} elsif ($line =~ m/^MVI:\s*(.+)\.(.+)\s+----\s+(.+)\s+----\s*(?:\s(.*))?\s*$/) {
 		    # movie slide
@@ -1270,23 +1325,31 @@ if ($use_caption_file) {
     $nentries = @entries ;
     print "\n" ;
     print $warnings ;
-    print "Found $nentries files.\n";
+    indprint "Found $nentries files.\n";
 
 } else {
     # generate the gallery without caring about the caption file
     get_entries ;
-    print "Found $nentries files in directory $destination_dir\n";
+    indprint "Found $nentries files in directory $destination_dir\n";
 }
 
 if ($unsafe_url_warning) {
     print "\n" ;
-    print "At least one of your files ($first_unsafe_url) contains non-ascii characters\n" ;
-    print "which are not safely representable in a URL. llgal has escaped them\n" ;
-    print "using the method RFC 2396 specifies, but this may not work out if\n" ;
-    print "your web server has a different notion of character encoding\n" ;
-    print "than the machine llgal runs on.\n" ;
-    print "See also: http://www.w3.org/TR/html4/appendix/notes.html#h-B.2\n" ;
+    indprint "At least one of your files ($first_unsafe_url) contains non-ascii characters\n" ;
+    indprint "which are not safely representable in a URL. llgal has escaped them\n" ;
+    indprint "using the method RFC 2396 specifies, but this may not work out if\n" ;
+    indprint "your web server has a different notion of character encoding\n" ;
+    indprint "than the machine llgal runs on.\n" ;
+    indprint "See also: http://www.w3.org/TR/html4/appendix/notes.html#h-B.2\n" ;
     print "\n" ;
+}
+
+#######################################################################
+# Add recursion header and footer
+
+if ($parent_link) {
+    unshift @headers, "<a href=\"..\">Back to parent gallery</a>" ;
+    push @footers, "<a href=\"..\">Back to parent gallery</a>" ;
 }
 
 #######################################################################
@@ -1302,7 +1365,7 @@ get_generic_llgal_file ($css_filename) ;
 
 # Get the film tile for the index
 if ($show_no_film_effect) {
-    print "Omitting film reel effect.\n" ;
+    indprint "Omitting film reel effect.\n" ;
 } else {
     get_generic_llgal_file ($filmtile_filename) ;
 }
@@ -1318,22 +1381,24 @@ if (!$show_no_film_effect) {
 # Create the individual slide show files
 
 if ($make_no_slides) {
-    print "Linking thumbnails directly to image files...  Making no html slides.\n";
+    indprint "Linking thumbnails directly to image files...  Making no html slides.\n";
 } else {
     # remove old .html files
     system("rm -f \"$destination_dir/$local_llgal_dir/*.html\"");
 
     # keep the slidetemplate in memory instead of always reopening it
     my @slidetemplate_text;
-    open(SR,"$destination_dir/$local_llgal_dir/$slidetemplate_filename") or die "Can't open the slide template file\n";
+    open(SR,"$destination_dir/$local_llgal_dir/$slidetemplate_filename")
+	or die "Can't open the slide template file\n";
     @slidetemplate_text = <SR>;
     close SR;
 
     # create slides
-    print "Creating individual slides: ";
+    indprint "Creating individual slides: ";
     init_percentage ();
     for (my $i = 0; $i < $nentries; $i++) {
-	open(SW, ">$destination_dir/$entries[$i]->{slide_filename}") or die "Can't create slide file\n";
+	open(SW, ">$destination_dir/$entries[$i]->{slide_filename}")
+	    or die "Can't create slide file\n";
 
 	my $type = $entries[$i]->{type} ;
 
@@ -1441,9 +1506,11 @@ print "\n" ;
 #######################################################################
 # Creating the index file
 
-print "Creating the $index_filename file: " ;
-open(IXR, "$destination_dir/$local_llgal_dir/$indextemplate_filename") or die "Can't open the index template file\n" ;
-open(IXW, ">$destination_dir/$index_filename") or die "Can't create main $index_filename file\n" ;
+indprint "Creating the $index_filename file: " ;
+open(IXR, "$destination_dir/$local_llgal_dir/$indextemplate_filename")
+    or die "Can't open the index template file\n" ;
+open(IXW, ">$destination_dir/$index_filename")
+    or die "Can't create main $index_filename file\n" ;
 
 # headers
 my $line ;
@@ -1574,7 +1641,7 @@ for (my $i = 0; $i < $nentries; $i += $num) {
 while (!(<IXR> =~ m/\*{10}/)) {};
 
 # footers
-while (defined($line = <IXR>)) {
+while (defined ($line = <IXR>)) {
     if ($line =~ m/<!--FOOTERS-->/) {
 	foreach my $footer (@footers) {
 	    print IXW "    <div class=\"footer\">" . $footer . "</div>\n";
@@ -1589,32 +1656,25 @@ close(IXR) ;
 print "\n" ;
 
 if ($forced_width_warning) {
-    print "(Warning: Row width max ($pixels_per_row) was too low even for one single image per row. "
+    indprint "(Warning: Row width max ($pixels_per_row) was too low even for one single image per row. "
 	. "Forced $forced_width_warning time". ($forced_width_warning>1?"s":"") .")\n" ;
 }
 
 #######################################################################
-# If --www was invoked make all images world-readable at the END
+# If --www was invoked make all files world-readable at the END
 if ($www_access_rights) {
     my $dir = "$destination_dir/";
     $dir = "" if $destination_dir eq ".";
-    print "\nMaking all llgal files world-readable for WWW publishing...\n";
-    print "chmod a+r $destination_dir/$local_llgal_dir/$css_filename\n";
+    indprint "\nMaking all llgal files world-readable for WWW publishing...\n";
     system("chmod a+r $destination_dir/$local_llgal_dir/$css_filename");
-    print "chmod a+r $destination_dir/*.html\n";
     system("chmod a+r $destination_dir/*.html");
-    print "chmod a+r $destination_dir/$local_llgal_dir/$thumbnail_image_filenameprefix*.*\n";
     system("chmod a+r $destination_dir/$local_llgal_dir/$thumbnail_image_filenameprefix*.*");
-    print "chmod a+r $destination_dir/$local_llgal_dir/$scaled_image_filenameprefix*.*\n";
     system("chmod a+r $destination_dir/$local_llgal_dir/$scaled_image_filenameprefix*.*");
-    print "chmod a+r $destination_dir/$local_llgal_dir/$filmtile_filename\n";
     system("chmod a+r $destination_dir/$local_llgal_dir/$filmtile_filename");
-    print "chmod a+r ";
     for(my $i = 0; $i < $nentries; $i++) {
 	next if ($entries[$i]->{type} != $TYPE_IMG
 		 && $entries[$i]->{type} != $TYPE_MVI);
 	my $file = $entries[$i]->{filename} ;
-	print "$dir$file ";
 	system("chmod a+r $dir$file");
     }
     die "\nDone!\n";
@@ -1622,6 +1682,7 @@ if ($www_access_rights) {
 
 #######################################################################
 # If --gencfg was invoked, generate a configuration file
+
 if (defined $generate_config) {
     die "Cannot generate $generate_config which already exists."
 	if -r "$generate_config" ;
@@ -1687,4 +1748,18 @@ if (defined $generate_config) {
     print NEWCFG "make_recursive = $make_recursive\n" ;
     print NEWCFG "www_access_rights = $www_access_rights\n" ;
     close NEWCFG ;
+}
+
+#######################################################################
+# Process subdirectories
+
+if ($make_recursive) {
+    print "\n"
+	if @subdirs;
+    foreach my $dir ( @subdirs ) {
+	indprint "Entering subdirectory '$dir'...\n" ;
+	system ( $0, @llgal_options, "-d", "$destination_dir/$dir", "--parent", "--indent", $indent."  " ) ;
+	indprint "Leaving subdirectory '$dir'.\n" ;
+	print "\n" ;
+    }
 }

@@ -142,13 +142,6 @@ or go crazy with
 may be used several times on the same command line.
 
 .TP
-.BI -d " <dir>"
-Operate on image files in directory
-.IR <dir> ,
-which is also where the HTML and thumbnail files will be generated.
-The default is the current directory.
-
-.TP
 .BI -i " <file>"
 Name of the main thumbnail index file.  The default is
 .IR index.html ,
@@ -181,10 +174,6 @@ Omit the film reel effect altogether.  For a simpler look you
 can also set the thumbnail background to be the same as the main
 index page background with the tile background-color option in the
 .IR llgal.css " file."
-
-.TP
-.BI -R
-Enable recursive mode. Subdirectories will be added to the gallery.
 
 .TP
 .B -s
@@ -283,6 +272,13 @@ See
 may be used several times on the same command line.
 
 .TP
+.BI -d " <dir>"
+Operate on image files in directory
+.IR <dir> ,
+which is also where the HTML and thumbnail files will be generated.
+The default is the current directory.
+
+.TP
 .BI -f
 Force thumbnail regeneration.  Also forces medium-slide regeneration if
 .BI --bigxy or --bigy
@@ -308,6 +304,17 @@ These captions may then be modified by the user and used by invocating
 later.
 
 .TP
+.BI --gencfg " <file>"
+Output configuration in
+.IR file
+for a futur reutilization through
+.BI --config
+See
+.SM
+.B CONFIGURATION
+.BI --config
+
+.TP
 .BI "-h, --help"
 Display brief help.
 
@@ -319,6 +326,27 @@ See
 .B CONFIGURATION
 .BI --option
 may be used several times on the same command line.
+
+.TP
+.BI -R
+Enable recursive mode. Each subdirectory will get a dedicated
+slide and
+.B llgal
+will be run inside it (except those whose name begins with
+a dot).
+This option might be used either to generate captions file
+in all directories, or actual galleries.
+If a caption file is used, only the subdirectories that
+are set inside will be processed.
+
+Note that recursive cleaning (
+.BI -R
+used together with
+.BI --clean
+or
+.BI --cleanall
+) will _not_ check that a subdirectory is in the caption file.
+All not-dot-begining subdirectories will be cleaned.
 
 .TP
 .BI "-v, --version"

@@ -1,3 +1,18 @@
+llgal (0.9.9)
+
+  * Implement recursive caption and subgallery generation with -R.
+  * Implement recursive cleaning without checking whether a subdirectory is in the caption file.
+  * Add --parent internal option to add link to parent gallery in subgalleries (not documented).
+  * Add --indent internal option to indent subgalleries messages (not documented).
+  * Split usage into behavior and layout options.
+  * Cleanup separation between behavior and layout in the manpage.
+  * Add missing description of --gencfg in the manpage.
+  * Remove messages when chmod'ing for --www.
+  * Cleanup code indentation around die.
+  * A few typos.
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Wed,  3 Aug 2005 03:17:43 +0200
+
 llgal (0.9.8)
 
   * -c is now only used to read captions from file. Generating captions
