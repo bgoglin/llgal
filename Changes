@@ -1,3 +1,9 @@
+llgal (0.10.1.1)
+
+  * Fix bogus check of .llgal.files attributes.
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Sat, 20 Aug 2005 01:32:55 +0200
+
 llgal (0.10.1)
 
   * Rework the text that is shown in links (MVI, FIL and DIR types)

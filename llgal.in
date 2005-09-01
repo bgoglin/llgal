@@ -1387,7 +1387,7 @@ if (! -e "$destination_dir/$local_llgal_dir") {
 	or die "Failed to create $destination_dir/$local_llgal_dir directory ($!)" ;
 }
 die "Local llgal '$destination_dir/$local_llgal_dir' is not a directory.\n"
-    if ! -d _ ;
+    if ! -d "$destination_dir/$local_llgal_dir" ;
 die "Cannot enter in local llgal directory '$destination_dir/$local_llgal_dir'.\n"
     if ! -x _ ;
 die "Cannot read local llgal directory '$destination_dir/$local_llgal_dir'.\n"
