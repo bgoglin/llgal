@@ -3,21 +3,21 @@
 body {
   font-family: verdana, sans-serif;
   background: #333333;
-  color: #DDDDDD;
+  color: #dddddd;
 }
 
 /* Links */
 
 a:link {
-  color: #95DDFF;
+  color: #95ddff;
 }
 
 a:visited {
-  color: #AAAAAA;
+  color: #aaaaaa;
 }
 
 a:hover {
-  color: #BBDDFF;
+  color: #bbddff;
   background: #555555;
 }
 
@@ -61,7 +61,9 @@ table.index td.thumb img {
 }
 
 table.index td.text-thumb {
-  border: 1px solid #ffffff;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #ffffff;
   text-align: center;
   font-size: 50%;
 }
@@ -84,7 +86,9 @@ table.index td.thumb-caption {
 
 table.slide {
   background-color: #000000;
-  border: 3px solid #ffffff;
+  border-width: 3px;
+  border-style: solid;
+  border-color: #ffffff;
   border-spacing: 0px;
 }
 

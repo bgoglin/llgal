@@ -1,3 +1,26 @@
+llgal (0.10.1)
+
+  * Rework the text that is shown in links (MVI, FIL and DIR types)
+    by default (when no captions file exists):
+    - Show the extension, not only the filename.
+    - Add an prefix text depending on the link type.
+    - Add MVI/FIL/DIR_default_linktext options to change this text.
+    - Add no_default_text option so that this text is not shown
+      (only the filename is shown).
+  * Document and improve link to parent gallery in subgalleries:
+    - make_parent option adds a header and a footer linking to the parent
+      (like --parent).
+    - parent_linktext option changes the text in these links.
+  * Add an UPGRADE file to document upgrading galleries from igal to llgal.
+  * Cleanup a few stuff in the CSS.
+  * Fix some inline styles in the HTML code.
+  * Fix quotes around string option in the manpage.
+  * Fix a few missing $ in regexp matching lines in configuration files.
+  * Fix a few typos.
+  * Remove "reel" near "film effect" everywhere.
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Fri, 19 Aug 2005 16:42:10 +0200
+
 llgal (0.10)
 
   * Add the FIL type for files that are neither an image nor a movie. FIL is similar

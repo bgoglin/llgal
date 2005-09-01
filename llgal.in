@@ -113,7 +113,7 @@ my $index_cellpadding = $index_cellpadding_default ;
 my $pixels_per_row = $pixels_per_row_default ;
 
 # Film effects
-# omit the film reel effect altogether (-r)
+# omit the film effect altogether (-r)
 my $show_no_film_effect = 0 ;
 # height of the tile.png tiled image (-t)
 my $tile_height = $tile_height_default ;
@@ -195,9 +195,17 @@ my $sort_criteria = "name" ;
 # makes everything world-readable (--www)
 my $www_access_rights = 0 ;
 
+# Default link text
+my $MVI_default_linktext = "Open movie " ;
+my $FIL_default_linktext = "Download file " ;
+my $DIR_default_linktext = "Open subgallery in " ;
+my $no_default_linktext = 0 ;
+
 # Recursion
 # generate header and footer for link to parent gallery
 my $parent_link = 0 ;
+# text that is shown when linking to the parent gallery
+my $parent_linktext = "Back to parent gallery" ;
 # add indentation to the begining of messages
 my $indent = "" ;
 
@@ -331,12 +339,13 @@ Layout Options:
           -n              use image file names for the HTML slide files
           --nc            omit the image count from the captions
           -p <n>          cellpadding value of thumbnail index tables ($index_cellpadding)
-          -r              omit the film reel effect altogether
+          --parent        add links to the parent directory
+          -r              omit the film effect altogether
           -S              add subdirectories to the list of slides
           -s              make no HTML slides, link thumbnails to images
           --sort <s>      sort files with criteria <s>
           --sp <s>        sets the slide image prefix (\"$scaled_image_filenameprefix\")
-          -t <n>          height of the film reel tiled image ($tile_height)
+          -t <n>          height of the film tiled image ($tile_height)
           --title <s>     string to substitute for TITLE in index template
           --tp <s>        sets the thumbnail image prefix (\"$thumbnail_image_filenameprefix\")
           -u              write captions under thumbnails on index page
@@ -461,8 +470,28 @@ sub process_option {
 	    $entry->{excluded} = 0 ;
 	    $entry->{filter} = $1 ;
 	    push (@excludes, $entry) ;
+# Default link text
+	} elsif (/^MVI_default_linktext\s*=\s*"(.+)"$/) {
+	    $MVI_default_linktext = $1 ;
+	} elsif (/^FIL_default_linktext\s*=\s*"(.+)"$/) {
+	    $FIL_default_linktext = $1 ;
+	} elsif (/^DIR_default_linktext\s*=\s*"(.+)"$/) {
+	    $DIR_default_linktext = $1 ;
+	} elsif (/^no_default_linktext\s*=\s*(.+)$/) {
+	    $no_default_linktext = $1 ;
+# Recursion
+	} elsif (/^make_recursive\s*=\s*(.+)$/) {
+	    $make_recursive = $1 ;
+	} elsif (/^parent_link\s*=\s*(.+)$/) {
+	    $parent_link = $1 ;
+	} elsif (/^parent_linktext\s*=\s*"(.+)"$/) {
+	    $parent_linktext = $1 ;
 # Various
-	} elsif (/^additional_configuration_file\s*=\s*"(.+)"/) {
+	} elsif (/^add_all_files\s*=\s*(.+)$/) {
+	    $add_all_files = $1 ;
+	} elsif (/^add_subdirs\s*=\s*(.+)$/) {
+	    $add_subdirs = $1 ;
+	} elsif (/^additional_configuration_file\s*=\s*"(.+)$"/) {
 	    push (@additional_config_files, $1) ;
 	} elsif (/^convert_options\s*=\s*"(.*)"$/) {
 	    push (@convert_options, split (' +', $1)) ;
@@ -474,12 +503,6 @@ sub process_option {
 	    $image_extensions = $1 ;
 	} elsif (/^movie_extensions\s*=\s*"(.*)"$/) {
 	    $movie_extensions = $1 ;
-	} elsif (/^make_recursive\s*=\s*(.+)$/) {
-	    $make_recursive = $1 ;
-	} elsif (/^add_all_files\s*=\s*(.+)$/) {
-	    $add_all_files = $1 ;
-	} elsif (/^add_subdirs\s*=\s*(.+)$/) {
-	    $add_subdirs = $1 ;
 	} elsif (/^sort_criteria\s*=\s*"(.+)"$/) {
 	    $sort_criteria = $1 ;
 	} elsif (/^www_access_rights\s*=\s*(.+)$/) {
@@ -500,7 +523,7 @@ foreach my $conf ( @config_files ) {
 }
 
 foreach my $conf ( @additional_config_files ) {
-    die "Additional configuration file '$conf' does not exists.\n"
+    die "Additional configuration file '$conf' does not exist.\n"
 	unless -e "$conf" ;
     die "Additional configuration file '$conf' is not a file.\n"
 	unless -f _ ;
@@ -1089,7 +1112,17 @@ sub make_entry {
 
     # the linktext (will be HTML-safe after caption file generation)
     if (not defined $linktext) {
-	$linktext = $basename ;
+	if (!$no_default_linktext) {
+	    if ($type == $TYPE_MVI) {
+		$linktext = $MVI_default_linktext.$filename ;
+	    } elsif ($type == $TYPE_FIL) {
+		$linktext = $FIL_default_linktext.$filename ;
+	    } elsif ($type == $TYPE_DIR) {
+		$linktext = $DIR_default_linktext.$filename ;
+	    }
+	} else {
+	    $linktext = $filename ;
+	}
 	$linktext =~ s/&/&amp;/g ;
 #       $linktext =~ s/"/&\#34;/g ;
     }
@@ -1572,8 +1605,8 @@ if ($use_caption_file) {
 # Add recursion header and footer
 
 if ($parent_link) {
-    unshift @headers, "<a href=\"..\">Back to parent gallery</a>" ;
-    push @footers, "<a href=\"..\">Back to parent gallery</a>" ;
+    unshift @headers, "<a href=\"..\">". $parent_linktext ."</a>" ;
+    push @footers, "<a href=\"..\">". $parent_linktext ."</a>" ;
 }
 
 #######################################################################
@@ -1589,7 +1622,7 @@ get_generic_llgal_file ($css_filename) ;
 
 # Get the film tile for the index
 if ($show_no_film_effect) {
-    indprint "Omitting film reel effect.\n" ;
+    indprint "Omitting film effect.\n" ;
 } else {
     get_generic_llgal_file ($filmtile_filename) ;
 }
@@ -1795,7 +1828,7 @@ for (my $i = 0; $i < $nentries; $i += $num) {
     } else {
 	print IXW "<table class=\"index with-tile\" style=\"border-spacing: ", $index_cellpadding, "px 0px;\">\n";
     }
-    print IXW "  <tr><td class=\"tiled\" style=\"height: ", $tile_height, "px;\" colspan=\"", ($show_no_film_effect?$num:$num+2), "\">&nbsp;</td></tr>\n" unless ($show_no_film_effect);
+    print IXW "  <tr><td class=\"tiled\" colspan=\"", ($show_no_film_effect?$num:$num+2), "\">&nbsp;</td></tr>\n" unless ($show_no_film_effect);
     print IXW "  <tr>\n";
     print IXW "    <td class=\"thumb\">&nbsp;</td>\n" unless ($show_no_film_effect);
     for (my $j = 0; $j < $num; $j++) {
@@ -1837,7 +1870,7 @@ for (my $i = 0; $i < $nentries; $i += $num) {
     }
     print IXW "    <td class=\"thumb\">&nbsp;</td>\n" unless ($show_no_film_effect) ;
     print IXW "  </tr>\n" ;
-    print IXW "  <tr><td class=\"tiled\" colspan=\"", $num+2, "\" style=\"", $tile_height, "\">&nbsp;</td></tr>\n" unless ($show_no_film_effect) ;
+    print IXW "  <tr><td class=\"tiled\" colspan=\"", $num+2, "\">&nbsp;</td></tr>\n" unless ($show_no_film_effect) ;
     if ($show_dimensions or $show_size) {
 	print IXW "  <tr>\n";
 	print IXW "    <td>&nbsp;</td>\n" unless ($show_no_film_effect) ;
@@ -2012,6 +2045,15 @@ if (defined $generate_config) {
     map {
 	print NEWCFG ($_->{excluded} ? "exclude" : "include"). " = \"". $_->{filter} ."\"\n" ;
     } @excludes ;
+    print NEWCFG "# Default linktext:\n" ;
+    print NEWCFG "MVI_default_linktext = \"MVI_default_linktext\"\n" ;
+    print NEWCFG "FIL_default_linktext = \"FIL_default_linktext\"\n" ;
+    print NEWCFG "DIR_default_linktext = \"DIR_default_linktext\"\n" ;
+    print NEWCFG "no_default_linktext = \"$no_default_linktext\"\n" ;
+    print NEWCFG "# Recursion:\n" ;
+    print NEWCFG "make_recursive = $make_recursive\n" ;
+    print NEWCFG "parent_link = $parent_link\n" ;
+    print NEWCFG "parent_linktext = \"$parent_linktext\"\n" ;
     print NEWCFG "# Various:\n" ;
     print NEWCFG "add_all_files = $add_all_files\n" ;
     print NEWCFG "add_subdirs = $add_subdirs\n" ;
@@ -2020,7 +2062,6 @@ if (defined $generate_config) {
     print NEWCFG "thumbnail_convert_options = \"". join (' ', @thumbnail_convert_options) ."\"\n" ;
     print NEWCFG "image_extensions = \"$image_extensions\"\n" ;
     print NEWCFG "movie_extensions = \"$movie_extensions\"\n" ;
-    print NEWCFG "make_recursive = $make_recursive\n" ;
     print NEWCFG "www_access_rights = $www_access_rights\n" ;
 
     close NEWCFG ;

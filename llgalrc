@@ -79,7 +79,7 @@
 
 ##### Film effect #####
 
-# Omit film reel effect [-r]
+# Omit film effect [-r]
 # show_no_film_effect = 0
 
 # Film tile height [-t <n>]
@@ -188,6 +188,34 @@
 # The order of includes and excludes is respected.
 # include = "string"
 
+##### Default linktext #####
+
+# Change the text that prefixes the filename when generating linktext
+# for movies without a captions file.
+# MVI_default_linktext = "Open movie "
+
+# Change the text that prefixes the filename when generating linktext
+# for files without a captions file.
+# FIL_default_linktext = "Download file "
+
+# Change the text that prefixes the filename when generating linktext
+# for directories without a captions file.
+# DIR_default_linktext = "Open subgallery in "
+
+# Don't show prefix when generating link text.
+# no_default_linktext = 0
+
+##### Recursion #####
+
+# Run recursively in subdirectories [-R]
+# make_recursive = 0
+
+# Add links to the parent directory [--parent].
+# parent_link = 0
+
+# Change text in links to parent directory.
+# parent_linktext = "Back to parent gallery"
+
 ##### Various #####
 
 # Add all files to the list of entries
@@ -215,9 +243,6 @@
 
 # Extensions that are matched when searching movies
 # movie_extensions = "mpe?g|avi"
-
-# Run recursively in subdirectories [-R]
-# make_recursive = 0
 
 # Change sort criteria when scanning files in the working directory [--sort]
 # sort_criteria = "name"

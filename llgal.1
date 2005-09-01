@@ -187,8 +187,17 @@ The cellpadding value of the thumbnail index tables.
 The default is 3.
 
 .TP
+.BI --parent
+Add links to the parent directory.
+This option is used internally for recursive galleries.
+These links are stored as a header and a footer for the index.
+The text in the links might be changed through the
+.B parent_linktext
+configuration option.
+
+.TP
 .BI -r
-Omit the film reel effect altogether.  For a simpler look you
+Omit the film effect altogether.  For a simpler look you
 can also set the thumbnail background to be the same as the main
 index page background with the tile background-color option in the
 .IR llgal.css " file."
@@ -231,7 +240,7 @@ Change slide image filename prefix
 .TP
 .BI -t " <n>"
 Height (in pixels) of the tiled image used to simulate the top
-and bottom "film reel" effect on the thumbnail index page.  This
+and bottom film effect on the thumbnail index page.  This
 is 21 for the default
 .I .tile.png
 image used, but you should set it otherwise if you replace that
@@ -301,7 +310,7 @@ may have created earlier and that user did not modify since.
 Remove all files
 .B llgal
 may have created earlier. This includes thumbnails, scaled down slides, all 
-HTML files, caption file, reel-effect picture, indextemplate and slidetemplate 
+HTML files, caption file, film effect picture, indextemplate and slidetemplate 
 and the stylesheet file.
 
 .TP
@@ -502,11 +511,11 @@ for details about these options and their default values.
 
 .B llgal directories:
 
-.I llgal_share_dir = "path"
+.I llgal_share_dir = \fI"path"
 .RS
 The location of llgal share directory where template are stored.
 .RE
-.I user_share_dir = "path"
+.I user_share_dir = \fI"path"
 .RS
 The location of the per-user share directory wher template are stored.
 If they exists, these files are used instead of the system-wide files.
@@ -514,39 +523,39 @@ If they exists, these files are used instead of the system-wide files.
 
 .B Names of generic llgal files:
 
-.I css_filename = "filename.css"
+.I css_filename = \fI"filename.css"
 .RS
 Name of the CSS file.
 .RE
-.I filmtile_filename = "filename.png"
+.I filmtile_filename = \fI"filename.png"
 .RS
 Name of the film tile image.
 .RE
-.I indextemplate_filename = "filename"
+.I indextemplate_filename = \fI"filename"
 .RS
 Name of the HTML index template that will be taken from common directories.
 .RE
-.I slidetemplate_filename = "filename"
+.I slidetemplate_filename = \fI"filename"
 .RS
 Name of the HTML slide template that will be taken from common directories.
 .RE
 
 .B Location and name of generated files:
 
-.I destination_dir = "path"
+.I destination_dir = \fI"path"
 .RS
 Directory of the gallery [-d <s>].
 .RE
-.I local_llgal_dir = "subdirectory"
+.I local_llgal_dir = \fI"subdirectory"
 .RS
 The name of the subdirectory where llgal generated files will be stored.
 .RE
-.I scaled_image_filenameprefix = "filenameprefix"
+.I scaled_image_filenameprefix = \fI"filenameprefix"
 .RS
 Prefix used to determine slide-image filenames from
 original images (in case of --bigxy or --bigy) [--sp <s>].
 .RE
-.I thumbnail_image_filenameprefix = "filenameprefix"
+.I thumbnail_image_filenameprefix = \fI"filenameprefix"
 .RS
 Prefix used to determine thumbnail filenames from
 original images [--tp <s>].
@@ -554,11 +563,11 @@ original images [--tp <s>].
 
 .B Index:
 
-.I index_filename = "index.html"
+.I index_filename = \fI"filename.html"
 .RS
 Name of the generated index file [-i <s>].
 .RE
-.I index_title = "string"
+.I index_title = \fI"string"
 .RS
 Title of the gallery [--title <s>].
 .RE
@@ -575,7 +584,7 @@ Pixels per row of thumbnails in index [-wx <n>].
 
 .I show_no_film_effect = <0/1>
 .RS
-Omit film reel effect [-r].
+Omit film effect [-r].
 .RE
 .I tile_height = <n>
 .RS
@@ -647,12 +656,12 @@ Default height of text slides.
 
 .B Captions:
 
-.I captions_filename = "filename"
+.I captions_filename = \fI"filename"
 .RS
 Name of the caption file that will be generated the first time llgal
 is called with -c.
 .RE
-.I caption_removal_line = "string"
+.I caption_removal_line = \fI"string"
 .RS
 This line will be added to the caption file llgal will generate the
 first time it is called with -c. If the user doesn't want igal to
@@ -687,7 +696,7 @@ Show image dimensions [-a, -ad].
 .RS
 Show file sizes [-a, -as].
 .RE
-.I show_size_unit = "string"
+.I show_size_unit = \fI"string"
 .RS
 Unit to be used when printing sizes [-asu <s>]
 .RE
@@ -698,16 +707,53 @@ Use a caption file [-c].
 
 .B Exclude:
 
-.I exclude = "string"
+.I exclude = \fI"string"
 .RS
 Exclude files whose name matches [--exclude <s>].
 This option may be used several times.
 .RE
-.I include = "string"
+.I include = \fI"string"
 .RS
 Include files whose name matches and were previously excluded [--include <s>].
 This option may be used several times.
 The order of includes and excludes is respected.
+.RE
+
+.B Default linktext:
+
+.I MVI_default_linktext = \fI"string"
+.RS
+Change the text that prefixes the filename when generating
+linktext for movies without a captions file.
+.RE
+.I FIL_default_linktext = \fI"string"
+.RS
+Change the text that prefixes the filename when generating
+linktext for files without a captions file.
+.RE
+.I DIR_default_linktext = \fI"string"
+.RS
+Change the text that prefixes the filename when generating
+linktext for directories without a captions file.
+.RE
+.I no_default_linktext = <0/1>
+.RS
+Don't show prefix when generating link text.
+.RE
+
+.B Recursion:
+
+.I make_recursive = <0/1>
+.RS
+Run recursively in subdirectories [-R].
+.RE
+.I parent_link = <0/1>
+.RS
+Add links to the parent directory [--parent].
+.RE
+.I parent_linktext = \fI"string"
+.RS
+Change text in links to parent directory.
 .RE
 
 .B Various:
@@ -720,16 +766,16 @@ Add all files to the list of entries, not only images and movies [-A].
 .RS
 Add subdirectories to the list of entries [-S].
 .RE
-.I convert_options = "string"
+.I convert_options = \fI"string"
 .RS
 Options to pass to convert [--con <s>].
 This option may be used several times.
 .RE
-.I scaled_convert_options = "string"
+.I scaled_convert_options = \fI"string"
 .RS
 Additional options to pass to convert when creating slides.
 .RE
-.I thumbnail_convert_options = "string"
+.I thumbnail_convert_options = \fI"string"
 .RS
 Additional options to pass to convert when creating thumbnails.
 .RE
@@ -738,19 +784,15 @@ Additional options to pass to convert when creating thumbnails.
 Additional configuration file [--config <s>].
 This option may be used several times.
 .RE
-.I image_extensions = "ext1|ext2|..."
+.I image_extensions = \fI"ext1|ext2|..."
 .RS
 Extensions that are matched when searching images
 .RE
-.I movie_extensions = "ext1|ext2|..."
+.I movie_extensions = \fI"ext1|ext2|..."
 .RS
 Extensions that are matched when searching movies
 .RE
-.I make_recursive = <0/1>
-.RS
-Run recursively in subdirectories [-R].
-.RE
-.I sort_criteria = "name|time|none"
+.I sort_criteria = \fI"name|time|none"
 .RS
 Change sort criteria when scanning files in the working directory.
 .RE
@@ -804,7 +846,7 @@ The default style sheet template.
 .RE
 .I /usr/share/llgal/tile.png
 .RS
-The tiled image used for the "film reel" effect.
+The tiled image used for the film effect.
 .RE
 All four files are copied to your image directory as dotfiles the
 first time you run
