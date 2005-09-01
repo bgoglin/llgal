@@ -6,6 +6,56 @@ use Image::Size;
 use strict ;
 no strict "refs" ;
 
+Getopt::Long::Configure('noignorecase', 'noautoabbrev', 'bundling') ;
+STDOUT->autoflush("1");
+
+######################################################################
+# store command-line options upfront to write in the index <HEAD>
+my @llgal_options = @ARGV;
+
+######################################################################
+# process general command-line options
+
+my $destination_dir = "." ;	# look in current directory "."
+my $force_regen_asked = 0 ;	# force thumbnail regeneration
+my $help_asked = 0 ;		# displays brief usage message
+my $clean_asked = 0 ;		# clean up all generated files
+my $cleanall_asked = 0 ;	# clean up all generated and user modified files
+
+# process these options but kept other options in @ARGV for later
+Getopt::Long::Configure('passthrough') ;
+GetOptions(
+	   'clean'	=> \$clean_asked,
+	   'cleanall'	=> \$cleanall_asked,
+	   'd=s' 	=> \$destination_dir,
+	   'f'		=> \$force_regen_asked,
+	   'h|help'	=> \$help_asked,
+	) ;
+
+# restore default behavior: process all options and warn on error
+Getopt::Long::Configure('nopassthrough') ;
+
+# strip any unnecessary slashes from the end of the given $destination_dir directory
+$destination_dir =~ s/\/$//;
+
+######################################################################
+# configuration files
+
+my @config_files = () ;
+push (@config_files, "/etc/llgalrc") ;
+push (@config_files, $ENV{HOME}."/.llgalrc") ;
+push (@config_files, "$destination_dir/.llgalrc") unless ($destination_dir eq ".") ;
+push (@config_files, ".llgalrc") ;
+
+Getopt::Long::Configure('passthrough') ;
+GetOptions(
+	   'config=s'   => \@config_files,
+	) ;
+Getopt::Long::Configure('nopassthrough') ;
+
+######################################################################
+# all configuration variables
+
 # directories when templates are stored
 my $llgal_share_dir = "/usr/share/llgal" ;
 my $user_share_dir = $ENV{HOME}."/.llgal" ;
@@ -28,187 +78,226 @@ my $slide_filenameprefix = "slide_" ;
 # the user may remove it to prevent llgal from removing the caption file with -clean
 my $caption_removal_line = "REMOVE THIS LINE IF LLGAL SHOULD NOT REMOVE THIS FILE" ;
 
-# default text slide dimensions
-my $text_slide_width = 400;
-my $text_slide_height = 300;
+my $index_filename = "index.html" ;	# name of the index file (-i)
+my $index_title = "Index of pictures" ;	# title of the gallery (--title)
 
-# parse config files
-foreach my $conf ( "/etc/llgalrc", $ENV{HOME}."/.llgalrc", ".llgalrc" ) {
-    open CONF, $conf ;
-    while (<CONF>) {
-	if (/^llgal_share_dir = "(.+)"$/) {
+my $show_dimensions = 0 ;	# to write image dimensions (-a or -ad)
+my $show_size = 0 ;		# to write image size (-a or -as)
+my $show_size_unit = "kB" ;	# change kB to another unit (-asu)
+
+my $use_caption_file = 0 ;	# use user-supplied captions (-c)
+my $caption_from_filename = 0 ;	# preserve image names as captions (-C)
+my $caption_from_exif = 0 ;	# use exiftags as captions (--ce)
+
+my $convert_options = "" ;	# options to be passed to convert (--con)
+my $slidetitle_from_caption = 0 ;	# use captions as slide titles (-k)
+my $slidename_from_filename = 0 ;	# use image names as slide names (-n)
+
+my $index_cellpadding = 3 ;	# cellpadding value for the thumbnail index tables (-p)
+my $no_film_effect = 0 ;	# omit the film reel effect altogether (-r)
+my $tile_height = 21 ;		# height of the tile.png tiled image (-t)
+my $make_no_slides = 0 ;	# make no slides, just thumbnail links to images (-s)
+
+my $pixels_per_row = undef ;	# how many pixels per row ar most in index (-wx)
+my $thumbnails_per_row = 5 ;	# how many thumbnails per row at most in index (-w)
+my $thumbnail_dimension_max = 0 ;	# scale thumb longer dimension (-xy)
+my $thumbnail_height_max = 0 ;	# max height of a thumbnail (-y)
+
+my $caption_under_thumbnails = 0 ;	# write captions under thumbnails on index page (-u)
+my $no_slide_counter = 0 ;	# omit the image slide from the caption (-x)
+
+my $www_access_rights = 0 ;	# makes everything world-readable (-www)
+
+my $slide_height_max = 0 ;	# max height of the slides (--bigy)
+my $text_slide_width = 400;	# default text slide width
+my $text_slide_height = 300;	# default text slide height
+
+######################################################################
+# parse options in config files
+
+sub process_option {
+	$_ = shift ;
+	chomp $_ ;
+    	if (/^llgal_share_dir\s*=\s*"(.+)"$/) {
 	    $llgal_share_dir = $1 ;
-	} elsif (/^user_share_dir = "(.+)"$/) {
+	} elsif (/^user_share_dir\s*=\s*"(.+)"$/) {
 	    $user_share_dir = $ENV{HOME}."/".$1 ;
-	} elsif (/^local_llgal_dir = "(.+)"$/) {
+	} elsif (/^local_llgal_dir\s*=\s*"(.+)"$/) {
 	    $local_llgal_dir = $1 ;
-	} elsif (/^filmtile_filename = "(.+)"$/) {
+	} elsif (/^filmtile_filename\s*=\s*"(.+)"$/) {
 	    $filmtile_filename = $1 ;
-	} elsif (/^css_filename = "(.+)"$/) {
+	} elsif (/^css_filename\s*=\s*"(.+)"$/) {
 	    $css_filename = $1 ;
-	} elsif (/^indextemplate_filename = "(.+)"$/) {
+	} elsif (/^indextemplate_filename\s*=\s*"(.+)"$/) {
 	    $indextemplate_filename = $1 ;
-	} elsif (/^slidetemplate_filename = "(.+)"$/) {
+	} elsif (/^slidetemplate_filename\s*=\s*"(.+)"$/) {
 	    $slidetemplate_filename = $1 ;
-	} elsif (/^captions_filename = "(.+)"$/) {
+	} elsif (/^captions_filename\s*=\s*"(.+)"$/) {
 	    $captions_filename = $1 ;
-	} elsif (/^thumb_filenameprefix = "(.+)"$/) {
-	    $thumb_filenameprefix = $1 ;
-	} elsif (/^slide_filenameprefix = "(.+)"$/) {
-	    $slide_filenameprefix = $1 ;
-	} elsif (/^caption_removal_line = "(.+)"$/) {
+	} elsif (/^caption_removal_line\s*=\s*"(.+)"$/) {
 	    $caption_removal_line = $1 ;
-	} elsif (/^text_slide_width = "(.+)"$/) {
+	} elsif (/^index_filename\s*=\s*"(.+)"$/) {
+	    $index_filename = $1 ;
+	} elsif (/^index_title\s*=\s*"(.+)"$/) {
+	    $index_title = $1 ;
+	} elsif (/^thumb_filenameprefix\s*=\s*"(.+)"$/) {
+	    $thumb_filenameprefix = $1 ;
+	} elsif (/^slide_filenameprefix\s*=\s*"(.+)"$/) {
+	    $slide_filenameprefix = $1 ;
+	} elsif (/^destination_dir\s*=\s*"(.+)"$/) {
+	    $destination_dir = $1 ;
+	} elsif (/^text_slide_width\s*=\s*(.+)$/) {
 	    $text_slide_width = $1 ;
-	} elsif (/^text_slide_height = "(.+)"$/) {
+	} elsif (/^text_slide_height\s*=\s*(.+)$/) {
 	    $text_slide_height = $1 ;
+	} elsif (/^show_dimensions\s*=\s*(.+)$/) {
+	    $show_dimensions = $1 ;
+	} elsif (/^show_size\s*=\s*(.+)$/) {
+	    $show_size = $1 ;
+	} elsif (/^show_size_unit\s*=\s*"(.+)"$/) {
+	    $show_size_unit = $1 ;
+	} elsif (/^use_caption_file\s*=\s*(.+)$/) {
+	    $use_caption_file = $1 ;
+	} elsif (/^caption_from_filename\s*=\s*(.+)$/) {
+	    $caption_from_filename = $1 ;
+	} elsif (/^caption_from_exif\s*=\s*(.+)$/) {
+	    $caption_from_exif = $1 ;
+	} elsif (/^convert_options\s*=\s*"(.+)"$/) {
+	    $convert_options = $1 ;
+	} elsif (/^slide_height_max\s*=\s*(.+)$/) {
+	    $slide_height_max = $1 ;
+	} elsif (/^slidetitle_from_caption\s*=\s*(.+)$/) {
+	    $slidetitle_from_caption = $1 ;
+	} elsif (/^slidename_from_filename\s*=\s*(.+)$/) {
+	    $slidename_from_filename = $1 ;
+	} elsif (/^index_cellpadding\s*=\s*(.+)$/) {
+	    $index_cellpadding = $1 ;
+	} elsif (/^no_film_effect\s*=\s*(.+)$/) {
+	    $no_film_effect = $1 ;
+	} elsif (/^tile_height\s*=\s*(.+)$/) {
+	    $tile_height = $1 ;
+	} elsif (/^make_no_slides\s*=\s*(.+)$/) {
+	    $make_no_slides = $1 ;
+	} elsif (/^pixels_per_row\s*=\s*(.+)$/) {
+	    $pixels_per_row = $1 ;
+	} elsif (/^thumbnails_per_row\s*=\s*(.+)$/) {
+	    $thumbnails_per_row = $1 ;
+	} elsif (/^thumbnail_dimension_max\s*=\s*(.+)$/) {
+	    $thumbnail_dimension_max = $1 ;
+	} elsif (/^thumbnail_height_max\s*=\s*(.+)$/) {
+	    $thumbnail_height_max = $1 ;
+	} elsif (/^caption_under_thumbnails\s*=\s*(.+)$/) {
+	    $caption_under_thumbnails = $1 ;
+	} elsif (/^no_slide_counter\s*=\s*(.+)$/) {
+	    $no_slide_counter = $1 ;
+	} elsif (/^www_access_rights\s*=\s*(.+)$/) {
+	    $www_access_rights = $1 ;
 	} elsif (/^[^#]/ && !/^(\s*)$/) {
 	    die "Unrecognized option line: ". $_ ;
 	}
-    }
 }
 
-# some constants
-$Getopt::Long::ignorecase = 0;
-STDOUT->autoflush("1");
+# parse config files
+foreach my $conf ( @config_files ) {
+    open CONF, $conf ;
+    while (<CONF>) {
+	process_option $_ ;
+    }
+   close CONF ;
+}
 
-# default command-line argument values
-my $opt_a = "0" ;          # to write image size under thumbnails in index page and under slide images in -bigy
-my $opt_c = "0" ;          # -c to use user-supplied captions
-my $opt_C = "0" ;          # same as -c, but preserve image names as captions
-my $opt_ce = "0" ;         # same as -c, but use exiftags as captions
-my $opt_d = "." ;          # look in current directory "."
-my $opt_f = "0" ;          # -f to force thumbnail regeneration
-my $opt_h = "0" ;
-my $opt_help = "0" ;       # displays brief usage message; same as -h
-my $opt_i = "index.html" ; # name of the main thumbnail index file
-my $opt_k = "0" ;          # -k for the captions to also be used as slide titles
-my $opt_n = "0" ;          # -n to use image file names for the .html files
-my $opt_p = "3" ;          # cellpadding value for the thumbnail index tables
-my $opt_r = "0" ;          # -r to omit the film reel effect altogether
-my $opt_s = "0" ;          # -s to make no slides, just thumbnail links to images
-my $opt_t = "21" ;         # height of the tile.png tiled image
-my $opt_u = "0" ;          # write captions under thumbnails on index page
-my $opt_w = "5" ;          # index rows are at most 5 images wide by default
-my $opt_x = "0" ;          # -x to omit the image count from the caption
-my $opt_y = "0" ;          # max height of a thumbnail (defaults to 75 below)
-my $opt_ad = "0" ;         # write out only dimensions
-my $opt_as = "0" ;         # write out only file size
-my $opt_asu = "kB" ;       # change kB to another unit
-my $opt_bigy = "0" ;       # max height of the slides.  use if images are huge.
-my $opt_con = "" ;         # options to be passed to convert or cjpeg
-my $opt_www = "0" ;        # makes everything world-readable
-my $opt_wx = undef ;       # to set index rows n pixels wide
-my $opt_xy = "0" ;         # scale thumbs to n pixels in their longer dimension
-my $opt_clean=0 ;          # clean up all generated files
-my $opt_cleanall=0 ;       # clean up all generated and user modified files
-my $opt_title = "Index of Pictures" ;
-my $opt_tp = $thumb_filenameprefix ; # changes the thumbnail filename prefix
-my $opt_sp = $slide_filenameprefix ; # changes the slide filename prefix
-
+######################################################################
 # usage
 my $usage = << "END_OF_USAGE";
 This is llgal 0.1 the Loulous HTML image slide show generator.
 Syntax:  llgal [-option -option ...]
-Options:      -a          write image sizes under thumbnails on index page
-              -c          first generate and then use captions
-              -C          like -c, but preserve file names as captions
-              -d <dir>    operate on files in directory <dir> (.)
-              -f          force thumbnail regeneration and scaled slides
-              -h          displays this brief help; same as --help
-              -i <file>   name of the main thumbnail index file (index.html)
-              -k          use the image captions for the HTML slide titles
-              -n          use image file names for the HTML slide files
-              -p <n>      cellpadding value of thumbnail index tables (3)
-              -r          omit the film reel effect altogether
-              -s          make no HTML slides, link thumbnails to images
-              -t <n>      height of the film reel tiled image (21)
-              -u          write captions under thumbnails on index page
-              -w <n>      rows in thumbnail index are at most <n> images wide (5)
-              -x          omit the image count from the captions
-              -y <n>      scale all thumbnails to the same height <n> (75)
-              --ad        like -a, but write only the image dimensions
-              --as        like -a, but write only the file size (in kbytes)
-              --asu <s>   change file size unit (kB)
-              --ce        like -c, but use exiftags as captions
-              --bigy <n>  like -y, use it if you have very large image files
-              --con <>    options to pass to convert (e.g. -quality N)
-              --help      displays this brief help; same as -h
-              --www       make all llgal files world-readable
-              --wx <n>    rows in thumbnail index are at most <n> pixels wide
-              --xy <n>    scale thumbs to <n> pixels in their longer dimension
-              --title <s> string to substitute for TITLE in index template
-              --clean     remove all generated files
-              --cleanall  remove all generated and user modified files
-              --tp <s>    sets the thumbnail image prefix (\".thumb_\")
-              --sp <s>    sets the slide image prefix (\".slide_\")
+Options:      -a             write image sizes under thumbnails on index page
+              -c             first generate and then use captions
+              -C             use file names as captions
+              -d <dir>       operate on files in directory <dir> (.)
+              -f             force thumbnail and scaled slide regeneration
+              -h             displays this brief help; same as --help
+              -i <file>      name of the main thumbnail index file (index.html)
+              -k             use the image captions for the HTML slide titles
+              -n             use image file names for the HTML slide files
+              -p <n>         cellpadding value of thumbnail index tables (3)
+              -r             omit the film reel effect altogether
+              -s             make no HTML slides, link thumbnails to images
+              -t <n>         height of the film reel tiled image (21)
+              -u             write captions under thumbnails on index page
+              -w <n>         rows in thumbnail index are at most <n> images wide (5)
+              -x             omit the image count from the captions
+              -y <n>         scale all thumbnails to the same height <n> (75)
+              --ad           like -a, but write only the image dimensions
+              --as           like -a, but write only the file size (in kbytes)
+              --asu <s>      change file size unit (kB)
+              --ce           use exiftags as captions
+              --bigy <n>     like -y, use it if you have very large image files
+              --con <>       options to pass to convert (e.g. -quality N)
+              --www          make all llgal files world-readable
+              --wx <n>       rows in thumbnail index are at most <n> pixels wide
+              --xy <n>       scale thumbs to <n> pixels in their longer dimension
+              --sp <s>       sets the slide image prefix (\".slide_\")
+              --tp <s>       sets the thumbnail image prefix (\".thumb_\")
+              --title <s>    string to substitute for TITLE in index template
+              --option <s>   pass an additional option as in configuration files
+              --config <s>   pass an additional configuration files
+              --clean        remove all generated files
+              --cleanall     remove all generated and user modified files
+              --help         displays this brief help; same as -h	     
 Note:      default values are given in parentheses (where applicable).
 Author:    Brice Goglin <Brice.Goglin\@ens-lyon.org>
 END_OF_USAGE
 
-# store command-line options upfront to write in the index <HEAD>
-my @llgal_options = @ARGV;
-
+######################################################################
 # process command-line arguments (overriding defaults above)
 GetOptions(
-	   'h'=>\$opt_h,
-	   'help'=>\$opt_help,
-	   'a'=>\$opt_a,
-	   'ad'=>\$opt_ad,
-	   'as'=>\$opt_as,
-	   'asu=s'=>\$opt_asu,
-	   'c'=>\$opt_c,
-	   'C'=>\$opt_C,
-	   'ce'=>\$opt_ce,
-	   'd=s'=>\$opt_d,
-	   'f'=>\$opt_f,
-	   'i=s'=>\$opt_i,
-	   'k'=>\$opt_k,
-	   'n'=>\$opt_n,
-	   'p=i'=>\$opt_p,
-           'r'=>\$opt_r,
-	   's'=>\$opt_s,
-	   't=i'=>\$opt_t,
-	   'u'=>\$opt_u,
-	   'w=i'=>\$opt_w,
-	   'x'=>\$opt_x,
-	   'y=i'=>\$opt_y,
-	   'bigy=i'=>\$opt_bigy,
-           'con=s'=>\$opt_con,
-	   'www'=>\$opt_www,
-	   'wx=i'=>\$opt_wx,
-	   'xy=i'=>\$opt_xy,
-	   'clean'=>\$opt_clean,
-	   'cleanall'=>\$opt_cleanall,
-	   'title=s'=>\$opt_title,
-           'tp=s'=>\$opt_tp,
-	   'sp=s'=>\$opt_sp,
-	) or die "$usage";
+	   'a'		=> sub { $show_dimensions = 1 ; $show_size = 1 ; },
+	   'ad'		=> \$show_dimensions,
+	   'as'		=> \$show_size,
+	   'asu=s'	=> \$show_size_unit,
+	   'c'		=> \$use_caption_file,
+	   'C'		=> \$caption_from_filename,
+	   'ce'		=> \$caption_from_exif,
+	   'i=s'	=> \$index_filename,
+	   'k'		=> \$slidetitle_from_caption,
+	   'n'		=> \$slidename_from_filename,
+	   'p=i'	=> \$index_cellpadding,
+           'r'		=> \$no_film_effect,
+	   's'		=> \$make_no_slides,
+	   't=i'	=> \$tile_height,
+	   'u'		=> \$caption_under_thumbnails,
+	   'w=i'	=> \$thumbnails_per_row,
+	   'x'		=> \$no_slide_counter,
+	   'y=i'	=> \$thumbnail_height_max,
+	   'bigy=i'	=> \$slide_height_max,
+           'con=s'	=> \$convert_options,
+	   'sp=s'	=> \$slide_filenameprefix,
+	   'title=s'	=> \$index_title,
+           'tp=s'	=> \$thumb_filenameprefix,
+	   'www'	=> \$www_access_rights,
+	   'wx=i'	=> \$pixels_per_row,
+	   'xy=i'	=> \$thumbnail_dimension_max,
+	   'option=s'	=> sub { shift ; process_option (shift) ; },
+	) or die $usage ;
 
-die $usage if ($opt_help or $opt_h);
-
-# strip any unnecessary slashes from the end of the given $opt_d directory
-$opt_d =~ s/\/$//;
-
-# change the thumbnail and/or prefix settings
-$thumb_filenameprefix = $opt_tp if ($opt_tp);
-$slide_filenameprefix = $opt_sp if ($opt_sp);
+die $usage if ($help_asked) ;
 
 ######################################################################
 
 # deal with the competing -y and --xy options
-die "Please only specify one of the -y and --xy options\n" if ($opt_y and $opt_xy);
-if (($opt_y == 0) and ($opt_xy == 0)) {
-    $opt_y = 75;    # default, if neither -y nor --xy is specified
+die "Please only specify one of the -y and --xy options\n" if ($thumbnail_height_max and $thumbnail_dimension_max);
+if (($thumbnail_height_max == 0) and ($thumbnail_dimension_max == 0)) {
+    $thumbnail_height_max = 75;    # default, if neither -y nor --xy is specified
 }
 
 # other error (sanity) checks
-die "Please enter nonnegative thumbnail dimensions\n" if (($opt_y < 0) or ($opt_xy < 0)) ;
-die "Please enter a nonnegative cellpadding value\n" if ($opt_p < 0) ;
-die "Please choose at least one image per index row\n" if ($opt_w <= 0) ;
-die "Please allow at least one pixel per index row\n" if (defined $opt_wx && $opt_wx <= 0) ;
-die "Please enter a nonnegative tiled image height\n" if ($opt_t < 0) ;
-die "Please choose between --bigy and -s\n" if ($opt_bigy && $opt_s) ;
+die "Please enter nonnegative thumbnail dimensions\n" if (($thumbnail_height_max < 0) or ($thumbnail_dimension_max < 0)) ;
+die "Please enter a nonnegative cellpadding value\n" if ($index_cellpadding < 0) ;
+die "Please choose at least one image per index row\n" if ($thumbnails_per_row <= 0) ;
+die "Please allow at least one pixel per index row\n" if (defined $pixels_per_row && $pixels_per_row <= 0) ;
+die "Please enter a nonnegative tiled image height\n" if ($tile_height < 0) ;
+die "Please choose between --bigy and -s\n" if ($slide_height_max && $make_no_slides) ;
 
 #####################################################################
 # Main variables
@@ -247,12 +336,12 @@ sub find_generic_llgal_file {
 # get generic llgal file
 sub get_generic_llgal_file {
     my ($filename) = (shift) ;
-    if (-e "$opt_d/$local_llgal_dir/$filename") {
-	print "Found $filename in $opt_d/$local_llgal_dir/ ... using it.\n" ;
+    if (-e "$destination_dir/$local_llgal_dir/$filename") {
+	print "Found $filename in $destination_dir/$local_llgal_dir/ ... using it.\n" ;
     } else {
 	my $srcdir = find_generic_llgal_file ($filename, 1);
-	print "No $filename in $opt_d/$local_llgal_dir/ ... getting a copy from $srcdir\n" ;
-	system("cp -f \"$srcdir/$filename\" \"$opt_d/$local_llgal_dir/$filename\"") ;
+	print "No $filename in $destination_dir/$local_llgal_dir/ ... getting a copy from $srcdir\n" ;
+	system("cp -f \"$srcdir/$filename\" \"$destination_dir/$local_llgal_dir/$filename\"") ;
     }
 }
 
@@ -263,25 +352,25 @@ sub clean_files {
     my $all = shift ;
     my $notdeleted = 0 ;
 
-    die "Can't open directory $opt_d\n" if (!-r $opt_d) ;
+    die "Can't open directory $destination_dir\n" if (!-r $destination_dir) ;
 
-    opendir DIR, "$opt_d/$local_llgal_dir" ;
+    opendir DIR, "$destination_dir/$local_llgal_dir" ;
     while ($_ = readdir DIR) {
 	if (/^$thumb_filenameprefix/ or /^$slide_filenameprefix/) {
-	    unlink "$opt_d/$local_llgal_dir/$_";
+	    unlink "$destination_dir/$local_llgal_dir/$_";
 	} elsif (/^$indextemplate_filename$/
 	    or /^$slidetemplate_filename$/
 	    or /^$filmtile_filename$/
 	    or /^$css_filename$/) {
 	    my $original = (find_generic_llgal_file $_, 0)."/".$_ ;
-	    if ($all or !system("diff -q \"$opt_d/$local_llgal_dir/$_\" \"$original\" > /dev/null 2>&1")) {
-		unlink "$opt_d/$local_llgal_dir/$_";
+	    if ($all or !system("diff -q \"$destination_dir/$local_llgal_dir/$_\" \"$original\" > /dev/null 2>&1")) {
+		unlink "$destination_dir/$local_llgal_dir/$_";
 	    } else {
 		print "(preserved $_) " ;
 	    }
 	} elsif (/^$captions_filename$/) {
-	    if ($all or !system("grep -q \"$caption_removal_line\" \"$opt_d/$local_llgal_dir/$_\"")) {
-		unlink "$opt_d/$local_llgal_dir/$_";
+	    if ($all or !system("grep -q \"$caption_removal_line\" \"$destination_dir/$local_llgal_dir/$_\"")) {
+		unlink "$destination_dir/$local_llgal_dir/$_";
 	    } else {
 		print "(preserved $_) " ;
 	    }
@@ -291,26 +380,26 @@ sub clean_files {
     }
     closedir DIR ;
     if ($notdeleted <= 2 && $all) {
-	rmdir "$opt_d/$local_llgal_dir" ;
+	rmdir "$destination_dir/$local_llgal_dir" ;
     }
 
-    opendir DIR, "$opt_d" ;
+    opendir DIR, "$destination_dir" ;
     while ($_ = readdir DIR ) {
 	if (/.html$/) {
-	    unlink "$opt_d/$_" ;
+	    unlink "$destination_dir/$_" ;
 	}
     }
     closedir DIR ;
 }
 
-if ($opt_clean) {
-    print "Removing all llgal files: ";
+if ($clean_asked) {
+    print "Removing all non-modified llgal files: ";
     clean_files 0 ;
     print "done!\n";
     exit 0 ;
 }
 
-if ($opt_cleanall) {
+if ($cleanall_asked) {
     print "Removing all llgal files: ";
     clean_files 1 ;
     print "done!\n";
@@ -337,15 +426,15 @@ sub make_caption {
     my $filename = shift ;
     my $file = shift ;
     my $type = shift ;
-    return make_exiftags_caption ($file) if ($opt_ce && $type == $TYPE_IMG) ;
-    return make_filename_caption ($filename) if ($opt_C) ;
+    return make_exiftags_caption ($file) if ($caption_from_exif && $type == $TYPE_IMG) ;
+    return make_filename_caption ($filename) if ($caption_from_filename) ;
     return "" ;
 }
 
 # generating entry table from files in target directory
 sub get_entries {
-    # load up image files from $opt_d into array @imgfiles
-    opendir DIR, $opt_d or die "Can't open directory $opt_d\n";
+    # load up image files from $destination_dir into array @imgfiles
+    opendir DIR, $destination_dir or die "Can't open directory $destination_dir\n";
 
     # find and read all jp(e)g, gif and png files
     my @imgfiles = () ;
@@ -366,7 +455,7 @@ sub get_entries {
     # find all subdirectories
     my @subdirs = () ;
     while ($_ = readdir DIR) {
-	if (/^[^.]/ && -d "$opt_d/$_") {
+	if (/^[^.]/ && -d "$destination_dir/$_") {
 	    push @subdirs, $_ ;
 	}
     }
@@ -426,19 +515,19 @@ sub get_entries {
 #######################################################################
 # Create local subdirectory to place all llgal files
 
-if (!-r "$opt_d/$local_llgal_dir") {
-    mkdir "$opt_d/$local_llgal_dir" or die "Cannot create $opt_d/$local_llgal_dir directory" ;
+if (!-r "$destination_dir/$local_llgal_dir") {
+    mkdir "$destination_dir/$local_llgal_dir" or die "Cannot create $destination_dir/$local_llgal_dir directory" ;
 }
 
 #######################################################################
-# If the -c (or -C) option was supplied let user specify captions, else see below
-if ($opt_c or $opt_C) {
-    if (! -r "$opt_d/$local_llgal_dir/$captions_filename") {
+# If the -c option was supplied let user specify captions, else see below
+if ($use_caption_file) {
+    if (! -r "$destination_dir/$local_llgal_dir/$captions_filename") {
 	get_entries ;
 
-	# create and fill $captionw_filename file if it doesn't exist
-	print "Found $nentries files in " . ($opt_d eq "." ? "current directory" : "directory $opt_d") ."\n" ;
-	open(CAP, ">$opt_d/$local_llgal_dir/$captions_filename") or die "Can't create $opt_d/$local_llgal_dir/$captions_filename file\n" ;
+	# create and fill $captions_filename file if it doesn't exist
+	print "Found $nentries files in " . ($destination_dir eq "." ? "current directory" : "directory $destination_dir") ."\n" ;
+	open(CAP, ">$destination_dir/$local_llgal_dir/$captions_filename") or die "Can't create $destination_dir/$local_llgal_dir/$captions_filename file\n" ;
 	print "Creating the $captions_filename file...\n" ;
 	print CAP "# This is llgal's $captions_filename file, first generated ", scalar localtime, ".\n" ;
 	print CAP "# TITLE: title of the index\n" ;
@@ -468,7 +557,7 @@ if ($opt_c or $opt_C) {
 	# read in files specified in the .captions file if it exists
 	print "Reading the $captions_filename file ... ";
 
-	open(CAP,"$opt_d/$local_llgal_dir/$captions_filename") or die "Can't open $opt_d/$local_llgal_dir/$captions_filename file\n";
+	open(CAP,"$destination_dir/$local_llgal_dir/$captions_filename") or die "Can't open $destination_dir/$local_llgal_dir/$captions_filename file\n";
 	my $line;
 	while (defined($line = <CAP>)) {
 	    chomp($line); $line =~ s/^\s*//; $line =~ s/\s\(\s*\)$/\1/;
@@ -476,7 +565,7 @@ if ($opt_c or $opt_C) {
 	    if (!($line =~ m/^\#/) && !($line =~ /^$/)) {
 		if ($line =~ m/TITLE:\s*(.*)\s*/) {
 		    # title
-		    $opt_title = $1;
+		    $index_title = $1;
 
 		} elsif ($line =~ m/^INDEXHEAD:\s+(.*)\s*$/) {
 		    # header for the index
@@ -543,7 +632,7 @@ if ($opt_c or $opt_C) {
     }
 } else {
     get_entries ;
-    print "Found $nentries files in directory $opt_d\n";
+    print "Found $nentries files in directory $destination_dir\n";
 }
 
 #######################################################################
@@ -552,27 +641,27 @@ if ($opt_c or $opt_C) {
 print "Creating thumbnails: ";
 # default size (for text and link slide especially)
 my ($defaultthumbx,$defaultthumby) ;
-if ($opt_xy) {
-    ($defaultthumbx,$defaultthumby) = ($opt_xy, $opt_xy * 3/4) ;
+if ($thumbnail_dimension_max) {
+    ($defaultthumbx, $defaultthumby) = ($thumbnail_dimension_max, $thumbnail_dimension_max * 3/4) ;
 } else {
-    ($defaultthumbx,$defaultthumby) = ($opt_y * 4/3, $opt_y) ;
+    ($defaultthumbx, $defaultthumby) = ($thumbnail_height_max * 4/3, $thumbnail_height_max) ;
 }
 # compute their scale option to pass to convert
 my $scale;
-if ($opt_xy) {
-    $scale = "-scale \"".$opt_xy."x".$opt_xy.">\"" ;
+if ($thumbnail_dimension_max) {
+    $scale = "-scale \"".$thumbnail_dimension_max."x".$thumbnail_dimension_max.">\"" ;
 } else {
-    $scale = "-scale x".$opt_y ;
+    $scale = "-scale x".$thumbnail_height_max ;
 }
 # compute the thumbnail and store their size
-my $command = "convert  +profile '*' ".$opt_con.$scale ;
+my $command = "convert  +profile '*' ".$convert_options.$scale ;
 for (my $i = 0; $i < $nentries; $i++) {
     my ($x,$y) = ($defaultthumbx,$defaultthumby);
     if ($entries[$i]->{type} == $TYPE_IMG) {
-	my $filename = $opt_d."/".$entries[$i]->{url} ;
+	my $filename = "$destination_dir/$entries[$i]->{url}" ;
 	die "Can't open $filename\n" unless (-r $filename) ;
-	my $thumb_filename = "$opt_d/$local_llgal_dir/$thumb_filenameprefix$entries[$i]->{url}" ;
-	if ((! -e $thumb_filename) or $opt_f) {
+	my $thumb_filename = "$destination_dir/$local_llgal_dir/$thumb_filenameprefix$entries[$i]->{url}" ;
+	if ((! -e $thumb_filename) or $force_regen_asked) {
 	    system("$command"." \"".$filename."\" \"".$thumb_filename."\"") if ($command) ;
 	    print "." if ($command) ;
 	}
@@ -589,7 +678,7 @@ print " done!\n";
 print "Determining image sizes: ";
 for (my $i = 0; $i < $nentries; $i++) {
     if ($entries[$i]->{type} == $TYPE_IMG || $entries[$i]->{type} == $TYPE_MVI) {
-	my $filename = "$opt_d/$entries[$i]->{url}" ;
+	my $filename = "$destination_dir/$entries[$i]->{url}" ;
 	die "Can't open $filename\n" unless (-r $filename);
 	if ($entries[$i]->{type} == $TYPE_IMG) {
 	    my ($x,$y) = imgsize($filename) ;
@@ -608,21 +697,21 @@ print " done!\n";
 #######################################################################
 # Scale down slides if the --bigy <n> option was given
 
-if ($opt_bigy and !($opt_s)) {
+if ($slide_height_max and !($make_no_slides)) {
     print "Scaling down big slides and determining new slide sizes: ";
     for (my $i = 0; $i < $nentries; $i++) {
 	if ($entries[$i]->{type} == $TYPE_IMG) {
-	    my $filename = "$opt_d/$entries[$i]->{url}" ;
+	    my $filename = "$destination_dir/$entries[$i]->{url}" ;
 	    die "Can't open $filename\n" unless (-r $filename);
-	    my $slide_filename = "$opt_d/$local_llgal_dir/$slide_filenameprefix$entries[$i]->{url}" ;
+	    my $slide_filename = "$destination_dir/$local_llgal_dir/$slide_filenameprefix$entries[$i]->{url}" ;
 	    my ($x,$y) ;
-	    if ((! -e $slide_filename) or $opt_f) {
+	    if ((! -e $slide_filename) or $force_regen_asked) {
 		# only scale down, never up.
 		($x,$y) = imgsize($filename);
-		if ($y<=$opt_bigy) {
+		if ($y <= $slide_height_max) {
 		    $command = "cp -f \"$filename\" \"$slide_filename\"";
 		} else {
-		    $command = "convert  +profile '*' $opt_con -scale x$opt_bigy \"$filename\" \"$slide_filename\"";
+		    $command = "convert  +profile '*' $convert_options -scale x$slide_height_max \"$filename\" \"$slide_filename\"";
 		}
 		system("$command") if ($command);
 		print "." if ($command);
@@ -643,16 +732,16 @@ get_generic_llgal_file ($css_filename) ;
 #######################################################################
 # Create the individual slide show files
 
-if ($opt_bigy && $opt_bigy < $text_slide_width) {
-    $text_slide_width = $opt_bigy ;
-    $text_slide_height = $text_slide_width * 3/4 ;
+if ($slide_height_max && $slide_height_max < $text_slide_height) {
+    $text_slide_height = $slide_height_max ;
+    $text_slide_width = $text_slide_height * 4/3 ;
 }
 
-if ($opt_s) {
+if ($make_no_slides) {
     print "Linking thumbnails directly to image files...  Making no html slides.\n";
 } else {
     # create slide filenames
-    if ($opt_n) {
+    if ($slidename_from_filename) {
 	# use filename to generated slide name
 	for (my $i = 0; $i < $nentries; $i++) {
 	    $entries[$i]->{slide} = $entries[$i]->{filename} . ".html" ;
@@ -665,7 +754,7 @@ if ($opt_s) {
     }
 
     # remove old .html files
-    system("rm -f \"$opt_d/$local_llgal_dir/*.html\"");
+    system("rm -f \"$destination_dir/$local_llgal_dir/*.html\"");
 
     # get the slide template
     get_generic_llgal_file ($slidetemplate_filename) ;
@@ -673,21 +762,21 @@ if ($opt_s) {
     # create slides
     print "Creating individual slides: ";
     for (my $i = 0; $i < $nentries; $i++) {
-	open(SR,"$opt_d/$local_llgal_dir/$slidetemplate_filename") or die "Can't open the slide template file\n";
-	open(SW,">$opt_d/$entries[$i]->{slide}") or die "Can't create slide file\n";
+	open(SR,"$destination_dir/$local_llgal_dir/$slidetemplate_filename") or die "Can't open the slide template file\n";
+	open(SW,">$destination_dir/$entries[$i]->{slide}") or die "Can't create slide file\n";
 	print ".";
 
 	my $type = $entries[$i]->{type} ;
 
 	my $altname ;
-	if ($opt_k) {	# use image caption for the image alternative
+	if ($slidetitle_from_caption) {	# use image caption for the image alternative
 	    $altname = "$entries[$i]->{filename} - $entries[$i]->{caption}" ;
 	} else {	# otherwise use the image name (strip suffix)
 	    $altname = $entries[$i]->{filename};
 	}
 
 	my $title ;
-	if ($opt_k) {	# use image caption for the HTML slide title
+	if ($slidetitle_from_caption) {	# use image caption for the HTML slide title
 	    $title = $entries[$i]->{caption} ;
 	} else {	# otherwise use the image name (strip suffix)
 	    $title = $entries[$i]->{filename};
@@ -696,7 +785,7 @@ if ($opt_s) {
 	my $line;
 	while (defined($line = <SR>)) {
 	    $line =~ s/<!--SLIDE-TITLE-->/$title/g;
-	    $line =~ s/<!--TITLE-->/$opt_title/g;
+	    $line =~ s/<!--TITLE-->/$index_title/g;
 	    $line =~ s/<!--CSS-->/$local_llgal_dir\/$css_filename/g;
 
 	    if ($line =~ m/<!--THIS-SLIDE-STYLE-->/g) {
@@ -716,7 +805,7 @@ if ($opt_s) {
 		    $line =~ s/<!--THIS-SLIDE-->/<a href="$entries[$i]->{url}">$entries[$i]->{text}<\/a>/ ;
 		} elsif ($type == $TYPE_IMG) {
 		    my $file = $entries[$i]->{url} ;
-		    if ($opt_bigy) {
+		    if ($slide_height_max) {
 			# image slide with link to the real image
 			$line =~ s/<!--THIS-SLIDE-->/<a href="$file"><img src="$local_llgal_dir\/$slide_filenameprefix$file" alt="$altname" title="click to see full-size ($altname)" \/><\/a>/ ;
 		    } else {
@@ -730,33 +819,33 @@ if ($opt_s) {
 
 	    # add the caption, with the image counter unless -x is specified
 	    my $imagecaption ;
-	    if ($opt_x) {
+	    if ($no_slide_counter) {
 		$imagecaption = $entries[$i]->{caption} ;
 	    } else{
-		$imagecaption = $entries[$i]->{caption} . "&nbsp;&nbsp;&nbsp;(" . ($i+1) ."/$nentries)" if (! $opt_x) ;
+		$imagecaption = $entries[$i]->{caption} . "&nbsp;&nbsp;&nbsp;(" . ($i+1) ."/$nentries)" if (!$no_slide_counter) ;
 	    }
 
 	    # add dimensions and size to the caption
-	    if ($opt_bigy and ($opt_a or $opt_ad or $opt_as) and ($type == $TYPE_IMG || $type == $TYPE_MVI)) {
-		my $printdim = "";
-		if ($opt_a && $type == $TYPE_IMG) {
-		    $printdim = "$entries[$i]->{xdim}x$entries[$i]->{ydim} ($entries[$i]->{kbytes}$opt_asu)" ;
-		} elsif ($opt_a || $opt_as) {
-		    $printdim = "$entries[$i]->{kbytes}$opt_asu" ;
-		} elsif ($opt_ad) {
-		    $printdim = "$entries[$i]->{xdim}x$entries[$i]->{ydim}" if $type == $TYPE_IMG ;
+	    if ($slide_height_max and ($show_dimensions or $show_size) and ($type == $TYPE_IMG || $type == $TYPE_MVI)) {
+		my $printdim = "$entries[$i]->{xdim}x$entries[$i]->{ydim}" ;
+		my $printsize = "$entries[$i]->{kbytes}$show_size_unit" ;
+		if ($show_dimensions && $show_size && $type == $TYPE_IMG) {
+		    $imagecaption .= "&nbsp;&nbsp;&nbsp;" . "$printdim ($printsize)" ;
+		} elsif ($show_size) {
+		    $imagecaption .= "&nbsp;&nbsp;&nbsp;" . $printsize ;
+		} elsif ($show_dimensions) {
+		    $imagecaption .= "&nbsp;&nbsp;&nbsp;" . $printdim if $type == $TYPE_IMG ;
 		}
-		$imagecaption .= "&nbsp;&nbsp;&nbsp;".$printdim ;
 	    }
 
 	    $line =~ s/<!--IMAGE-CAPTION-->/$imagecaption/g ;
-	    $line =~ s/<!--INDEX-FILE-->/$opt_i/g ;
+	    $line =~ s/<!--INDEX-FILE-->/$index_filename/g ;
 	    $line =~ s/<!--THIS-SLIDE-->/$entries[$i]->{slide}/g ;
 
 	    # process PREV/NEXT SLIDE
 	    my $prev ;
 	    my $next ;
-	    if ($opt_k) { # use caption for title attribute
+	    if ($slidetitle_from_caption) { # use caption for title attribute
 		$prev=$entries[$i-1]->{caption} ;
 		$next=$entries[($i==$nentries-1?0:$i+1)]->{caption} ;
 	    } else { # otherwise use the image name (strip suffix)
@@ -777,16 +866,16 @@ if ($opt_s) {
 
 #######################################################################
 # Get the film tile file for the index
-if ($opt_r) {
-    print "Got option -r... omitting film reel effect.\n" ;
+if ($no_film_effect) {
+    print "Omitting film reel effect.\n" ;
 } else {
     get_generic_llgal_file ($filmtile_filename) ;
 }
 
 # rescale the tiled image if the -t switch was called but -r wasn't
-if (! $opt_r) {
-    my $tileh = (imgsize("$opt_d/$local_llgal_dir/$filmtile_filename"))[1] ;
-    system("mogrify -scale x$opt_t $opt_d/$local_llgal_dir/$filmtile_filename") if ($opt_t != $tileh) ;
+if (! $no_film_effect) {
+    my $tileh = (imgsize("$destination_dir/$local_llgal_dir/$filmtile_filename"))[1] ;
+    system("mogrify -scale x$tile_height $destination_dir/$local_llgal_dir/$filmtile_filename") if ($tile_height != $tileh) ;
 }
 
 #######################################################################
@@ -796,9 +885,9 @@ get_generic_llgal_file ($indextemplate_filename) ;
 #######################################################################
 # Creating the index file
 
-print "Creating the $opt_i file: " ;
-open(IXR, "$opt_d/$local_llgal_dir/$indextemplate_filename") or die "Can't open the index template file\n" ;
-open(IXW, ">$opt_d/$opt_i") or die "Can't create main $opt_i file\n" ;
+print "Creating the $index_filename file: " ;
+open(IXR, "$destination_dir/$local_llgal_dir/$indextemplate_filename") or die "Can't open the index template file\n" ;
+open(IXW, ">$destination_dir/$index_filename") or die "Can't create main $index_filename file\n" ;
 
 # headers
 my $line ;
@@ -809,7 +898,7 @@ while (defined($line = <IXR>)) {
 	}
     } else {
 	$line =~ s/LLGAL-OPTIONS/@llgal_options/g ;
-        $line =~ s/<!--TITLE-->/$opt_title/g ;
+        $line =~ s/<!--TITLE-->/$index_title/g ;
 	$line =~ s/<!--CSS-->/$local_llgal_dir\/$css_filename/g;
 	print IXW "$line";
 # stop at <!-- ********** -->
@@ -824,29 +913,29 @@ for (my $i = 0; $i < $nentries; $i += $num) {
 
 # figure out how many to put in next row.
     my $width = 0 ;
-    while(($i+$num < $nentries) && ($num < $opt_w) && (!defined($opt_wx) || $width < $opt_wx)) {
+    while(($i+$num < $nentries) && ($num < $thumbnails_per_row) && (!defined($pixels_per_row) || $width < $pixels_per_row)) {
 	$width += $entries[$num+$i]->{thumbxdim} ;
 	$num++ ;
 	# add cellpadding
-	$width += $opt_p ;
+	$width += $index_cellpadding ;
     }
-    if ($opt_wx && $width > $opt_wx) {
+    if ($pixels_per_row && $width > $pixels_per_row) {
 	if ($num >= 2) {
 	    $num-- ;
 	} else {
-	    print "(Warning: Row width max ($opt_wx) is too slow for this image alone ($width), Forcing)" ;
+	    print "(Warning: Row width max ($pixels_per_row) is too slow for this image alone ($width), Forcing)" ;
 	}
     }
 
 # Now output the row of thumbnails.
-    if ($opt_r) {
-	print IXW "<table class=\"index\" style=\"border-spacing: ", $opt_p, "px 0px;\">\n";
+    if ($no_film_effect) {
+	print IXW "<table class=\"index\" style=\"border-spacing: ", $index_cellpadding, "px 0px;\">\n";
     } else {
-	print IXW "<table class=\"index with-tile\" style=\"border-spacing: ", $opt_p, "px 0px;\">\n";
+	print IXW "<table class=\"index with-tile\" style=\"border-spacing: ", $index_cellpadding, "px 0px;\">\n";
     }
-    print IXW "  <tr><td class=\"tiled\" style=\"height: ", $opt_t, "px;\" colspan=\"", ($opt_r?$num:$num+2), "\">&nbsp;</td></tr>\n" unless ($opt_r);
+    print IXW "  <tr><td class=\"tiled\" style=\"height: ", $tile_height, "px;\" colspan=\"", ($no_film_effect?$num:$num+2), "\">&nbsp;</td></tr>\n" unless ($no_film_effect);
     print IXW "  <tr>\n";
-    print IXW "    <td class=\"thumb\">&nbsp;</td>\n" unless ($opt_r);
+    print IXW "    <td class=\"thumb\">&nbsp;</td>\n" unless ($no_film_effect);
     for (my $j = 0; $j < $num; $j++) {
 	my $type = $entries[$i+$j]->{type} ;
 	my $width = $entries[$i+$j]->{thumbxdim} ;
@@ -865,20 +954,20 @@ for (my $i = 0; $i < $nentries; $i += $num) {
 	    print IXW "</td>\n" ;
 	} elsif ($type == $TYPE_IMG) {
 	    print IXW "    <td class=\"thumb\" style=\"width: ", $width, "px; height: ", $height, "px;\">\n";
-	    if ($opt_s) {
+	    if ($make_no_slides) {
 		print IXW "      <a href=\"", $entries[$i+$j]->{url}, "\">" ;
 	    } else {
 		print IXW "      <a href=\"", $entries[$i+$j]->{slide}, "\">" ;
 	    }
 
 	    my $altname;
-	    if ($opt_k) {	# use image caption for image alternative
+	    if ($slidetitle_from_caption) {	# use image caption for image alternative
 		$altname = "$entries[$i+$j]->{filename} - $entries[$i+$j]->{caption}" ;
 	    } else {	# otherwise use the image name (strip suffix)
 		$altname = $entries[$i+$j]->{filename};
 	    }
 	    
-	    my $thumb = "$opt_d/$local_llgal_dir/$thumb_filenameprefix" . $entries[$i+$j]->{url} ;
+	    my $thumb = "$local_llgal_dir/$thumb_filenameprefix" . $entries[$i+$j]->{url} ;
 	    print IXW "<img src=\"$thumb\" alt=\"$altname\" title=\"$altname\" />";
 	    print IXW "</a></td>\n" ;
 	} else {
@@ -886,35 +975,35 @@ for (my $i = 0; $i < $nentries; $i += $num) {
 	}
 	print "." ;
     }
-    print IXW "    <td class=\"thumb\">&nbsp;</td>\n" unless ($opt_r) ;
+    print IXW "    <td class=\"thumb\">&nbsp;</td>\n" unless ($no_film_effect) ;
     print IXW "  </tr>\n" ;
-    print IXW "  <tr><td class=\"tiled\" colspan=\"", $num+2, "\" style=\"", $opt_t, "\">&nbsp;</td></tr>\n" unless ($opt_r) ;
-    if ($opt_a or $opt_ad or $opt_as) {
+    print IXW "  <tr><td class=\"tiled\" colspan=\"", $num+2, "\" style=\"", $tile_height, "\">&nbsp;</td></tr>\n" unless ($no_film_effect) ;
+    if ($show_dimensions or $show_size) {
 	print IXW "  <tr>\n";
-	print IXW "    <td>&nbsp;</td>\n" unless ($opt_r) ;
+	print IXW "    <td>&nbsp;</td>\n" unless ($no_film_effect) ;
 	for (my $j = 0; $j < $num; $j++) {
 	    print IXW "    <td class=\"thumb-dim\">" ;
 	    my $type = $entries[$i+$j]->{type} ;
-	    my $printdim = "";
 	    if ($type == $TYPE_IMG || $type == $TYPE_MVI) {
-		if ($opt_a && $type == $TYPE_IMG) {
-		    $printdim = "$entries[$i+$j]->{slidexdim}x$entries[$i+$j]->{slideydim} ($entries[$i+$j]->{slidekbytes}$opt_asu)" ;
-		} elsif ($opt_a || $opt_as) {
-		    $printdim = "$entries[$i+$j]->{slidekbytes}$opt_asu" ;
-		} elsif ($opt_ad) {
-		    $printdim = "$entries[$i+$j]->{slidexdim}x$entries[$i+$j]->{slideydim}" if $type == $TYPE_IMG ;
+		my $printdim = "$entries[$i+$j]->{slidexdim}x$entries[$i+$j]->{slideydim}" ;
+		my $printsize = "$entries[$i+$j]->{slidekbytes}$show_size_unit" ;
+		if ($show_dimensions && $show_size && $type == $TYPE_IMG) {
+		    print IXW "$printdim ($printsize)" ;
+		} elsif ($show_size) {
+		    print IXW "$printsize" ;
+		} elsif ($show_dimensions) {
+		    print IXW "$printdim" if $type == $TYPE_IMG ;
 	    	}
 	    }
-	    print IXW $printdim ;
 	    print IXW "</td>\n" ;
 	}
-	print IXW "    <td>&nbsp;</td>\n" unless ($opt_r) ;
+	print IXW "    <td>&nbsp;</td>\n" unless ($no_film_effect) ;
 	print IXW "  </tr>\n" ;
     }
 #	write image captions under images if option -u is given
-    if ($opt_u) {
+    if ($caption_under_thumbnails) {
 	print IXW "  <tr>\n" ;
-	print IXW "<td>&nbsp;</td>\n" unless ($opt_r) ;
+	print IXW "<td>&nbsp;</td>\n" unless ($no_film_effect) ;
 	for (my $j = 0; $j < $num; $j++) {
 	    print IXW "    <td class=\"thumb-caption\">$entries[$i+$j]->{caption}</td>\n" ;
 	}
@@ -933,7 +1022,7 @@ while (defined($line = <IXR>)) {
 	    print IXW "    <div class=\"footer\">" . $footer . "</div>\n";
 	}
     } else {
-	$line =~ s/<!--TITLE-->/$opt_title/g;
+	$line =~ s/<!--TITLE-->/$index_title/g;
 	print IXW "$line";
     }
 }
@@ -943,21 +1032,21 @@ print " done!\n";
 
 #######################################################################
 # If --www was invoked make all images world-readable at the END
-if ($opt_www) {
+if ($www_access_rights) {
 # to be fixed
-    my $dir = "$opt_d/";
-    $dir = "" if $opt_d eq ".";
+    my $dir = "$destination_dir/";
+    $dir = "" if $destination_dir eq ".";
     print "\nMaking all llgal files world-readable for WWW publishing...\n";
-    print "chmod a+r $opt_d/$local_llgal_dir/$css_filename\n";
-    system("chmod a+r $opt_d/$local_llgal_dir/$css_filename");
-    print "chmod a+r $opt_d/*.html\n";
-    system("chmod a+r $opt_d/*.html");
-    print "chmod a+r $opt_d/$local_llgal_dir/$thumb_filenameprefix*.*\n";
-    system("chmod a+r $opt_d/$local_llgal_dir/$thumb_filenameprefix*.*");
-    print "chmod a+r $opt_d/$local_llgal_dir/$slide_filenameprefix*.*\n";
-    system("chmod a+r $opt_d/$local_llgal_dir/$slide_filenameprefix*.*");
-    print "chmod a+r $opt_d/$local_llgal_dir/$filmtile_filename\n";
-    system("chmod a+r $opt_d/$local_llgal_dir/$filmtile_filename");
+    print "chmod a+r $destination_dir/$local_llgal_dir/$css_filename\n";
+    system("chmod a+r $destination_dir/$local_llgal_dir/$css_filename");
+    print "chmod a+r $destination_dir/*.html\n";
+    system("chmod a+r $destination_dir/*.html");
+    print "chmod a+r $destination_dir/$local_llgal_dir/$thumb_filenameprefix*.*\n";
+    system("chmod a+r $destination_dir/$local_llgal_dir/$thumb_filenameprefix*.*");
+    print "chmod a+r $destination_dir/$local_llgal_dir/$slide_filenameprefix*.*\n";
+    system("chmod a+r $destination_dir/$local_llgal_dir/$slide_filenameprefix*.*");
+    print "chmod a+r $destination_dir/$local_llgal_dir/$filmtile_filename\n";
+    system("chmod a+r $destination_dir/$local_llgal_dir/$filmtile_filename");
     print "chmod a+r ";
     for(my $i = 0; $i < $nentries; $i++) {
 	next if ($entries[$i]->{type} != $TYPE_IMG
