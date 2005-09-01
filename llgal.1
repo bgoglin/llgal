@@ -41,7 +41,7 @@ the site-wide
 .TP
 .B -a
 Write image dimensions and sizes under each thumbnail on the index page,
-and under each slide if --bigy was passed.
+and under each slide if --bigy or --bigxy was passed.
 This only works if the ImageMagick command
 .BR identify " is present."
 
@@ -63,6 +63,23 @@ Allow to define the unit used to show file sizes. Default is
 .IR kB "."
 
 .TP
+.BI --bigxy " <n>"
+Like
+.B -xy
+but operates on the image slides, not the thumbnails.  Scales image
+slides to some medium width and height (e.g.
+.IR 400 "),"
+adjusting their other dimension accordingly.  Useful if your digital 
+camera spits out large images, like 1600x1200.  The originals aren't 
+affected, but scaled copies of your images are generated
+and thumbnails link to these copies.  Clicking on the scaled
+copies in the HTML slides lets users see the full unscaled images.
+You must use
+.B -f
+between two consecutive runs when you've changed the value of
+.BR "--bigxy" .
+
+.TP
 .BI --bigy " <n>"
 Like
 .B -y
@@ -71,9 +88,8 @@ slides to some medium height (e.g.
 .IR 400 "),"
 adjusting their width accordingly.  Useful if your digital camera
 spits out large images, like 1600x1200.  The originals aren't affected,
-but scaled copies of your images are stored with the 
-.I ".slide"
-prefix and thumbnails link to these copies.  Clicking on the scaled
+but scaled copies of your images are generated
+and thumbnails link to these copies.  Clicking on the scaled
 copies in the HTML slides lets users see the full unscaled images.
 You must use
 .B -f
@@ -106,10 +122,18 @@ Generates
 from file names (strips suffix).
 
 .TP
-.BI --ce
+.BI --cc
 Generates
 .I captions
-from EXIF tags that may exist in JPEG files
+from image comment tag.
+
+.TP
+.BI --ct
+Add image timestamp tag to the generated caption.
+
+.TP
+.BI --ctf " strftime_format"
+Change timestamp in caption using a strftime format.
 
 .TP
 .BI --con " options"
@@ -117,7 +141,7 @@ Command line options to pass on to
 .BR convert
 internally (see its man page).  This affects all thumbnails
 and, if
-.BI --bigy
+.BI --bigxy or --bigy
 is given, the medium-size slides too.  You can set the
 .I -quality
 or go crazy with
@@ -271,14 +295,14 @@ may be used several times on the same command line.
 .TP
 .BI -f
 Force thumbnail regeneration.  Also forces medium-slide regeneration if
-.BI --bigy
+.BI --bigxy or --bigy
 is given.  Otherwise
 .B llgal
 will not regenerate these files if they already exist, and you may
 end up with stale copies.  Definitely use
 .BI -f
 between two runs where you've changed the value of 
-.BR --bigy " or " --con "."
+.BR --bigxy, --bigy " or " --con "."
 
 .TP
 .BI "-h, --help"
@@ -318,11 +342,11 @@ The order of the captions in this file determines the order in the gallery.
 
 .B IMG: <filename> ---- <caption>
 .RS
-defines an image (
+defines an image (when omitted,
 .B IMG:
 is the default type).
 .RE
-.B MVI: <filename> ---- <linkname> ---- <caption>
+.B MVI: <filename> ---- <linktext> ---- <caption>
 .RS
 defines a movie.
 .RE
@@ -330,11 +354,11 @@ defines a movie.
 .RS
 defines a text slide.
 .RE
-.B LNK: <url> ---- <linkname> ---- <caption>
+.B LNK: <url> ---- <linktext> ---- <caption>
 .RS
 defines a link slide.
 .RE
-.B DIR: <dir> ---- <linkname> ---- <caption>
+.B DIR: <dir> ---- <linktext> ---- <caption>
 .RS
 defines a subdirectory slide.
 .RE
@@ -428,7 +452,7 @@ The name of the subdirectory where llgal generated files will be stored.
 .I scaled_image_filenameprefix = "filenameprefix"
 .RS
 Prefix used to determine slide-image filenames from
-original images (in case of --bigy) [--sp <s>].
+original images (in case of --bigxy or --bigy) [--sp <s>].
 .RE
 .I thumbnail_image_filenameprefix = "filenameprefix"
 .RS
@@ -512,9 +536,13 @@ Prefix of generated HTML slide filenames.
 Prefix of slide filenames when generated from filename
 while there's no file associated (text, link, ...).
 .RE
+.I slide_width_max = <n>
+.RS
+Maximal width of slides [--bigy <n>].
+.RE
 .I slide_height_max = <n>
 .RS
-Maximal height of slides [--bigy <n>].
+Maximal height of slides [--bigxy <n>, --bigy <n>].
 .RE
 .I text_slide_width = <n>
 .RS
@@ -543,9 +571,17 @@ remove this line from the file.
 .RS
 Generate captions from filenames [-C].
 .RE
-.I make_caption_from_exif = <0/1>
+.I make_caption_from_image_comment = <0/1>
 .RS
-Generate captions from EXIF tags in JPEG images [--ce].
+Generate captions from image comment tag [--cc].
+.RE
+.I make_caption_from_image_comment = <0/1>
+.RS
+Add image timestamp in generated captions [--ct].
+.RE
+.I timestamp_format_in_caption = <s>
+.RS
+Generate captions from image comment tag [--ctf <s>].
 .RE
 .I show_caption_under_thumbnails = <0/1>
 .RS

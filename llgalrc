@@ -125,7 +125,11 @@
 # while there's no file associated (text, link, ...)
 # slide_filenameprefix_nofile = "NOFILE"
 
-# Maximal height of slides [--bigy <n>]
+# Maximal width of slides [--bigxy <n>]
+# Must be > 0, 0 means unlimited, setting to < 0 resets to default
+# slide_width_max = 0
+
+# Maximal height of slides [--bigxy <n>, --bigy <n>]
 # Must be > 0, 0 means unlimited, setting to < 0 resets to default
 # slide_height_max = 0
 
@@ -148,8 +152,14 @@
 # remove this line from the file.
 # caption_removal_line = "REMOVE THIS LINE IF LLGAL SHOULD NOT REMOVE THIS FILE"
 
-# Generate captions from EXIF tags in JPEG images [--ce]
-# make_caption_from_exif = 0
+# Generate captions from comment stored in images [--cc]
+# make_caption_from_image_comment = 0
+
+# Also generate captions from timestamp stored in images [--ct]
+# make_caption_from_image_timestamp = 0
+
+# Set timestamp format in caption using strftime format [--ctf]
+# timestamp_format_in_caption = "%Y-%m-%d %H:%M:%S"
 
 # Generate captions from filenames [-C]
 # make_caption_from_filename = 0

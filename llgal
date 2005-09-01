@@ -4,6 +4,8 @@ use FileHandle ;
 use Getopt::Long ;
 use Image::Size ;
 use Image::Info qw(image_info) ;
+use POSIX qw(strftime) ;
+use Time::Local ;
 use URI::Escape ;
 
 use strict ;
@@ -70,6 +72,7 @@ my $thumbnail_width_max_default = 0 ; # unlimited
 my $thumbnail_height_max_default = 75 ;
 my $thumbnails_per_row_default = 5 ;
 my $slide_height_max_default = 0 ; # unlimited
+my $slide_width_max_default = 0 ; # unlimited
 my $text_slide_width_default = 400 ;
 my $text_slide_height_default = 300 ;
 
@@ -131,7 +134,9 @@ my $slide_filenameprefix = "" ;
 # prefix of HTML slide filenames when generated from filename
 # while there's no file associated (text, link, ...)
 my $slide_filenameprefix_nofile = "NOFILE" ;
-# max height of the slides (--bigy)
+# max width of the slides (--bigxy)
+my $slide_width_max = $slide_width_max_default ;
+# max height of the slides (--bigxy or --bigy)
 my $slide_height_max = $slide_height_max_default ;
 # default text slide width
 my $text_slide_width = $text_slide_width_default ;
@@ -143,8 +148,12 @@ my $captions_filename = "captions" ;
 # this line will be placed in caption generated file
 # the user may remove it to prevent llgal from removing the caption file with -clean
 my $caption_removal_line = "REMOVE THIS LINE IF LLGAL SHOULD NOT REMOVE THIS FILE" ;
-# use exiftags as captions (--ce)
-my $make_caption_from_exif = 0 ;
+# use image comment as captions (--cc)
+my $make_caption_from_image_comment = 0 ;
+# use image timestamp as captions (--ct)
+my $make_caption_from_image_timestamp = 0 ;
+# format of the timestamp in captions (--ctf)
+my $timestamp_format_in_caption = "%Y-%m-%d %H:%M:%S" ;
 # preserve image names as captions (-C)
 my $make_caption_from_filename = 0 ;
 # write captions under thumbnails on index page (-u)
@@ -179,9 +188,12 @@ Options:  -a              write image sizes under thumbnails on index page
           --as            like -a, but write only the file size (in kbytes)
           --asu <s>       change file size unit ($show_size_unit)
           --bigy <n>      like -y, use it if you have very large image files
+          --bigxy <n>     like -xy, use it if you have very large image files
           -c              first generate and then use captions
           -C              use file names as captions
-          --ce            use exiftags as captions
+          --cc            use image comments as captions
+          --ct            use image timestamps as captions
+          --ctf <s>       timestamp format in captions (strftime format)
           --con <s>       options to pass to convert (e.g. -quality N)
           -d <dir>        operate on files in directory <dir> ($destination_dir)
           -i <file>       name of the main thumbnail index file ($index_filename)
@@ -281,6 +293,8 @@ sub process_option {
 	    $slide_filenameprefix = $1 ;
 	} elsif (/^slide_filenameprefix_nofile\s*=\s*"(.+)"$/) {
 	    $slide_filenameprefix_nofile = $1 ;
+	} elsif (/^slide_width_max\s*=\s*(.+)$/) { # > 0, 0 for unlimited, -1 for default
+	    $slide_width_max = $1 ;
 	} elsif (/^slide_height_max\s*=\s*(.+)$/) { # > 0, 0 for unlimited, -1 for default
 	    $slide_height_max = $1 ;
 	} elsif (/^text_slide_width\s*=\s*(.+)$/) { # > 0, -1 for default
@@ -292,8 +306,12 @@ sub process_option {
 	    $captions_filename = $1 ;
 	} elsif (/^caption_removal_line\s*=\s*"(.+)"$/) {
 	    $caption_removal_line = $1 ;
-	} elsif (/^make_caption_from_exif\s*=\s*(.+)$/) {
-	    $make_caption_from_exif = $1 ;
+	} elsif (/^make_caption_from_image_comment\s*=\s*(.+)$/) {
+	    $make_caption_from_image_comment = $1 ;
+	} elsif (/^make_caption_from_image_timestamp\s*=\s*(.+)$/) {
+	    $make_caption_from_image_timestamp = $1 ;
+	} elsif (/^timestamp_format_in_caption\s*=\s*"(.+)"$/) {
+	    $timestamp_format_in_caption = $1 ;
 	} elsif (/^make_caption_from_filename\s*=\s*(.+)$/) {
 	    $make_caption_from_filename = $1 ;
 	} elsif (/^show_caption_under_thumbnails\s*=\s*(.+)$/) {
@@ -352,7 +370,9 @@ GetOptions(
 	   'asu=s'	=> \$show_size_unit,
 	   'c'		=> \$use_caption_file,
 	   'C'		=> \$make_caption_from_filename,
-	   'ce'		=> \$make_caption_from_exif,
+	   'cc'		=> \$make_caption_from_image_comment,
+	   'ct'		=> \$make_caption_from_image_timestamp,
+	   'ctf=s'      => \$timestamp_format_in_caption,
 	   'i=s'	=> \$index_filename,
 	   'k'		=> \$make_slide_title_from_caption,
 	   'n'		=> \$make_slide_filename_from_filename,
@@ -366,6 +386,7 @@ GetOptions(
 	   'x'		=> \$show_no_slide_counter,
 	   'y=i'	=> \$thumbnail_height_max,
 	   'bigy=i'	=> \$slide_height_max,
+	   'bigxy=i'    => sub { shift ; $slide_width_max = $slide_height_max = shift ; },
            'con=s'	=> sub { shift ; $convert_options .= " ".shift ; },
 	   'sp=s'	=> \$scaled_image_filenameprefix,
 	   'title=s'	=> \$index_title,
@@ -469,6 +490,17 @@ if ($text_slide_height < 0) {
 die "Please give a positive text slide height value\n"
     unless ($text_slide_height > 0) ;
 
+# slide_width_max must be > 0, 0 for unlimited
+die "Please give an integer value for slide width max\n"
+    unless is_integer($slide_width_max) ;
+if ($slide_width_max < 0) {
+    print "Slide width max value < 0, restoring to default (".
+	($slide_width_max_default?$slide_width_max_default:"unlimited") .")\n" ;
+    $slide_width_max = $slide_width_max_default ;
+}
+die "Please give a positive slide width max value (or 0 for unlimited)\n"
+    unless ($slide_width_max >= 0) ;
+
 # slide_height_max must be > 0, 0 for unlimited
 die "Please give an integer value for slide height max\n"
     unless is_integer($slide_height_max) ;
@@ -519,8 +551,6 @@ die "Please give a non-empty caption filename\n"
 die "Please give a non-empty caption removal line\n"
     if ($caption_removal_line eq "");
 
-## TOFIX: all directories must be websafe
-
 ######################################################################
 # prepare a few globals for later
 
@@ -532,18 +562,22 @@ $scaled_convert_options =~ s/ +$//g ;
 $thumbnail_convert_options =~ s/ +/ /g ;
 $thumbnail_convert_options =~ s/ +$//g ;
 
-# adapt text slide height in case of --bigy
+# adapt text slide width and height in case of --bigxy or --bigy
 if ($slide_height_max > 0) {
     $text_slide_width = $text_slide_width / $text_slide_height * $slide_height_max ;
     $text_slide_height = $slide_height_max ;
 }
+if ($slide_width_max > 0 and $text_slide_width > $slide_width_max) {
+    $text_slide_height = $text_slide_height / $text_slide_width * $slide_width_max ;
+    $text_slide_width = $slide_width_max ;
+}
 
 # thumbnail default size (for text and link slide especially)
-my ($defaultthumbx, $defaultthumby) ;
+my ($default_thumb_xdim, $default_thumb_ydim) ;
 if ($thumbnail_width_max > 0) {
-    ($defaultthumbx, $defaultthumby) = ($thumbnail_width_max, $thumbnail_height_max) ;
+    ($default_thumb_xdim, $default_thumb_ydim) = ($thumbnail_width_max, $thumbnail_height_max) ;
 } else {
-    ($defaultthumbx, $defaultthumby) = ($thumbnail_height_max * 4/3, $thumbnail_height_max) ;
+    ($default_thumb_xdim, $default_thumb_ydim) = ($thumbnail_height_max * 4/3, $thumbnail_height_max) ;
 }
 
 # convert options for thumbnails
@@ -556,42 +590,19 @@ if ($thumbnail_width_max > 0) {
 my $thumbnail_create_command = "convert  +profile '*' $convert_options $thumbnail_convert_options $thumbnail_scale_options" ;
 
 # convert options for slides
-my $slide_create_command = "convert  +profile '*' $convert_options $scaled_convert_options -scale x$slide_height_max " ;
+my $slide_create_command = "convert  +profile '*' $convert_options $scaled_convert_options " ;
+if ($slide_height_max > 0) {
+    if ($slide_width_max > 0) {
+	$slide_create_command .= "-scale ${slide_width_max}x$slide_height_max " ;
+    } else {
+	$slide_create_command .= "-scale x$slide_height_max " ;	
+    }
+} else {
+    if ($slide_width_max > 0) {
+	$slide_create_command .= "-scale ${slide_width_max}x " ;
+    }
+}
 my $slide_copy_command = "cp -f " ;
-
-#####################################################################
-# Main variables
-
-# The whole entry list
-my @entries ;
-my $nentries ;
-# Entries are hashed composed of 
-# - type: see below
-# - filename (original filename with extension)
-# - basename (original filename without extension)
-# - url (web-safe url of the filename)
-# - linktext (an associated text that may be used in a link, www-safe)
-# - title (title, www-safe)
-# - caption (the caption of the slide, www-safe)
-# - slide (name of the HTML slide filename)
-# - slide_url (www-safe url of the slide filename)
-# - xdim, ydim, kbytes (details about the image or movie)
-# - thumb_xdim, thumb_ydim (details about the thumbnail image)
-# - scaled_xdim, scaled_ydim, scaled_kbytes (details about the scaled image)
-
-# types
-my $TYPE_TXT = 0 ;
-my $TYPE_LNK = 1 ;
-my $TYPE_IMG = 2 ;
-my $TYPE_MVI = 3 ;
-my $TYPE_DIR = 4 ;
-
-# number of entries that don't have any file associated with them
-my $nofiles = 0 ;
-
-# headers and footers
-my @headers = () ;
-my @footers = () ;
 
 ######################################################################
 # find generic llgal file
@@ -681,66 +692,245 @@ if ($cleanall_asked) {
     exit 0;
 }
 
-###################################################################################
-# generating entries
+#####################################################################
+# Main variables
 
-# generating safe filenames
+# The whole entry list
+my @entries ;
+my $nentries ;
+# Entries are hashed composed of 
+# - type: see below
+# - filename (original filename with extension)
+# - basename (original filename without extension)
+# - url (url of the filename)
+# - linktext (an associated text that may be used in a link, www-safe)
+# - caption (the caption of the slide, www-safe)
+# - title (title, www-safe)
+
+# - xdim, ydim, kbytes (details about the image or movie)
+
+# - slide_filename (name of the HTML slide filename)
+# - slide_url (url of the HTML slide filename)
+
+# - thumb_xdim, thumb_ydim (details about the thumbnail image)
+# - thumb_filename (name of the thumbnail image file)
+# - thumb_url (url of the thumbnail image file)
+
+# - scaled_xdim, scaled_ydim, scaled_kbytes (details about the scaled image)
+# - scaled_filename (name of the scaled image file)
+# - scaled_url (url of the scaled image file)
+
+# types
+my $TYPE_TXT = 0 ;
+my $TYPE_LNK = 1 ;
+my $TYPE_IMG = 2 ;
+my $TYPE_MVI = 3 ;
+my $TYPE_DIR = 4 ;
+
+# number of entries that don't have any file associated with them
+my $nofiles = 0 ;
+
+# headers and footers
+my @headers = () ;
+my @footers = () ;
+
+###################################################################################
+# generating safe url
 my $unsafe_url_warning = 0 ;
+my $first_unsafe_url ;
 sub make_safe_url {
     my $file = shift ;
     my $safe = uri_escape($file) ;
 
     if (!$unsafe_url_warning and $safe ne $file and $file =~ /[\x80-\xFF]/) {
 	$unsafe_url_warning = 1 ;
-	print "\n\n" ;
-	print "At least one of your files ($file) contains non-ascii characters\n" ;
-	print "which are not safely representable in a URL. llgal has escaped them\n" ;
-	print "using the method RFC 2396 specifies, but this may not work out if\n" ;
-	print "your web server has a different notion of character encoding\n" ;
-	print "than the machine llgal runs on.\n" ;
-	print "See also: http://www.w3.org/TR/html4/appendix/notes.html#h-B.2\n" ;
-	print "\n" ;
+	$first_unsafe_url = $file ;
     }
     return $safe ;
 }
 
-# generate caption and co.
-sub fill_entry {
-    my $entry = shift ;
-    my $filename = $entry->{filename} ;
-    my $basename = $entry->{basename} ;
+# Create the url of the local llgal directory
+my $local_llgal_url = make_safe_url ($local_llgal_dir) ;
+
+###################################################################################
+# generate entries
+sub make_entry {
+    my $entry ;
+    my $type = shift ;
+    my $filename = shift ;
+    my $basename = shift ;
+    my $url = shift ;
+    my $linktext = shift ;
+    my $caption = shift ;
+
+    # set the type
+    $entry->{type} = $type ;
+
+    # set the filename
+    if (not defined $filename) {
+	$filename = $slide_filenameprefix_nofile.($nofiles++) ;
+	$basename = $slide_filenameprefix_nofile.($nofiles++) ;
+    } else {
+	# check its existence
+	die "Can't open $filename\n" unless (-r "$destination_dir/$filename");
+    }
+    $entry->{filename} = $filename ;
+    
+    # keep real filename for later
+    my $real_filename = "$destination_dir/$filename" ;
+
+    # set the basename
+    $entry->{basename} = $basename ;
 
     # make a safe url
-    $entry->{url} = make_safe_url ($filename) ;
+    if (not defined $url) {
+	$url = $filename ;
+    }
+    $entry->{url} = make_safe_url ($url) ;
 
     # the linktext (will be HTML-safe after caption file generation)
-    $entry->{linktext} = $basename ;
+    if (not defined $linktext) {
+	$linktext = $basename ;
+	$linktext =~ s/&/&amp;/g ;
+#       $linktext =~ s/"/&\#34;/g ;
+    }
+    $entry->{linktext} = $linktext ;
 
     # the caption (will be HTML-safe after caption file generation)
-    my $caption = "" ;
-    if ($make_caption_from_exif && $entry->{type} == $TYPE_IMG) {
-	my $infos = image_info ("$destination_dir/$filename") ;
-	my $comment ;
-	if (($comment = $infos->{UserComment}) ne "") {
-	    if ($comment =~ /^ASCII\0\0\0(.*)$/) {
-		# ASCII Exif Comment
-		$caption = $1 ;
-	    } elsif (substr ($comment,0,8) ne "\0\0\0\0\0\0\0\0") {
-		die "Unrecognized Exif UserComment '$comment' length ".(length $comment)."\n" ;
+    if (not defined $caption) {
+	if ($type == $TYPE_IMG) {
+	    my $infos = image_info ("$destination_dir/$filename") ;
+	    if ($make_caption_from_image_comment) {
+		my $comment ;
+		if (($comment = $infos->{UserComment}) ne "") {
+		    # remove trailing spaces
+		    $comment =~ s/\s*$// ;
+		    if ($comment =~ /^ASCII\0\0\0(.*)$/) {
+			# ASCII Exif Comment
+			$caption = $1 ;
+		    } elsif (substr ($comment,0,8) ne "\0\0\0\0\0\0\0\0") {
+			die "Unrecognized Exif UserComment '$comment' length ".(length $comment)."\n" ;
+		    }
+		} elsif (($comment = $infos->{Comment}) ne "") {
+		    # GIF comment
+		    $caption = $comment ;
+		}
 	    }
-	} elsif (($comment = $infos->{Comment}) ne "") {
-	    # GIF comment
-	    $caption = $comment ;
+	    if ($make_caption_from_image_timestamp) {
+		my $imagetime = $infos->{DateTimeOriginal} ;
+		if ($imagetime ne "") {
+		    my @timearray = split(/[: ]/, $imagetime);
+		    my @gmtime = ($timearray[5], $timearray[4], $timearray[3], $timearray[2], $timearray[1]-1, $timearray[0]-1900, 0, 0) ;
+		    my $timestamp = strftime ($timestamp_format_in_caption, @gmtime) ;
+		    $caption .= " - " if $caption ne "" ;
+		    $caption .= $timestamp ;
+		}
+	    }
 	}
+	if ($caption eq "" && $make_caption_from_filename) {
+	    $caption = $basename ;
+	}
+	$caption =~ s/&/&amp;/g ;
+#	$caption =~ s/"/&\#34;/g ;
     }
-    if ($make_caption_from_filename && $caption eq "") {
-	$caption = $basename ;
-    }
+    chomp $caption ;
     $entry->{caption} = $caption ;
+
+    # title is based on the basename
+    my $title = $basename ;
+    $title =~ s/&/&amp;/g ;
+#    $title =~ s/"/&\#34;/g ;
+    $entry->{title} = $title ;
+
+    # HTML slide and its url
+    if (!$make_no_slides) {
+	my $slide_filename ;
+	if ($make_slide_filename_from_filename) {
+	    if ($make_slide_filename_from_extension) {
+		$slide_filename = $filename .".html" ;
+	    } else {
+		$slide_filename = $basename .".html" ;
+	    }
+	} else {
+	    $slide_filename = $slide_filenameprefix . (@entries+1) . ".html" ;
+	}
+	$entry->{slide_filename} = $slide_filename ;
+	$entry->{slide_url} = make_safe_url ($slide_filename) ;
+    }
+
+    # xdim, ydim, kbytes of the image or movie
+    if ($type == $TYPE_IMG) {
+	my ($x,$y) = imgsize("$destination_dir/$filename") ;
+	$entry->{xdim} = $x ;
+	$entry->{ydim} = $y ;
+	# initialize here so that we can use it even when scaled are not used
+	$entry->{scaled_xdim} = $x ;
+	$entry->{scaled_ydim} = $y ;
+    }
+    if ($type == $TYPE_IMG or $type == $TYPE_MVI) {
+	my $kbytes = ((stat($filename))[7]) >> 10;
+	$entry->{kbytes} = $kbytes ;
+	# initialize here so that we can use it even when scaled are not used
+	$entry->{scaled_kbytes} = $kbytes ;
+    }
+
+    # thumbnail, its url and dimensions
+    if ($type == $TYPE_IMG) {
+	# filename and url
+	my $thumbnail_filename = "$thumbnail_image_filenameprefix$filename" ;
+	$entry->{thumb_filename} = "$local_llgal_dir/$thumbnail_filename" ;
+	$entry->{thumb_url} = "$local_llgal_url/". make_safe_url ($thumbnail_filename) ;
+
+	# thumbnails dimensions
+	my $real_thumb_filename = "$destination_dir/$entry->{thumb_filename}" ;
+	if ((! -e "$real_thumb_filename") or $force_regen_asked) {
+	    my $output = `$thumbnail_create_command "$real_filename" "$real_thumb_filename" 2>&1` ;
+	    chomp $output ;
+	    die "Failed ($output)\n" if $? ;
+	}
+	($entry->{thumb_xdim},$entry->{thumb_ydim}) = imgsize("$real_thumb_filename") ;
+    } else {
+	# default thumbnail dimensions
+	$entry->{thumb_xdim} = $default_thumb_xdim ;
+	$entry->{thumb_ydim} = $default_thumb_ydim ;
+    }
+    
+    # scaled image, its url and dimensions
+    if ($type == $TYPE_IMG and ($slide_width_max > 0 or $slide_height_max > 0) and !$make_no_slides) {
+	# filename and url
+	my $scaled_filename = "$scaled_image_filenameprefix$filename" ;
+	$entry->{scaled_filename} = "$local_llgal_dir/$scaled_filename" ;
+	$entry->{scaled_url} = "$local_llgal_url/". make_safe_url ($scaled_filename) ;
+
+	# scaled image dimensions
+	my $real_scaled_filename = "$destination_dir/$entry->{scaled_filename}" ;
+	my ($x,$y) ;
+	if ((! -e "$real_scaled_filename") or $force_regen_asked) {
+	    # only scale down, never up.
+	    ($x,$y) = imgsize("$real_filename");
+	    my $output ;
+	    if ($x <= $slide_width_max and $y <= $slide_height_max) {
+		$output = `$slide_copy_command "$real_filename" "$real_scaled_filename" 2>&1` ;
+	    } else {
+		$output = `$slide_create_command "$real_filename" "$real_scaled_filename" 2>&1` ;
+	    }
+	    chomp $output ;
+	    die "Failed ($output)\n" if $? ;
+	}
+	($x,$y) = imgsize("$real_scaled_filename");
+	$entry->{scaled_xdim} = $x;
+	$entry->{scaled_ydim} = $y;
+	$entry->{scaled_kbytes} = ((stat("$real_scaled_filename"))[7])>>10 ;
+    }
+
+    print "." ;
+
+    return $entry ;
 }
 
 # generating entry table from files in target directory
 sub get_entries {
+
     # load up image files from $destination_dir into array @imgfiles
     opendir DIR, $destination_dir or die "Can't open directory $destination_dir\n";
 
@@ -772,42 +962,31 @@ sub get_entries {
 
     closedir DIR ;
 
-    # add files to entries
+    print "Preparing entries" ;
+
+    # add entries
     while (@imgfiles) {
 	my $filename = shift @imgfiles ;
-	my $entry ;
 	my @parts = split (/\./, $filename) ;
-	my $ext = pop @parts ;
+	pop @parts ;
 	my $basename = join (".", @parts) ;
-	$entry->{type} = $TYPE_IMG ;
-	$entry->{filename} = $filename ;
-	$entry->{basename} = $basename ;
-	fill_entry ($entry) ;
-	push @entries, $entry ;
+	push @entries, make_entry ($TYPE_IMG, $filename, $basename, undef, undef, undef) ;
     }
     
     while (@mvifiles) {
         my $filename = shift @mvifiles ;
-	my $entry ;
 	my @parts = split (/\./, $filename) ;
-	my $ext = pop @parts ;
+	pop @parts ;
 	my $basename = join (".", @parts) ;
-	$entry->{type} = $TYPE_MVI ;
-	$entry->{filename} = $filename ;
-	$entry->{basename} = $basename ;
-	fill_entry ($entry) ;
-	push @entries, $entry ;
+	push @entries, make_entry ($TYPE_MVI, $filename, $basename, undef, undef, undef) ;
     }
 
     while (@subdirs) {
 	my $dirname = shift @subdirs ;
-	my $entry ;
-	$entry->{type} = $TYPE_DIR ;
-	$entry->{filename} = $dirname ;
-	$entry->{basename} = $dirname ; # don't care about the extension here
-	fill_entry ($entry) ;
-	push @entries, $entry ;
+	push @entries, make_entry ($TYPE_DIR, $dirname, $dirname, undef, undef, undef) ;
     }
+
+    print " Done!\n" ;
 
     # how many total files
     $nentries = @entries ;
@@ -853,20 +1032,26 @@ if ($use_caption_file) {
 	for (my $i = 0; $i < $nentries; $i++) {
 	    my $type = $entries[$i]->{type} ;
 	    if ($type == $TYPE_IMG) {
-		print CAP "IMG: ". $entries[$i]->{filename} ." ---- ". $entries[$i]->{caption} ."\n";
+		print CAP "IMG: ". $entries[$i]->{filename}
+		." ---- ". $entries[$i]->{caption} ."\n";
 	    } elsif ($type == $TYPE_MVI) {
-	        print CAP "MVI: " . $entries[$i]->{filename}	." ---- ". $entries[$i]->{linktext} ." ---- ". $entries[$i]->{caption} ."\n";
+	        print CAP "MVI: " . $entries[$i]->{filename}
+		." ---- ". $entries[$i]->{linktext}
+		." ---- ". $entries[$i]->{caption} ."\n";
 	    } elsif ($type == $TYPE_DIR) {
-	        print CAP "DIR: " . $entries[$i]->{filename} ." ---- ". $entries[$i]->{linktext} ." ---- ". $entries[$i]->{caption} ."\n";
+	        print CAP "DIR: " . $entries[$i]->{filename}
+		." ---- ". $entries[$i]->{linktext}
+		." ---- ". $entries[$i]->{caption} ."\n";
 	    }
 	}
 	close(CAP);
 	die "Now edit the $captions_filename file to your liking and rerun llgal -c\n";
     } else {
 	# read in files specified in the .captions file if it exists
-	print "Reading the $captions_filename file ... ";
+	print "Reading the $captions_filename file and preparing entries ";
 
-	open(CAP,"$destination_dir/$local_llgal_dir/$captions_filename") or die "Can't open $destination_dir/$local_llgal_dir/$captions_filename file\n";
+	open(CAP,"$destination_dir/$local_llgal_dir/$captions_filename")
+	    or die "Can't open $destination_dir/$local_llgal_dir/$captions_filename file\n";
 	my $line;
 	while (defined($line = <CAP>)) {
 	    chomp($line); $line =~ s/^\s*//; $line =~ s/\s\(\s*\)$/\1/;
@@ -892,47 +1077,24 @@ if ($use_caption_file) {
 		    # - \s is facultative after TYP: at the begining
 		    if ($line =~ m/^TXT:\s*(.+)\s+----\s*(?:\s(.*))?\s*$/) {
 			# text slide
-			$entry->{type} = $TYPE_TXT ;
-			$entry->{filename} = $slide_filenameprefix_nofile.($nofiles++) ;
-			$entry->{basename} = $entry->{filename} ;
-			$entry->{caption} = $2 ;
-			$entry->{linktext} = $1 ;
+			$entry = make_entry ($TYPE_TXT, undef, undef, undef, $1, $2) ;
 
 		    } elsif ($line =~ m/^LNK:\s*(.+)\s+----\s+(.+)\s+----\s*(?:\s(.*))?\s*$/) {
 			# link slide
-			$entry->{type} = $TYPE_LNK ;
-			$entry->{filename} = $slide_filenameprefix_nofile.($nofiles++) ;
-			$entry->{basename} = $entry->{filename} ;
-			$entry->{url} = $1 ;
-			$entry->{caption} = $3 ;
-			$entry->{linktext} = $2 ;
-
-		    } elsif ($line =~ m/^MVI:\s*(.+)\.(.+)\s+----\s+(.+)\s+----\s*(?:\s(.*))?\s*$/) {
-			# movie slide
-			$entry->{type} = $TYPE_MVI ;
-			$entry->{filename} = $1 .".". $2 ;
-			$entry->{basename} = $1 ;
-			$entry->{url} = make_safe_url ($1 .".". $2) ;
-			$entry->{caption} = $4 ;
-			$entry->{linktext} = $3 ;
+			$entry = make_entry ($TYPE_LNK, undef, undef, $1, $2, $3) ;
 
 		    } elsif ($line =~ m/^DIR:\s*(.+)\s+----\s+(.+)\s+----\s*(?:\s(.*))?\s*$/) {
 			# directory slide
-			$entry->{type} = $TYPE_DIR ;
-			$entry->{filename} = $1 ;
-			$entry->{basename} = $1 ;
-			$entry->{url} = make_safe_url ($1) ;
-			$entry->{caption} = $3 ;
-			$entry->{linktext} = $2 ;
+			$entry = make_entry ($TYPE_DIR, $1, $1, undef, $2, $3) ;
+
+		    } elsif ($line =~ m/^MVI:\s*(.+)\.(.+)\s+----\s+(.+)\s+----\s*(?:\s(.*))?\s*$/) {
+			# movie slide
+			$entry = make_entry ($TYPE_MVI, $1.".".$2, $1, undef, $3, $4) ;
 
 		    } elsif ($line =~ m/^IMG:\s*(.+)\.(.+)\s+----\s*(?:\s(.*))?\s*$/
 			     or $line =~ m/\s*(.+)\.(.+)\s+----\s*(?:\s(.*))?\s*^/) {
 			# image slide (default)
-			$entry->{type} = $TYPE_IMG ;
-			$entry->{filename} = $1 .".". $2 ;
-			$entry->{basename} = $1 ;
-			$entry->{url} = make_safe_url ($1 .".". $2) ;
-			$entry->{caption} = $3 ;
+			$entry = make_entry ($TYPE_IMG, $1.".".$2, $1, undef, undef, $3) ;
 
 		    } else {
 			die "Unrecognized line #$. in caption file: \"$line\"\n" ;
@@ -952,101 +1114,40 @@ if ($use_caption_file) {
     print "Found $nentries files in directory $destination_dir\n";
 }
 
-#######################################################################
-# Generate www-safe titles, linktexts and captions
-
-for (my $i = 0; $i < $nentries; $i++) {
-    $entries[$i]->{title} = $entries[$i]->{basename} ;
-    $entries[$i]->{title} =~ s/&/&amp;/g ;
-    $entries[$i]->{title} =~ s/"/&\#34;/g ;
-    $entries[$i]->{linktext} =~ s/&/&amp;/g ;
-#    $entries[$i]->{linktext} =~ s/"/&\#34;/g ;
-    $entries[$i]->{caption} =~ s/&/&amp;/g ;
-#    $entries[$i]->{caption} =~ s/"/&\#34;/g ;
+if ($unsafe_url_warning) {
+    print "\n" ;
+    print "At least one of your files ($first_unsafe_url) contains non-ascii characters\n" ;
+    print "which are not safely representable in a URL. llgal has escaped them\n" ;
+    print "using the method RFC 2396 specifies, but this may not work out if\n" ;
+    print "your web server has a different notion of character encoding\n" ;
+    print "than the machine llgal runs on.\n" ;
+    print "See also: http://www.w3.org/TR/html4/appendix/notes.html#h-B.2\n" ;
+    print "\n" ;
 }
 
 #######################################################################
-# Create thumbnails
+# Get the indextemplate
+get_generic_llgal_file ($indextemplate_filename) ;
 
-print "Creating thumbnails: ";
-# compute the thumbnail and store their size
-for (my $i = 0; $i < $nentries; $i++) {
-    my ($x,$y) = ($defaultthumbx,$defaultthumby);
-    if ($entries[$i]->{type} == $TYPE_IMG) {
-	my $filename = "$destination_dir/$entries[$i]->{filename}" ;
-	die "Can't open $filename\n" unless (-r $filename) ;
-	my $thumbnail_filename = "$destination_dir/$local_llgal_dir/$thumbnail_image_filenameprefix$entries[$i]->{filename}" ;
-	if ((! -e $thumbnail_filename) or $force_regen_asked) {
-	    my $output = `$thumbnail_create_command "$filename" "$thumbnail_filename" 2>&1` ;
-	    chomp $output ;
-	    die "Failed ($output)\n" if $? ;
-	    print "." ;
-	}
-	($x,$y) = imgsize($thumbnail_filename) ;
-    }
-    $entries[$i]->{thumb_xdim} = $x ;
-    $entries[$i]->{thumb_ydim} = $y ;    
-}
-print " done!\n";
+# Get the slide template if needed
+get_generic_llgal_file ($slidetemplate_filename) if !$make_no_slides ;
 
-#######################################################################
-# Determine image file sizes
-
-print "Determining image sizes: ";
-for (my $i = 0; $i < $nentries; $i++) {
-    if ($entries[$i]->{type} == $TYPE_IMG || $entries[$i]->{type} == $TYPE_MVI) {
-	my $filename = "$destination_dir/$entries[$i]->{filename}" ;
-	die "Can't open $filename\n" unless (-r $filename);
-	if ($entries[$i]->{type} == $TYPE_IMG) {
-	    my ($x,$y) = imgsize($filename) ;
-	    $entries[$i]->{xdim} = $x ;
-	    $entries[$i]->{ydim} = $y ;
-	    $entries[$i]->{scaled_xdim} = $x ;
-	    $entries[$i]->{scaled_ydim} = $y ;
-	}
-	$entries[$i]->{kbytes} = ((stat($filename))[7])>>10 ;
-	$entries[$i]->{scaled_kbytes} = ((stat($filename))[7])>>10 ;
-	print "." ;
-    }
-}
-print " done!\n";
-
-#######################################################################
-# Scale down slides if the --bigy <n> option was given
-
-if ($slide_height_max > 0 and !($make_no_slides)) {
-    print "Scaling down big slides and determining new slide sizes: ";
-    for (my $i = 0; $i < $nentries; $i++) {
-	if ($entries[$i]->{type} == $TYPE_IMG) {
-	    my $filename = "$destination_dir/$entries[$i]->{filename}" ;
-	    die "Can't open $filename\n" unless (-r $filename);
-	    my $slide_filename = "$destination_dir/$local_llgal_dir/$scaled_image_filenameprefix$entries[$i]->{filename}" ;
-	    my ($x,$y) ;
-	    if ((! -e $slide_filename) or $force_regen_asked) {
-		# only scale down, never up.
-		($x,$y) = imgsize($filename);
-		my $output ;
-		if ($y <= $slide_height_max) {
-		    $output = `$slide_copy_command "$filename" "$slide_filename" 2>&1` ;
-		} else {
-		    $output = `$slide_create_command "$filename" "$slide_filename" 2>&1` ;
-		}
-		chomp $output ;
-		die "Failed ($output)\n" if $? ;
-		print "." ;
-	    }
-            ($x,$y) = imgsize($slide_filename);
-	    $entries[$i]->{scaled_xdim} = $x;
-	    $entries[$i]->{scaled_ydim} = $y;
-	    $entries[$i]->{scaled_kbytes} = ((stat($slide_filename))[7])>>10 ;
-	}
-    }
-    print " done!\n";
-}
-
-#######################################################################
 # Get the css
 get_generic_llgal_file ($css_filename) ;
+
+# Get the film tile for the index
+if ($show_no_film_effect) {
+    print "Omitting film reel effect.\n" ;
+} else {
+    get_generic_llgal_file ($filmtile_filename) ;
+}
+
+# rescale the tiled image if needed
+if (!$show_no_film_effect) {
+    my $tileh = (imgsize("$destination_dir/$local_llgal_dir/$filmtile_filename"))[1] ;
+    system("mogrify -scale x$tile_height $destination_dir/$local_llgal_dir/$filmtile_filename")
+	if ($tile_height != $tileh) ;
+}
 
 #######################################################################
 # Create the individual slide show files
@@ -1054,38 +1155,8 @@ get_generic_llgal_file ($css_filename) ;
 if ($make_no_slides) {
     print "Linking thumbnails directly to image files...  Making no html slides.\n";
 } else {
-    # create slide filenames
-    if ($make_slide_filename_from_filename) {
-	if ($make_slide_filename_from_extension) {
-	    # use filename with extension to generated slide filename
-	    for (my $i = 0; $i < $nentries; $i++) {
-		$entries[$i]->{slide} = $entries[$i]->{filename} .".html" ;
-	    }
-
-	} else {
-	    # use filename without extension to generated slide filename
-	    for (my $i = 0; $i < $nentries; $i++) {
-		$entries[$i]->{slide} = $entries[$i]->{basename} . ".html" ;
-	    }
-	}
-
-    } else {
-	# use number to generated slide filename
-	for (my $i = 0; $i < $nentries; $i++) {
-	    $entries[$i]->{slide} = $slide_filenameprefix . ($i+1) . ".html" ;
-	}
-    }
-
-    # generate corresponding slide url
-    for(my $i = 0; $i < $nentries; $i++) {
-	$entries[$i]->{slide_url} = make_safe_url ($entries[$i]->{slide}) ;
-    }
-
     # remove old .html files
     system("rm -f \"$destination_dir/$local_llgal_dir/*.html\"");
-
-    # get the slide template
-    get_generic_llgal_file ($slidetemplate_filename) ;
 
     # keep the slidetemplate in memory instead of always reopening it
     my @slidetemplate_text;
@@ -1096,7 +1167,7 @@ if ($make_no_slides) {
     # create slides
     print "Creating individual slides: ";
     for (my $i = 0; $i < $nentries; $i++) {
-	open(SW, ">$destination_dir/$entries[$i]->{slide}") or die "Can't create slide file\n";
+	open(SW, ">$destination_dir/$entries[$i]->{slide_filename}") or die "Can't create slide file\n";
 	print ".";
 
 	my $type = $entries[$i]->{type} ;
@@ -1123,38 +1194,34 @@ if ($make_no_slides) {
 
 	    # set the style
 	    if ($line =~ m/<!--THIS-SLIDE-STYLE-->/g) {
-		if ($type == $TYPE_TXT || $type == $TYPE_LNK || $type == $TYPE_MVI || $type == $TYPE_DIR) {
-		    $line =~ s/<!--THIS-SLIDE-STYLE-->/text-slide" style="width: ${text_slide_width}px; height: ${text_slide_height}px;/ ;
-		} else {
+		if ($type == $TYPE_IMG) {
 		    $line =~ s/<!--THIS-SLIDE-STYLE-->/image-slide/ ;
+		} else {
+		    $line =~ s/<!--THIS-SLIDE-STYLE-->/text-slide" style="width: ${text_slide_width}px; height: ${text_slide_height}px;/ ;
 		}
 	    }
 
 	    # fill the main part
 	    if ($line =~ m/<!--THIS-SLIDE-->/g) {
-		if ($type == $TYPE_TXT) {
-		    # text slide
-		    $line =~ s/<!--THIS-SLIDE-->/$entries[$i]->{linktext}/ ;
-
-		} elsif ($type == $TYPE_LNK || $type == $TYPE_MVI || $type == $TYPE_DIR) {
-		    # link or movie or directory slide
-		    $line =~ s/<!--THIS-SLIDE-->/<a href="$entries[$i]->{url}">$entries[$i]->{linktext}<\/a>/ ;
-
-		} elsif ($type == $TYPE_IMG) {
+# TOFIX: pas de TYPE_IMG
+		if ($type == $TYPE_IMG) {
 		    # image slide
-		    my $url = $entries[$i]->{url} ;
 
-		    if ($slide_height_max) {
-			# image slide with link to the real image
-			$line =~ s/<!--THIS-SLIDE-->/<a href="$url"><img src="$local_llgal_dir\/$scaled_image_filenameprefix$url" alt="$altname" title="click to see full-size ($altname)" \/><\/a>/ ;
+		    if (defined $entries[$i]->{scaled_filename}) {
+			# scaled image with link to the real image
+			$line =~ s/<!--THIS-SLIDE-->/<a href="$entries[$i]->{url}"><img src="$entries[$i]->{scaled_url}" alt="$altname" title="click to see full-size ($altname)" \/><\/a>/ ;
 
 		    } else {
-			# image slide with the real image
-			$line =~ s/<!--THIS-SLIDE-->/<img src="$url" alt="$altname" title="$altname" \/>/g ;
+			# real image
+			$line =~ s/<!--THIS-SLIDE-->/<img src="$entries[$i]->{url}" alt="$altname" title="$altname" \/>/g ;
 
 		    }
+		} elsif (defined $entries[$i]->{url}) {
+		    # link or movie or directory slide
+		    $line =~ s/<!--THIS-SLIDE-->/<a href="$entries[$i]->{url}">$entries[$i]->{linktext}<\/a>/ ;
 		} else {
-		    die "Unknown type $type.\n" ;
+		    # text slide
+		    $line =~ s/<!--THIS-SLIDE-->/$entries[$i]->{linktext}/ ;
 		}
 	    }
 
@@ -1167,7 +1234,8 @@ if ($make_no_slides) {
 	    }
 
 	    # add dimensions and size to the caption
-	    if ($slide_height_max and ($show_dimensions or $show_size) and ($type == $TYPE_IMG || $type == $TYPE_MVI)) {
+# TOFIX: defined size/dim
+	    if (($slide_width_max or $slide_height_max) and ($show_dimensions or $show_size) and ($type == $TYPE_IMG || $type == $TYPE_MVI)) {
 		my $printdim = "$entries[$i]->{xdim}x$entries[$i]->{ydim}" ;
 		my $printsize = "$entries[$i]->{kbytes}$show_size_unit" ;
 		if ($show_dimensions && $show_size && $type == $TYPE_IMG) {
@@ -1203,24 +1271,6 @@ if ($make_no_slides) {
     }
     print " done!\n" ;
 }
-
-#######################################################################
-# Get the film tile file for the index
-if ($show_no_film_effect) {
-    print "Omitting film reel effect.\n" ;
-} else {
-    get_generic_llgal_file ($filmtile_filename) ;
-}
-
-# rescale the tiled image if the -t switch was called but -r wasn't
-if (! $show_no_film_effect) {
-    my $tileh = (imgsize("$destination_dir/$local_llgal_dir/$filmtile_filename"))[1] ;
-    system("mogrify -scale x$tile_height $destination_dir/$local_llgal_dir/$filmtile_filename") if ($tile_height != $tileh) ;
-}
-
-#######################################################################
-# Get the indextemplate
-get_generic_llgal_file ($indextemplate_filename) ;
 
 #######################################################################
 # Creating the index file
@@ -1283,6 +1333,7 @@ for (my $i = 0; $i < $nentries; $i += $num) {
 	my $type = $entries[$i+$j]->{type} ;
 	my $width = $entries[$i+$j]->{thumb_xdim} ;
 	my $height = $entries[$i+$j]->{thumb_ydim} ;
+	
 	if ($type == $TYPE_TXT || $type == $TYPE_LNK || $type == $TYPE_MVI || $type == $TYPE_DIR) {
 	    print IXW "    <td class=\"text-thumb\" style=\"width: ", $width, "px; height: ", $height, "px;\">\n" ;
             print IXW "      " ;
@@ -1308,8 +1359,7 @@ for (my $i = 0; $i < $nentries; $i += $num) {
 		$altname = $entries[$i+$j]->{title};
 	    }
 	    
-	    my $thumb = "$local_llgal_dir/$thumbnail_image_filenameprefix$entries[$i+$j]->{url}" ;
-	    print IXW "<img src=\"$thumb\" alt=\"$altname\" title=\"$altname\" />";
+	    print IXW "<img src=\"$entries[$i+$j]->{thumb_url}\" alt=\"$altname\" title=\"$altname\" />";
 	    print IXW "</a></td>\n" ;
 	} else {
 	    die "Unknown type $type.\n" ;
@@ -1404,7 +1454,7 @@ if ($www_access_rights) {
 }
 
 #######################################################################
-# If -g was invoked, generate a configuration file
+# If --gencfg was invoked, generate a configuration file
 if (defined $generate_config) {
     die "Cannot generate $generate_config which already exists."
 	if -r "$generate_config" ;
@@ -1436,8 +1486,8 @@ if (defined $generate_config) {
     print NEWCFG "show_no_film_effect = $show_no_film_effect\n" ;
     print NEWCFG "tile_height = $tile_height\n" ;
     print NEWCFG "# Thumbnails:\n" ;
-    print NEWCFG "thumbnail_height_max = $thumbnail_height_max\n" ;
     print NEWCFG "thumbnail_width_max = $thumbnail_width_max\n" ;
+    print NEWCFG "thumbnail_height_max = $thumbnail_height_max\n" ;
     print NEWCFG "thumbnails_per_row = $thumbnails_per_row\n" ;
     print NEWCFG "# Slides:\n" ;
     print NEWCFG "make_no_slides = $make_no_slides\n" ;
@@ -1447,13 +1497,16 @@ if (defined $generate_config) {
     print NEWCFG "show_no_slide_counter = $show_no_slide_counter\n" ;
     print NEWCFG "slide_filenameprefix = \"$slide_filenameprefix\"\n" ;
     print NEWCFG "slide_filenameprefix_nofile = \"$slide_filenameprefix_nofile\"\n" ;
+    print NEWCFG "slide_width_max = $slide_width_max\n" ;
     print NEWCFG "slide_height_max = $slide_height_max\n" ;
-    print NEWCFG "text_slide_height = $text_slide_height\n" ;
     print NEWCFG "text_slide_width = $text_slide_width\n" ;
+    print NEWCFG "text_slide_height = $text_slide_height\n" ;
     print NEWCFG "# Captions:\n" ;
     print NEWCFG "captions_filename = \"$captions_filename\"\n" ;
     print NEWCFG "caption_removal_line = \"$caption_removal_line\"\n" ;
-    print NEWCFG "make_caption_from_exif = $make_caption_from_exif\n" ;
+    print NEWCFG "make_caption_from_image_comment = $make_caption_from_image_comment\n" ;
+    print NEWCFG "make_caption_from_image_timestamp = $make_caption_from_image_timestamp\n" ;
+    print NEWCFG "timestamp_format_in_caption = $timestamp_format_in_caption\n" ;
     print NEWCFG "make_caption_from_filename = $make_caption_from_filename\n" ;
     print NEWCFG "show_caption_under_thumbnails = $show_caption_under_thumbnails\n" ;
     print NEWCFG "show_dimensions = $show_dimensions\n" ;
