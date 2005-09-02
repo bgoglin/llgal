@@ -23,7 +23,7 @@ clean::
 install:: llgal
 	install -d -m 0755 $(DESTDIR)$(BINDIR) $(DESTDIR)$(DATADIR)/llgal $(DESTDIR)$(MANDIR)/man1 $(DESTDIR)$(SYSCONFDIR)
 	install -m 0755 llgal $(DESTDIR)$(BINDIR)/llgal
-	install -m 0644 indextemplate.html llgal.css slidetemplate.html tile.png $(DESTDIR)$(DATADIR)/llgal
+	install -m 0644 captions.header indextemplate.html llgal.css slidetemplate.html tile.png $(DESTDIR)$(DATADIR)/llgal
 	install -m 0644 llgalrc $(DESTDIR)$(SYSCONFDIR)
 	install -m 0644 llgal.1 $(DESTDIR)$(MANDIR)/man1
 
@@ -40,6 +40,7 @@ tarball::
 	cp llgalrc /tmp/$(TARBALL)
 	cp llgal.1 /tmp/$(TARBALL)
 	cp Makefile /tmp/$(TARBALL)
+	cp captions.header /tmp/$(TARBALL)
 	cp README /tmp/$(TARBALL)
 	cp COPYING /tmp/$(TARBALL)
 	cp Changes /tmp/$(TARBALL)

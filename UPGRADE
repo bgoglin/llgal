@@ -12,15 +12,17 @@ igal places all files in the working directory with existing images.
 	.tile.png
 	igal.css
 
-llgal moves all these files in a .llgal.files, making the starting dot useless.
+llgal moves all these files in a .llgal, making the starting dot useless.
 .slide_<image> is also replaced by .scaled_<image>.
-	.llgal.files/captions
-	.llgal.files/indextemplate.html
-	.llgal.files/slidetemplate.html
-	.llgal.files/scaled_<image>
-	.llgal.files/thumb_<image>
-	.llgal.files/tile.png
-	.llgal.files/llgal.css
+	.llgal/captions
+	.llgal/indextemplate.html
+	.llgal/slidetemplate.html
+	.llgal/scaled_<image>
+	.llgal/thumb_<image>
+	.llgal/tile.png
+	.llgal/llgal.css
+
+Note that earlier versions of llgal use .llgal.files instead of .llgal.
 
 2. CSS style sheet
 ------------------
@@ -35,7 +37,7 @@ igal -clean is now llgal --cleanall since llgal --clean only removes file that
 have not been modified.
 
 Captions generation uses --gc instead of -c.
-Captions usage still uses -c.
+The caption is automatically used if it exists, -c is not used anymore.
 Captions generation from filename is --cf instead of -C
 
 Do not show image counter in captions is now --nc instead of -x.
@@ -46,7 +48,7 @@ If you don't care about processing time:
 * Save your .captions file if it exists
 * Note the command line you used when creating the gallery (see in the header of index.html)
 * Remove everything but the images with igal -clean
-* Create a .llgal.files directory and move your captions files inside
+* Create a .llgal directory and move your captions files inside
   (remember it is now named captions instead of .captions)
 * Run llgal with same options (see section 3 for details)
 
@@ -54,5 +56,5 @@ Recomputing the whole might be long, especially if you have tons of images,
 since thumbnails (and scaled images if --bigy/--bigxy is passed) have to
 be generated.
 If you don't want to regenerate these, see section 1 and
-move .thumb_* and .slide_* files to .llgal.files/thumb_* and scaled_*
+move .thumb_* and .slide_* files to .llgal/thumb_* and scaled_*
 so that llgal uses them.

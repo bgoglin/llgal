@@ -1,3 +1,62 @@
+* The local llgal directory is now .llgal instead of .llgal.files
+  + A warning is shown if .llgal.files exists
+* Add -L and list_links to list links after the gallery index instead of
+  creating slides and thumbnails.
+* Allow empty gallery.
+* The captions file is now automatically used if it exists
+  (-c option got removed).
+* All links in the index directly open the target instead of the slide
+  (not only MVI and FIL).
+* Improved usage of image comments for captions:
+  + use JFIF/GIF comment by default (closes Debian bug #324478).
+  + support array of strings in JFIF comment.
+  + remove \000 in JFIF comment.
+  + make_caption_from_image_comment is now a string option of comma
+    separated fields:
+    - std and exif are supported.
+    - each type is tried until one returns a non-empty value.
+    - basic types maybe combined with a plus to concat their values.
+  + update --cc option behavior:
+    - no argument means default (std before exif).
+    - 0 means no caption from comment.
+    - any other string defines make_caption_from_image_comment.
+* Cleanup title of image, alternatives, ...
+  + Add over_scaled/thumbnail_text configuration options to change texts
+    that are shown when the mouse pointer is over images.
+    - Add "Click to enlarge" default prefix for thumbnails.
+  + Add alt_scaled/thumbnail/full_text configuration options to change
+    alternatives prefix, and add defaults.
+  + Show dimensions and filesize in alt and title.
+  + Add title to links in the index and in slides.
+  + Remove colon between image title prefix and image.
+  + Use same basis for image alternative and title.
+  + Don't use basename anymore, always use the whole filename instead.
+  + When possible, the HTML title parameter is in href instead of img.
+* Cleanup location of special llgal files:
+  + index/slidetemplate.html are not copied to .llgal anymore.
+  + the user might put a special revision of index/slidetemplate.html
+    in .llgal, llgal will use it.
+* Move several text configuration option to a common Text section in llgalrc
+  and in the manpage.
+  + Add a LANGUAGE section in the manpage for changing text configuration
+    options.
+* Remove destination_dir configuration option.
+* caption_removal_line config option is now captions_removal_line.
+* Warning if it seems llgal is running inside .llgal.
+* Add all default values of configuration options in the manpage.
+* Add captions.header file which contains what's inserted at the begining of
+  generated captions files.
+* Check for -h or -v earlier.
+* Don't use file operators to check file permissions
+  (closes Debian bug #325171).
+* Fix chmod'ing for --www.
+* Fix bogus output of configuration file for MVI/FIL/DIR_default_linktext
+  and no_default_linktext.
+* Fix string config option that might be empty or not.
+* Fix bogus parsing of additional_configuration_file option.
+* Lots of cleanups and typos.
+
+
 llgal (0.10.1.1)
 
   * Fix bogus check of .llgal.files attributes.

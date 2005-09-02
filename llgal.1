@@ -25,7 +25,7 @@ appearance of the image gallery with the many options listed below or
 (if you know a bit of HTML) by modifying the
 .IR indextemplate.html ", " slidetemplate.html " and " llgal.css
 files in the
-.IR .llgal.files/ " subdirectory that appeared in your"
+.IR .llgal/ " subdirectory that appeared in your"
 image directory.
 .B llgal
 also checks for the existence of a
@@ -106,34 +106,50 @@ between two consecutive runs when you've changed the value of
 .BR "--bigy" .
 
 .TP
-.BI -c
-Read the
-.IR ".llgal.files/captions"
-file, include your captions in the slides and rearrange them if necessary.
-See
-.SM
-.B CAPTIONS
-for details.
-
-.TP
 .BI --cf
 Generates
 .I captions
 from file names (strips suffix).
 
 .TP
-.BI --cc
+.BI --cc [=<s>]
 Generates
 .I captions
 from image comment tag.
+If no argument is given,
+.B llgal
+first tries the standard comment (for instance JFIF or GIF), and then
+tries Exif comments if the previous one is empty.
+
+An argument such as
+.I std
+or
+.I exif
+might be added to force the use of only standard comment
+or only Exif comment.
+
+An argument such as
+.I exif,std
+will make
+.B llgal
+try Exif comment first.
+
+An argument such as
+.I std+exif
+will use the combination of standard and Exif comments.
+
+Passing
+.I --cc
+without argument is thus equivalent to passing
+.I --cc std,exif\fR.
 
 .TP
 .BI --ct
-Add image timestamp tag to the generated caption.
+Add image timestamp tag to the generated captions.
 
 .TP
 .BI --ctf " strftime_format"
-Change timestamp in caption using a strftime format.
+Change timestamp in captions using a strftime format.
 
 .TP
 .BI --con " options"
@@ -171,6 +187,13 @@ Use the image captions for the HTML slide titles.
 The default behavior is to use the image names.
 
 .TP
+.BI -L
+Do not create slides and thumbnails for links (including video, file and url),
+but list them after the main gallery index.
+Might be used when the directory only contains subgalleries and thus does
+not need any slide or thumbnail.
+
+.TP
 .BI -n
 Use the image file names for the HTML slide files.  Otherwise
 the default behavior is to simply name your slides
@@ -205,9 +228,9 @@ index page background with the tile background-color option in the
 .TP
 .BI -S
 Each subdirectory will get a dedicated slide.
-If a caption file exists, only the subdirectories that
+If a captions file exists, only the subdirectories that
 it defines will be processed.
-If no caption file exists,
+If no captions file exists,
 .B llgal
 will process all subdirectories but those whose name begins
 with a dot.
@@ -227,11 +250,13 @@ For the simplest setup, omit all HTML slides.  Clicking the thumbnails on
 the main page will just take users to the plain image files.
 
 .TP
-.BI --sort " <name|time|none>"
+.BI --sort " [rev]<name|iname|size|time|none>"
 Change sort criteria when scanning files in the working directory.
 Default is \fBname\fR.
 Setting to the empty string means \fBnone\fR.
+\fBiname\fR is case insensitive sort by names.
 \fBdate\fR means \fBtime\fR.
+\fBrev\fR might be added for reverse sort.
 
 .TP
 .BI --sp " <s>"
@@ -261,8 +286,7 @@ Change thumbnail image filename prefix.
 Write image captions under each thumbnail on the index page.
 If you have a
 .I captions
-file (see options -c or -C) then the captions are read from there,
-else the file names are used (but the file extension is stripped).
+file, then the captions are read from there.
 
 .TP
 .BI -w " <n>"
@@ -310,7 +334,7 @@ may have created earlier and that user did not modify since.
 Remove all files
 .B llgal
 may have created earlier. This includes thumbnails, scaled down slides, all 
-HTML files, caption file, film effect picture, indextemplate and slidetemplate 
+HTML files, captions file, film effect picture, indextemplate and slidetemplate 
 and the stylesheet file.
 
 .TP
@@ -346,15 +370,20 @@ between two runs where you've changed the value of
 .TP
 .BI --gc
 Generate slide captions in
-.IR ".llgal.files/captions"
+.IR ".llgal/captions"
 file that you may edit.  The format of this file is very simple.
 See
 .SM
 .B CAPTIONS
 for details.
-These captions may then be modified by the user and used by invocating
-.B llgal -c
-later.
+These captions may then be modified by the user.
+The file will be automatically used next time
+.B llgal
+is invoked.
+.BI --gc
+might also be used to update the
+.I captions
+file when new files were added to the working directory.
 
 .TP
 .BI --gencfg " <file>"
@@ -403,7 +432,7 @@ or
 .BI --cleanall
 ) will
 .B not
-check that a subdirectory is in the caption file.
+check that a subdirectory is in the captions file.
 All not-dot-begining subdirectories will be cleaned.
 
 .TP
@@ -424,18 +453,29 @@ When called with
 generates (or updates if already existing) the
 .IR captions
 file in the
-.IR .llgal.files
+.IR .llgal
 subdirectory.
-If called with
-.I -c
-.B llgal
-uses the
+
+When
+.I --gc
+is not passed, if the
 .IR captions
-file to generate slide captions in the gallery.
-The order of the captions in this file determines the order in the gallery.
-The user may modify this file between the two invocations of
+file exists,
 .B llgal
-to change captions order or text.
+will automatically use it to generate slide captions in the gallery.
+If
+.IR captions
+does not exist,
+.B llgal
+generates captions on the fly and use them in the gallery.
+
+Generating the
+.IR captions
+file with
+.I --gc
+before actually using it makes it possible to modify them
+(especially to add comments)
+or change the order of the slides in the gallery
 
 .B IMG: <filename> ---- <caption>
 .RS
@@ -514,70 +554,85 @@ for details about these options and their default values.
 .I llgal_share_dir = \fI"path"
 .RS
 The location of llgal share directory where template are stored.
+Usually \fB/usr/share/llgal\fR or \fB/usr/local/share/llgal\fR.
 .RE
 .I user_share_dir = \fI"path"
 .RS
 The location of the per-user share directory wher template are stored.
 If they exists, these files are used instead of the system-wide files.
+Default is \fB$HOME/.llgal\fR.
 .RE
 
 .B Names of generic llgal files:
 
-.I css_filename = \fI"filename.css"
+.I captions_header_filename = \fI"filename"
+.RS
+Name of the captions header file that is inserted at the begining of
+generated captions files.
+Default is \fBcaptions.header\fR.
+.RE
+.I css_filename = \fI"filename"
 .RS
 Name of the CSS file.
+Default is \fBllgal.css\fR.
 .RE
-.I filmtile_filename = \fI"filename.png"
+.I filmtile_filename = \fI"filename"
 .RS
 Name of the film tile image.
+Default is \fBtile.png\fR.
 .RE
 .I indextemplate_filename = \fI"filename"
 .RS
-Name of the HTML index template that will be taken from common directories.
+Name of the HTML index template.
+Default is \fBindextemplate.html\fR.
 .RE
 .I slidetemplate_filename = \fI"filename"
 .RS
-Name of the HTML slide template that will be taken from common directories.
+Name of the HTML slide template.
+Default is \fBslidetemplate.html\fR.
 .RE
 
 .B Location and name of generated files:
 
-.I destination_dir = \fI"path"
-.RS
-Directory of the gallery [-d <s>].
-.RE
-.I local_llgal_dir = \fI"subdirectory"
+.I local_llgal_dir = \fI"subdirectory name"
 .RS
 The name of the subdirectory where llgal generated files will be stored.
+Default is \fB.llgal\fR.
 .RE
-.I scaled_image_filenameprefix = \fI"filenameprefix"
+.I scaled_image_filenameprefix = \fI"filename prefix"
 .RS
 Prefix used to determine slide-image filenames from
 original images (in case of --bigxy or --bigy) [--sp <s>].
+Default is \fBscaled_\fR.
 .RE
-.I thumbnail_image_filenameprefix = \fI"filenameprefix"
+.I thumbnail_image_filenameprefix = \fI"filename prefix"
 .RS
 Prefix used to determine thumbnail filenames from
 original images [--tp <s>].
+Default is \fBthumb_\fR.
 .RE
 
 .B Index:
 
-.I index_filename = \fI"filename.html"
+.I index_filename = \fI"filename"
 .RS
 Name of the generated index file [-i <s>].
+Default is \fBindex.html\fR.
 .RE
-.I index_title = \fI"string"
-.RS
-Title of the gallery [--title <s>].
-.RE
-.I index_cellpadding = <n>
+.I index_cellpadding = <pixels>
 .RS
 Cellpadding in the index table [-p <n>].
+Default is \fB3\fR.
 .RE
-.I pixels_per_row = <n>
+.I list_links = <0/1>
+.RS
+List links after the main gallery thumbnail index [-L].
+Default is \fB0\fR (disabled).
+.RE
+.I pixels_per_row = <pixels>
 .RS
 Pixels per row of thumbnails in index [-wx <n>].
+Default is \fB0\fR (unlimited).
 .RE
 
 .B Film effect:
@@ -585,25 +640,30 @@ Pixels per row of thumbnails in index [-wx <n>].
 .I show_no_film_effect = <0/1>
 .RS
 Omit film effect [-r].
+Default is \fB1\fR (enabled).
 .RE
-.I tile_height = <n>
+.I tile_height = <pixels>
 .RS
 Film tile height [-t <n>].
+Default is \fB21\fR.
 .RE
 
 .B Thumbnails:
 
-.I thumbnail_height_max = <n>
+.I thumbnail_height_max = <pixels>
 .RS
 Maximal height of thumbnails [-y <n>].
+Default is \fB75\fR.
 .RE
-.I thumbnail_width_max = <n>
+.I thumbnail_width_max = <pixels>
 .RS
 Maximal width of thumbnails [--xy <n>]
+Default is \fB0\fR (unlimited).
 .RE
-.I thumbnails_per_row = <n>
+.I thumbnails_per_row = <pixels>
 .RS
 Thumbnails per row in index [-w <n>].
+Default is \fB5\fR.
 .RE
 
 .B Slides:
@@ -611,98 +671,104 @@ Thumbnails per row in index [-w <n>].
 .I make_no_slides = <0/1>
 .RS
 Make no slides [-s].
+Default is \fB0\fR (make slides).
 .RE
 .I make_slide_filename_from_filename = <0/1>
 .RS
 Use filenames as slide filenames [-n].
+Default is \fB0\fR (disabled).
 .RE
 .I make_slide_filename_from_extension = <0/1>
 .RS
 Also use extension in slide filename when generated from filename.
+Default is \fB0\fR (disabled).
 .RE
 .I make_slide_title_from_caption = <0/1>
 .RS
 Generate slide titles from captions [-k].
+Default is \fB0\fR (disabled).
 .RE
 .I show_no_slide_counter = <0/1>
 .RS
 Do not show slide counter in captions [--nc].
+Default is \fB0\fR (show counter).
 .RE
-.I slide_filenameprefix = <s>
+.I slide_filenameprefix = \fI"filename prefix"
 .RS
 Prefix of generated HTML slide filenames.
+Default is \fB""\fR.
 .RE
-.I slide_filenameprefix_nofile = <s>
+.I slide_filenameprefix_nofile = \fI"filename prefix"
 .RS
 Prefix of slide filenames when generated from filename
 while there's no file associated (text, link, ...).
+Default is \fBNOFILE\fR.
 .RE
-.I slide_width_max = <n>
+.I slide_width_max = <pixels>
 .RS
 Maximal width of slides [--bigy <n>].
+Default is \fB0\fR (unlimited).
 .RE
-.I slide_height_max = <n>
+.I slide_height_max = <pixels>
 .RS
 Maximal height of slides [--bigxy <n>, --bigy <n>].
+Default is \fB0\fR (unlimited).
 .RE
-.I text_slide_width = <n>
+.I text_slide_width = <pixels>
 .RS
 Default width of text slides.
+Default is \fB400\fR.
 .RE
-.I text_slide_height = <n>
+.I text_slide_height = <pixels>
 .RS
 Default height of text slides.
+Default is \fB300\fR.
 .RE
 
 .B Captions:
 
 .I captions_filename = \fI"filename"
 .RS
-Name of the caption file that will be generated the first time llgal
-is called with -c.
+Name of the caption file that will be generated when llgal is called with --gc,
+or will be automatically used if it exists to generate slide captions.
+Default is \fBcaptions\fR.
 .RE
-.I caption_removal_line = \fI"string"
+.I captions_removal_line = \fI"string"
 .RS
-This line will be added to the caption file llgal will generate the
-first time it is called with -c. If the user doesn't want igal to
-remove this caption file when called with --clean, it just needs to
-remove this line from the file.
+This line will be added to the caption file llgal will generate when called with --gc.
+If the user doesn't want igal to remove this caption file when called with --clean,
+he just needs to remove this line from the file.
+Default is \fB"REMOVE THIS LINE IF LLGAL SHOULD NOT REMOVE THIS FILE"\fR.
 .RE
 .I make_caption_from_filename = <0/1>
 .RS
 Generate captions from filenames [-C].
+Default is \fB0\fR (disabled).
 .RE
-.I make_caption_from_image_comment = <0/1>
+.I make_caption_from_image_comment = ",-separated strings of +-separated strings"
 .RS
 Generate captions from image comment tag [--cc].
+Default is \fB""\fR (disabled).
 .RE
 .I make_caption_from_image_comment = <0/1>
 .RS
-Add image timestamp in generated captions [--ct].
-.RE
-.I timestamp_format_in_caption = <s>
-.RS
-Generate captions from image comment tag [--ctf <s>].
+Add image timestamp to generated captions [--ct].
+Default is \fB0\fR (disabled).
 .RE
 .I show_caption_under_thumbnails = <0/1>
 .RS
 Write captions under thumbnails [-u].
+Default is \fB0\fR (disabled).
 .RE
 .I show_dimensions = <0/1>
 .RS
 Show image dimensions [-a, -ad].
+Default is \fB0\fR (disabled).
 .RE
 .I show_size = <0/1>
 .RS
 Show file sizes [-a, -as].
-.RE
-.I show_size_unit = \fI"string"
-.RS
-Unit to be used when printing sizes [-asu <s>]
-.RE
-.I use_caption_file = <0/1>
-.RS
-Use a caption file [-c].
+Default is \fB0\fR (disabled).
 .RE
 
 .B Exclude:
@@ -711,6 +777,7 @@ Use a caption file [-c].
 .RS
 Exclude files whose name matches [--exclude <s>].
 This option may be used several times.
+Dot begining files and html files are excluded by default.
 .RE
 .I include = \fI"string"
 .RS
@@ -719,26 +786,75 @@ This option may be used several times.
 The order of includes and excludes is respected.
 .RE
 
-.B Default linktext:
+.B Text:
 
 .I MVI_default_linktext = \fI"string"
 .RS
 Change the text that prefixes the filename when generating
 linktext for movies without a captions file.
+Default is \fB"Open movie "\fR.
 .RE
 .I FIL_default_linktext = \fI"string"
 .RS
 Change the text that prefixes the filename when generating
 linktext for files without a captions file.
+Default is \fB"Download file "\fR.
 .RE
 .I DIR_default_linktext = \fI"string"
 .RS
 Change the text that prefixes the filename when generating
 linktext for directories without a captions file.
+Default is \fB"Open subgallery in "\fR.
 .RE
-.I no_default_linktext = <0/1>
+.I alt_full_text = \fI"string"
 .RS
-Don't show prefix when generating link text.
+Change the default text that is shown as an image alternative
+for full-size images in slides.
+Default is \fB""\fR.
+.RE
+.I alt_scaled_text = \fI"string"
+.RS
+Change the default text that is shown as an image alternative
+for scaled images in slides.
+Default is \fB"Scaled image "\fR.
+.RE
+.I alt_thumbnail_text = \fI"string"
+.RS
+Change the default text that is shown as an image alternative
+for thumbnails in the index.
+Default is \fB"Thumbnail "\fR.
+.RE
+.I index_title = \fI"string"
+.RS
+Title of the gallery [--title <s>].
+Default is \fB"Index of pictures"\fR.
+.RE
+.I over_scaled_text = \fI"string"
+.RS
+Change the default text that is shown when the mouse pointer
+is over a scaled image in a slide.
+Default is \fB"Click to see full size"\fR.
+.RE
+.I over_thumbnail_text = \fI"string"
+.RS
+Change the default text that is shown when the mouse pointer
+is over a thumbnail.
+Default is \fB"Click to enlarge "\fR.
+.RE
+.I parent_linktext = \fI"string"
+.RS
+Change text in links to parent directory.
+Default is \fB"Back to parent gallery"\fR.
+.RE
+.I show_size_unit = \fI"string"
+.RS
+Unit to be used when printing sizes [-asu <s>]
+Default is \fB"kB"\fR.
+.RE
+.I timestamp_format_in_caption = "timestamp format"
+.RS
+Generate captions from image comment tag [--ctf <s>].
+Default is \fB"%Y-%m-%d %H:%M:%S"\fR.
 .RE
 
 .B Recursion:
@@ -746,14 +862,12 @@ Don't show prefix when generating link text.
 .I make_recursive = <0/1>
 .RS
 Run recursively in subdirectories [-R].
+Default is \fB0\fR (disabled).
 .RE
 .I parent_link = <0/1>
 .RS
 Add links to the parent directory [--parent].
-.RE
-.I parent_linktext = \fI"string"
-.RS
-Change text in links to parent directory.
+Default is \fB0\fR (disabled).
 .RE
 
 .B Various:
@@ -761,45 +875,72 @@ Change text in links to parent directory.
 .I add_all_files = <0/1>
 .RS
 Add all files to the list of entries, not only images and movies [-A].
+Default is \fB0\fR (disabled).
 .RE
 .I add_subdirs = <0/1>
 .RS
 Add subdirectories to the list of entries [-S].
+Default is \fB0\fR (disabled).
 .RE
 .I convert_options = \fI"string"
 .RS
 Options to pass to convert [--con <s>].
 This option may be used several times.
+Default is \fB""\fR.
 .RE
 .I scaled_convert_options = \fI"string"
 .RS
 Additional options to pass to convert when creating slides.
+Default is \fB""\fR.
 .RE
 .I thumbnail_convert_options = \fI"string"
 .RS
 Additional options to pass to convert when creating thumbnails.
+Default is \fB""\fR.
 .RE
 .I config_file = <s>
 .RS
 Additional configuration file [--config <s>].
 This option may be used several times.
 .RE
-.I image_extensions = \fI"ext1|ext2|..."
+.I image_extensions = \fI"|-separated strings"
 .RS
 Extensions that are matched when searching images
+Default is \fB"jpe?g|png|gif"\fR.
 .RE
-.I movie_extensions = \fI"ext1|ext2|..."
+.I movie_extensions = \fI"|-separated strings"
 .RS
 Extensions that are matched when searching movies
+Default is \fB"mpe?g|avi"\fR.
 .RE
-.I sort_criteria = \fI"name|time|none"
+.I no_default_linktext = <0/1>
+.RS
+Don't show prefix when generating link text.
+Default is \fB0\fR (show prefix).
+.RE
+.I sort_criteria = \fI"|-separated strings"
 .RS
 Change sort criteria when scanning files in the working directory.
+Default is \fBname\fR.
 .RE
 .I www_access_rights = <0/1>
 .RS
 Make all generated files world readable [-www].
+Default is \fB0\fR (disabled).
 .RE
+
+
+.SH LANGUAGE
+All configuration options produce english text by default.
+If you wish to create your gallery in another language, you should
+create an additional configuration file (or modify the system-wide
+one) to update all configuration options of the
+.B Text
+section.
+
+Additionally, you might have to modify several static strings in
+the templates (\fBindextemplate.html\fR and \fBslidetemplate.html\fR),
+for instance \fBIndex\fR, \fBPrev\fR and \fBNext\fR.
 
 
 .SH CHARACTER ENCODING
