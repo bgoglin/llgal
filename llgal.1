@@ -973,14 +973,6 @@ System-wide, per-user and local configuration files. See
 for details.
 
 .RE
-.I /usr/share/llgal/indextemplate.html
-.RS
-The default index template file.
-.RE
-.I /usr/share/llgal/slidetemplate.html
-.RS
-The default file used to generate slides.
-.RE
 .I /usr/share/llgal/llgal.css
 .RS
 The default style sheet template.
@@ -989,18 +981,40 @@ The default style sheet template.
 .RS
 The tiled image used for the film effect.
 .RE
-All four files are copied to your image directory as dotfiles the
-first time you run
-.BR llgal .
-Modify the local copies (but keep their names) if you need to further 
-alter the appearance of your slide show (also see
-.BR "-t" ")."
-.B llgal
-also checks for the existence of a
-.I "$HOME/.llgal"
-directory where users can store their own templates, overriding
-the site-wide 
-.IR "/usr/share/llgal" .
+Both files are required on the website.
+.BR llgal
+will copy them to the local
+IR .llgal
+file during gallery generation.
+
+.RE
+.I /usr/share/llgal/indextemplate.html
+.RS
+The default index template file.
+.RE
+.I /usr/share/llgal/slidetemplate.html
+.RS
+The default file used to generate slides.
+.RE
+These files are not required on the website.
+But,
+.BR llgal
+will thus them to generate HTML webpages og the gallery.
+
+The user may change these 4 templates by storing files with
+the same name in its user template directory
+.IR $HOME/.llgal
+or in the local
+.IR .llgal
+directory.
+The former defines user-specific templates that will be used
+each time the user generate a gallery.
+The later defines gallery-specific templates that will be used
+for the local gallery.
+A local template is used by default if it exists.
+A user template is used if it exists and no local template exists.
+Finally, system-wide templates are used if no local and user
+templates override them.
 
 
 .SH EXAMPLES
