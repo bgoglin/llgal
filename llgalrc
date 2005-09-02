@@ -29,26 +29,27 @@
 # captions_header_filename = "captions.header"
 
 # Name of the CSS file.
-# This file will be stored under $local_llgal_dir.
+# Such a file will be stored under $local_llgal_dir.
 # css_filename = "llgal.css"
 
 # Name of the film tile image.
-# This file will be stored under $local_llgal_dir.
+# Such a file will be stored under $local_llgal_dir.
 # filmtile_filename = "tile.png"
 
 # Name of the index template.
-# This file will be stored under $local_llgal_dir.
+# Such a template file will be used during gallery generation.
 # indextemplate_filename = "indextemplate.html"
 
 # Name of the slide template.
-# This file will be stored under $local_llgal_dir.
+# Such a template file will be used during gallery generation.
 # slidetemplate_filename = "slidetemplate.html"
 
 ##### Location and name of generated files #####
 
 # Local subdirectory where llgal files generated files will be stored.
-# Note that HTML files are generated in place while templates, captions
-# and CSS are kept in this subdirectory.
+# Note that HTML files are generated in place while captions and CSS
+# are kept in this subdirectory.
+# HTML templates might also be defined here.
 # local_llgal_dir = ".llgal"
 
 # Prefix used to determine slide-image filenames from

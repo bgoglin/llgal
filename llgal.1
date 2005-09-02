@@ -23,16 +23,22 @@ in a directory with
 files and check the output in a web browser.  You can adjust the
 appearance of the image gallery with the many options listed below or
 (if you know a bit of HTML) by modifying the
-.IR indextemplate.html ", " slidetemplate.html " and " llgal.css
+.IR llgal.css
 files in the
 .IR .llgal/ " subdirectory that appeared in your"
-image directory.
+image directory, or by defining
+.IR indextemplate.html " or " slidetemplate.html
+files.
 .B llgal
 also checks for the existence of a
 .I "$HOME/.llgal"
 directory where users can store their own templates, overriding
 the site-wide 
 .IR "/usr/share/llgal" .
+See
+.SM
+.B FILES
+for details.
 
 
 .SH LAYOUT OPTIONS
@@ -558,7 +564,7 @@ Usually \fB/usr/share/llgal\fR or \fB/usr/local/share/llgal\fR.
 .RE
 .I user_share_dir = \fI"path"
 .RS
-The location of the per-user share directory wher template are stored.
+The location of the per-user share directory where template are stored.
 If they exists, these files are used instead of the system-wide files.
 Default is \fB$HOME/.llgal\fR.
 .RE
