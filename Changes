@@ -1,5 +1,5 @@
-* The local llgal directory is now .llgal instead of .llgal.files
-  + A warning is shown if .llgal.files exists
+* The local llgal directory is now .llgal instead of .llgal.files.
+  + A warning is shown if .llgal.files exists.
 * Add -L and list_links to list links after the gallery index instead of
   creating slides and thumbnails.
 * Allow empty gallery.
@@ -36,10 +36,10 @@
   + index/slidetemplate.html are not copied to .llgal anymore.
   + the user might put a special revision of index/slidetemplate.html
     in .llgal, llgal will use it.
-* Move several text configuration option to a common Text section in llgalrc
-  and in the manpage.
-  + Add a LANGUAGE section in the manpage for changing text configuration
-    options.
+* Move several text configuration options to a common Text section in
+  llgalrc and in the manpage.
+  + Add a LANGUAGE section in the manpage for changing text options.
+* Add iname and size sort options, add rev prefix to reverse the order.
 * Remove destination_dir configuration option.
 * caption_removal_line config option is now captions_removal_line.
 * Warning if it seems llgal is running inside .llgal.
