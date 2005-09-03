@@ -32,6 +32,7 @@ my $clean_asked = 0 ;		# clean up all generated files
 my $cleanall_asked = 0 ;	# clean up all generated and user modified files
 my $generate_config = undef ;   # generate a config file
 my $generate_captions = 0 ;     # generate (or update) captions
+my $give_templates = undef ;	# give templates to the given directory
 my $make_recursive = 0 ;        # do we run recursively in subdirectories ?
 
 # process these options but kept other options in @ARGV for later
@@ -42,6 +43,11 @@ GetOptions(
            'R'          => \$make_recursive,
 	   'gc'         => \$generate_captions,
 	   'gencfg=s'   => \$generate_config,
+	   'gt:s'       => sub {
+				shift ; my $value = shift ;
+				$value = "local" if !$value ;
+				$give_templates = $value ;
+			    },
 	   'clean'	=> \$clean_asked,
 	   'cleanall'	=> \$cleanall_asked,
 	   'v|version'	=> \$version_asked,
@@ -241,6 +247,7 @@ Behavior Options:
           -R              run recursively in subdirectories
           --gc            generate or update the captions file
           --gencfg <file> generate the configuration file <file>
+          --gt [<dir>]    give templates to the directory <dir>
           --clean         remove all generated files
           --cleanall      remove all generated and user modified files
           -v, --version   show version
@@ -620,6 +627,22 @@ sub is_integer {
     return $s eq int($s) ;
 }
 
+# copy a file
+sub copy_file {
+    my $filename = shift ;
+    my $srcdir = shift ;
+    my $destdir = shift ;
+    my @output = system_with_output
+	("copy '$filename' from '$srcdir'",
+	"cp", "-f", "$srcdir/$filename", "$destdir/$filename") ;
+    my $status = shift @output ;
+    if ($status) {
+	# die on whatever error
+	immediate_external_warnings @output ;
+	die "Failed to get generic '$filename' file.\n" ;
+    }
+}
+
 # find path to the template file in generic directories
 sub find_generic_template_file {
     my ($filename, $check) = (shift, shift) ;
@@ -647,15 +670,7 @@ sub get_template_file {
     } else {
 	my $srcdir = find_generic_template_file ($filename, 1);
 	indprint "No $filename in $destination_dir$local_llgal_dir/, getting a copy from $srcdir\n" ;
-	my @output = system_with_output
-	    ("get generic '$filename' file",
-	     "cp", "-f", "$srcdir/$filename", "$destination_dir$local_llgal_dir/$filename") ;
-	my $status = shift @output ;
-	if ($status) {
-	    # die on whatever error
-	    immediate_external_warnings @output ;
-	    die "Failed to get generic '$filename' file.\n" ;
-	}
+	copy_file ($filename, $srcdir, "$destination_dir$local_llgal_dir" ) ;
     }
 }
 
@@ -987,6 +1002,39 @@ if ($cleanall_asked) {
     }
     closedir DIR ;
     exit 0;
+}
+
+#####################################################################
+# give templates to the given directory
+
+if ($give_templates) {
+    my $destdir = $give_templates ;
+    $destdir = $local_llgal_dir
+	if $destdir eq "local" ;
+    $destdir = $user_share_dir
+	if $destdir eq "user" ;
+
+    if ( ! -e $destdir ) {
+	indprint "Creating template directory $destdir...\n" ;
+	mkdir $destdir
+	    or die "Failed to create $destdir ($!)" ;
+    }
+
+    foreach my $filename
+	( $css_filename, $filmtile_filename, $indextemplate_filename, $slidetemplate_filename ) {
+	if ( -e "$destdir/$filename" ) {
+	    indprint "$filename already exists in $destdir.\n" ;
+	} else {
+	    my $srcdir = find_generic_template_file ($filename, 1) ;
+	    indprint "$filename does not exist in $destdir, getting a copy from $srcdir...\n" ;
+	    copy_file ($filename, $srcdir, $destdir ) ;
+	}
+    }
+
+    indprint "You may now edit templates in $destdir and generate new galleries.\n" ;
+    indprint "You may also remove any template that you do not want to modify.\n" ;
+
+    exit 0 ;
 }
 
 #####################################################################

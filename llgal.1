@@ -117,6 +117,30 @@ See
 .BI --config
 
 .TP
+.BI --gt " [<dir>]"
+Copy template files to the directory.
+The special value
+.IR local
+might be used for the local
+.I .llgal
+directory, while
+.IR user
+might be used for the user
+template directory
+.I $HOME/.llgal \fR.
+Any other directory is acceptable.
+.I llgal
+will create the target directory if it does not exist.
+The argument is optional.
+Its default value is
+.IR local \fR.
+See
+.SM
+.B FILES
+for details about template files.
+
+
+.TP
 .BI "-h, --help"
 Display brief help.
 
@@ -1021,6 +1045,11 @@ A local template is used by default if it exists.
 A user template is used if it exists and no local template exists.
 Finally, system-wide templates are used if no local and user
 templates override them.
+
+The option
+.IR --gt
+might be used to get copies of template files in the local
+or in the user template directory.
 
 
 .SH EXAMPLES

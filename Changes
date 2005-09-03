@@ -1,12 +1,13 @@
 * The local llgal directory is now .llgal instead of .llgal.files.
   + A warning is shown if .llgal.files exists.
 * Add -L and list_links to list links after the gallery index instead of
-  creating slides and thumbnails.
-* Allow empty gallery.
+  creating slides and thumbnails (requested by David Baelde).
+* Add --gt option to copy templates in the local, user or any other
+  template directory (requested by Loïs Taulelle).
+* All links in the index directly open the target instead of the slide,
+  not only MVI and FIL (requested by Samuel Thibault).
 * The captions file is now automatically used if it exists
   (-c option got removed).
-* All links in the index directly open the target instead of the slide
-  (not only MVI and FIL).
 * Improved usage of image comments for captions:
   + use JFIF/GIF comment by default (closes Debian bug #324478).
   + support array of strings in JFIF comment.
@@ -46,6 +47,7 @@
 * Add all default values of configuration options in the manpage.
 * Add captions.header file which contains what's inserted at the begining of
   generated captions files.
+* Allow empty gallery.
 * Check for -h or -v earlier.
 * Don't use file operators to check file permissions
   (closes Debian bug #325171).
