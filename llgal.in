@@ -238,7 +238,7 @@ my $www_access_rights = 0 ;
 ######################################################################
 # Create usage now to use defaults values
 
-my $usage = << "END_OF_USAGE";
+my $usage = << "END_OF_USAGE" ;
 This is llgal $version the Loulous HTML image slide show generator.
 Syntax:  llgal [-option -option ...]
 Behavior Options:
@@ -603,7 +603,7 @@ sub system_with_output {
 	return ( -1, "Fork failed while trying to $descr\n" ) ;
     } elsif ($pid > 0) {
 	close $pipe_in ;
-	waitpid ($pid, 0);
+	waitpid ($pid, 0) ;
 	my $status = $? >> 8 ;
 	$status = -1
 	    if $status == 255 ;
@@ -668,7 +668,7 @@ sub get_template_file {
     if (-e "$destination_dir$local_llgal_dir/$filename") {
 	indprint "Found $filename in $destination_dir$local_llgal_dir/, using it.\n" ;
     } else {
-	my $srcdir = find_generic_template_file ($filename, 1);
+	my $srcdir = find_generic_template_file ($filename, 1) ;
 	indprint "No $filename in $destination_dir$local_llgal_dir/, getting a copy from $srcdir\n" ;
 	copy_file ($filename, $srcdir, "$destination_dir$local_llgal_dir" ) ;
     }
@@ -887,7 +887,7 @@ sub clean_files {
 	or die "Can't open directory $destination_dir$local_llgal_dir ($!)\n" ;
     while ($_ = readdir DIR) {
 	if (/^$thumbnail_image_filenameprefix/ or /^$scaled_image_filenameprefix/) {
-	    unlink "$destination_dir$local_llgal_dir/$_";
+	    unlink "$destination_dir$local_llgal_dir/$_" ;
 	} elsif (/^$filmtile_filename$/
 		 or /^$css_filename$/) {
 	    my $original = (find_generic_template_file $_, 0)."/".$_ ;
@@ -907,7 +907,7 @@ sub clean_files {
 	    }
 	    if ($diff) {
 		add_warning "Preserved '$destination_dir$local_llgal_dir/$_' since it seems to be modified." ;
-		$notdeleted++;
+		$notdeleted++ ;
 	    } else {
 		if (!unlink "$destination_dir$local_llgal_dir/$_" and ! $!{ENOENT}) {
 		    add_warning "Failed to remove file '$destination_dir$local_llgal_dir/$_'." ;
@@ -930,14 +930,14 @@ sub clean_files {
 	    }
 	    if ($grep) {
 		add_warning "Preserved '$destination_dir$local_llgal_dir/$_' since it seems to be modified." ;
-		$notdeleted++;
+		$notdeleted++ ;
 	    } else {
 		if (!unlink "$destination_dir$local_llgal_dir/$_" and ! $!{ENOENT}) {
 		    add_warning "Failed to remove file '$destination_dir$local_llgal_dir/$_'." ;
 		}
 	    }
 	} else {
-	    $notdeleted++;
+	    $notdeleted++ ;
 	}
     }
     closedir DIR ;
@@ -957,7 +957,7 @@ sub clean_files {
 }
 
 if ($clean_asked) {
-    indprint "Removing all non-modified llgal files...\n";
+    indprint "Removing all non-modified llgal files...\n" ;
     clean_files 0 ;
     show_warnings ;
 
@@ -981,7 +981,7 @@ if ($clean_asked) {
 }
 
 if ($cleanall_asked) {
-    indprint "Removing all llgal files...\n";
+    indprint "Removing all llgal files...\n" ;
     clean_files 1 ;
     show_warnings ;
 
@@ -1001,7 +1001,7 @@ if ($cleanall_asked) {
 	}
     }
     closedir DIR ;
-    exit 0;
+    exit 0 ;
 }
 
 #####################################################################
@@ -1223,7 +1223,7 @@ sub generate_caption_from_image_timestamp {
     my $infos = shift ;
     my $imagetime = $infos->{DateTimeOriginal} ;
     if ($imagetime ne "") {
-	my @timearray = split(/[: ]/, $imagetime);
+	my @timearray = split (/[: ]/, $imagetime) ;
 	my @gmtime = ($timearray[5], $timearray[4], $timearray[3], $timearray[2], $timearray[1]-1, $timearray[0]-1900, 0, 0) ;
 	return strftime ($timestamp_format_in_caption, @gmtime) ;
     }
@@ -1337,7 +1337,7 @@ sub create_entry {
 
     # xdim, ydim, kbytes of the image or movie
     if ($type == $TYPE_IMG) {
-	my ($x,$y) = imgsize("$destination_dir$filename") ;
+	my ($x,$y) = imgsize ("$destination_dir$filename") ;
 	$entry->{xdim} = $x ;
 	$entry->{ydim} = $y ;
 	# initialize here so that we can use it even when scaled are not used
@@ -1395,7 +1395,7 @@ sub create_entry {
 		return undef ;
 	    }
 	}
-	($entry->{thumb_xdim},$entry->{thumb_ydim}) = imgsize("$real_thumb_filename") ;
+	($entry->{thumb_xdim},$entry->{thumb_ydim}) = imgsize ("$real_thumb_filename") ;
 
 	# dimstring
 	if ($show_dimensions) {
@@ -1426,7 +1426,7 @@ sub create_entry {
 	    my ($x,$y) ;
 	    if ((! -e "$real_scaled_filename") or $force_regen_asked) {
 		# only scale down, never up.
-		($x,$y) = imgsize("$real_filename");
+		($x,$y) = imgsize ("$real_filename") ;
 		my @output ;
 		if ($x <= $slide_width_max and $y <= $slide_height_max) {
 		    @output = system_with_output
@@ -1447,9 +1447,9 @@ sub create_entry {
 		    return undef ;
 		}
 	    }
-	    ($x,$y) = imgsize("$real_scaled_filename");
-	    $entry->{scaled_xdim} = $x;
-	    $entry->{scaled_ydim} = $y;
+	    ($x,$y) = imgsize ("$real_scaled_filename") ;
+	    $entry->{scaled_xdim} = $x ;
+	    $entry->{scaled_ydim} = $y ;
 	    $entry->{scaled_kbytes} = (-s "$real_scaled_filename") >> 10 ;
 
 	    # dimstring
@@ -1502,7 +1502,7 @@ sub get_entries_from_directory {
     @subdirs = () ;
 
     opendir DIR, "./$destination_dir" # destination is empty for './'
-	or die "Can't open $destination_string ($!)\n";
+	or die "Can't open $destination_string ($!)\n" ;
     # get all files, except dot-starting ones and .html ending ones
     my @filenames = grep ((!/\.html$/i and !/^\./), readdir DIR) ;
     closedir DIR ;
@@ -1621,8 +1621,8 @@ if ($generate_captions) {
 	indprint "Reading existing captions from $captions_filename.\n" ;
 	open (CAP, "$destination_dir$local_llgal_dir/$captions_filename")
 	    or die "Can't open $destination_dir$local_llgal_dir/$captions_filename for reading\n" ;
-	my @captions = <CAP>;
-	close(CAP) ;
+	my @captions = <CAP> ;
+	close CAP ;
 
 	indprint "Appending new captions to $captions_filename: " ;
 	open (CAP, ">>$destination_dir$local_llgal_dir/$captions_filename")
@@ -1684,25 +1684,25 @@ if ($generate_captions) {
 	    my $type = $entry->{type} ;
 	    if ($type == $TYPE_IMG) {
 		print CAP "IMG: ". $entry->{filename}
-		." ---- ". $entry->{caption} ."\n";
+		." ---- ". $entry->{caption} ."\n" ;
 	    } elsif ($type == $TYPE_MVI) {
 		print CAP "MVI: " . $entry->{filename}
 		." ---- ". $entry->{linktext}
-		." ---- ". $entry->{caption} ."\n";
+		." ---- ". $entry->{caption} ."\n" ;
 	    } elsif ($type == $TYPE_FIL) {
 		print CAP "FIL: " . $entry->{filename}
 		." ---- ". $entry->{linktext}
-		." ---- ". $entry->{caption} ."\n";
+		." ---- ". $entry->{caption} ."\n" ;
 	    } elsif ($type == $TYPE_DIR) {
 		print CAP "DIR: " . $entry->{filename}
 		." ---- ". $entry->{linktext}
-		." ---- ". $entry->{caption} ."\n";
+		." ---- ". $entry->{caption} ."\n" ;
 	    }
 	    print_percentage ($caption_header_lines+$i+1, $caption_header_lines + @entries) ;
 	}
     }
-    close(CAP);
-    print "\n";
+    close CAP ;
+    print "\n" ;
     show_warnings ;
 
     if ($make_recursive) {
@@ -1720,7 +1720,7 @@ if ($generate_captions) {
 	}
     }
 
-    indprint "Now edit the $destination_dir$local_llgal_dir/$captions_filename file to your liking and run llgal\n";
+    indprint "Now edit the $destination_dir$local_llgal_dir/$captions_filename file to your liking and run llgal\n" ;
     exit 0 ;
 
 }
@@ -1730,21 +1730,23 @@ if ($generate_captions) {
 
 if (-e "$destination_dir$local_llgal_dir/$captions_filename") {
     # read in files specified in the captions file since it exists
-    indprint "Reading the $captions_filename file and preparing entries: ";
-    init_percentage ();
+    indprint "Reading the $captions_filename file and preparing entries: " ;
+    init_percentage () ;
 
     open(CAP,"$destination_dir$local_llgal_dir/$captions_filename")
-	or die "Can't open $destination_dir$local_llgal_dir/$captions_filename file\n";
+	or die "Can't open $destination_dir$local_llgal_dir/$captions_filename file\n" ;
 
     my $size = (-s CAP) ;
-    my $line;
+    my $line ;
     while (defined ($line = <CAP>)) {
-	chomp($line); $line =~ s/^\s*//; $line =~ s/\s\(\s*\)$/\1/;
+	chomp $line ;
+	$line =~ s/^\s*// ;
+	$line =~ s/\s\(\s*\)$/\1/ ;
 	# only lines that don't start with # and are not empty
 	if (!($line =~ m/^\#/) && !($line =~ /^$/)) {
 	    if ($line =~ m/TITLE:\s*(.*)\s*/) {
 		# title
-		$index_title = $1;
+		$index_title = $1 ;
 
 	    } elsif ($line =~ m/^INDEXHEAD:\s+(.*)\s*$/) {
 		# header for the index
@@ -1756,7 +1758,7 @@ if (-e "$destination_dir$local_llgal_dir/$captions_filename") {
 
 	    } else {
 		# that's a slide, create its entry
-		my $entry;
+		my $entry ;
 		# flexibility:
 		# - the last \s might be omitted when there's no caption
 		# - \s is facultative after TYP: at the begining
@@ -1797,7 +1799,7 @@ if (-e "$destination_dir$local_llgal_dir/$captions_filename") {
 	}
 	print_percentage (tell CAP, $size) ;
     }
-    close(CAP);
+    close CAP ;
     print "\n" ;
 
     show_warnings ;
@@ -1808,7 +1810,7 @@ if (-e "$destination_dir$local_llgal_dir/$captions_filename") {
     get_entries_from_directory ;
 
     show_warnings ;
-    indprint "Found ". (scalar @entries) ." files in $destination_string\n";
+    indprint "Found ". (scalar @entries) ." files in $destination_string\n" ;
 }
 
 # extract entries from the table
@@ -1842,7 +1844,7 @@ if ($parent_link) {
 # Create the individual slide show files
 
 if ($make_no_slides) {
-    indprint "Linking thumbnails directly to image files...  Making no html slides.\n";
+    indprint "Linking thumbnails directly to image files...  Making no html slides.\n" ;
 } else {
     # remove old .html files
     system ("rm -f ${destination_dir}*.html") ;
@@ -1856,27 +1858,27 @@ if ($make_no_slides) {
     indprint "Using '$slidetemplate' as HTML slide template.\n" ;
 
     # keep the slidetemplate in memory instead of always reopening it
-    my @slidetemplate_text;
+    my @slidetemplate_text ;
     open(SR,"$slidetemplate")
-	or die "Can't open the slide template file '$slidetemplate'\n";
-    @slidetemplate_text = <SR>;
-    close SR;
+	or die "Can't open the slide template file '$slidetemplate'\n" ;
+    @slidetemplate_text = <SR> ;
+    close SR ;
 
     # create slides
-    indprint "Creating individual slides: ";
-    init_percentage ();
+    indprint "Creating individual slides: " ;
+    init_percentage () ;
     for (my $i = 0; $i < @entries; $i++) {
 	open(SW, ">$destination_dir$entries[$i]->{slide_filename}")
-	    or die "Can't create slide file\n";
+	    or die "Can't create slide file\n" ;
 	my $entry = $entries[$i] ;
 	my $type = $entry->{type} ;
-	my $title = $entry->{title};
+	my $title = $entry->{title} ;
 
 	my @slidetemplate_text_copy = @slidetemplate_text ; # don't touch the original template
         for my $line (@slidetemplate_text_copy) {
-	    $line =~ s/<!--SLIDE-TITLE-->/$title/g;
-	    $line =~ s/<!--TITLE-->/$index_title/g;
-	    $line =~ s/<!--CSS-->/$local_llgal_dir\/$css_filename/g;
+	    $line =~ s/<!--SLIDE-TITLE-->/$title/g ;
+	    $line =~ s/<!--TITLE-->/$index_title/g ;
+	    $line =~ s/<!--CSS-->/$local_llgal_dir\/$css_filename/g ;
 
 	    # set the style
 	    if ($line =~ m/<!--THIS-SLIDE-STYLE-->/g) {
@@ -1935,7 +1937,7 @@ if ($make_no_slides) {
 	    # output the line
 	    print SW "$line" ;
 	}
-	close(SW) ;
+	close SW ;
 	print_percentage ($i+1, scalar @entries) ;
     }
 }
@@ -1968,19 +1970,19 @@ while (defined($line = <IXR>)) {
     } else {
 	$line =~ s/LLGAL-OPTIONS/@llgal_options/g ;
         $line =~ s/<!--TITLE-->/$index_title/g ;
-	$line =~ s/<!--CSS-->/$local_llgal_dir\/$css_filename/g;
-	print IXW "$line";
+	$line =~ s/<!--CSS-->/$local_llgal_dir\/$css_filename/g ;
+	print IXW "$line" ;
 # stop at <!-- ********** -->
 	last if $line =~ m/\*{10}/ ;
     }
 }
 
 # for each row
-my $num;
-my $forced_width_warning = 0;
-init_percentage ();
+my $num ;
+my $forced_width_warning = 0 ;
+init_percentage () ;
 for (my $i = 0; $i < @entries; $i += $num) {
-    $num = 0;
+    $num = 0 ;
 
 # figure out how many to put in next row.
     my $width = 0 ;
@@ -2002,15 +2004,15 @@ for (my $i = 0; $i < @entries; $i += $num) {
 
 # Table header
     if ($show_no_film_effect) {
-	print IXW "<table class=\"index\" style=\"border-spacing: ", $index_cellpadding, "px 0px;\">\n";
+	print IXW "<table class=\"index\" style=\"border-spacing: ", $index_cellpadding, "px 0px;\">\n" ;
     } else {
-	print IXW "<table class=\"index with-tile\" style=\"border-spacing: ", $index_cellpadding, "px 0px;\">\n";
+	print IXW "<table class=\"index with-tile\" style=\"border-spacing: ", $index_cellpadding, "px 0px;\">\n" ;
     }
 
 # Row header
     print IXW "  <tr><td class=\"tiled\" colspan=\"", ($show_no_film_effect?$num:$num+2), "\">&nbsp;</td></tr>\n"
 	unless $show_no_film_effect ;
-    print IXW "  <tr>\n";
+    print IXW "  <tr>\n" ;
     print IXW "    <td class=\"thumb\">&nbsp;</td>\n"
 	unless $show_no_film_effect ;
 
@@ -2033,14 +2035,14 @@ for (my $i = 0; $i < @entries; $i += $num) {
 	    print IXW "</td>\n" ;
 	} elsif ($type == $TYPE_IMG) {
 	    my $altname = $entry->{title} ;
-	    print IXW "    <td class=\"thumb\" style=\"width: ${width}px; height: ${height}px;\">\n";
+	    print IXW "    <td class=\"thumb\" style=\"width: ${width}px; height: ${height}px;\">\n" ;
 	    if ($make_no_slides) {
 		print IXW "      <a href=\"$entry->{url}\"" ;
 	    } else {
 		print IXW "      <a href=\"$entry->{slide_url}\"" ;
 	    }
 	    print IXW " title=\"$over_thumbnail_text$altname $entry->{scaled_dimstring}\">" ;
-	    print IXW "<img src=\"$entry->{thumb_url}\" alt=\"$alt_thumbnail_text$altname $entry->{thumb_dimstring}\" />";
+	    print IXW "<img src=\"$entry->{thumb_url}\" alt=\"$alt_thumbnail_text$altname $entry->{thumb_dimstring}\" />" ;
 	    print IXW "</a></td>\n" ;
 	} else {
 	    die "Unknown type $type.\n" ;
@@ -2057,7 +2059,7 @@ for (my $i = 0; $i < @entries; $i += $num) {
 
 # Dimensions and filesizes
     if ($show_dimensions or $show_size) {
-	print IXW "  <tr>\n";
+	print IXW "  <tr>\n" ;
 	print IXW "    <td>&nbsp;</td>\n"
 	    unless $show_no_film_effect ;
 	for (my $j = 0; $j < $num; $j++) {
@@ -2109,15 +2111,15 @@ while (defined($line = <IXR>)) {
 while (defined ($line = <IXR>)) {
     if ($line =~ m/<!--FOOTERS-->/) {
 	foreach my $footer (@footers) {
-	    print IXW "    <div class=\"footer\">" . $footer . "</div>\n";
+	    print IXW "    <div class=\"footer\">" . $footer . "</div>\n" ;
 	}
     } else {
-	$line =~ s/<!--TITLE-->/$index_title/g;
-	print IXW "$line";
+	$line =~ s/<!--TITLE-->/$index_title/g ;
+	print IXW "$line" ;
     }
 }
-close(IXW) ;
-close(IXR) ;
+close IXW ;
+close IXR ;
 print "\n" ;
 
 add_warning "Row width max ($pixels_per_row) too low for one single thumbnail. "
