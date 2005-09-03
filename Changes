@@ -9,7 +9,8 @@
 * The captions file is now automatically used if it exists
   (-c option got removed).
 * Improved usage of image comments for captions:
-  + use JFIF/GIF comment by default (closes Debian bug #324478).
+  + use JFIF/GIF comment by default
+    (closes Wolfram Quester's Debian bug #324478).
   + support array of strings in JFIF comment.
   + remove \000 in JFIF comment.
   + make_caption_from_image_comment is now a string option of comma
@@ -51,7 +52,7 @@
 * Spaces are now supported in convert options.
 * Check for -h or -v earlier.
 * Don't use file operators to check file permissions
-  (closes Debian bug #325171).
+  (closes Marcus Better's Debian bug #325171).
 * Fix chmod'ing for --www.
 * Fix bogus output of configuration file for MVI/FIL/DIR_default_linktext
   and no_default_linktext.
