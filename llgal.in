@@ -7,6 +7,7 @@ use Image::Info qw(image_info) ;
 use POSIX qw(strftime) ;
 use Time::Local ;
 use URI::Escape ;
+use Text::ParseWords ;
 use Cwd ;
 
 use strict ;
@@ -20,6 +21,20 @@ my $version = "@VERSION@" ;
 ######################################################################
 # store command-line options upfront to write in the index <HEAD>
 my @llgal_options = @ARGV ;
+
+######################################################################
+# a few routines that are required early
+
+# split at each space, except between quotes
+sub parse_convert_options {
+    my $line = shift ;
+    return parse_line (' +', 0, $line) ;
+}
+
+# join with spaces, and protect spaces
+sub join_convert_options {
+    return join (' ', map { my $val = $_ ; $val =~ s/( +)/\'\1\'/g ; $val } @_) ;
+}
 
 ######################################################################
 # process general command-line options
@@ -440,13 +455,13 @@ sub process_option {
 	} elsif (/^add_subdirs\s*=\s*(.+)$/) {
 	    $add_subdirs = $1 ;
 	} elsif (/^additional_configuration_file\s*=\s*"(.+)"$/) {
-	    push (@additional_config_files, $1) ;
+	    push (@additional_config_files, parse_convert_options ($1)) ;
 	} elsif (/^convert_options\s*=\s*"(.*)"$/) {
-	    push (@convert_options, split (' +', $1)) ;
+	    push (@convert_options, parse_convert_options ($1)) ;
 	} elsif (/^scaled_convert_options\s*=\s*"(.*)"$/) {
-	    push (@scaled_convert_options, split (' +', $1)) ;
+	    push (@scaled_convert_options, parse_convert_options ($1)) ;
 	} elsif (/^thumbnail_convert_options\s*=\s*"(.*)"$/) {
-	    push (@thumbnail_convert_options, split (' +', $1)) ;
+	    push (@thumbnail_convert_options, $1) ;
 	} elsif (/^image_extensions\s*=\s*"(.*)"$/) {
 	    $image_extensions = $1 ;
 	} elsif (/^movie_extensions\s*=\s*"(.*)"$/) {
@@ -515,7 +530,7 @@ GetOptions(
 	   'y=i'	=> \$thumbnail_height_max,
 	   'bigy=i'	=> \$slide_height_max,
 	   'bigxy=i'    => sub { shift ; $slide_width_max = $slide_height_max = shift ; },
-           'con=s'	=> sub { shift ; push (@convert_options, split (' +', shift)) ; },
+           'con=s'	=> sub { shift ; push (@convert_options, parse_convert_options (shift)) ; },
            'sort=s'     => \$sort_criteria,
 	   'sp=s'	=> \$scaled_image_filenameprefix,
 	   'title=s'	=> \$index_title,
@@ -2316,9 +2331,9 @@ if (defined $generate_config) {
     print NEWCFG "# Various:\n" ;
     print NEWCFG "add_all_files = $add_all_files\n" ;
     print NEWCFG "add_subdirs = $add_subdirs\n" ;
-    print NEWCFG "convert_options = \"". join (' ', @convert_options) ."\"\n" ;
-    print NEWCFG "scaled_convert_options = \"". join (' ', @scaled_convert_options) ."\"\n" ;
-    print NEWCFG "thumbnail_convert_options = \"". join (' ', @thumbnail_convert_options) ."\"\n" ;
+    print NEWCFG "convert_options = \"". (join_convert_options (@convert_options)) ."\"\n" ;
+    print NEWCFG "scaled_convert_options = \"". (join_convert_options (@scaled_convert_options)) ."\"\n" ;
+    print NEWCFG "thumbnail_convert_options = \"". (join_convert_options (@thumbnail_convert_options)) ."\"\n" ;
     print NEWCFG "image_extensions = \"$image_extensions\"\n" ;
     print NEWCFG "movie_extensions = \"$movie_extensions\"\n" ;
     print NEWCFG "no_default_linktext = $no_default_linktext\n" ;

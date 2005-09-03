@@ -48,6 +48,7 @@
 * Add captions.header file which contains what's inserted at the begining of
   generated captions files.
 * Allow empty gallery.
+* Spaces are now supported in convert options.
 * Check for -h or -v earlier.
 * Don't use file operators to check file permissions
   (closes Debian bug #325171).
