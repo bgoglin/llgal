@@ -2,8 +2,6 @@
   + A warning is shown if .llgal.files exists.
 * Add -L and list_links to list links after the gallery index instead of
   creating slides and thumbnails (requested by David Baelde).
-* Add --gt option to copy templates in the local, user or any other
-  template directory (requested by Loïs Taulelle).
 * All links in the index directly open the target instead of the slide,
   not only MVI and FIL (requested by Samuel Thibault).
 * The captions file is now automatically used if it exists
@@ -34,10 +32,15 @@
   + Use same basis for image alternative and title.
   + Don't use basename anymore, always use the whole filename instead.
   + When possible, the HTML title parameter is in href instead of img.
-* Cleanup location of special llgal files:
+* Cleanup location and copying of special llgal files
+  (requested by Loïs Taulelle) :
   + index/slidetemplate.html are not copied to .llgal anymore.
-  + the user might put a special revision of index/slidetemplate.html
+  + The user might put a special revision of index/slidetemplate.html
     in .llgal, llgal will use it.
+  + Add --gt option to copy templates in the local, user or any
+    other template directory.
+  + Add --templates option (add template_dir configuration option)
+    to add a custom template directory.
 * Move several text configuration options to a common Text section in
   llgalrc and in the manpage.
   + Add a LANGUAGE section in the manpage for changing text options.

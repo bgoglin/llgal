@@ -48,6 +48,7 @@ my $cleanall_asked = 0 ;	# clean up all generated and user modified files
 my $generate_config = undef ;   # generate a config file
 my $generate_captions = 0 ;     # generate (or update) captions
 my $give_templates = undef ;	# give templates to the given directory
+my @template_dirs = () ;	# user-added directories where templates might be found
 my $make_recursive = 0 ;        # do we run recursively in subdirectories ?
 
 # process these options but kept other options in @ARGV for later
@@ -63,6 +64,7 @@ GetOptions(
 				$value = "local" if !$value ;
 				$give_templates = $value ;
 			    },
+	   'templates=s'=> \@template_dirs,
 	   'clean'	=> \$clean_asked,
 	   'cleanall'	=> \$cleanall_asked,
 	   'v|version'	=> \$version_asked,
@@ -257,16 +259,17 @@ my $usage = << "END_OF_USAGE" ;
 This is llgal $version the Loulous HTML image slide show generator.
 Syntax:  llgal [-option -option ...]
 Behavior Options:
-          -d <dir>        operate on files in directory <dir> ($destination_dir)
-          -f              force thumbnail and scaled slide regeneration
-          -R              run recursively in subdirectories
-          --gc            generate or update the captions file
-          --gencfg <file> generate the configuration file <file>
-          --gt [<dir>]    give templates to the directory <dir>
-          --clean         remove all generated files
-          --cleanall      remove all generated and user modified files
-          -v, --version   show version
-          -h, --help      displays this brief help
+          -d <dir>           operate on files in directory <dir> ($destination_dir)
+          -f                 force thumbnail and scaled slide regeneration
+          -R                 run recursively in subdirectories
+          --gc               generate or update the captions file
+          --gencfg <file>    generate the configuration file <file>
+          --gt [<dir>]       give templates to the directory <dir>
+          --templates <dir>  use templates in <dir>
+          --clean            remove all generated files
+          --cleanall         remove all generated and user modified files
+          -v, --version      show version
+          -h, --help         displays this brief help
 Layout Options:
           -A              add all non-image non-video files to the list of slides
           -a              write image sizes under thumbnails on index page
@@ -329,6 +332,8 @@ sub process_option {
 	    $user_share_dir = $1 ;
 	} elsif (/^user_share_dir\s*=\s*"(.+)"$/) {
 	    $user_share_dir = $ENV{HOME}."/".$1 ;
+	} elsif (/^template_dir\s*=\s*"(.+)"$/) {
+	    push (@template_dirs, $1) ;
 # Name of generic llgal files
 	} elsif (/^captions_header_filename\s*=\s*"(.+)"$/) {
 	    $captions_header_filename = $1 ;
@@ -661,7 +666,10 @@ sub copy_file {
 # find path to the template file in generic directories
 sub find_generic_template_file {
     my ($filename, $check) = (shift, shift) ;
-    # TODO: add --template here
+    foreach my $dir (@template_dirs) {
+	return $dir
+	    if -e "$dir/$filename" ;
+    }
     return $user_share_dir
 	if -e "$user_share_dir/$filename" ;
     die "File '$llgal_share_dir/$filename' does not exist.\nPlease install llgal properly.\n"
@@ -1866,8 +1874,6 @@ if ($make_no_slides) {
     die "Failed to remove existing HTML slides.\n"
 	if $? ;
 
-    # TODO: get template si --get-templates
-
     # find the slidetemplate
     my $slidetemplate = find_template_file ($slidetemplate_filename, 1) . "/$slidetemplate_filename" ;
     indprint "Using '$slidetemplate' as HTML slide template.\n" ;
@@ -1961,8 +1967,6 @@ show_warnings ;
 
 #######################################################################
 # Creating the index file
-
-# TODO: get template si --get-templates
 
 # find the indextemplate
 my $indextemplate = find_template_file ($indextemplate_filename, 1) . "/$indextemplate_filename" ;
@@ -2265,6 +2269,7 @@ if (defined $generate_config) {
     print NEWCFG "# llgal directories:\n" ;
     print NEWCFG "llgal_share_dir = \"$llgal_share_dir\"\n" ;
     print NEWCFG "user_share_dir = \"$user_share_dir\"\n" ;
+    map { print NEWCFG "template_dir = \"$_\"\n" ; } @template_dirs ;
     print NEWCFG "# Name of generic llgal files:\n" ;
     print NEWCFG "captions_header_filename = \"$captions_header_filename\"\n" ;
     print NEWCFG "css_filename = \"$css_filename\"\n" ;

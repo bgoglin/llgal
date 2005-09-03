@@ -22,6 +22,10 @@
 # since dynamic values are not supported for now.
 # user_share_dir = $ENV{HOME}."/.llgal"
 
+# Additional template directories [--templates].
+# This option may be used multiple times.
+# template_dir = "path"
+
 ##### Name of generic llgal files #####
 
 # Name of the captions header file that is inserted at the begining

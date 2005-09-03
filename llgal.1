@@ -139,7 +139,6 @@ See
 .B FILES
 for details about template files.
 
-
 .TP
 .BI "-h, --help"
 Display brief help.
@@ -178,6 +177,10 @@ or
 .B not
 check that a subdirectory is in the captions file.
 All not-dot-begining subdirectories will be cleaned.
+
+.TP
+.BI --templates " <dir>"
+Add a directory to the list of template locations.
 
 .TP
 .BI "-v, --version"
@@ -591,6 +594,11 @@ Usually \fB/usr/share/llgal\fR or \fB/usr/local/share/llgal\fR.
 The location of the per-user share directory where template are stored.
 If they exists, these files are used instead of the system-wide files.
 Default is \fB$HOME/.llgal\fR.
+.RE
+.I template_dir = \fI"path"
+.RS
+Additional template directories [--templates].
+This option may be used multiple times.
 .RE
 
 .B Names of generic llgal files:
@@ -1045,6 +1053,11 @@ A local template is used by default if it exists.
 A user template is used if it exists and no local template exists.
 Finally, system-wide templates are used if no local and user
 templates override them.
+
+It is also possible to add custom template directories (with
+.I --templates
+) that will be used to get templates before trying in the user
+and in the system-wide template directories.
 
 The option
 .IR --gt
