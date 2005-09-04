@@ -308,9 +308,10 @@ Layout Options:
           -y <n>          scale all thumbnails to the same height <n> ($thumbnail_height_max)
           --config <s>    pass an additional configuration files
           --option <s>    pass an additional option as in configuration files
-Note:      default values are given in parentheses (where applicable).
-Author:    Brice Goglin <Brice.Goglin\@ens-lyon.org>
+Note:     default values are given in parentheses (where applicable).
+Author:  Brice Goglin
 Homepage:  http://bgoglin.free.fr/llgal
+Report bugs to:  <llgal-devel AT gna.org>
 END_OF_USAGE
 
 # process help and version now
