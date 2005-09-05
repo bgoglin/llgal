@@ -61,6 +61,7 @@
   and no_default_linktext.
 * Fix string config option that might be empty or not.
 * Fix bogus parsing of additional_configuration_file option.
+* Update contact address to gna.org and add it to README.
 * Lots of cleanups and typos.
 
 
