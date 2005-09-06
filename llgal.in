@@ -1566,7 +1566,7 @@ sub get_entries_from_directory {
 	if (-d "$destination_dir$filename") {
 	    # directory
 	    if ($add_subdirs) {
-		push @subdirs, $_ ;
+		push @subdirs, $filename ;
 		my $entry = create_entry ($TYPE_DIR, $filename, undef, undef, undef) ;
 		push @entries, $entry
 		    if defined $entry ;

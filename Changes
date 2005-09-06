@@ -56,6 +56,7 @@
 * Check for -h or -v earlier.
 * Don't use file operators to check file permissions
   (closes Marcus Better's Debian bug #325171).
+* Fix completely broken -R processing (reported by Cyrill Helg).
 * Fix chmod'ing for --www.
 * Fix bogus output of configuration file for MVI/FIL/DIR_default_linktext
   and no_default_linktext.
