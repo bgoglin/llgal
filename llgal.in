@@ -243,8 +243,8 @@ my @convert_options = () ;
 my @scaled_convert_options = () ;
 my @thumbnail_convert_options = () ;
 # image and movie extensions
-my $image_extensions = "jpe?g|png|gif" ;
-my $movie_extensions = "mpe?g|avi" ;
+my $image_extensions = "jpe?g|tiff?|png|gif" ;
+my $movie_extensions = "mpe?g|mov|avi" ;
 # don't show prefix when generating link text
 my $no_default_linktext = 0 ;
 # sort criteria

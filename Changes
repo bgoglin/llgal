@@ -54,6 +54,8 @@
 * Allow empty gallery.
 * Spaces are now supported in convert options.
 * Check for -h or -v earlier.
+* Add .tif[f] and .mov to default image and movie extensions
+  (requested by Cyrill Helg).
 * Don't use file operators to check file permissions
   (closes Marcus Better's Debian bug #325171).
 * Fix completely broken -R processing (reported by Cyrill Helg).
