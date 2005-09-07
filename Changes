@@ -1,3 +1,5 @@
+llgal (0.11)
+
 * The local llgal directory is now .llgal instead of .llgal.files.
   + A warning is shown if .llgal.files exists.
 * Add -L and list_links to list links after the gallery index instead of
@@ -68,6 +70,7 @@
 * Update contact address to gna.org and add it to README.
 * Lots of cleanups and typos.
 
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Sat,  7 Sep 2005 23:30:55 +0200
 
 llgal (0.10.1.1)
 
