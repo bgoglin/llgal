@@ -621,6 +621,8 @@ sub system_with_output {
     pipe (my $pipe_out, my $pipe_in) ;
     my $pid = fork() ;
     if ($pid < 0) {
+	close $pipe_in ;
+	close $pipe_out ;
 	return ( -1, "Fork failed while trying to $descr\n" ) ;
     } elsif ($pid > 0) {
 	close $pipe_in ;
@@ -637,6 +639,7 @@ sub system_with_output {
 	open STDOUT, ">&", $pipe_in ;
 	{ exec @_ } ;
 	print $pipe_in "Exec of @_[0] failed while trying to $descr\n" ;
+	close $pipe_in ;
 	exit -1 ;
     }
 }
@@ -653,10 +656,9 @@ sub copy_file {
     my $filename = shift ;
     my $srcdir = shift ;
     my $destdir = shift ;
-    my @output = system_with_output
+    my ($status, @output) = system_with_output
 	("copy '$filename' from '$srcdir'",
 	"cp", "-f", "$srcdir/$filename", "$destdir/$filename") ;
-    my $status = shift @output ;
     if ($status) {
 	# die on whatever error
 	immediate_external_warnings @output ;
@@ -916,12 +918,12 @@ sub clean_files {
 		 or /^$css_filename$/) {
 	    my $original = (find_generic_template_file $_, 0)."/".$_ ;
 	    my $diff = 0 ;
+	    my @output ;
 	    # default is cleanall, which removes everything, as if file were not changed
 	    if (!$cleanall) {
-		my @output = system_with_output
+		($diff, @output) = system_with_output
 		    ("compare $_ with its original",
 		     "cmp", "-s", "$destination_dir$local_llgal_dir/$_", "$original") ;
-		my $diff = shift @output ;
 		if ($diff == -1) {
 		    immediate_external_warnings @output ;
 		    die "Failed to execute 'cmp' to check whether '$destination_dir$local_llgal_dir/$_' has been modified ($!).\n" ;
@@ -939,12 +941,12 @@ sub clean_files {
 	    }
 	} elsif (/^$captions_filename$/) {
 	    my $grep = 0 ;
+	    my @output ;
 	    # default is cleanall, which removes everything, as if the removal line was here
 	    if (!$cleanall) {
-		my @output = system_with_output
+		($grep, @output) = system_with_output
 		    ("check for caption removal line",
 		     "grep", "-q", "$captions_removal_line", "$destination_dir$local_llgal_dir/$_") ;
-		my $grep = shift @output ;
 		if ($grep == -1) {
 		    immediate_external_warnings @output ;
 		    die "Failed to execute 'grep' to check whether '$destination_dir$local_llgal_dir/$_' has been modified ($!).\n" ;
@@ -1161,10 +1163,9 @@ sub check_file {
 
 sub check_image {
     my $filename = shift ;
-    my @output = system_with_output
+    my ($status, @output) = system_with_output
 	( "check \"$filename\" validity",
 	  "identify", $filename ) ;
-    my $status = shift @output ;
     if ($status == -1) {
 	immediate_external_warnings @output ;
 	die "Failed to check \"$filename\" validity\n" ;
@@ -1406,10 +1407,9 @@ sub create_entry {
 	# thumbnails dimensions
 	my $real_thumb_filename = "$destination_dir$entry->{thumb_filename}" ;
 	if ((! -e "$real_thumb_filename") or $force_regen_asked) {
-	    my @output = system_with_output
+	    my ($status, @output) = system_with_output
 		( "create '$real_filename' thumbnail",
 		  @thumbnail_create_command, "$real_filename", "$real_thumb_filename" ) ;
-	    my $status = shift @output ;
 	    if ($status == -1) {
 		immediate_external_warnings @output ;
 		die "Failed to create '$real_filename' thumbnail\n" ;
@@ -1451,17 +1451,16 @@ sub create_entry {
 	    if ((! -e "$real_scaled_filename") or $force_regen_asked) {
 		# only scale down, never up.
 		($x,$y) = imgsize ("$real_filename") ;
-		my @output ;
+		my ($status, @output) ;
 		if ($x <= $slide_width_max and $y <= $slide_height_max) {
-		    @output = system_with_output
+		    ($status, @output) = system_with_output
 			( "copy '$real_filename' scaled image",
 			  @slide_copy_command, "$real_filename", "$real_scaled_filename" ) ;
 		} else {
-		    @output = system_with_output
+		    ($status, @output) = system_with_output
 			( "create '$real_filename' scaled image",
 			  @slide_create_command, "$real_filename", "$real_scaled_filename" ) ;
 		}
-		my $status = shift @output ;
 		if ($status == -1) {
 		    immediate_external_warnings @output ;
 		    die "Failed to create '$real_filename' scaled image\n" ;
@@ -2158,10 +2157,9 @@ if ($show_no_film_effect) {
     # rescale the tiled image if needed
     my $tileh = (imgsize ("$destination_dir$local_llgal_dir/$filmtile_filename"))[1] ;
     if ($tile_height != $tileh) {
-	my @output = system_with_output
+	my ($status, @output) = system_with_output
 	    ( "reduce film tile",
 	      "mogrify", "-scale", "x$tile_height", "$destination_dir$local_llgal_dir/$filmtile_filename" ) ;
-	my $status = shift @output ;
 	if ($status) {
 	    # die on whatever error
 	    immediate_external_warnings @output ;
@@ -2178,22 +2176,16 @@ get_template_file ($css_filename) ;
 
 sub make_readable {
     my $file = shift ;
-    my @output ;
-    my $status ;
-    @output = system_with_output ("make world readable",
-				  "chmod", "a+r", $file) ;
-    $status = shift @output ;
+    my ($status, @output) = system_with_output ("make world readable",
+						"chmod", "a+r", $file) ;
     add_external_warnings @output
 	if $status ;
 }   
 
 sub make_readable_and_traversable {
     my $file = shift ;
-    my @output ;
-    my $status ;
-    @output = system_with_output ("make world readable and traversable",
-				  "chmod", "a+rx", $file) ;
-    $status = shift @output ;
+    my ($status, @output) = system_with_output ("make world readable and traversable",
+						"chmod", "a+rx", $file) ;
     add_external_warnings @output
 	if $status ;
 }   
