@@ -22,34 +22,39 @@
 # since dynamic values are not supported for now.
 # user_share_dir = $ENV{HOME}."/.llgal"
 
+# Additional template directories [--templates].
+# This option may be used multiple times.
+# template_dir = "path"
+
 ##### Name of generic llgal files #####
 
+# Name of the captions header file that is inserted at the begining
+# of generated captions files.
+# captions_header_filename = "captions.header"
+
 # Name of the CSS file.
-# This file will be stored under $local_llgal_dir.
+# Such a file will be stored under $local_llgal_dir.
 # css_filename = "llgal.css"
 
 # Name of the film tile image.
-# This file will be stored under $local_llgal_dir.
+# Such a file will be stored under $local_llgal_dir.
 # filmtile_filename = "tile.png"
 
 # Name of the index template.
-# This file will be stored under $local_llgal_dir.
+# Such a template file will be used during gallery generation.
 # indextemplate_filename = "indextemplate.html"
 
 # Name of the slide template.
-# This file will be stored under $local_llgal_dir.
+# Such a template file will be used during gallery generation.
 # slidetemplate_filename = "slidetemplate.html"
 
 ##### Location and name of generated files #####
 
-# Directory of the gallery [-d <s>]
-# All images and generated files will be placed there.
-# destination_dir = "."
-
 # Local subdirectory where llgal files generated files will be stored.
-# Note that HTML files are generated in place while templates, captions
-# and CSS are kept in this subdirectory.
-# local_llgal_dir = ".llgal.files"
+# Note that HTML files are generated in place while captions and CSS
+# are kept in this subdirectory.
+# HTML templates might also be defined here.
+# local_llgal_dir = ".llgal"
 
 # Prefix used to determine slide-image filenames from
 # original images (in case of --bigy) [--sp <s>]
@@ -66,12 +71,12 @@
 # Name of the generated index file [-i <s>]
 # index_filename = "index.html"
 
-# Title of the gallery [--title <s>]
-# index_title = "Index of pictures"
-
 # Cellpadding in the index table [-p <n>]
 # Must be >= 0, setting to < 0 resets to default
 # index_cellpadding = 3
+
+# List links after the main gallery thumbnail index [-L]
+# list_links = 0
 
 # Pixels per row of thumbnails in index [--wx <n>]
 # Must be > 0, 0 means unlimited, setting to < 0 resets to default
@@ -141,24 +146,21 @@
 
 ##### Captions #####
 
-# Name of the caption file that will be generated when llgal is called
+# Name of the captions file that will be generated when llgal is called
 # with --gc. This file will be stored under $local_llgal_dir.
 # captions_filename = "captions"
 
-# This line will be added to the caption file llgal will generate when
-# called with --gc. If the user doesn't want igal to remove this caption
+# This line will be added to the captions file llgal will generate when
+# called with --gc. If the user doesn't want igal to remove this captions
 # file when called with --clean, it just needs to remove this line from
 # the file.
-# caption_removal_line = "REMOVE THIS LINE IF LLGAL SHOULD NOT REMOVE THIS FILE"
+# captions_removal_line = "REMOVE THIS LINE IF LLGAL SHOULD NOT REMOVE THIS FILE"
 
-# Generate captions from comment stored in images [--cc]
-# make_caption_from_image_comment = 0
+# Generate captions from comment stored in images [--cc [<s>]]
+# make_caption_from_image_comment = ""
 
 # Also generate captions from timestamp stored in images [--ct]
 # make_caption_from_image_timestamp = 0
-
-# Set timestamp format in caption using strftime format [--ctf]
-# timestamp_format_in_caption = "%Y-%m-%d %H:%M:%S"
 
 # Generate captions from filenames [--cf]
 # make_caption_from_filename = 0
@@ -170,25 +172,18 @@
 # show_dimensions = 0
 # show_size = 0
 
-# Unit to be used when printing sizes [--asu <s>]
-# show_size_unit = "kB"
-
-# Use a caption file (defined by caption_filename) [-c]
-# It will be stored under $local_llgal_dir.
-# use_caption_file = 0
-
 ##### Exclude #####
 
 # Exclude files whose name matches [--exclude <s>]
 # This option may be used several times.
-# exclude = "string"
+# exclude = "regexp"
 
 # Include files whose name matches and were previously excluded [--include <s>].
 # This option may be used several times.
 # The order of includes and excludes is respected.
-# include = "string"
+# include = "regexp"
 
-##### Default linktext #####
+##### Text #####
 
 # Change the text that prefixes the filename when generating linktext
 # for movies without a captions file.
@@ -200,10 +195,36 @@
 
 # Change the text that prefixes the filename when generating linktext
 # for directories without a captions file.
-# DIR_default_linktext = "Open subgallery in "
+# DIR_default_linktext = "Open subgallery "
 
-# Don't show prefix when generating link text.
-# no_default_linktext = 0
+# Change the default text that is shown as image alternative for full-size images in slides
+# alt_full_text = ""
+
+# Change the default text that is shown as image alternative for scaled images in slides
+# alt_scaled_text = "Scaled image "
+
+# Change the default text that is shown as image alternative for thumbnails in the index
+# alt_thumbnail_text = "Thumbnail "
+
+# Title of the gallery [--title <s>]
+# index_title = "Index of pictures"
+
+# Change the default text that is shown when the mouse pointer
+# is over a scaled image in a slide.
+# over_scaled_text = "Click to see full size "
+
+# Change the default text that is shown when the mouse pointer
+# is over a thumbnail.
+# over_thumbnail_text = "Click to enlarge "
+
+# Change text in links to parent directory.
+# parent_linktext = "Back to parent gallery"
+
+# Unit to be used when printing sizes [--asu <s>]
+# show_size_unit = "kB"
+
+# Set timestamp format in captions using strftime format [--ctf]
+# timestamp_format_in_caption = "%Y-%m-%d %H:%M:%S"
 
 ##### Recursion #####
 
@@ -212,9 +233,6 @@
 
 # Add links to the parent directory [--parent].
 # parent_link = 0
-
-# Change text in links to parent directory.
-# parent_linktext = "Back to parent gallery"
 
 ##### Various #####
 
@@ -243,6 +261,9 @@
 
 # Extensions that are matched when searching movies
 # movie_extensions = "mpe?g|avi"
+
+# Don't show prefix when generating link text.
+# no_default_linktext = 0
 
 # Change sort criteria when scanning files in the working directory [--sort]
 # sort_criteria = "name"

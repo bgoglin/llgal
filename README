@@ -32,3 +32,8 @@ ftp://ftp.debian.org/debian/pool/main/i/image-size/image-size_*.orig.tar.gz
 ftp://ftp.debian.org/debian/pool/main/libu/liburi-perl/liburi-perl_*.orig.tar.gz
 Replace * with the last version that you'll find.
 llgal currently works with versions 1.16/2.992/1.35.
+
+
+If you experience any problem,
+please see http://bgoglin.free.fr/llgal
+or report to <llgal-devel AT gna.org>.

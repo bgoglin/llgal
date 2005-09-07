@@ -1,0 +1,12 @@
+
+# Use the following syntax (without the begining '# ') to define captions line:
+# TITLE: title of the index
+# INDEXHEAD: one header line in the index
+# INDEXFOOT: one header line in the index
+# TXT: text ---- caption
+# LNK: url ---- slide link text ---- caption
+# IMG: imagefile.{gif,png,jpg,jpeg} ---- caption
+# MVI: movie.{avi,mpg,mpeg} ---- slide link text ---- caption
+# FIL: file ---- slide link text ---- caption
+# DIR: directory ---- slide link text ---- caption
+

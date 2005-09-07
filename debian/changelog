@@ -1,3 +1,9 @@
+llgal (0.11-1) unstable; urgency=low
+
+  * New upstream release, closes: #324478, #325171.
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Wed,  7 Sep 2005 23:34:08 +0200
+
 llgal (0.10.1.1-1) unstable; urgency=low
 
   * New upstream release.
