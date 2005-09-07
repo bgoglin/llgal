@@ -207,7 +207,7 @@ my @excludes = () ;
 # Change the text that prefixes the linktext
 my $MVI_default_linktext = "Open movie " ;
 my $FIL_default_linktext = "Download file " ;
-my $DIR_default_linktext = "Open subgallery in " ;
+my $DIR_default_linktext = "Open subgallery " ;
 # default alternative text for full-size images in slides
 my $alt_full_text = "" ;
 # default alternative text for scaled images in slides

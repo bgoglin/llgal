@@ -195,7 +195,7 @@
 
 # Change the text that prefixes the filename when generating linktext
 # for directories without a captions file.
-# DIR_default_linktext = "Open subgallery in "
+# DIR_default_linktext = "Open subgallery "
 
 # Change the default text that is shown as image alternative for full-size images in slides
 # alt_full_text = ""

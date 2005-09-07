@@ -58,6 +58,7 @@
   (requested by Cyrill Helg).
 * Don't use file operators to check file permissions
   (closes Marcus Better's Debian bug #325171).
+* Remove "in "at the end of DIR_default_linktext.
 * Fix completely broken -R processing (reported by Cyrill Helg).
 * Fix chmod'ing for --www.
 * Fix bogus output of configuration file for MVI/FIL/DIR_default_linktext
