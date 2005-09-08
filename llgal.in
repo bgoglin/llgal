@@ -612,6 +612,10 @@ sub print_percentage {
     }
 }
 
+sub end_percentage {
+    print "\b\b\b\b100%\n" ;
+}
+
 # system routine which:
 # - takes a description followed by cmdline arguments
 # - returns a table composed of the status followed by STDERR and STDOUT lines
@@ -1596,9 +1600,7 @@ sub get_entries_from_directory {
 
 	print_percentage ($i+1, scalar @filenames) ;
     }
-
-    # end percentage
-    print "\n" ;
+    end_percentage () ;
     show_warnings ;
 }
 
@@ -1678,6 +1680,7 @@ if ($generate_captions) {
 	    }
 	    print_percentage ($i+1, scalar @entries) ;
 	}
+	end_percentage () ;
     } else {
 	indprint "Creating the $captions_filename file: " ;
 	open (CAP, ">$destination_dir$local_llgal_dir/$captions_filename")
@@ -1693,8 +1696,6 @@ if ($generate_captions) {
 	}
 	print CAP "# $captions_removal_line\n" ;
 	print CAP "\n" ;
-	my $caption_header_lines = $. ;
-	print_percentage ($caption_header_lines, $caption_header_lines + @entries) ;
 
 	for (my $i = 0; $i < @entries; $i++) {
 	    my $entry = $entries[$i] ;
@@ -1715,11 +1716,11 @@ if ($generate_captions) {
 		." ---- ". $entry->{linktext}
 		." ---- ". $entry->{caption} ."\n" ;
 	    }
-	    print_percentage ($caption_header_lines+$i+1, $caption_header_lines + @entries) ;
+	    print_percentage ($i+1, @entries) ;
 	}
+	end_percentage () ;
     }
     close CAP ;
-    print "\n" ;
     show_warnings ;
 
     if ($make_recursive) {
@@ -1818,8 +1819,7 @@ if (-e "$destination_dir$local_llgal_dir/$captions_filename") {
 	print_percentage (tell CAP, $size) ;
     }
     close CAP ;
-    print "\n" ;
-
+    end_percentage () ;
     show_warnings ;
     indprint "Found ". (scalar @entries) ." files in the captions file.\n" ;
 
@@ -1956,8 +1956,8 @@ if ($make_no_slides) {
 	close SW ;
 	print_percentage ($i+1, scalar @entries) ;
     }
+    end_percentage () ;
 }
-print "\n" ;
 show_warnings ;
 
 #######################################################################
@@ -2134,13 +2134,13 @@ while (defined ($line = <IXR>)) {
 }
 close IXW ;
 close IXR ;
-print "\n" ;
 
-add_warning "Row width max ($pixels_per_row) too low for one single thumbnail. "
+end_percentage () ;
+show_warnings ;
+
+immediate_warning "Row width max ($pixels_per_row) too low for one single thumbnail. "
     . "Forced $forced_width_warning time". ($forced_width_warning>1?"s":"") ."."
     if $forced_width_warning ;
-
-show_warnings ;
 
 #######################################################################
 
