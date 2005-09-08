@@ -444,6 +444,8 @@ sub process_option {
 	    $over_scaled_text = $1 ;
 	} elsif (/^over_thumbnail_text\s*=\s*"(.*)"$/) {
 	    $over_thumbnail_text = $1 ;
+	} elsif (/^parent_linktext\s*=\s*"(.+)"$/) {
+	    $parent_linktext = $1 ;
 	} elsif (/^show_size_unit\s*=\s*"(.*)"$/) {
 	    $show_size_unit = $1 ;
 	} elsif (/^timestamp_format_in_caption\s*=\s*"(.+)"$/) {
@@ -453,8 +455,6 @@ sub process_option {
 	    $make_recursive = $1 ;
 	} elsif (/^parent_link\s*=\s*(.+)$/) {
 	    $parent_link = $1 ;
-	} elsif (/^parent_linktext\s*=\s*"(.+)"$/) {
-	    $parent_linktext = $1 ;
 # Various
 	} elsif (/^add_all_files\s*=\s*(.+)$/) {
 	    $add_all_files = $1 ;
