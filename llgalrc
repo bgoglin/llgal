@@ -206,8 +206,14 @@
 # Change the default text that is shown as image alternative for thumbnails in the index
 # alt_thumbnail_text = "Thumbnail "
 
+# Label of the link from a slide to the index
+# index_linktext = "Index"
+
 # Title of the gallery [--title <s>]
 # index_title = "Index of pictures"
+
+# Label of the link from a slide to the next one
+# next_slide_linktext = "Next&gt;&gt;"
 
 # Change the default text that is shown when the mouse pointer
 # is over a scaled image in a slide.
@@ -219,6 +225,9 @@
 
 # Change text in links to parent directory.
 # parent_linktext = "Back to parent gallery"
+
+# Label of the link from a slide to the previous one
+# prev_slide_linktext = "&lt;&lt;Prev"
 
 # Unit to be used when printing sizes [--asu <s>]
 # show_size_unit = "kB"

@@ -214,14 +214,20 @@ my $alt_full_text = "" ;
 my $alt_scaled_text = "Scaled image " ;
 # default alternative text for thumbnails in the index
 my $alt_thumbnail_text = "Thumbnail " ;
+# default text for link from slides to index
+my $index_linktext = "Index" ;
 # title of the gallery (--title)
 my $index_title = "Index of pictures" ;
+# label of link from a slide to the next one
+my $next_slide_linktext = "Next&gt;&gt;" ;
 # default text that is shown when the mouse pointer is over a scaled image in a slide
 my $over_scaled_text = "Click to see full size " ;
 # default text that is shown when the mouse pointer is over a thumbnail
 my $over_thumbnail_text = "Click to enlarge " ;
 # text that is shown when linking to the parent gallery
 my $parent_linktext = "Back to parent gallery" ;
+# label of link from a slide to the previous one
+my $prev_slide_linktext = "&lt;&lt;Prev" ;
 # change kB to another unit (--asu)
 my $show_size_unit = "kB" ;
 # format of the timestamp in captions (--ctf)
@@ -425,7 +431,7 @@ sub process_option {
 	    $entry->{excluded} = 0 ;
 	    $entry->{filter} = $1 ;
 	    push (@excludes, $entry) ;
-# Text
+# Link text
 	} elsif (/^MVI_default_linktext\s*=\s*"(.*)"$/) {
 	    $MVI_default_linktext = $1 ;
 	} elsif (/^FIL_default_linktext\s*=\s*"(.*)"$/) {
@@ -438,14 +444,20 @@ sub process_option {
 	    $alt_scaled_text = $1 ;
 	} elsif (/^alt_thumbnail_text\s*=\s*"(.*)"$/) {
 	    $alt_thumbnail_text = $1 ;
+	} elsif (/^index_linktext\s*=\s*"(.+)"$/) {
+	    $index_linktext = $1 ;
 	} elsif (/^index_title\s*=\s*"(.*)"$/) {
 	    $index_title = $1 ;
+	} elsif (/^next_slide_linktext\s*=\s*"(.+)"$/) {
+	    $next_slide_linktext = $1 ;
 	} elsif (/^over_scaled_text\s*=\s*"(.*)"$/) {
 	    $over_scaled_text = $1 ;
 	} elsif (/^over_thumbnail_text\s*=\s*"(.*)"$/) {
 	    $over_thumbnail_text = $1 ;
 	} elsif (/^parent_linktext\s*=\s*"(.+)"$/) {
 	    $parent_linktext = $1 ;
+	} elsif (/^prev_slide_linktext\s*=\s*"(.+)"$/) {
+	    $prev_slide_linktext = $1 ;
 	} elsif (/^show_size_unit\s*=\s*"(.*)"$/) {
 	    $show_size_unit = $1 ;
 	} elsif (/^timestamp_format_in_caption\s*=\s*"(.+)"$/) {
@@ -1940,15 +1952,21 @@ if ($make_no_slides) {
 	    $imagecaption .= "&nbsp;&nbsp;&nbsp;$entry->{dimstring}" ;
 
 	    $line =~ s/<!--IMAGE-CAPTION-->/$imagecaption/g ;
-	    $line =~ s/<!--INDEX-FILE-->/$index_filename/g ;
 	    $line =~ s/<!--THIS-SLIDE-->/$entry->{slide_url}/g ;
 
+	    # process INDEX-FILE
+	    $line =~ s/<!--INDEX-LINKTEXT-->/$index_linktext/g ;
+	    $line =~ s/<!--INDEX-FILE-->/$index_filename/g ;
+
 	    # process PREV-SLIDE
+	    $line =~ s/<!--PREV-SLIDE-LINKTEXT-->/$prev_slide_linktext/g ;
 	    my $prev = $entries[$i-1] ;
-	    $line =~ s/<!--PREV-SLIDE-->/\"$prev->{slide_url}\" title=\"$prev->{title}\"/g ;
+	    $line =~ s/<!--PREV-SLIDE-->/$prev->{slide_url}\" title=\"$prev->{title}/g ;
+
 	    # process NEXT-SLIDE
+	    $line =~ s/<!--NEXT-SLIDE-LINKTEXT-->/$next_slide_linktext/g ;
 	    my $next = $entries[$i==@entries-1 ? 0 : $i+1] ;
-	    $line =~ s/<!--NEXT-SLIDE-->/\"$next->{slide_url}\" title=\"$next->{title}\"/g ;
+	    $line =~ s/<!--NEXT-SLIDE-->/$next->{slide_url}\" title=\"$next->{title}/g ;
 
 	    # output the line
 	    print SW "$line" ;
@@ -2312,10 +2330,13 @@ if (defined $generate_config) {
     print NEWCFG "alt_full_text = \"$alt_full_text\"\n" ;
     print NEWCFG "alt_scaled_text = \"$alt_scaled_text\"\n" ;
     print NEWCFG "alt_thumbnail_text = \"$alt_thumbnail_text\"\n" ;
+    print NEWCFG "index_linktext = \"$index_linktext\"\n" ;
     print NEWCFG "index_title = \"$index_title\"\n" ;
+    print NEWCFG "next_slide_linktext = \"$next_slide_linktext\"\n" ;
     print NEWCFG "over_scaled_text = \"$over_scaled_text\"\n" ;
     print NEWCFG "over_thumbnail_text = \"$over_thumbnail_text\"\n" ;
     print NEWCFG "parent_linktext = \"$parent_linktext\"\n" ;
+    print NEWCFG "prev_slide_linktext = \"$prev_slide_linktext\"\n" ;
     print NEWCFG "show_size_unit = \"$show_size_unit\"\n" ;
     print NEWCFG "timestamp_format_in_caption = \"$timestamp_format_in_caption\"\n" ;
     print NEWCFG "# Recursion:\n" ;
