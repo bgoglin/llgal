@@ -1107,9 +1107,6 @@ my $nofiles = 0 ;
 my @headers = () ;
 my @footers = () ;
 
-# list of subdirectories
-my @subdirs ;
-
 # list of entries which are shown as simple links
 my @listed_links = () ;
 
@@ -1522,8 +1519,6 @@ sub generate_slidename {
 # generating entry table from files in target directory
 sub get_entries_from_directory {
 
-    @subdirs = () ;
-
     opendir DIR, "./$destination_dir" # destination is empty for './'
 	or die "Can't open $destination_string ($!)\n" ;
     # get all files, except dot-starting ones and .html ending ones
@@ -1565,7 +1560,6 @@ sub get_entries_from_directory {
 	if (-d "$destination_dir$filename") {
 	    # directory
 	    if ($add_subdirs) {
-		push @subdirs, $filename ;
 		my $entry = create_entry ($TYPE_DIR, $filename, undef, undef, undef) ;
 		push @entries, $entry
 		    if defined $entry ;
@@ -1729,9 +1723,11 @@ if ($generate_captions) {
     show_warnings ;
 
     if ($make_recursive) {
+	my @dir_entries = grep { $_->{type} == $TYPE_DIR } @entries ;
 	print "\n"
-	    if @subdirs ;
-	foreach my $dir (@subdirs) {
+	    if @dir_entries ;
+	foreach my $entry (@dir_entries) {
+	    my $dir = $entry->{filename} ;
 	    indprint "Entering subdirectory '$dir'...\n" ;
 	    system ( $0, @llgal_options, "-d", "$destination_dir$dir", "--indent", "  ".$indent ) ;
 	    die "Failed to call $0 for subdirectory $destination_dir$dir ($!).\n"
@@ -1796,7 +1792,6 @@ if (-e "$destination_dir$local_llgal_dir/$captions_filename") {
 		} elsif ($line =~ m/^DIR:\s*(.+)\s+----\s+(.+)\s+----\s*(?:\s(.*))?\s*$/) {
 		    # directory slide
 		    $entry = create_entry ($TYPE_DIR, $1, undef, $2, $3) ;
-		    push @subdirs, $1 ;
 
 		} elsif ($line =~ m/^MVI:\s*(.+)\s+----\s+(.+)\s+----\s*(?:\s(.*))?\s*$/) {
 		    # movie slide
@@ -2345,7 +2340,9 @@ if (defined $generate_config) {
 # Process subdirectories
 
 if ($make_recursive) {
-    foreach my $dir ( @subdirs ) {
+    my @dir_entries = grep { $_->{type} == $TYPE_DIR } @entries ;
+    foreach my $entry (@dir_entries) {
+	my $dir = $entry->{filename} ;
 	print "\n" ;
 	indprint "Entering subdirectory '$dir'...\n" ;
 	system ( $0, @llgal_options, "-d", "$destination_dir$dir", "--parent", "--indent", $indent."  " ) ;
