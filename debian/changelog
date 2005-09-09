@@ -1,28 +1,13 @@
 llgal (0.11-1) unstable; urgency=low
 
-  * New upstream release, closes: #324478, #325171.
-
- -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Wed,  7 Sep 2005 23:34:08 +0200
-
-llgal (0.10.1.1-1) unstable; urgency=low
-
   * New upstream release.
-
- -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Sat, 20 Aug 2005 01:32:55 +0200
-
-llgal (0.10.1-1) unstable; urgency=low
-
-  * New upstream release.
+  * Improved support for JFIF and/or EXIF image comments, closes: #324478.
+  * Does not use Perl filetest operators that do not support ACL,
+    closes: #325171.
   * Install the UPGRADE file.
-
- -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Fri, 19 Aug 2005 16:42:10 +0200
-
-llgal (0.10-1) unstable; urgency=low
-
-  * New upstream release.
   * Add debian/watch.
 
- -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Wed, 17 Aug 2005 11:29:59 +0200
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Wed,  7 Sep 2005 23:34:08 +0200
 
 llgal (0.9.10-1) unstable; urgency=low
 
