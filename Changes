@@ -1,6 +1,7 @@
 
 * Allow to change the label of links to index/prev/next in slides
-  with prev/next_slide/index_linktext.
+  with prev/next_slide/index_link_text.
+* Rename _linktext option to _link_text.
 
 
 llgal (0.11)

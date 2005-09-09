@@ -185,17 +185,17 @@
 
 ##### Text #####
 
-# Change the text that prefixes the filename when generating linktext
+# Change the text that prefixes the filename when generating link text
 # for movies without a captions file.
-# MVI_default_linktext = "Open movie "
+# MVI_default_link_text = "Open movie "
 
-# Change the text that prefixes the filename when generating linktext
+# Change the text that prefixes the filename when generating link text
 # for files without a captions file.
-# FIL_default_linktext = "Download file "
+# FIL_default_link_text = "Download file "
 
-# Change the text that prefixes the filename when generating linktext
+# Change the text that prefixes the filename when generating link text
 # for directories without a captions file.
-# DIR_default_linktext = "Open subgallery "
+# DIR_default_link_text = "Open subgallery "
 
 # Change the default text that is shown as image alternative for full-size images in slides
 # alt_full_text = ""
@@ -207,13 +207,13 @@
 # alt_thumbnail_text = "Thumbnail "
 
 # Label of the link from a slide to the index
-# index_linktext = "Index"
+# index_link_text = "Index"
 
 # Title of the gallery [--title <s>]
 # index_title = "Index of pictures"
 
 # Label of the link from a slide to the next one
-# next_slide_linktext = "Next&gt;&gt;"
+# next_slide_link_text = "Next&gt;&gt;"
 
 # Change the default text that is shown when the mouse pointer
 # is over a scaled image in a slide.
@@ -224,10 +224,10 @@
 # over_thumbnail_text = "Click to enlarge "
 
 # Change text in links to parent directory.
-# parent_linktext = "Back to parent gallery"
+# parent_link_text = "Back to parent gallery"
 
 # Label of the link from a slide to the previous one
-# prev_slide_linktext = "&lt;&lt;Prev"
+# prev_slide_link_text = "&lt;&lt;Prev"
 
 # Unit to be used when printing sizes [--asu <s>]
 # show_size_unit = "kB"
@@ -272,7 +272,7 @@
 # movie_extensions = "mpe?g|avi"
 
 # Don't show prefix when generating link text.
-# no_default_linktext = 0
+# no_default_link_text = 0
 
 # Change sort criteria when scanning files in the working directory [--sort]
 # sort_criteria = "name"

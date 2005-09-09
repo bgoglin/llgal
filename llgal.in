@@ -204,10 +204,10 @@ my $show_size = 0 ;
 my @excludes = () ;
 
 # Text
-# Change the text that prefixes the linktext
-my $MVI_default_linktext = "Open movie " ;
-my $FIL_default_linktext = "Download file " ;
-my $DIR_default_linktext = "Open subgallery " ;
+# Change the text that prefixes the link text
+my $MVI_default_link_text = "Open movie " ;
+my $FIL_default_link_text = "Download file " ;
+my $DIR_default_link_text = "Open subgallery " ;
 # default alternative text for full-size images in slides
 my $alt_full_text = "" ;
 # default alternative text for scaled images in slides
@@ -215,19 +215,19 @@ my $alt_scaled_text = "Scaled image " ;
 # default alternative text for thumbnails in the index
 my $alt_thumbnail_text = "Thumbnail " ;
 # default text for link from slides to index
-my $index_linktext = "Index" ;
+my $index_link_text = "Index" ;
 # title of the gallery (--title)
 my $index_title = "Index of pictures" ;
 # label of link from a slide to the next one
-my $next_slide_linktext = "Next&gt;&gt;" ;
+my $next_slide_link_text = "Next&gt;&gt;" ;
 # default text that is shown when the mouse pointer is over a scaled image in a slide
 my $over_scaled_text = "Click to see full size " ;
 # default text that is shown when the mouse pointer is over a thumbnail
 my $over_thumbnail_text = "Click to enlarge " ;
 # text that is shown when linking to the parent gallery
-my $parent_linktext = "Back to parent gallery" ;
+my $parent_link_text = "Back to parent gallery" ;
 # label of link from a slide to the previous one
-my $prev_slide_linktext = "&lt;&lt;Prev" ;
+my $prev_slide_link_text = "&lt;&lt;Prev" ;
 # change kB to another unit (--asu)
 my $show_size_unit = "kB" ;
 # format of the timestamp in captions (--ctf)
@@ -252,7 +252,7 @@ my @thumbnail_convert_options = () ;
 my $image_extensions = "jpe?g|tiff?|png|gif" ;
 my $movie_extensions = "mpe?g|mov|avi" ;
 # don't show prefix when generating link text
-my $no_default_linktext = 0 ;
+my $no_default_link_text = 0 ;
 # sort criteria
 my $sort_criteria = "name" ;
 # makes everything world-readable (--www)
@@ -432,32 +432,32 @@ sub process_option {
 	    $entry->{filter} = $1 ;
 	    push (@excludes, $entry) ;
 # Link text
-	} elsif (/^MVI_default_linktext\s*=\s*"(.*)"$/) {
-	    $MVI_default_linktext = $1 ;
-	} elsif (/^FIL_default_linktext\s*=\s*"(.*)"$/) {
-	    $FIL_default_linktext = $1 ;
-	} elsif (/^DIR_default_linktext\s*=\s*"(.*)"$/) {
-	    $DIR_default_linktext = $1 ;
+	} elsif (/^MVI_default_link_text\s*=\s*"(.*)"$/) {
+	    $MVI_default_link_text = $1 ;
+	} elsif (/^FIL_default_link_text\s*=\s*"(.*)"$/) {
+	    $FIL_default_link_text = $1 ;
+	} elsif (/^DIR_default_link_text\s*=\s*"(.*)"$/) {
+	    $DIR_default_link_text = $1 ;
 	} elsif (/^alt_full_text\s*=\s*"(.*)"$/) {
 	    $alt_full_text = $1 ;
 	} elsif (/^alt_scaled_text\s*=\s*"(.*)"$/) {
 	    $alt_scaled_text = $1 ;
 	} elsif (/^alt_thumbnail_text\s*=\s*"(.*)"$/) {
 	    $alt_thumbnail_text = $1 ;
-	} elsif (/^index_linktext\s*=\s*"(.+)"$/) {
-	    $index_linktext = $1 ;
+	} elsif (/^index_link_text\s*=\s*"(.+)"$/) {
+	    $index_link_text = $1 ;
 	} elsif (/^index_title\s*=\s*"(.*)"$/) {
 	    $index_title = $1 ;
-	} elsif (/^next_slide_linktext\s*=\s*"(.+)"$/) {
-	    $next_slide_linktext = $1 ;
+	} elsif (/^next_slide_link_text\s*=\s*"(.+)"$/) {
+	    $next_slide_link_text = $1 ;
 	} elsif (/^over_scaled_text\s*=\s*"(.*)"$/) {
 	    $over_scaled_text = $1 ;
 	} elsif (/^over_thumbnail_text\s*=\s*"(.*)"$/) {
 	    $over_thumbnail_text = $1 ;
-	} elsif (/^parent_linktext\s*=\s*"(.+)"$/) {
-	    $parent_linktext = $1 ;
-	} elsif (/^prev_slide_linktext\s*=\s*"(.+)"$/) {
-	    $prev_slide_linktext = $1 ;
+	} elsif (/^parent_link_text\s*=\s*"(.+)"$/) {
+	    $parent_link_text = $1 ;
+	} elsif (/^prev_slide_link_text\s*=\s*"(.+)"$/) {
+	    $prev_slide_link_text = $1 ;
 	} elsif (/^show_size_unit\s*=\s*"(.*)"$/) {
 	    $show_size_unit = $1 ;
 	} elsif (/^timestamp_format_in_caption\s*=\s*"(.+)"$/) {
@@ -484,8 +484,8 @@ sub process_option {
 	    $image_extensions = $1 ;
 	} elsif (/^movie_extensions\s*=\s*"(.*)"$/) {
 	    $movie_extensions = $1 ;
-	} elsif (/^no_default_linktext\s*=\s*(.+)$/) {
-	    $no_default_linktext = $1 ;
+	} elsif (/^no_default_link_text\s*=\s*(.+)$/) {
+	    $no_default_link_text = $1 ;
 	} elsif (/^sort_criteria\s*=\s*"(.+)"$/) {
 	    $sort_criteria = $1 ;
 	} elsif (/^www_access_rights\s*=\s*(.+)$/) {
@@ -1328,13 +1328,13 @@ sub create_entry {
 
     # the linktext (will be HTML-safe after caption file generation)
     if (not defined $linktext) {
-	if (!$no_default_linktext) {
+	if (!$no_default_link_text) {
 	    if ($type == $TYPE_MVI) {
-		$linktext = $MVI_default_linktext.$filename ;
+		$linktext = $MVI_default_link_text.$filename ;
 	    } elsif ($type == $TYPE_FIL) {
-		$linktext = $FIL_default_linktext.$filename ;
+		$linktext = $FIL_default_link_text.$filename ;
 	    } elsif ($type == $TYPE_DIR) {
-		$linktext = $DIR_default_linktext.$filename ;
+		$linktext = $DIR_default_link_text.$filename ;
 	    }
 	} else {
 	    $linktext = $filename ;
@@ -1866,8 +1866,8 @@ for(my $i=0; $i < @entries; $i++) {
 # Add recursion header and footer
 
 if ($parent_link) {
-    unshift @headers, "<a href=\"..\">". $parent_linktext ."</a>" ;
-    push @footers, "<a href=\"..\">". $parent_linktext ."</a>" ;
+    unshift @headers, "<a href=\"..\">". $parent_link_text ."</a>" ;
+    push @footers, "<a href=\"..\">". $parent_link_text ."</a>" ;
 }
 
 #######################################################################
@@ -1955,16 +1955,16 @@ if ($make_no_slides) {
 	    $line =~ s/<!--THIS-SLIDE-->/$entry->{slide_url}/g ;
 
 	    # process INDEX-FILE
-	    $line =~ s/<!--INDEX-LINKTEXT-->/$index_linktext/g ;
+	    $line =~ s/<!--INDEX-LINK-TEXT-->/$index_link_text/g ;
 	    $line =~ s/<!--INDEX-FILE-->/$index_filename/g ;
 
 	    # process PREV-SLIDE
-	    $line =~ s/<!--PREV-SLIDE-LINKTEXT-->/$prev_slide_linktext/g ;
+	    $line =~ s/<!--PREV-SLIDE-LINK-TEXT-->/$prev_slide_link_text/g ;
 	    my $prev = $entries[$i-1] ;
 	    $line =~ s/<!--PREV-SLIDE-->/$prev->{slide_url}\" title=\"$prev->{title}/g ;
 
 	    # process NEXT-SLIDE
-	    $line =~ s/<!--NEXT-SLIDE-LINKTEXT-->/$next_slide_linktext/g ;
+	    $line =~ s/<!--NEXT-SLIDE-LINK-TEXT-->/$next_slide_link_text/g ;
 	    my $next = $entries[$i==@entries-1 ? 0 : $i+1] ;
 	    $line =~ s/<!--NEXT-SLIDE-->/$next->{slide_url}\" title=\"$next->{title}/g ;
 
@@ -2324,19 +2324,19 @@ if (defined $generate_config) {
 	print NEWCFG ($_->{excluded} ? "exclude" : "include"). " = \"". $_->{filter} ."\"\n" ;
     } @excludes ;
     print NEWCFG "# Text:\n" ;
-    print NEWCFG "MVI_default_linktext = \"$MVI_default_linktext\"\n" ;
-    print NEWCFG "FIL_default_linktext = \"$FIL_default_linktext\"\n" ;
-    print NEWCFG "DIR_default_linktext = \"$DIR_default_linktext\"\n" ;
+    print NEWCFG "MVI_default_link_text = \"$MVI_default_link_text\"\n" ;
+    print NEWCFG "FIL_default_link_text = \"$FIL_default_link_text\"\n" ;
+    print NEWCFG "DIR_default_link_text = \"$DIR_default_link_text\"\n" ;
     print NEWCFG "alt_full_text = \"$alt_full_text\"\n" ;
     print NEWCFG "alt_scaled_text = \"$alt_scaled_text\"\n" ;
     print NEWCFG "alt_thumbnail_text = \"$alt_thumbnail_text\"\n" ;
-    print NEWCFG "index_linktext = \"$index_linktext\"\n" ;
+    print NEWCFG "index_link_text = \"$index_link_text\"\n" ;
     print NEWCFG "index_title = \"$index_title\"\n" ;
-    print NEWCFG "next_slide_linktext = \"$next_slide_linktext\"\n" ;
+    print NEWCFG "next_slide_link_text = \"$next_slide_link_text\"\n" ;
     print NEWCFG "over_scaled_text = \"$over_scaled_text\"\n" ;
     print NEWCFG "over_thumbnail_text = \"$over_thumbnail_text\"\n" ;
-    print NEWCFG "parent_linktext = \"$parent_linktext\"\n" ;
-    print NEWCFG "prev_slide_linktext = \"$prev_slide_linktext\"\n" ;
+    print NEWCFG "parent_link_text = \"$parent_link_text\"\n" ;
+    print NEWCFG "prev_slide_link_text = \"$prev_slide_link_text\"\n" ;
     print NEWCFG "show_size_unit = \"$show_size_unit\"\n" ;
     print NEWCFG "timestamp_format_in_caption = \"$timestamp_format_in_caption\"\n" ;
     print NEWCFG "# Recursion:\n" ;
@@ -2350,7 +2350,7 @@ if (defined $generate_config) {
     print NEWCFG "thumbnail_convert_options = \"". (join_convert_options (@thumbnail_convert_options)) ."\"\n" ;
     print NEWCFG "image_extensions = \"$image_extensions\"\n" ;
     print NEWCFG "movie_extensions = \"$movie_extensions\"\n" ;
-    print NEWCFG "no_default_linktext = $no_default_linktext\n" ;
+    print NEWCFG "no_default_link_text = $no_default_link_text\n" ;
     print NEWCFG "sort_criteria = \"$sort_criteria\"\n" ;
     print NEWCFG "www_access_rights = $www_access_rights\n" ;
 
