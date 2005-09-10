@@ -351,6 +351,15 @@ Replace link labels in slides (usually \fBIndex\fR, \fBPrev\fR and \fBNext\fR)
 with images (usually \fBindex.png\fR, \fBprev.png\fR and \fBnext.png\fR).
 
 .TP
+.BI --lt
+Replace link labels in slides (usually \fBPrev\fR and \fBNext\fR) with
+a thumbnail to preview previous/next slide.
+If passed together with
+.BI --li \fR,
+thumbnail preview is used for links to previous/next slide
+while the image is for the link to the index is kept. 
+
+.TP
 .BI -n
 Use the image file names for the HTML slide files.  Otherwise
 the default behavior is to simply name your slides
@@ -776,14 +785,24 @@ Default is \fB300\fR.
 Use an image instead of a text label for the link to the index [--li].
 Default is \fB0\fR (disabled).
 .RE
+.I prev_slide_link_image = <0/1>
+.RS
+Use an image instead of a text label for the link to the previous slide [--li].
+Default is \fB0\fR (disabled).
+.RE
 .I next_slide_link_image = <0/1>
 .RS
 Use an image instead of a text label for the link to the next slide [--li].
 Default is \fB0\fR (disabled).
 .RE
-.I previous_slide_link_image = <0/1>
+.I prev_slide_link_preview = <0/1>
 .RS
-Use an image instead of a text label for the link to the previous slide [--li].
+Use a thumbnail preview instead of a text label for the link to the previous slide [--lt].
+Default is \fB0\fR (disabled).
+.RE
+.I next_slide_link_preview = <0/1>
+.RS
+Use a thumbnail preview instead of a text label for the link to the next slide [--lt].
 Default is \fB0\fR (disabled).
 .RE
 .I make_slide_title_from_caption = <0/1>

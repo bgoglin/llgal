@@ -182,6 +182,9 @@ my $text_slide_height = $text_slide_height_default ;
 my $index_link_image = 0 ;
 my $prev_slide_link_image = 0 ;
 my $next_slide_link_image = 0 ;
+# use an image preview for link from a slide to the previous or next slide
+my $prev_slide_link_preview = 0 ;
+my $next_slide_link_preview = 0 ;
 # use captions as slide titles (-k)
 my $make_slide_title_from_caption = 0 ;
 
@@ -302,6 +305,7 @@ Layout Options:
           --include <s>   include matching files that were excluded
           -k              use the image captions for the HTML slide titles
           --li            use images for links in slides
+          --lt            use thumbnail preview for links in slides
           -L              list links outside of the table
           -n              use image file names for the HTML slide files
           --nc            omit the image count from the captions
@@ -416,10 +420,14 @@ sub process_option {
 	    $text_slide_height = $1 ;
 	} elsif (/^index_link_image\s*=\s*(.+)$/) {
 	    $index_link_image = $1 ;
-	} elsif (/^next_slide_link_image\s*=\s*(.+)$/) {
-	    $next_slide_link_image = $1 ;
 	} elsif (/^prev_slide_link_image\s*=\s*(.+)$/) {
 	    $prev_slide_link_image = $1 ;
+	} elsif (/^next_slide_link_image\s*=\s*(.+)$/) {
+	    $next_slide_link_image = $1 ;
+	} elsif (/^prev_slide_link_preview\s*=\s*(.+)$/) {
+	    $prev_slide_link_preview = $1 ;
+	} elsif (/^next_slide_link_preview\s*=\s*(.+)$/) {
+	    $next_slide_link_preview = $1 ;
 	} elsif (/^make_slide_title_from_caption\s*=\s*(.+)$/) {
 	    $make_slide_title_from_caption = $1 ;
 # Captions
@@ -559,7 +567,8 @@ GetOptions(
 	   'k'		=> \$make_slide_title_from_caption,
 	   'L'          => \$list_links,
 	   'li'		=> sub { $index_link_image = 1 ; $prev_slide_link_image = 1 ; $next_slide_link_image = 1 ; },
-	   'n'		=> \$make_slide_filename_from_filename,
+	   'lt'		=> sub { $prev_slide_link_preview = 1 ; $next_slide_link_preview = 1 ; },
+ 	   'n'		=> \$make_slide_filename_from_filename,
 	   'nc'		=> \$show_no_slide_counter,
 	   'p=i'	=> \$index_cellpadding,
 	   'parent'     => \$parent_link,
@@ -1993,23 +2002,35 @@ if ($make_no_slides) {
 	    $line =~ s/<!--INDEX-FILE-->/$index_filename\" title=\"$over_index_link_text/g ;
 
 	    # process PREV-SLIDE
-	    my $prev_slide_link = $prev_slide_link_text ;
-	    $prev_slide_link = "<img src=\"$local_llgal_dir/". (make_safe_url $prev_slide_link_image_filename)
-		."\" alt=\"$prev_slide_link_text\" class=\"image-link\" />"
-		if $prev_slide_link_image ;
+	    my $prev = $entries[$i-1] ;
+
+	    my $prev_slide_link ;
+	    if ($prev_slide_link_preview) {
+		$prev_slide_link = "<img src=\"$prev->{thumb_url}\" alt=\"$prev_slide_link_text\"/>" ;
+	    } elsif ($prev_slide_link_image) {
+		$prev_slide_link = "<img src=\"$local_llgal_dir/". (make_safe_url $prev_slide_link_image_filename)
+		    ."\" alt=\"$prev_slide_link_text\" class=\"image-link\" />" ;
+	    } else {
+		$prev_slide_link = $prev_slide_link_text ;
+	    }
 	    $line =~ s/<!--PREV-SLIDE-LINK-TEXT-->/$prev_slide_link/g ;
 
-	    my $prev = $entries[$i-1] ;
 	    $line =~ s/<!--PREV-SLIDE-->/$prev->{slide_url}\" title=\"$over_prev_slide_link_text$prev->{title}/g ;
 
 	    # process NEXT-SLIDE
-	    my $next_slide_link = $next_slide_link_text ;
-	    $next_slide_link = "<img src=\"$local_llgal_dir/". (make_safe_url $next_slide_link_image_filename)
-		."\" alt=\"$next_slide_link_text\" class=\"image-link\" />"
-		if $next_slide_link_image ;
+	    my $next = $entries[$i==@entries-1 ? 0 : $i+1] ;
+
+	    my $next_slide_link ;
+	    if ($next_slide_link_preview) {
+		$next_slide_link = "<img src=\"$next->{thumb_url}\" alt=\"$next_slide_link_text\"/>" ;
+	    } elsif ($next_slide_link_image ) {
+		$next_slide_link = "<img src=\"$local_llgal_dir/". (make_safe_url $next_slide_link_image_filename)
+		    ."\" alt=\"$next_slide_link_text\" class=\"image-link\" />" ;
+	    } else {
+		$next_slide_link = $next_slide_link_text ;
+	    }
 	    $line =~ s/<!--NEXT-SLIDE-LINK-TEXT-->/$next_slide_link/g ;
 
-	    my $next = $entries[$i==@entries-1 ? 0 : $i+1] ;
 	    $line =~ s/<!--NEXT-SLIDE-->/$next->{slide_url}\" title=\"$over_next_slide_link_text$next->{title}/g ;
 
 	    # output the line
@@ -2229,9 +2250,9 @@ if ($show_no_film_effect) {
 get_template_file ($index_link_image_filename)
     if $index_link_image ;
 get_template_file ($prev_slide_link_image_filename)
-    if $prev_slide_link_image ;
+    if $prev_slide_link_image and ! $prev_slide_link_preview ;
 get_template_file ($next_slide_link_image_filename)
-    if $next_slide_link_image ;
+    if $next_slide_link_image and ! $next_slide_link_preview ;
 
 # Get the css
 get_template_file ($css_filename) ;
@@ -2270,13 +2291,13 @@ if ($www_access_rights) {
 	if ! $show_no_film_effect ;
     # index link image
     make_readable "$destination_dir$local_llgal_dir/$index_link_image_filename"
- 	if ! $index_link_image ;
-    # next slide link image
-    make_readable "$destination_dir$local_llgal_dir/$next_slide_link_image_filename"
- 	if ! $next_slide_link_image ;
+ 	if $index_link_image ;
     # prev slide link image
     make_readable "$destination_dir$local_llgal_dir/$prev_slide_link_image_filename"
- 	if ! $prev_slide_link_image ;
+ 	if $prev_slide_link_image and ! $prev_slide_link_preview;
+    # next slide link image
+    make_readable "$destination_dir$local_llgal_dir/$next_slide_link_image_filename"
+ 	if $next_slide_link_image and ! $next_slide_link_preview ;
     
     # entries that have a slide
     foreach my $entry (@entries) {
@@ -2376,8 +2397,10 @@ if (defined $generate_config) {
     print NEWCFG "text_slide_width = $text_slide_width\n" ;
     print NEWCFG "text_slide_height = $text_slide_height\n" ;
     print NEWCFG "index_link_image = $index_link_image\n" ;
-    print NEWCFG "next_slide_link_image = $next_slide_link_image\n" ;
     print NEWCFG "prev_slide_link_image = $prev_slide_link_image\n" ;
+    print NEWCFG "next_slide_link_image = $next_slide_link_image\n" ;
+    print NEWCFG "prev_slide_link_preview = $prev_slide_link_preview\n" ;
+    print NEWCFG "next_slide_link_preview = $next_slide_link_preview\n" ;
     print NEWCFG "make_slide_title_from_caption = $make_slide_title_from_caption\n" ;
     print NEWCFG "\n" ;
     print NEWCFG "# Captions:\n" ;

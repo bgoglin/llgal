@@ -148,6 +148,11 @@
 # next_slide_link_image = 0
 # prev_slide_link_image = 0
 
+# Use a thumbnail preview instead of a text label for the link
+# to the previous or next slide [--lt]
+# next_slide_link_preview = 0
+# prev_slide_link_preview = 0
+
 # Generate slide titles from captions [-k]
 # make_slide_title_from_caption = 0
 
