@@ -217,9 +217,9 @@ my $prev_slide_link_text = "&lt;&lt;Prev" ;
 # label of link from a slide to the next one
 my $next_slide_link_text = "Next&gt;&gt;" ;
 # Change the text that prefixes the link text
-my $MVI_default_link_text = "Open movie " ;
-my $FIL_default_link_text = "Download file " ;
-my $DIR_default_link_text = "Open subgallery " ;
+my $MVI_link_text = "Open movie " ;
+my $FIL_link_text = "Download file " ;
+my $DIR_link_text = "Open subgallery " ;
 # default alternative text for full-size images in slides
 my $alt_full_text = "" ;
 # default alternative text for scaled images in slides
@@ -267,8 +267,6 @@ my @scaled_convert_options = () ;
 my @thumbnail_convert_options = () ;
 # makes everything world-readable (--www)
 my $www_access_rights = 0 ;
-# don't show prefix when generating link text
-my $no_default_link_text = 0 ;
 
 ######################################################################
 # Create usage now to use defaults values
@@ -455,12 +453,12 @@ sub process_option {
 	    $prev_slide_link_text = $1 ;
 	} elsif (/^next_slide_link_text\s*=\s*"(.+)"$/) {
 	    $next_slide_link_text = $1 ;
-	} elsif (/^MVI_default_link_text\s*=\s*"(.*)"$/) {
-	    $MVI_default_link_text = $1 ;
-	} elsif (/^FIL_default_link_text\s*=\s*"(.*)"$/) {
-	    $FIL_default_link_text = $1 ;
-	} elsif (/^DIR_default_link_text\s*=\s*"(.*)"$/) {
-	    $DIR_default_link_text = $1 ;
+	} elsif (/^MVI_link_text\s*=\s*"(.*)"$/) {
+	    $MVI_link_text = $1 ;
+	} elsif (/^FIL_link_text\s*=\s*"(.*)"$/) {
+	    $FIL_link_text = $1 ;
+	} elsif (/^DIR_link_text\s*=\s*"(.*)"$/) {
+	    $DIR_link_text = $1 ;
 	} elsif (/^alt_full_text\s*=\s*"(.*)"$/) {
 	    $alt_full_text = $1 ;
 	} elsif (/^alt_scaled_text\s*=\s*"(.*)"$/) {
@@ -518,8 +516,6 @@ sub process_option {
 	    $www_access_rights = $1 ;
 	} elsif (/^additional_configuration_file\s*=\s*"(.+)"$/) {
 	    push (@additional_config_files, parse_convert_options ($1)) ;
-	} elsif (/^no_default_link_text\s*=\s*(.+)$/) {
-	    $no_default_link_text = $1 ;
 # Error
 	} elsif (/^[^#]/ && !/^(\s*)$/) {
 	    die "Unrecognized option line #$.: \"$_\"\n" ;
@@ -1368,16 +1364,12 @@ sub create_entry {
 
     # the link text (will be HTML-safe after caption file generation)
     if (not defined $linktext) {
-	if (!$no_default_link_text) {
-	    if ($type == $TYPE_MVI) {
-		$linktext = $MVI_default_link_text.$filename ;
-	    } elsif ($type == $TYPE_FIL) {
-		$linktext = $FIL_default_link_text.$filename ;
-	    } elsif ($type == $TYPE_DIR) {
-		$linktext = $DIR_default_link_text.$filename ;
-	    }
-	} else {
-	    $linktext = $filename ;
+	if ($type == $TYPE_MVI) {
+	    $linktext = $MVI_link_text.$filename ;
+	} elsif ($type == $TYPE_FIL) {
+	    $linktext = $FIL_link_text.$filename ;
+	} elsif ($type == $TYPE_DIR) {
+	    $linktext = $DIR_link_text.$filename ;
 	}
 	$linktext =~ s/&/&amp;/g ;
 #       $linktext =~ s/"/&\#34;/g ;
@@ -2409,9 +2401,9 @@ if (defined $generate_config) {
     print NEWCFG "parent_link_text = \"$parent_link_text\"\n" ;
     print NEWCFG "prev_slide_link_text = \"$prev_slide_link_text\"\n" ;
     print NEWCFG "next_slide_link_text = \"$next_slide_link_text\"\n" ;
-    print NEWCFG "MVI_default_link_text = \"$MVI_default_link_text\"\n" ;
-    print NEWCFG "FIL_default_link_text = \"$FIL_default_link_text\"\n" ;
-    print NEWCFG "DIR_default_link_text = \"$DIR_default_link_text\"\n" ;
+    print NEWCFG "MVI_link_text = \"$MVI_link_text\"\n" ;
+    print NEWCFG "FIL_link_text = \"$FIL_link_text\"\n" ;
+    print NEWCFG "DIR_link_text = \"$DIR_link_text\"\n" ;
     print NEWCFG "alt_full_text = \"$alt_full_text\"\n" ;
     print NEWCFG "alt_scaled_text = \"$alt_scaled_text\"\n" ;
     print NEWCFG "alt_thumbnail_text = \"$alt_thumbnail_text\"\n" ;
@@ -2442,7 +2434,6 @@ if (defined $generate_config) {
     print NEWCFG "scaled_convert_options = \"". (join_convert_options (@scaled_convert_options)) ."\"\n" ;
     print NEWCFG "thumbnail_convert_options = \"". (join_convert_options (@thumbnail_convert_options)) ."\"\n" ;
     print NEWCFG "www_access_rights = $www_access_rights\n" ;
-    print NEWCFG "no_default_link_text = $no_default_link_text\n" ;
     print NEWCFG "\n" ;
 
     close NEWCFG ;

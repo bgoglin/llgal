@@ -200,15 +200,15 @@
 
 # Change the text that prefixes the filename when generating link text
 # for movies without a captions file.
-# MVI_default_link_text = "Open movie "
+# MVI_link_text = "Open movie "
 
 # Change the text that prefixes the filename when generating link text
 # for files without a captions file.
-# FIL_default_link_text = "Download file "
+# FIL_link_text = "Download file "
 
 # Change the text that prefixes the filename when generating link text
 # for directories without a captions file.
-# DIR_default_link_text = "Open subgallery "
+# DIR_link_text = "Open subgallery "
 
 # Change the default text that is shown as image alternative for full-size images in slides
 # alt_full_text = ""
@@ -285,6 +285,3 @@
 # Additional configuration file [--config <s>]
 # This option may be used multiple times.
 # additional_configuration_file = "my_llgal.rc"
-
-# Don't show prefix when generating link text.
-# no_default_link_text = 0

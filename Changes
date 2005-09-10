@@ -9,7 +9,10 @@
     is over these links.
 * Allow to change the label of links to index/prev/next in slides
   with prev/next_slide/index_link_text.
-* Rename _linktext option to _link_text.
+* Rename _linktext options to _link_text.
+* Remove no_default_link_text since link text values might be
+  modified at runtime, and also after captions generations.
+* Rename MVI/FIL/DIR_default_link_text to MVI/FIL/DIR_link_text.
 * One more reorganization of options in llgalrc and generated config
   files. Hope this one will be fine.
 
