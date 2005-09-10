@@ -1,4 +1,10 @@
 
+* Add --li option to replace link labels in slides with image:
+  (requested by Cyrill Helg):
+  + index.png, prev.png and next.png are added.
+  + slidetemplate is a little bit modified.
+    - The Index link is now _betwee_ Prev and Next.
+  + The css template is a little bit extended.
 * Allow to change the label of links to index/prev/next in slides
   with prev/next_slide/index_link_text.
 * Rename _linktext option to _link_text.

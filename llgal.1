@@ -346,6 +346,11 @@ Might be used when the directory only contains subgalleries and thus does
 not need any slide or thumbnail.
 
 .TP
+.BI --li
+Replace link labels in slides (usually \fBIndex\fR, \fBPrev\fR and \fBNext\fR)
+with images (usually \fBindex.png\fR, \fBprev.png\fR and \fBnext.png\fR).
+
+.TP
 .BI -n
 Use the image file names for the HTML slide files.  Otherwise
 the default behavior is to simply name your slides
@@ -619,6 +624,21 @@ Default is \fBllgal.css\fR.
 Name of the film tile image.
 Default is \fBtile.png\fR.
 .RE
+.I index_link_image_filename = \fI"filename"
+.RS
+Change image name for link to the index.
+Default is \fB"index.png"\fR.
+.RE
+.I next_slide_link_image_filename = \fI"filename"
+.RS
+Change image name for link to the next slide.
+Default is \fB"next.png"\fR.
+.RE
+.I previous_slide_link_image_filename = \fI"filename"
+.RS
+Change image name for link to the previous slide.
+Default is \fB"prev.png"\fR.
+.RE
 .I indextemplate_filename = \fI"filename"
 .RS
 Name of the HTML index template.
@@ -761,6 +781,21 @@ Default is \fB400\fR.
 .RS
 Default height of text slides.
 Default is \fB300\fR.
+.RE
+.I index_link_image = <0/1>
+.RS
+Use an image instead of a text label for the link to the index [--li].
+Default is \fB0\fR (disabled).
+.RE
+.I next_slide_link_image = <0/1>
+.RS
+Use an image instead of a text label for the link to the next slide [--li].
+Default is \fB0\fR (disabled).
+.RE
+.I previous_slide_link_image = <0/1>
+.RS
+Use an image instead of a text label for the link to the previous slide [--li].
+Default is \fB0\fR (disabled).
 .RE
 
 .B Captions:
@@ -1034,7 +1069,19 @@ The default style sheet template.
 .RS
 The tiled image used for the film effect.
 .RE
-Both files are required on the website.
+.I /usr/share/llgal/index.png
+.RS
+The link image used for the index.
+.RE
+.I /usr/share/llgal/prev.png
+.RS
+The link image used for the previous slide.
+.RE
+.I /usr/share/llgal/next.png
+.RS
+The link image used for the next slide.
+.RE
+All files are required on the website.
 .BR llgal
 will copy them to the local
 IR .llgal
@@ -1054,7 +1101,7 @@ But,
 .BR llgal
 will thus them to generate HTML webpages og the gallery.
 
-The user may change these 4 templates by storing files with
+The user may change all these templates by storing files with
 the same name in its user template directory
 .IR $HOME/.llgal
 or in the local

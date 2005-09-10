@@ -21,6 +21,10 @@ a:hover {
   background: #555555;
 }
 
+img.image-link {
+  border-style: none;
+}
+
 /* Various */
 
 .small {

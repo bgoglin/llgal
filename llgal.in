@@ -125,6 +125,9 @@ my $user_share_dir = $ENV{HOME}."/.llgal" ;
 my $captions_header_filename = "captions.header" ;
 my $css_filename = "llgal.css" ;
 my $filmtile_filename = "tile.png" ;
+my $index_link_image_filename = "index.png" ;
+my $prev_slide_link_image_filename = "prev.png" ;
+my $next_slide_link_image_filename = "next.png" ;
 my $indextemplate_filename = "indextemplate.html" ;
 my $slidetemplate_filename = "slidetemplate.html" ;
 
@@ -181,6 +184,10 @@ my $slide_height_max = $slide_height_max_default ;
 my $text_slide_width = $text_slide_width_default ;
 # default text slide height
 my $text_slide_height = $text_slide_height_default ;
+# use an image for link from a slide to the index, previous or next slide
+my $index_link_image = 0 ;
+my $prev_slide_link_image = 0 ;
+my $next_slide_link_image = 0 ;
 
 # Captions
 my $captions_filename = "captions" ;
@@ -293,6 +300,7 @@ Layout Options:
           -i <file>       name of the main thumbnail index file ($index_filename)
           --include <s>   include matching files that were excluded
           -k              use the image captions for the HTML slide titles
+          --li            use images for links in slides
           -L              list links outside of the table
           -n              use image file names for the HTML slide files
           --nc            omit the image count from the captions
@@ -348,6 +356,12 @@ sub process_option {
 	    $css_filename = $1 ;
 	} elsif (/^filmtile_filename\s*=\s*"(.+)"$/) {
 	    $filmtile_filename = $1 ;
+	} elsif (/^index_link_image_filename\s*=\s*"(.+)"$/) {
+	    $index_link_image_filename = $1 ;
+	} elsif (/^prev_slide_link_image_filename\s*=\s*"(.+)"$/) {
+	    $prev_slide_link_image_filename = $1 ;
+	} elsif (/^next_slide_link_image_filename\s*=\s*"(.+)"$/) {
+	    $next_slide_link_image_filename = $1 ;
 	} elsif (/^indextemplate_filename\s*=\s*"(.+)"$/) {
 	    $indextemplate_filename = $1 ;
 	} elsif (/^slidetemplate_filename\s*=\s*"(.+)"$/) {
@@ -403,6 +417,12 @@ sub process_option {
 	    $text_slide_width = $1 ;
 	} elsif (/^text_slide_height\s*=\s*(.+)$/) { # > 0, -1 for default
 	    $text_slide_height = $1 ;
+	} elsif (/^index_link_image\s*=\s*(.+)$/) {
+	    $index_link_image = $1 ;
+	} elsif (/^next_slide_link_image\s*=\s*(.+)$/) {
+	    $next_slide_link_image = $1 ;
+	} elsif (/^prev_slide_link_image\s*=\s*(.+)$/) {
+	    $prev_slide_link_image = $1 ;
 # Captions
 	} elsif (/^captions_filename\s*=\s*"(.+)"$/) {
 	    $captions_filename = $1 ;
@@ -431,7 +451,7 @@ sub process_option {
 	    $entry->{excluded} = 0 ;
 	    $entry->{filter} = $1 ;
 	    push (@excludes, $entry) ;
-# Link text
+# Text
 	} elsif (/^MVI_default_link_text\s*=\s*"(.*)"$/) {
 	    $MVI_default_link_text = $1 ;
 	} elsif (/^FIL_default_link_text\s*=\s*"(.*)"$/) {
@@ -535,6 +555,7 @@ GetOptions(
 	   'indent=s'   => \$indent,
 	   'k'		=> \$make_slide_title_from_caption,
 	   'L'          => \$list_links,
+	   'li'		=> sub { $index_link_image = 1 ; $prev_slide_link_image = 1 ; $next_slide_link_image = 1 ; },
 	   'n'		=> \$make_slide_filename_from_filename,
 	   'nc'		=> \$show_no_slide_counter,
 	   'p=i'	=> \$index_cellpadding,
@@ -856,6 +877,12 @@ die "Please give a non-empty CSS filename\n"
     if $css_filename eq "" ;
 die "Please give a non-empty film tile filename\n"
     if $filmtile_filename eq "" ;
+die "Please give a non-empty index link image filename\n"
+    if $index_link_image_filename eq "" ;
+die "Please give a non-empty previous slide link image filename\n"
+    if $prev_slide_link_image_filename eq "" ;
+die "Please give a non-empty next slide link image filename\n"
+    if $next_slide_link_image_filename eq "" ;
 die "Please give a non-empty index template filename\n"
     if $indextemplate_filename eq "" ;
 die "Please give a non-empty slide template filename\n"
@@ -930,7 +957,8 @@ sub clean_files {
     while ($_ = readdir DIR) {
 	if (/^$thumbnail_image_filenameprefix/ or /^$scaled_image_filenameprefix/) {
 	    unlink "$destination_dir$local_llgal_dir/$_" ;
-	} elsif (/^$filmtile_filename$/
+	} elsif (/^$filmtile_filename$/ or /^$index_link_image_filename$/
+		 or /^$prev_slide_link_image_filename$/ or /^$next_slide_link_image_filename$/
 		 or /^$css_filename$/) {
 	    my $original = (find_generic_template_file $_, 0)."/".$_ ;
 	    my $diff = 0 ;
@@ -1063,7 +1091,9 @@ if ($give_templates) {
     }
 
     foreach my $filename
-	( $css_filename, $filmtile_filename, $indextemplate_filename, $slidetemplate_filename ) {
+	( $css_filename, $filmtile_filename, $index_link_image_filename,
+	  $prev_slide_link_image_filename, $next_slide_link_image_filename,
+	  $indextemplate_filename, $slidetemplate_filename ) {
 	if ( -e "$destdir/$filename" ) {
 	    indprint "$filename already exists in $destdir.\n" ;
 	} else {
@@ -1326,7 +1356,7 @@ sub create_entry {
     }
     $entry->{url} = make_safe_url ($url) ;
 
-    # the linktext (will be HTML-safe after caption file generation)
+    # the link text (will be HTML-safe after caption file generation)
     if (not defined $linktext) {
 	if (!$no_default_link_text) {
 	    if ($type == $TYPE_MVI) {
@@ -1955,16 +1985,31 @@ if ($make_no_slides) {
 	    $line =~ s/<!--THIS-SLIDE-->/$entry->{slide_url}/g ;
 
 	    # process INDEX-FILE
-	    $line =~ s/<!--INDEX-LINK-TEXT-->/$index_link_text/g ;
+	    my $index_link = $index_link_text ;
+	    $index_link = "<img src=\"$local_llgal_dir/". (make_safe_url $index_link_image_filename)
+		."\" alt=\"$index_link_text\" class=\"image-link\" />"
+		if $index_link_image ;
+	    $line =~ s/<!--INDEX-LINK-TEXT-->/$index_link/g ;
+
 	    $line =~ s/<!--INDEX-FILE-->/$index_filename/g ;
 
 	    # process PREV-SLIDE
-	    $line =~ s/<!--PREV-SLIDE-LINK-TEXT-->/$prev_slide_link_text/g ;
+	    my $prev_slide_link = $prev_slide_link_text ;
+	    $prev_slide_link = "<img src=\"$local_llgal_dir/". (make_safe_url $prev_slide_link_image_filename)
+		."\" alt=\"$prev_slide_link_text\" class=\"image-link\" />"
+		if $prev_slide_link_image ;
+	    $line =~ s/<!--PREV-SLIDE-LINK-TEXT-->/$prev_slide_link/g ;
+
 	    my $prev = $entries[$i-1] ;
 	    $line =~ s/<!--PREV-SLIDE-->/$prev->{slide_url}\" title=\"$prev->{title}/g ;
 
 	    # process NEXT-SLIDE
-	    $line =~ s/<!--NEXT-SLIDE-LINK-TEXT-->/$next_slide_link_text/g ;
+	    my $next_slide_link = $next_slide_link_text ;
+	    $next_slide_link = "<img src=\"$local_llgal_dir/". (make_safe_url $next_slide_link_image_filename)
+		."\" alt=\"$next_slide_link_text\" class=\"image-link\" />"
+		if $next_slide_link_image ;
+	    $line =~ s/<!--NEXT-SLIDE-LINK-TEXT-->/$next_slide_link/g ;
+
 	    my $next = $entries[$i==@entries-1 ? 0 : $i+1] ;
 	    $line =~ s/<!--NEXT-SLIDE-->/$next->{slide_url}\" title=\"$next->{title}/g ;
 
@@ -2181,6 +2226,14 @@ if ($show_no_film_effect) {
     }
 }
 
+# Get link images
+get_template_file ($index_link_image_filename)
+    if $index_link_image ;
+get_template_file ($prev_slide_link_image_filename)
+    if $prev_slide_link_image ;
+get_template_file ($next_slide_link_image_filename)
+    if $next_slide_link_image ;
+
 # Get the css
 get_template_file ($css_filename) ;
 
@@ -2216,6 +2269,15 @@ if ($www_access_rights) {
     # filmtile
     make_readable "$destination_dir$local_llgal_dir/$filmtile_filename"
 	if ! $show_no_film_effect ;
+    # index link image
+    make_readable "$destination_dir$local_llgal_dir/$index_link_image_filename"
+ 	if ! $index_link_image ;
+    # next slide link image
+    make_readable "$destination_dir$local_llgal_dir/$next_slide_link_image_filename"
+ 	if ! $next_slide_link_image ;
+    # prev slide link image
+    make_readable "$destination_dir$local_llgal_dir/$prev_slide_link_image_filename"
+ 	if ! $prev_slide_link_image ;
     
     # entries that have a slide
     foreach my $entry (@entries) {
@@ -2280,6 +2342,9 @@ if (defined $generate_config) {
     print NEWCFG "captions_header_filename = \"$captions_header_filename\"\n" ;
     print NEWCFG "css_filename = \"$css_filename\"\n" ;
     print NEWCFG "filmtile_filename = \"$filmtile_filename\"\n" ;
+    print NEWCFG "index_link_image_filename = \"$index_link_image_filename\"\n" ;
+    print NEWCFG "prev_slide_link_image_filename = \"$prev_slide_link_image_filename\"\n" ;
+    print NEWCFG "next_slide_link_image_filename = \"$next_slide_link_image_filename\"\n" ;
     print NEWCFG "indextemplate_filename = \"$indextemplate_filename\"\n" ;
     print NEWCFG "slidetemplate_filename = \"$slidetemplate_filename\"\n" ;
     print NEWCFG "# Location and name of generated files:\n" ;
@@ -2310,6 +2375,9 @@ if (defined $generate_config) {
     print NEWCFG "slide_height_max = $slide_height_max\n" ;
     print NEWCFG "text_slide_width = $text_slide_width\n" ;
     print NEWCFG "text_slide_height = $text_slide_height\n" ;
+    print NEWCFG "index_link_image = $index_link_image\n" ;
+    print NEWCFG "next_slide_link_image = $next_slide_link_image\n" ;
+    print NEWCFG "prev_slide_link_image = $prev_slide_link_image\n" ;
     print NEWCFG "# Captions:\n" ;
     print NEWCFG "captions_filename = \"$captions_filename\"\n" ;
     print NEWCFG "captions_removal_line = \"$captions_removal_line\"\n" ;

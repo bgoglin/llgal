@@ -40,6 +40,11 @@
 # Such a file will be stored under $local_llgal_dir.
 # filmtile_filename = "tile.png"
 
+# Name for image link to the index, previous or next slide
+# index_link_image_filename = "index.png"
+# prev_slide_link_image_filename = "prev.png"
+# next_slide_link_image_filename = "next.png"
+
 # Name of the index template.
 # Such a template file will be used during gallery generation.
 # indextemplate_filename = "indextemplate.html"
@@ -143,6 +148,12 @@
 # Note that the --bigy <n> option may lead to reduction of these values.
 # text_slide_width = 400
 # text_slide_height = 300
+
+# Use an image instead of a text label for the link to the index,
+# previous or next slide [--li]
+# index_link_image = 0
+# next_slide_link_image = 0
+# prev_slide_link_image = 0
 
 ##### Captions #####
 
