@@ -145,8 +145,10 @@ my $index_cellpadding = $index_cellpadding_default ;
 my $list_links = 0 ;
 # how many pixels per row at most in index (--wx)
 my $pixels_per_row = $pixels_per_row_default ;
-
-# Film effects
+# how many thumbnails per row at most in index (-w)
+my $thumbnails_per_row = $thumbnails_per_row_default ;
+# write captions under thumbnails on index page (-u)
+my $show_caption_under_thumbnails = 0 ;
 # omit the film effect altogether (-r)
 my $show_no_film_effect = 0 ;
 # height of the tile.png tiled image (-t)
@@ -157,25 +159,19 @@ my $tile_height = $tile_height_default ;
 my $thumbnail_height_max = $thumbnail_height_max_default ;
 # scale thumb longer dimension (--xy)
 my $thumbnail_width_max = $thumbnail_width_max_default ;
-# how many thumbnails per row at most in index (-w)
-my $thumbnails_per_row = $thumbnails_per_row_default ;
 
 # Slides
 # make no slides, just thumbnail links to images (-s)
 my $make_no_slides = 0 ;
-# use image names as slide names (-n)
-my $make_slide_filename_from_filename = 0 ;
-# also use image extension in the slide names
-my $make_slide_filename_from_extension = 0 ;
-# use captions as slide titles (-k)
-my $make_slide_title_from_caption = 0 ;
-# omit the image slide from the caption (--nc)
-my $show_no_slide_counter = 0 ;
 # prefix of HTML slide filenames
 my $slide_filenameprefix = "" ;
 # prefix of HTML slide filenames when generated from filename
 # while there's no file associated (text, link, ...)
 my $slide_filenameprefix_nofile = "NOFILE" ;
+# use image names as slide names (-n)
+my $make_slide_filename_from_filename = 0 ;
+# also use image extension in the slide names
+my $make_slide_filename_from_extension = 0 ;
 # max width of the slides (--bigxy)
 my $slide_width_max = $slide_width_max_default ;
 # max height of the slides (--bigxy or --bigy)
@@ -188,6 +184,8 @@ my $text_slide_height = $text_slide_height_default ;
 my $index_link_image = 0 ;
 my $prev_slide_link_image = 0 ;
 my $next_slide_link_image = 0 ;
+# use captions as slide titles (-k)
+my $make_slide_title_from_caption = 0 ;
 
 # Captions
 my $captions_filename = "captions" ;
@@ -200,17 +198,24 @@ my $make_caption_from_image_comment = 0 ;
 my $make_caption_from_image_timestamp = 0 ;
 # preserve image names as captions (--cf)
 my $make_caption_from_filename = 0 ;
-# write captions under thumbnails on index page (-u)
-my $show_caption_under_thumbnails = 0 ;
 # to write image dimensions (-a or --ad)
 my $show_dimensions = 0 ;
 # to write image size (-a or --as)
 my $show_size = 0 ;
-
-# Exclude
-my @excludes = () ;
+# omit the image slide from the caption (--nc)
+my $show_no_slide_counter = 0 ;
 
 # Text
+# title of the gallery (--title)
+my $index_title = "Index of pictures" ;
+# text that is shown when linking to the parent gallery
+my $parent_link_text = "Back to parent gallery" ;
+# default text for link from slides to index
+my $index_link_text = "Index" ;
+# label of link from a slide to the previous one
+my $prev_slide_link_text = "&lt;&lt;Prev" ;
+# label of link from a slide to the next one
+my $next_slide_link_text = "Next&gt;&gt;" ;
 # Change the text that prefixes the link text
 my $MVI_default_link_text = "Open movie " ;
 my $FIL_default_link_text = "Download file " ;
@@ -221,26 +226,16 @@ my $alt_full_text = "" ;
 my $alt_scaled_text = "Scaled image " ;
 # default alternative text for thumbnails in the index
 my $alt_thumbnail_text = "Thumbnail " ;
-# default text for link from slides to index
-my $index_link_text = "Index" ;
-# title of the gallery (--title)
-my $index_title = "Index of pictures" ;
-# label of link from a slide to the next one
-my $next_slide_link_text = "Next&gt;&gt;" ;
+# default text that is shown when the mouse pointer is over a scaled image in a slide
+my $over_scaled_text = "Click to see full size " ;
+# default text that is shown when the mouse pointer is over a thumbnail
+my $over_thumbnail_text = "Click to enlarge " ;
 # text that is show when the mouse pointer is over a link to the index
 my $over_index_link_text = "Return to the index" ;
 # text that is show when the mouse pointer is over a link to the previous slide
 my $over_prev_slide_link_text = "Previous slide " ;
 # text that is show when the mouse pointer is over a link to the next slide
 my $over_next_slide_link_text = "Next slide " ;
-# default text that is shown when the mouse pointer is over a scaled image in a slide
-my $over_scaled_text = "Click to see full size " ;
-# default text that is shown when the mouse pointer is over a thumbnail
-my $over_thumbnail_text = "Click to enlarge " ;
-# text that is shown when linking to the parent gallery
-my $parent_link_text = "Back to parent gallery" ;
-# label of link from a slide to the previous one
-my $prev_slide_link_text = "&lt;&lt;Prev" ;
 # change kB to another unit (--asu)
 my $show_size_unit = "kB" ;
 # format of the timestamp in captions (--ctf)
@@ -252,24 +247,28 @@ my $parent_link = 0 ;
 # add indentation to the begining of messages
 my $indent = "" ;
 
-# Various
+# What files to insert in the gallery
+# image and movie extensions
+my $image_extensions = "jpe?g|tiff?|png|gif" ;
+my $movie_extensions = "mpe?g|mov|avi" ;
 # add all files, not only images and movies (-A)
 my $add_all_files = 0 ;
 # add subdirectories to entry list (-S)
 my $add_subdirs = 0 ;
+# exclude/include
+my @excludes = () ;
+# sort criteria
+my $sort_criteria = "name" ;
+
+# Various
 # options to be passed to convert (--con)
 my @convert_options = () ;
 my @scaled_convert_options = () ;
 my @thumbnail_convert_options = () ;
-# image and movie extensions
-my $image_extensions = "jpe?g|tiff?|png|gif" ;
-my $movie_extensions = "mpe?g|mov|avi" ;
-# don't show prefix when generating link text
-my $no_default_link_text = 0 ;
-# sort criteria
-my $sort_criteria = "name" ;
 # makes everything world-readable (--www)
 my $www_access_rights = 0 ;
+# don't show prefix when generating link text
+my $no_default_link_text = 0 ;
 
 ######################################################################
 # Create usage now to use defaults values
@@ -388,7 +387,10 @@ sub process_option {
 	    $list_links = $1 ;
 	} elsif (/^pixels_per_row\s*=\s*(.+)$/) { # > 0, 0 for unlimited, -1 for default
 	    $pixels_per_row = $1 ;
-# Film effect
+	} elsif (/^thumbnails_per_row\s*=\s*(.+)$/) { # > 0, 0 for unlimited, -1 for default
+	    $thumbnails_per_row = $1 ;
+	} elsif (/^show_caption_under_thumbnails\s*=\s*(.+)$/) {
+	    $show_caption_under_thumbnails = $1 ;
 	} elsif (/^show_no_film_effect\s*=\s*(.+)$/) {
 	    $show_no_film_effect = $1 ;
 	} elsif (/^tile_height\s*=\s*(.+)$/) { # >= 0, -1 for default
@@ -398,23 +400,17 @@ sub process_option {
 	    $thumbnail_height_max = $1 ;
 	} elsif (/^thumbnail_width_max\s*=\s*(.+)$/) { # > 0, 0 for unlimited, -1 for default
 	    $thumbnail_width_max = $1 ;
-	} elsif (/^thumbnails_per_row\s*=\s*(.+)$/) { # > 0, 0 for unlimited, -1 for default
-	    $thumbnails_per_row = $1 ;
 # Slides
 	} elsif (/^make_no_slides\s*=\s*(.+)$/) {
 	    $make_no_slides = $1 ;
-	} elsif (/^make_slide_filename_from_filename\s*=\s*(.+)$/) {
-	    $make_slide_filename_from_filename = $1 ;
-	} elsif (/^make_slide_filename_from_extension\s*=\s*(.+)$/) {
-	    $make_slide_filename_from_extension = $1 ;
-	} elsif (/^make_slide_title_from_caption\s*=\s*(.+)$/) {
-	    $make_slide_title_from_caption = $1 ;
-	} elsif (/^show_no_slide_counter\s*=\s*(.+)$/) {
-	    $show_no_slide_counter = $1 ;
 	} elsif (/^slide_filenameprefix\s*=\s*"(.*)"$/) {
 	    $slide_filenameprefix = $1 ;
 	} elsif (/^slide_filenameprefix_nofile\s*=\s*"(.+)"$/) {
 	    $slide_filenameprefix_nofile = $1 ;
+	} elsif (/^make_slide_filename_from_filename\s*=\s*(.+)$/) {
+	    $make_slide_filename_from_filename = $1 ;
+	} elsif (/^make_slide_filename_from_extension\s*=\s*(.+)$/) {
+	    $make_slide_filename_from_extension = $1 ;
 	} elsif (/^slide_width_max\s*=\s*(.+)$/) { # > 0, 0 for unlimited, -1 for default
 	    $slide_width_max = $1 ;
 	} elsif (/^slide_height_max\s*=\s*(.+)$/) { # > 0, 0 for unlimited, -1 for default
@@ -429,6 +425,8 @@ sub process_option {
 	    $next_slide_link_image = $1 ;
 	} elsif (/^prev_slide_link_image\s*=\s*(.+)$/) {
 	    $prev_slide_link_image = $1 ;
+	} elsif (/^make_slide_title_from_caption\s*=\s*(.+)$/) {
+	    $make_slide_title_from_caption = $1 ;
 # Captions
 	} elsif (/^captions_filename\s*=\s*"(.+)"$/) {
 	    $captions_filename = $1 ;
@@ -440,24 +438,23 @@ sub process_option {
 	    $make_caption_from_image_timestamp = $1 ;
 	} elsif (/^make_caption_from_filename\s*=\s*(.+)$/) {
 	    $make_caption_from_filename = $1 ;
-	} elsif (/^show_caption_under_thumbnails\s*=\s*(.+)$/) {
-	    $show_caption_under_thumbnails = $1 ;
 	} elsif (/^show_dimensions\s*=\s*(.+)$/) {
 	    $show_dimensions = $1 ;
 	} elsif (/^show_size\s*=\s*(.+)$/) {
 	    $show_size = $1 ;
-# Exclude
-	} elsif (/^exclude\s*=\s*"(.+)"$/) {
-	    my $entry ;
-	    $entry->{excluded} = 1 ;
-	    $entry->{filter} = $1 ;
-	    push (@excludes, $entry) ;
-	} elsif (/^include\s*=\s*"(.+)"$/) {
-	    my $entry ;
-	    $entry->{excluded} = 0 ;
-	    $entry->{filter} = $1 ;
-	    push (@excludes, $entry) ;
+	} elsif (/^show_no_slide_counter\s*=\s*(.+)$/) {
+	    $show_no_slide_counter = $1 ;
 # Text
+	} elsif (/^index_title\s*=\s*"(.*)"$/) {
+	    $index_title = $1 ;
+	} elsif (/^index_link_text\s*=\s*"(.+)"$/) {
+	    $index_link_text = $1 ;
+	} elsif (/^parent_link_text\s*=\s*"(.+)"$/) {
+	    $parent_link_text = $1 ;
+	} elsif (/^prev_slide_link_text\s*=\s*"(.+)"$/) {
+	    $prev_slide_link_text = $1 ;
+	} elsif (/^next_slide_link_text\s*=\s*"(.+)"$/) {
+	    $next_slide_link_text = $1 ;
 	} elsif (/^MVI_default_link_text\s*=\s*"(.*)"$/) {
 	    $MVI_default_link_text = $1 ;
 	} elsif (/^FIL_default_link_text\s*=\s*"(.*)"$/) {
@@ -470,26 +467,16 @@ sub process_option {
 	    $alt_scaled_text = $1 ;
 	} elsif (/^alt_thumbnail_text\s*=\s*"(.*)"$/) {
 	    $alt_thumbnail_text = $1 ;
-	} elsif (/^index_link_text\s*=\s*"(.+)"$/) {
-	    $index_link_text = $1 ;
-	} elsif (/^index_title\s*=\s*"(.*)"$/) {
-	    $index_title = $1 ;
-	} elsif (/^next_slide_link_text\s*=\s*"(.+)"$/) {
-	    $next_slide_link_text = $1 ;
+	} elsif (/^over_scaled_text\s*=\s*"(.*)"$/) {
+	    $over_scaled_text = $1 ;
+	} elsif (/^over_thumbnail_text\s*=\s*"(.*)"$/) {
+	    $over_thumbnail_text = $1 ;
 	} elsif (/^over_index_link_text\s*=\s*"(.*)"$/) {
 	    $over_index_link_text = $1 ;
 	} elsif (/^over_prev_slide_link_text\s*=\s*"(.*)"$/) {
 	    $over_prev_slide_link_text = $1 ;
 	} elsif (/^over_next_slide_link_text\s*=\s*"(.*)"$/) {
 	    $over_next_slide_link_text = $1 ;
-	} elsif (/^over_scaled_text\s*=\s*"(.*)"$/) {
-	    $over_scaled_text = $1 ;
-	} elsif (/^over_thumbnail_text\s*=\s*"(.*)"$/) {
-	    $over_thumbnail_text = $1 ;
-	} elsif (/^parent_link_text\s*=\s*"(.+)"$/) {
-	    $parent_link_text = $1 ;
-	} elsif (/^prev_slide_link_text\s*=\s*"(.+)"$/) {
-	    $prev_slide_link_text = $1 ;
 	} elsif (/^show_size_unit\s*=\s*"(.*)"$/) {
 	    $show_size_unit = $1 ;
 	} elsif (/^timestamp_format_in_caption\s*=\s*"(.+)"$/) {
@@ -499,29 +486,40 @@ sub process_option {
 	    $make_recursive = $1 ;
 	} elsif (/^parent_link\s*=\s*(.+)$/) {
 	    $parent_link = $1 ;
-# Various
+# What files to insert
+	} elsif (/^image_extensions\s*=\s*"(.*)"$/) {
+	    $image_extensions = $1 ;
+	} elsif (/^movie_extensions\s*=\s*"(.*)"$/) {
+	    $movie_extensions = $1 ;
 	} elsif (/^add_all_files\s*=\s*(.+)$/) {
 	    $add_all_files = $1 ;
 	} elsif (/^add_subdirs\s*=\s*(.+)$/) {
 	    $add_subdirs = $1 ;
-	} elsif (/^additional_configuration_file\s*=\s*"(.+)"$/) {
-	    push (@additional_config_files, parse_convert_options ($1)) ;
+	} elsif (/^exclude\s*=\s*"(.+)"$/) {
+	    my $entry ;
+	    $entry->{excluded} = 1 ;
+	    $entry->{filter} = $1 ;
+	    push (@excludes, $entry) ;
+	} elsif (/^include\s*=\s*"(.+)"$/) {
+	    my $entry ;
+	    $entry->{excluded} = 0 ;
+	    $entry->{filter} = $1 ;
+	    push (@excludes, $entry) ;
+	} elsif (/^sort_criteria\s*=\s*"(.+)"$/) {
+	    $sort_criteria = $1 ;
+# Various
 	} elsif (/^convert_options\s*=\s*"(.*)"$/) {
 	    push (@convert_options, parse_convert_options ($1)) ;
 	} elsif (/^scaled_convert_options\s*=\s*"(.*)"$/) {
 	    push (@scaled_convert_options, parse_convert_options ($1)) ;
 	} elsif (/^thumbnail_convert_options\s*=\s*"(.*)"$/) {
 	    push (@thumbnail_convert_options, $1) ;
-	} elsif (/^image_extensions\s*=\s*"(.*)"$/) {
-	    $image_extensions = $1 ;
-	} elsif (/^movie_extensions\s*=\s*"(.*)"$/) {
-	    $movie_extensions = $1 ;
-	} elsif (/^no_default_link_text\s*=\s*(.+)$/) {
-	    $no_default_link_text = $1 ;
-	} elsif (/^sort_criteria\s*=\s*"(.+)"$/) {
-	    $sort_criteria = $1 ;
 	} elsif (/^www_access_rights\s*=\s*(.+)$/) {
 	    $www_access_rights = $1 ;
+	} elsif (/^additional_configuration_file\s*=\s*"(.+)"$/) {
+	    push (@additional_config_files, parse_convert_options ($1)) ;
+	} elsif (/^no_default_link_text\s*=\s*(.+)$/) {
+	    $no_default_link_text = $1 ;
 # Error
 	} elsif (/^[^#]/ && !/^(\s*)$/) {
 	    die "Unrecognized option line #$.: \"$_\"\n" ;
@@ -2350,6 +2348,7 @@ if (defined $generate_config) {
     print NEWCFG "llgal_share_dir = \"$llgal_share_dir\"\n" ;
     print NEWCFG "user_share_dir = \"$user_share_dir\"\n" ;
     map { print NEWCFG "template_dir = \"$_\"\n" ; } @template_dirs ;
+    print NEWCFG "\n" ;
     print NEWCFG "# Name of generic llgal files:\n" ;
     print NEWCFG "captions_header_filename = \"$captions_header_filename\"\n" ;
     print NEWCFG "css_filename = \"$css_filename\"\n" ;
@@ -2359,30 +2358,32 @@ if (defined $generate_config) {
     print NEWCFG "next_slide_link_image_filename = \"$next_slide_link_image_filename\"\n" ;
     print NEWCFG "indextemplate_filename = \"$indextemplate_filename\"\n" ;
     print NEWCFG "slidetemplate_filename = \"$slidetemplate_filename\"\n" ;
+    print NEWCFG "\n" ;
     print NEWCFG "# Location and name of generated files:\n" ;
     print NEWCFG "local_llgal_dir = \"$local_llgal_dir\"\n" ;
     print NEWCFG "scaled_image_filenameprefix = \"$scaled_image_filenameprefix\"\n" ;
     print NEWCFG "thumbnail_image_filenameprefix = \"$thumbnail_image_filenameprefix\"\n" ;
+    print NEWCFG "\n" ;
     print NEWCFG "# Index:\n" ;
     print NEWCFG "index_filename = \"$index_filename\"\n" ;
     print NEWCFG "index_cellpadding = $index_cellpadding\n" ;
     print NEWCFG "list_links = $list_links\n" ;
     print NEWCFG "pixels_per_row = $pixels_per_row\n" ;
-    print NEWCFG "# Film effects:\n" ;
+    print NEWCFG "thumbnails_per_row = $thumbnails_per_row\n" ;
+    print NEWCFG "show_caption_under_thumbnails = $show_caption_under_thumbnails\n" ;
     print NEWCFG "show_no_film_effect = $show_no_film_effect\n" ;
     print NEWCFG "tile_height = $tile_height\n" ;
+    print NEWCFG "\n" ;
     print NEWCFG "# Thumbnails:\n" ;
     print NEWCFG "thumbnail_width_max = $thumbnail_width_max\n" ;
     print NEWCFG "thumbnail_height_max = $thumbnail_height_max\n" ;
-    print NEWCFG "thumbnails_per_row = $thumbnails_per_row\n" ;
+    print NEWCFG "\n" ;
     print NEWCFG "# Slides:\n" ;
     print NEWCFG "make_no_slides = $make_no_slides\n" ;
-    print NEWCFG "make_slide_filename_from_filename = $make_slide_filename_from_filename\n" ;
-    print NEWCFG "make_slide_filename_from_extension = $make_slide_filename_from_extension\n" ;
-    print NEWCFG "make_slide_title_from_caption = $make_slide_title_from_caption\n" ;
-    print NEWCFG "show_no_slide_counter = $show_no_slide_counter\n" ;
     print NEWCFG "slide_filenameprefix = \"$slide_filenameprefix\"\n" ;
     print NEWCFG "slide_filenameprefix_nofile = \"$slide_filenameprefix_nofile\"\n" ;
+    print NEWCFG "make_slide_filename_from_filename = $make_slide_filename_from_filename\n" ;
+    print NEWCFG "make_slide_filename_from_extension = $make_slide_filename_from_extension\n" ;
     print NEWCFG "slide_width_max = $slide_width_max\n" ;
     print NEWCFG "slide_height_max = $slide_height_max\n" ;
     print NEWCFG "text_slide_width = $text_slide_width\n" ;
@@ -2390,52 +2391,59 @@ if (defined $generate_config) {
     print NEWCFG "index_link_image = $index_link_image\n" ;
     print NEWCFG "next_slide_link_image = $next_slide_link_image\n" ;
     print NEWCFG "prev_slide_link_image = $prev_slide_link_image\n" ;
+    print NEWCFG "make_slide_title_from_caption = $make_slide_title_from_caption\n" ;
+    print NEWCFG "\n" ;
     print NEWCFG "# Captions:\n" ;
     print NEWCFG "captions_filename = \"$captions_filename\"\n" ;
     print NEWCFG "captions_removal_line = \"$captions_removal_line\"\n" ;
     print NEWCFG "make_caption_from_image_comment = \"$make_caption_from_image_comment\"\n" ;
     print NEWCFG "make_caption_from_image_timestamp = $make_caption_from_image_timestamp\n" ;
     print NEWCFG "make_caption_from_filename = $make_caption_from_filename\n" ;
-    print NEWCFG "show_caption_under_thumbnails = $show_caption_under_thumbnails\n" ;
     print NEWCFG "show_dimensions = $show_dimensions\n" ;
     print NEWCFG "show_size = $show_size\n" ;
-    print NEWCFG "# Exclude:\n" ;
-    map {
-	print NEWCFG ($_->{excluded} ? "exclude" : "include"). " = \"". $_->{filter} ."\"\n" ;
-    } @excludes ;
+    print NEWCFG "show_no_slide_counter = $show_no_slide_counter\n" ;
+    print NEWCFG "\n" ;
     print NEWCFG "# Text:\n" ;
+    print NEWCFG "index_title = \"$index_title\"\n" ;
+    print NEWCFG "index_link_text = \"$index_link_text\"\n" ;
+    print NEWCFG "parent_link_text = \"$parent_link_text\"\n" ;
+    print NEWCFG "prev_slide_link_text = \"$prev_slide_link_text\"\n" ;
+    print NEWCFG "next_slide_link_text = \"$next_slide_link_text\"\n" ;
     print NEWCFG "MVI_default_link_text = \"$MVI_default_link_text\"\n" ;
     print NEWCFG "FIL_default_link_text = \"$FIL_default_link_text\"\n" ;
     print NEWCFG "DIR_default_link_text = \"$DIR_default_link_text\"\n" ;
     print NEWCFG "alt_full_text = \"$alt_full_text\"\n" ;
     print NEWCFG "alt_scaled_text = \"$alt_scaled_text\"\n" ;
     print NEWCFG "alt_thumbnail_text = \"$alt_thumbnail_text\"\n" ;
-    print NEWCFG "index_link_text = \"$index_link_text\"\n" ;
-    print NEWCFG "index_title = \"$index_title\"\n" ;
-    print NEWCFG "next_slide_link_text = \"$next_slide_link_text\"\n" ;
+    print NEWCFG "over_scaled_text = \"$over_scaled_text\"\n" ;
+    print NEWCFG "over_thumbnail_text = \"$over_thumbnail_text\"\n" ;
     print NEWCFG "over_index_link_text = \"$over_index_link_text\"\n" ;
     print NEWCFG "over_prev_slide_link_text = \"$over_prev_slide_link_text\"\n" ;
     print NEWCFG "over_next_slide_link_text = \"$over_next_slide_link_text\"\n" ;
-    print NEWCFG "over_scaled_text = \"$over_scaled_text\"\n" ;
-    print NEWCFG "over_thumbnail_text = \"$over_thumbnail_text\"\n" ;
-    print NEWCFG "parent_link_text = \"$parent_link_text\"\n" ;
-    print NEWCFG "prev_slide_link_text = \"$prev_slide_link_text\"\n" ;
     print NEWCFG "show_size_unit = \"$show_size_unit\"\n" ;
     print NEWCFG "timestamp_format_in_caption = \"$timestamp_format_in_caption\"\n" ;
+    print NEWCFG "\n" ;
     print NEWCFG "# Recursion:\n" ;
     print NEWCFG "make_recursive = $make_recursive\n" ;
     print NEWCFG "parent_link = $parent_link\n" ;
-    print NEWCFG "# Various:\n" ;
+    print NEWCFG "\n" ;
+    print NEWCFG "# What files to insert in the gallery:\n" ;
+    print NEWCFG "image_extensions = \"$image_extensions\"\n" ;
+    print NEWCFG "movie_extensions = \"$movie_extensions\"\n" ;
     print NEWCFG "add_all_files = $add_all_files\n" ;
     print NEWCFG "add_subdirs = $add_subdirs\n" ;
+    map {
+	print NEWCFG ($_->{excluded} ? "exclude" : "include"). " = \"". $_->{filter} ."\"\n" ;
+    } @excludes ;
+    print NEWCFG "sort_criteria = \"$sort_criteria\"\n" ;
+    print NEWCFG "\n" ;
+    print NEWCFG "# Various:\n" ;
     print NEWCFG "convert_options = \"". (join_convert_options (@convert_options)) ."\"\n" ;
     print NEWCFG "scaled_convert_options = \"". (join_convert_options (@scaled_convert_options)) ."\"\n" ;
     print NEWCFG "thumbnail_convert_options = \"". (join_convert_options (@thumbnail_convert_options)) ."\"\n" ;
-    print NEWCFG "image_extensions = \"$image_extensions\"\n" ;
-    print NEWCFG "movie_extensions = \"$movie_extensions\"\n" ;
-    print NEWCFG "no_default_link_text = $no_default_link_text\n" ;
-    print NEWCFG "sort_criteria = \"$sort_criteria\"\n" ;
     print NEWCFG "www_access_rights = $www_access_rights\n" ;
+    print NEWCFG "no_default_link_text = $no_default_link_text\n" ;
+    print NEWCFG "\n" ;
 
     close NEWCFG ;
 }

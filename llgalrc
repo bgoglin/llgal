@@ -87,7 +87,12 @@
 # Must be > 0, 0 means unlimited, setting to < 0 resets to default
 # pixels_per_row = 0
 
-##### Film effect #####
+# Thumbnails per row in index [-w <n>]
+# Must be > 0, 0 means unlimited, setting to < 0 resets to default
+# thumbnails_per_row = 5
+
+# Write captions under thumbnails [-u]
+# show_caption_under_thumbnails = 0
 
 # Omit film effect [-r]
 # show_no_film_effect = 0
@@ -106,27 +111,10 @@
 # Must be > 0, 0 means unlimited, setting to < 0 resets to default
 # thumbnail_width_max = 0
 
-# Thumbnails per row in index [-w <n>]
-# Must be > 0, 0 means unlimited, setting to < 0 resets to default
-# thumbnails_per_row = 5
-
 ##### Slides #####
 
 # Make no slides [-s]
 # make_no_slides = 0
-
-# Use filename as slide filename [-n]
-# make_slide_filename_from_filename = 0
-
-# Also use extension in the slide filename to differenciate
-# slide filename of images that have same filenames.
-# make_slide_filename_from_extension = 0
-
-# Generate slide titles from captions [-k]
-# make_slide_title_from_caption = 0
-
-# Do not show slide counter in captions [--nc]
-# show_no_slide_counter = 0
 
 # Prefix of generated HTML slide filenames
 # slide_filenameprefix = ""
@@ -134,6 +122,13 @@
 # Prefix of slide filenames when generated from filename
 # while there's no file associated (text, link, ...)
 # slide_filenameprefix_nofile = "NOFILE"
+
+# Use filename as slide filename [-n]
+# make_slide_filename_from_filename = 0
+
+# Also use extension in the slide filename to differenciate
+# slide filename of images that have same filenames.
+# make_slide_filename_from_extension = 0
 
 # Maximal width of slides [--bigxy <n>]
 # Must be > 0, 0 means unlimited, setting to < 0 resets to default
@@ -154,6 +149,9 @@
 # index_link_image = 0
 # next_slide_link_image = 0
 # prev_slide_link_image = 0
+
+# Generate slide titles from captions [-k]
+# make_slide_title_from_caption = 0
 
 ##### Captions #####
 
@@ -176,25 +174,29 @@
 # Generate captions from filenames [--cf]
 # make_caption_from_filename = 0
 
-# Write captions under thumbnails [-u]
-# show_caption_under_thumbnails = 0
-
 # Show dimensions and/or size of the images and movies [-a, --ad, --as]
 # show_dimensions = 0
 # show_size = 0
 
-##### Exclude #####
-
-# Exclude files whose name matches [--exclude <s>]
-# This option may be used several times.
-# exclude = "regexp"
-
-# Include files whose name matches and were previously excluded [--include <s>].
-# This option may be used several times.
-# The order of includes and excludes is respected.
-# include = "regexp"
+# Do not show slide counter in captions [--nc]
+# show_no_slide_counter = 0
 
 ##### Text #####
+
+# Title of the gallery [--title <s>]
+# index_title = "Index of pictures"
+
+# Change text in links to parent directory.
+# parent_link_text = "Back to parent gallery"
+
+# Label of the link from a slide to the index
+# index_link_text = "Index"
+
+# Label of the link from a slide to the previous one
+# prev_slide_link_text = "&lt;&lt;Prev"
+
+# Label of the link from a slide to the next one
+# next_slide_link_text = "Next&gt;&gt;"
 
 # Change the text that prefixes the filename when generating link text
 # for movies without a captions file.
@@ -217,15 +219,6 @@
 # Change the default text that is shown as image alternative for thumbnails in the index
 # alt_thumbnail_text = "Thumbnail "
 
-# Label of the link from a slide to the index
-# index_link_text = "Index"
-
-# Title of the gallery [--title <s>]
-# index_title = "Index of pictures"
-
-# Label of the link from a slide to the next one
-# next_slide_link_text = "Next&gt;&gt;"
-
 # Change the default text that is shown when the mouse pointer
 # is over a scaled image in a slide.
 # over_scaled_text = "Click to see full size "
@@ -234,17 +227,38 @@
 # is over a thumbnail.
 # over_thumbnail_text = "Click to enlarge "
 
-# Change text in links to parent directory.
-# parent_link_text = "Back to parent gallery"
-
-# Label of the link from a slide to the previous one
-# prev_slide_link_text = "&lt;&lt;Prev"
-
 # Unit to be used when printing sizes [--asu <s>]
 # show_size_unit = "kB"
 
 # Set timestamp format in captions using strftime format [--ctf]
 # timestamp_format_in_caption = "%Y-%m-%d %H:%M:%S"
+
+##### What files to insert in the gallery #####
+
+# Extensions that are matched when searching images
+# image_extensions = "jpe?g|gif|png"
+
+# Extensions that are matched when searching movies
+# movie_extensions = "mpe?g|avi"
+
+# Add all files to the list of entries
+# not only images and movies [-A]
+# add_all_files = 0
+
+# Add subdirectories to the list of entries [-S]
+# add_subdirs = 0
+
+# Exclude files whose name matches [--exclude <s>]
+# This option may be used several times.
+# exclude = "regexp"
+
+# Include files whose name matches and were previously excluded [--include <s>].
+# This option may be used several times.
+# The order of includes and excludes is respected.
+# include = "regexp"
+
+# Change sort criteria when scanning files in the working directory [--sort]
+# sort_criteria = "name"
 
 ##### Recursion #####
 
@@ -256,17 +270,6 @@
 
 ##### Various #####
 
-# Add all files to the list of entries
-# not only images and movies [-A]
-# add_all_files = 0
-
-# Add subdirectories to the list of entries [-S]
-# add_subdirs = 0
-
-# Additional configuration file [--config <s>]
-# This option may be used multiple times.
-# additional_configuration_file = "my_llgal.rc"
-
 # Options to pass to convert [--con <s>]
 # This option may be used multiple times.
 # convert_options = ""
@@ -276,17 +279,12 @@
 # scaled_convert_options = ""
 # thumbnail_convert_options = ""
 
-# Extensions that are matched when searching images
-# image_extensions = "jpe?g|gif|png"
+# Give access rights for www access [--www]
+# www_access_rights = 0
 
-# Extensions that are matched when searching movies
-# movie_extensions = "mpe?g|avi"
+# Additional configuration file [--config <s>]
+# This option may be used multiple times.
+# additional_configuration_file = "my_llgal.rc"
 
 # Don't show prefix when generating link text.
 # no_default_link_text = 0
-
-# Change sort criteria when scanning files in the working directory [--sort]
-# sort_criteria = "name"
-
-# Give access rights for www access [--www]
-# www_access_rights = 0

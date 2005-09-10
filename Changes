@@ -10,6 +10,8 @@
 * Allow to change the label of links to index/prev/next in slides
   with prev/next_slide/index_link_text.
 * Rename _linktext option to _link_text.
+* One more reorganization of options in llgalrc and generated config
+  files. Hope this one will be fine.
 
 
 llgal (0.11)
