@@ -2004,7 +2004,7 @@ if ($make_no_slides) {
 	    my $prev = $entries[$i-1] ;
 
 	    my $prev_slide_link ;
-	    if ($prev_slide_link_preview) {
+	    if ($prev_slide_link_preview and $prev->{type} == $TYPE_IMG) {
 		$prev_slide_link = "<img src=\"$prev->{thumb_url}\" alt=\"$prev_slide_link_text\"/>" ;
 	    } elsif ($prev_slide_link_image) {
 		$prev_slide_link = "<img src=\"$local_llgal_dir/". (make_safe_url $prev_slide_link_image_filename)
@@ -2020,7 +2020,7 @@ if ($make_no_slides) {
 	    my $next = $entries[$i==@entries-1 ? 0 : $i+1] ;
 
 	    my $next_slide_link ;
-	    if ($next_slide_link_preview) {
+	    if ($next_slide_link_preview and $next->{type} == $TYPE_IMG) {
 		$next_slide_link = "<img src=\"$next->{thumb_url}\" alt=\"$next_slide_link_text\"/>" ;
 	    } elsif ($next_slide_link_image ) {
 		$next_slide_link = "<img src=\"$local_llgal_dir/". (make_safe_url $next_slide_link_image_filename)
