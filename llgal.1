@@ -425,10 +425,6 @@ Setting to the empty string means \fBnone\fR.
 \fBrev\fR might be added for reverse sort.
 
 .TP
-.BI --sp " <s>"
-Change slide image filename prefix
-
-.TP
 .BI -t " <n>"
 Height (in pixels) of the tiled image used to simulate the top
 and bottom film effect on the thumbnail index page.  This
@@ -442,10 +438,6 @@ file with your own design.
 Substitutes the string 
 .I <s>
 for "<!--TITLE-->" in the index. The default is "Index of Pictures".
-
-.TP
-.BI --tp " <s>"
-Change thumbnail image filename prefix.
 
 .TP
 .BI -u
@@ -668,14 +660,13 @@ Default is \fB.llgal\fR.
 .RE
 .I scaled_image_filenameprefix = \fI"filename prefix"
 .RS
-Prefix used to determine slide-image filenames from
-original images (in case of --bigxy or --bigy) [--sp <s>].
+Prefix used to determine slide-image filenames from original images
+(in case of --bigxy or --bigy).
 Default is \fBscaled_\fR.
 .RE
 .I thumbnail_image_filenameprefix = \fI"filename prefix"
 .RS
-Prefix used to determine thumbnail filenames from
-original images [--tp <s>].
+Prefix used to determine thumbnail filenames from original images.
 Default is \fBthumb_\fR.
 .RE
 

@@ -61,13 +61,12 @@
 # HTML templates might also be defined here.
 # local_llgal_dir = ".llgal"
 
-# Prefix used to determine slide-image filenames from
-# original images (in case of --bigy) [--sp <s>]
+# Prefix used to determine slide-image filenames from original images
+# (in case of --bigy).
 # These files will be stored under $local_llgal_dir.
 # scaled_image_filenameprefix = "scaled_"
 
-# Prefix used to determine thumbnail filenames from
-# original images [--tp <s>]
+# Prefix used to determine thumbnail filenames from original images.
 # These files will be stored under $local_llgal_dir.
 # thumbnail_image_filenameprefix = "thumb_"
 

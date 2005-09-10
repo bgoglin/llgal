@@ -315,10 +315,8 @@ Layout Options:
           -S              add subdirectories to the list of slides
           -s              make no HTML slides, link thumbnails to images
           --sort <s>      sort files with criteria <s>
-          --sp <s>        sets the slide image prefix (\"$scaled_image_filenameprefix\")
           -t <n>          height of the film tiled image ($tile_height)
           --title <s>     string to substitute for TITLE in index template
-          --tp <s>        sets the thumbnail image prefix (\"$thumbnail_image_filenameprefix\")
           -u              write captions under thumbnails on index page
           -w <n>          rows in thumbnail index are at most <n> images wide ($thumbnails_per_row)
           --www           make all llgal files world-readable
@@ -583,9 +581,7 @@ GetOptions(
 	   'bigxy=i'    => sub { shift ; $slide_width_max = $slide_height_max = shift ; },
            'con=s'	=> sub { shift ; push (@convert_options, parse_convert_options (shift)) ; },
            'sort=s'     => \$sort_criteria,
-	   'sp=s'	=> \$scaled_image_filenameprefix,
 	   'title=s'	=> \$index_title,
-           'tp=s'	=> \$thumbnail_image_filenameprefix,
 	   'www'	=> \$www_access_rights,
 	   'wx=i'	=> \$pixels_per_row,
 	   'xy=i'	=> sub { shift ; $thumbnail_width_max = $thumbnail_height_max = shift ; },
