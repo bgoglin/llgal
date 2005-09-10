@@ -227,6 +227,12 @@ my $index_link_text = "Index" ;
 my $index_title = "Index of pictures" ;
 # label of link from a slide to the next one
 my $next_slide_link_text = "Next&gt;&gt;" ;
+# text that is show when the mouse pointer is over a link to the index
+my $over_index_link_text = "Return to the index" ;
+# text that is show when the mouse pointer is over a link to the previous slide
+my $over_prev_slide_link_text = "Previous slide " ;
+# text that is show when the mouse pointer is over a link to the next slide
+my $over_next_slide_link_text = "Next slide " ;
 # default text that is shown when the mouse pointer is over a scaled image in a slide
 my $over_scaled_text = "Click to see full size " ;
 # default text that is shown when the mouse pointer is over a thumbnail
@@ -470,6 +476,12 @@ sub process_option {
 	    $index_title = $1 ;
 	} elsif (/^next_slide_link_text\s*=\s*"(.+)"$/) {
 	    $next_slide_link_text = $1 ;
+	} elsif (/^over_index_link_text\s*=\s*"(.*)"$/) {
+	    $over_index_link_text = $1 ;
+	} elsif (/^over_prev_slide_link_text\s*=\s*"(.*)"$/) {
+	    $over_prev_slide_link_text = $1 ;
+	} elsif (/^over_next_slide_link_text\s*=\s*"(.*)"$/) {
+	    $over_next_slide_link_text = $1 ;
 	} elsif (/^over_scaled_text\s*=\s*"(.*)"$/) {
 	    $over_scaled_text = $1 ;
 	} elsif (/^over_thumbnail_text\s*=\s*"(.*)"$/) {
@@ -1991,7 +2003,7 @@ if ($make_no_slides) {
 		if $index_link_image ;
 	    $line =~ s/<!--INDEX-LINK-TEXT-->/$index_link/g ;
 
-	    $line =~ s/<!--INDEX-FILE-->/$index_filename/g ;
+	    $line =~ s/<!--INDEX-FILE-->/$index_filename\" title=\"$over_index_link_text/g ;
 
 	    # process PREV-SLIDE
 	    my $prev_slide_link = $prev_slide_link_text ;
@@ -2001,7 +2013,7 @@ if ($make_no_slides) {
 	    $line =~ s/<!--PREV-SLIDE-LINK-TEXT-->/$prev_slide_link/g ;
 
 	    my $prev = $entries[$i-1] ;
-	    $line =~ s/<!--PREV-SLIDE-->/$prev->{slide_url}\" title=\"$prev->{title}/g ;
+	    $line =~ s/<!--PREV-SLIDE-->/$prev->{slide_url}\" title=\"$over_prev_slide_link_text$prev->{title}/g ;
 
 	    # process NEXT-SLIDE
 	    my $next_slide_link = $next_slide_link_text ;
@@ -2011,7 +2023,7 @@ if ($make_no_slides) {
 	    $line =~ s/<!--NEXT-SLIDE-LINK-TEXT-->/$next_slide_link/g ;
 
 	    my $next = $entries[$i==@entries-1 ? 0 : $i+1] ;
-	    $line =~ s/<!--NEXT-SLIDE-->/$next->{slide_url}\" title=\"$next->{title}/g ;
+	    $line =~ s/<!--NEXT-SLIDE-->/$next->{slide_url}\" title=\"$over_next_slide_link_text$next->{title}/g ;
 
 	    # output the line
 	    print SW "$line" ;
@@ -2401,6 +2413,9 @@ if (defined $generate_config) {
     print NEWCFG "index_link_text = \"$index_link_text\"\n" ;
     print NEWCFG "index_title = \"$index_title\"\n" ;
     print NEWCFG "next_slide_link_text = \"$next_slide_link_text\"\n" ;
+    print NEWCFG "over_index_link_text = \"$over_index_link_text\"\n" ;
+    print NEWCFG "over_prev_slide_link_text = \"$over_prev_slide_link_text\"\n" ;
+    print NEWCFG "over_next_slide_link_text = \"$over_next_slide_link_text\"\n" ;
     print NEWCFG "over_scaled_text = \"$over_scaled_text\"\n" ;
     print NEWCFG "over_thumbnail_text = \"$over_thumbnail_text\"\n" ;
     print NEWCFG "parent_link_text = \"$parent_link_text\"\n" ;

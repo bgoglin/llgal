@@ -5,6 +5,8 @@
   + slidetemplate is a little bit modified.
     - The Index link is now _betwee_ Prev and Next.
   + The css template is a little bit extended.
+  + Add configurable text that is shown when the mouse pointer
+    is over these links.
 * Allow to change the label of links to index/prev/next in slides
   with prev/next_slide/index_link_text.
 * Rename _linktext option to _link_text.
