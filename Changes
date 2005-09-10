@@ -15,6 +15,7 @@
 * Rename MVI/FIL/DIR_default_link_text to MVI/FIL/DIR_link_text.
 * One more reorganization of options in llgalrc and generated config
   files. Hope this one will be fine.
+* Fix and cleanup documentation.
 
 
 llgal (0.11)

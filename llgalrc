@@ -91,6 +91,14 @@
 # Must be > 0, 0 means unlimited, setting to < 0 resets to default
 # thumbnails_per_row = 5
 
+# Maximal height of thumbnails [-y <n>, --xy <n>]
+# Must be > 0, setting to < 0 resets to default
+# thumbnail_height_max = 0
+
+# Maximal width of thumbnails [--xy <n>]
+# Must be > 0, 0 means unlimited, setting to < 0 resets to default
+# thumbnail_width_max = 0
+
 # Write captions under thumbnails [-u]
 # show_caption_under_thumbnails = 0
 
@@ -100,16 +108,6 @@
 # Film tile height [-t <n>]
 # Must be >= 0, setting to < 0 resets to default
 # tile_height = 21
-
-##### Thumbnails #####
-
-# Maximal height of thumbnails [-y <n>, --xy <n>]
-# Must be > 0, setting to < 0 resets to default
-# thumbnail_height_max = 0
-
-# Maximal width of thumbnails [--xy <n>]
-# Must be > 0, 0 means unlimited, setting to < 0 resets to default
-# thumbnail_width_max = 0
 
 ##### Slides #####
 
@@ -198,45 +196,40 @@
 # Label of the link from a slide to the next one
 # next_slide_link_text = "Next&gt;&gt;"
 
-# Change the text that prefixes the filename when generating link text
+# Text prefixing the filename when generating link text
 # for movies without a captions file.
 # MVI_link_text = "Open movie "
 
-# Change the text that prefixes the filename when generating link text
+# Text prefixing the filename when generating link text
 # for files without a captions file.
 # FIL_link_text = "Download file "
 
-# Change the text that prefixes the filename when generating link text
+# Text prefixing the filename when generating link text
 # for directories without a captions file.
 # DIR_link_text = "Open subgallery "
 
-# Change the default text that is shown as image alternative for full-size images in slides
+# Text shown as image alternative for full-size images in slides
 # alt_full_text = ""
 
-# Change the default text that is shown as image alternative for scaled images in slides
+# Text shown as image alternative for scaled images in slides
 # alt_scaled_text = "Scaled image "
 
-# Change the default text that is shown as image alternative for thumbnails in the index
+# Text shown as image alternative for thumbnails in the index
 # alt_thumbnail_text = "Thumbnail "
 
-# Change the default text that is shown when the mouse pointer
-# is over a scaled image in a slide.
+# Text shown when the mouse pointer is over a scaled image in a slide
 # over_scaled_text = "Click to see full size "
 
-# Change the default text that is shown when the mouse pointer
-# is over a thumbnail.
+# Text shown when the mouse pointer is over a thumbnail
 # over_thumbnail_text = "Click to enlarge "
 
-# Change the text that is shown when the mouse pointer
-# is over a link from a slide to the index
+# Text shown when the mouse pointer is over a link from a slide to the index
 # over_index_link_text = "Return to the index"
 
-# Change the text that is shown when the mouse pointer
-# is over a link from a slide to the previous one
+# Text shown when the mouse pointer is over a link from a slide to the previous one
 # over_prev_slide_link_text = "Previous slide "
 
-# Change the text that is shown when the mouse pointer
-# is over a link from a slide to the next one
+# Text shown when the mouse pointer is over a link from a slide to the next one
 # over_next_slide_link_text = "Next slide "
 
 # Unit to be used when printing sizes [--asu <s>]
@@ -269,7 +262,7 @@
 # The order of includes and excludes is respected.
 # include = "regexp"
 
-# Change sort criteria when scanning files in the working directory [--sort]
+# Sort criteria when scanning files in the working directory [--sort]
 # sort_criteria = "name"
 
 ##### Recursion #####

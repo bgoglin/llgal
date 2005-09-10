@@ -147,18 +147,16 @@ my $list_links = 0 ;
 my $pixels_per_row = $pixels_per_row_default ;
 # how many thumbnails per row at most in index (-w)
 my $thumbnails_per_row = $thumbnails_per_row_default ;
+# max height of a thumbnail (--xy or -y)
+my $thumbnail_height_max = $thumbnail_height_max_default ;
+# scale thumb longer dimension (--xy)
+my $thumbnail_width_max = $thumbnail_width_max_default ;
 # write captions under thumbnails on index page (-u)
 my $show_caption_under_thumbnails = 0 ;
 # omit the film effect altogether (-r)
 my $show_no_film_effect = 0 ;
 # height of the tile.png tiled image (-t)
 my $tile_height = $tile_height_default ;
-
-# Thumbnails
-# max height of a thumbnail (--xy or -y)
-my $thumbnail_height_max = $thumbnail_height_max_default ;
-# scale thumb longer dimension (--xy)
-my $thumbnail_width_max = $thumbnail_width_max_default ;
 
 # Slides
 # make no slides, just thumbnail links to images (-s)
@@ -208,33 +206,33 @@ my $show_no_slide_counter = 0 ;
 # Text
 # title of the gallery (--title)
 my $index_title = "Index of pictures" ;
-# text that is shown when linking to the parent gallery
+# label of link to the parent gallery
 my $parent_link_text = "Back to parent gallery" ;
-# default text for link from slides to index
+# label of link from slides to index
 my $index_link_text = "Index" ;
 # label of link from a slide to the previous one
 my $prev_slide_link_text = "&lt;&lt;Prev" ;
 # label of link from a slide to the next one
 my $next_slide_link_text = "Next&gt;&gt;" ;
-# Change the text that prefixes the link text
+# text prefixing the link text
 my $MVI_link_text = "Open movie " ;
 my $FIL_link_text = "Download file " ;
 my $DIR_link_text = "Open subgallery " ;
-# default alternative text for full-size images in slides
+# alternative text for full-size images in slides
 my $alt_full_text = "" ;
-# default alternative text for scaled images in slides
+# alternative text for scaled images in slides
 my $alt_scaled_text = "Scaled image " ;
-# default alternative text for thumbnails in the index
+# alternative text for thumbnails in the index
 my $alt_thumbnail_text = "Thumbnail " ;
-# default text that is shown when the mouse pointer is over a scaled image in a slide
+# text shown when the mouse pointer is over a scaled image in a slide
 my $over_scaled_text = "Click to see full size " ;
-# default text that is shown when the mouse pointer is over a thumbnail
+# text shown when the mouse pointer is over a thumbnail
 my $over_thumbnail_text = "Click to enlarge " ;
-# text that is show when the mouse pointer is over a link to the index
+# text shown when the mouse pointer is over a link to the index
 my $over_index_link_text = "Return to the index" ;
-# text that is show when the mouse pointer is over a link to the previous slide
+# text shown when the mouse pointer is over a link to the previous slide
 my $over_prev_slide_link_text = "Previous slide " ;
-# text that is show when the mouse pointer is over a link to the next slide
+# text shown when the mouse pointer is over a link to the next slide
 my $over_next_slide_link_text = "Next slide " ;
 # change kB to another unit (--asu)
 my $show_size_unit = "kB" ;
@@ -387,17 +385,16 @@ sub process_option {
 	    $pixels_per_row = $1 ;
 	} elsif (/^thumbnails_per_row\s*=\s*(.+)$/) { # > 0, 0 for unlimited, -1 for default
 	    $thumbnails_per_row = $1 ;
+	} elsif (/^thumbnail_height_max\s*=\s*(.+)$/) { # > 0, -1 for default
+	    $thumbnail_height_max = $1 ;
+	} elsif (/^thumbnail_width_max\s*=\s*(.+)$/) { # > 0, 0 for unlimited, -1 for default
+	    $thumbnail_width_max = $1 ;
 	} elsif (/^show_caption_under_thumbnails\s*=\s*(.+)$/) {
 	    $show_caption_under_thumbnails = $1 ;
 	} elsif (/^show_no_film_effect\s*=\s*(.+)$/) {
 	    $show_no_film_effect = $1 ;
 	} elsif (/^tile_height\s*=\s*(.+)$/) { # >= 0, -1 for default
 	    $tile_height = $1 ;
-# Thumbnails
-	} elsif (/^thumbnail_height_max\s*=\s*(.+)$/) { # > 0, -1 for default
-	    $thumbnail_height_max = $1 ;
-	} elsif (/^thumbnail_width_max\s*=\s*(.+)$/) { # > 0, 0 for unlimited, -1 for default
-	    $thumbnail_width_max = $1 ;
 # Slides
 	} elsif (/^make_no_slides\s*=\s*(.+)$/) {
 	    $make_no_slides = $1 ;
@@ -2362,13 +2359,11 @@ if (defined $generate_config) {
     print NEWCFG "list_links = $list_links\n" ;
     print NEWCFG "pixels_per_row = $pixels_per_row\n" ;
     print NEWCFG "thumbnails_per_row = $thumbnails_per_row\n" ;
+    print NEWCFG "thumbnail_width_max = $thumbnail_width_max\n" ;
+    print NEWCFG "thumbnail_height_max = $thumbnail_height_max\n" ;
     print NEWCFG "show_caption_under_thumbnails = $show_caption_under_thumbnails\n" ;
     print NEWCFG "show_no_film_effect = $show_no_film_effect\n" ;
     print NEWCFG "tile_height = $tile_height\n" ;
-    print NEWCFG "\n" ;
-    print NEWCFG "# Thumbnails:\n" ;
-    print NEWCFG "thumbnail_width_max = $thumbnail_width_max\n" ;
-    print NEWCFG "thumbnail_height_max = $thumbnail_height_max\n" ;
     print NEWCFG "\n" ;
     print NEWCFG "# Slides:\n" ;
     print NEWCFG "make_no_slides = $make_no_slides\n" ;

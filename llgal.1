@@ -697,6 +697,16 @@ Default is \fB0\fR (unlimited).
 Thumbnails per row in index [-w <n>].
 Default is \fB5\fR.
 .RE
+.I thumbnail_height_max = <pixels>
+.RS
+Maximal height of thumbnails [-y <n>].
+Default is \fB75\fR.
+.RE
+.I thumbnail_width_max = <pixels>
+.RS
+Maximal width of thumbnails [--xy <n>]
+Default is \fB0\fR (unlimited).
+.RE
 .I show_caption_under_thumbnails = <0/1>
 .RS
 Write captions under thumbnails [-u].
@@ -711,19 +721,6 @@ Default is \fB1\fR (enabled).
 .RS
 Film tile height [-t <n>].
 Default is \fB21\fR.
-.RE
-
-.B Thumbnails:
-
-.I thumbnail_height_max = <pixels>
-.RS
-Maximal height of thumbnails [-y <n>].
-Default is \fB75\fR.
-.RE
-.I thumbnail_width_max = <pixels>
-.RS
-Maximal width of thumbnails [--xy <n>]
-Default is \fB0\fR (unlimited).
 .RE
 
 .B Slides:
@@ -850,88 +847,80 @@ Default is \fB"Index of pictures"\fR.
 .RE
 .I parent_link_text = \fI"string"
 .RS
-Change text in links to parent directory.
+Label of the link to the parent directory.
 Default is \fB"Back to parent gallery"\fR.
 .RE
 .I index_link_text = \fI"string"
 .RS
-Change the label of the link from a slide to the index.
+Label of the link from a slide to the index.
 Default is \fB"Index"\fR.
 .RE
 .I prev_slide_link_text = \fI"string"
 .RS
-Change the label of the link from a slide to the prev one.
+Label of the link from a slide to the prev one.
 Default is \fB"Prev&gt;&gt;"\fR.
 .RE
 .I next_slide_link_text = \fI"string"
 .RS
-Change the label of the link from a slide to the next one.
+Label of the link from a slide to the next one.
 Default is \fB"Next&gt;&gt;"\fR.
 .RE
 .I MVI_link_text = \fI"string"
 .RS
-Change the text that prefixes the filename when generating
-link text for movies without a captions file.
+Text prefixing the filename when generating link text for movies without
+a captions file.
 Default is \fB"Open movie "\fR.
 .RE
 .I FIL_link_text = \fI"string"
 .RS
-Change the text that prefixes the filename when generating
-link text for files without a captions file.
+Text prefixing the filename when generating link text for files without
+a captions file.
 Default is \fB"Download file "\fR.
 .RE
 .I DIR_link_text = \fI"string"
 .RS
-Change the text that prefixes the filename when generating
-link text for directories without a captions file.
+Text prefixing the filename when generating link text for directories
+without a captions file.
 Default is \fB"Open subgallery "\fR.
 .RE
 .I alt_full_text = \fI"string"
 .RS
-Change the default text that is shown as an image alternative
-for full-size images in slides.
+Text shown as an image alternative for full-size images in slides.
 Default is \fB""\fR.
 .RE
 .I alt_scaled_text = \fI"string"
 .RS
-Change the default text that is shown as an image alternative
-for scaled images in slides.
+Text shown as an image alternative for scaled images in slides.
 Default is \fB"Scaled image "\fR.
 .RE
 .I alt_thumbnail_text = \fI"string"
 .RS
-Change the default text that is shown as an image alternative
-for thumbnails in the index.
+Text shown as an image alternative for thumbnails in the index.
 Default is \fB"Thumbnail "\fR.
 .RE
 .I over_scaled_text = \fI"string"
 .RS
-Change the default text that is shown when the mouse pointer
-is over a scaled image in a slide.
+Text shown when the mouse pointer is over a scaled image in a slide.
 Default is \fB"Click to see full size"\fR.
 .RE
 .I over_thumbnail_text = \fI"string"
 .RS
-Change the default text that is shown when the mouse pointer
-is over a thumbnail.
+Text shown when the mouse pointer is over a thumbnail.
 Default is \fB"Click to enlarge "\fR.
 .RE
 .I over_index_link_text = \fI"string"
 .RS
-Change the text that is shown when the mouse pointer
-is over a link from a slide to the index.
+Text shown when the mouse pointer is over a link from a slide to the index.
 Default is \fB"Return to the index"\fR.
 .RE
 .I over_prev_slide_link_text = \fI"string"
 .RS
-Change the text that is shown when the mouse pointer
-is over a link from a slide to the previous one.
+Text shown when the mouse pointer is over a link from a slide to the previous one.
 Default is \fB"Previous slide "\fR.
 .RE
 .I over_next_slide_link_text = \fI"string"
 .RS
-Change the text that is shown when the mouse pointer
-is over a link from a slide to the next one.
+Text shown when the mouse pointer is over a link from a slide to the next one.
 Default is \fB"Next slide "\fR.
 .RE
 .I show_size_unit = \fI"string"
@@ -992,9 +981,9 @@ Include files whose name matches and were previously excluded [--include <s>].
 This option may be used several times.
 The order of includes and excludes is respected.
 .RE
-.I sort_criteria = \fI"|-separated strings"
+.I sort_criteria = \fI"string"
 .RS
-Change sort criteria when scanning files in the working directory.
+Sort criteria when scanning files in the working directory.
 Default is \fBname\fR.
 .RE
 
