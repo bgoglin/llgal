@@ -227,6 +227,18 @@
 # is over a thumbnail.
 # over_thumbnail_text = "Click to enlarge "
 
+# Change the text that is shown when the mouse pointer
+# is over a link from a slide to the index
+# over_index_link_text = "Return to the index"
+
+# Change the text that is shown when the mouse pointer
+# is over a link from a slide to the previous one
+# over_prev_slide_link_text = "Previous slide "
+
+# Change the text that is shown when the mouse pointer
+# is over a link from a slide to the next one
+# over_next_slide_link_text = "Next slide "
+
 # Unit to be used when printing sizes [--asu <s>]
 # show_size_unit = "kB"
 
