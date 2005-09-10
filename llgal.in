@@ -132,13 +132,22 @@ my $indextemplate_filename = "indextemplate.html" ;
 my $slidetemplate_filename = "slidetemplate.html" ;
 
 # Location and name of generated files
+# local llgal directory
 my $local_llgal_dir = ".llgal" ;
-my $scaled_image_filenameprefix = "scaled_" ;
-my $thumbnail_image_filenameprefix = "thumb_" ;
-
-# Index
 # name of the index file (-i)
 my $index_filename = "index.html" ;
+# prefix of HTML slide filenames
+my $slide_filenameprefix = "" ;
+# prefix of HTML slide filenames when generated from filename
+# while there's no file associated (text, link, ...)
+my $slide_filenameprefix_nofile = "NOFILE" ;
+# scaled and thumbnail image filename prefix
+my $scaled_image_filenameprefix = "scaled_" ;
+my $thumbnail_image_filenameprefix = "thumb_" ;
+# captions filename
+my $captions_filename = "captions" ;
+
+# Index
 # cellpadding value for the thumbnail index tables (-p)
 my $index_cellpadding = $index_cellpadding_default ;
 # list links outside f the table (-L)
@@ -161,11 +170,6 @@ my $tile_height = $tile_height_default ;
 # Slides
 # make no slides, just thumbnail links to images (-s)
 my $make_no_slides = 0 ;
-# prefix of HTML slide filenames
-my $slide_filenameprefix = "" ;
-# prefix of HTML slide filenames when generated from filename
-# while there's no file associated (text, link, ...)
-my $slide_filenameprefix_nofile = "NOFILE" ;
 # use image names as slide names (-n)
 my $make_slide_filename_from_filename = 0 ;
 # also use image extension in the slide names
@@ -189,7 +193,6 @@ my $next_slide_link_preview = 0 ;
 my $make_slide_title_from_caption = 0 ;
 
 # Captions
-my $captions_filename = "captions" ;
 # this line will be placed in caption generated file
 # the user may remove it to prevent llgal from removing the caption file with --clean
 my $captions_removal_line = "REMOVE THIS LINE IF LLGAL SHOULD NOT REMOVE THIS FILE" ;
@@ -372,13 +375,19 @@ sub process_option {
 # Location and name of generated files
 	} elsif (/^local_llgal_dir\s*=\s*"(.+)"$/) {
 	    $local_llgal_dir = $1 ;
+	} elsif (/^index_filename\s*=\s*"(.+)"$/) {
+	    $index_filename = $1 ;
+	} elsif (/^slide_filenameprefix\s*=\s*"(.*)"$/) {
+	    $slide_filenameprefix = $1 ;
+	} elsif (/^slide_filenameprefix_nofile\s*=\s*"(.+)"$/) {
+	    $slide_filenameprefix_nofile = $1 ;
 	} elsif (/^scaled_image_filenameprefix\s*=\s*"(.+)"$/) {
 	    $scaled_image_filenameprefix = $1 ;
 	} elsif (/^thumbnail_image_filenameprefix\s*=\s*"(.+)"$/) {
 	    $thumbnail_image_filenameprefix = $1 ;
+	} elsif (/^captions_filename\s*=\s*"(.+)"$/) {
+	    $captions_filename = $1 ;
 # Index
-	} elsif (/^index_filename\s*=\s*"(.+)"$/) {
-	    $index_filename = $1 ;
 	} elsif (/^index_cellpadding\s*=\s*(.+)$/) { # >= 0, -1 for default
 	    $index_cellpadding = $1 ;
 	} elsif (/^list_links\s*=\s*(.+)$/) {
@@ -400,10 +409,6 @@ sub process_option {
 # Slides
 	} elsif (/^make_no_slides\s*=\s*(.+)$/) {
 	    $make_no_slides = $1 ;
-	} elsif (/^slide_filenameprefix\s*=\s*"(.*)"$/) {
-	    $slide_filenameprefix = $1 ;
-	} elsif (/^slide_filenameprefix_nofile\s*=\s*"(.+)"$/) {
-	    $slide_filenameprefix_nofile = $1 ;
 	} elsif (/^make_slide_filename_from_filename\s*=\s*(.+)$/) {
 	    $make_slide_filename_from_filename = $1 ;
 	} elsif (/^make_slide_filename_from_extension\s*=\s*(.+)$/) {
@@ -429,8 +434,6 @@ sub process_option {
 	} elsif (/^make_slide_title_from_caption\s*=\s*(.+)$/) {
 	    $make_slide_title_from_caption = $1 ;
 # Captions
-	} elsif (/^captions_filename\s*=\s*"(.+)"$/) {
-	    $captions_filename = $1 ;
 	} elsif (/^captions_removal_line\s*=\s*"(.+)"$/) {
 	    $captions_removal_line = $1 ;
 	} elsif (/^make_caption_from_image_comment\s*=\s*"(.*)"$/) {
@@ -2367,11 +2370,14 @@ if (defined $generate_config) {
     print NEWCFG "\n" ;
     print NEWCFG "# Location and name of generated files:\n" ;
     print NEWCFG "local_llgal_dir = \"$local_llgal_dir\"\n" ;
+    print NEWCFG "index_filename = \"$index_filename\"\n" ;
+    print NEWCFG "slide_filenameprefix = \"$slide_filenameprefix\"\n" ;
+    print NEWCFG "slide_filenameprefix_nofile = \"$slide_filenameprefix_nofile\"\n" ;
     print NEWCFG "scaled_image_filenameprefix = \"$scaled_image_filenameprefix\"\n" ;
     print NEWCFG "thumbnail_image_filenameprefix = \"$thumbnail_image_filenameprefix\"\n" ;
+    print NEWCFG "captions_filename = \"$captions_filename\"\n" ;
     print NEWCFG "\n" ;
     print NEWCFG "# Index:\n" ;
-    print NEWCFG "index_filename = \"$index_filename\"\n" ;
     print NEWCFG "index_cellpadding = $index_cellpadding\n" ;
     print NEWCFG "list_links = $list_links\n" ;
     print NEWCFG "pixels_per_row = $pixels_per_row\n" ;
@@ -2384,8 +2390,6 @@ if (defined $generate_config) {
     print NEWCFG "\n" ;
     print NEWCFG "# Slides:\n" ;
     print NEWCFG "make_no_slides = $make_no_slides\n" ;
-    print NEWCFG "slide_filenameprefix = \"$slide_filenameprefix\"\n" ;
-    print NEWCFG "slide_filenameprefix_nofile = \"$slide_filenameprefix_nofile\"\n" ;
     print NEWCFG "make_slide_filename_from_filename = $make_slide_filename_from_filename\n" ;
     print NEWCFG "make_slide_filename_from_extension = $make_slide_filename_from_extension\n" ;
     print NEWCFG "slide_width_max = $slide_width_max\n" ;
@@ -2400,7 +2404,6 @@ if (defined $generate_config) {
     print NEWCFG "make_slide_title_from_caption = $make_slide_title_from_caption\n" ;
     print NEWCFG "\n" ;
     print NEWCFG "# Captions:\n" ;
-    print NEWCFG "captions_filename = \"$captions_filename\"\n" ;
     print NEWCFG "captions_removal_line = \"$captions_removal_line\"\n" ;
     print NEWCFG "make_caption_from_image_comment = \"$make_caption_from_image_comment\"\n" ;
     print NEWCFG "make_caption_from_image_timestamp = $make_caption_from_image_timestamp\n" ;

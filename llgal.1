@@ -658,6 +658,22 @@ Default is \fBslidetemplate.html\fR.
 The name of the subdirectory where llgal generated files will be stored.
 Default is \fB.llgal\fR.
 .RE
+.I index_filename = \fI"filename"
+.RS
+Name of the generated index file [-i <s>].
+Default is \fBindex.html\fR.
+.RE
+.I slide_filenameprefix = \fI"filename prefix"
+.RS
+Prefix of generated HTML slide filenames.
+Default is \fB""\fR.
+.RE
+.I slide_filenameprefix_nofile = \fI"filename prefix"
+.RS
+Prefix of slide filenames when generated from filename
+while there's no file associated (text, link, ...).
+Default is \fBNOFILE\fR.
+.RE
 .I scaled_image_filenameprefix = \fI"filename prefix"
 .RS
 Prefix used to determine slide-image filenames from original images
@@ -669,14 +685,15 @@ Default is \fBscaled_\fR.
 Prefix used to determine thumbnail filenames from original images.
 Default is \fBthumb_\fR.
 .RE
+.I captions_filename = \fI"filename"
+.RS
+Name of the caption file that will be generated when llgal is called with --gc,
+or will be automatically used if it exists to generate slide captions.
+Default is \fBcaptions\fR.
+.RE
 
 .B Index:
 
-.I index_filename = \fI"filename"
-.RS
-Name of the generated index file [-i <s>].
-Default is \fBindex.html\fR.
-.RE
 .I index_cellpadding = <pixels>
 .RS
 Cellpadding in the index table [-p <n>].
@@ -729,17 +746,6 @@ Default is \fB21\fR.
 .RS
 Make no slides [-s].
 Default is \fB0\fR (make slides).
-.RE
-.I slide_filenameprefix = \fI"filename prefix"
-.RS
-Prefix of generated HTML slide filenames.
-Default is \fB""\fR.
-.RE
-.I slide_filenameprefix_nofile = \fI"filename prefix"
-.RS
-Prefix of slide filenames when generated from filename
-while there's no file associated (text, link, ...).
-Default is \fBNOFILE\fR.
 .RE
 .I make_slide_filename_from_filename = <0/1>
 .RS
@@ -804,12 +810,6 @@ Default is \fB0\fR (disabled).
 
 .B Captions:
 
-.I captions_filename = \fI"filename"
-.RS
-Name of the caption file that will be generated when llgal is called with --gc,
-or will be automatically used if it exists to generate slide captions.
-Default is \fBcaptions\fR.
-.RE
 .I captions_removal_line = \fI"string"
 .RS
 This line will be added to the caption file llgal will generate when called with --gc.

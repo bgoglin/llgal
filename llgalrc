@@ -61,6 +61,16 @@
 # HTML templates might also be defined here.
 # local_llgal_dir = ".llgal"
 
+# Name of the generated index file [-i <s>]
+# index_filename = "index.html"
+
+# Prefix of generated HTML slide filenames
+# slide_filenameprefix = ""
+
+# Prefix of slide filenames when generated from filename
+# while there's no file associated (text, link, ...)
+# slide_filenameprefix_nofile = "NOFILE"
+
 # Prefix used to determine slide-image filenames from original images
 # (in case of --bigy).
 # These files will be stored under $local_llgal_dir.
@@ -70,10 +80,11 @@
 # These files will be stored under $local_llgal_dir.
 # thumbnail_image_filenameprefix = "thumb_"
 
-##### Index #####
+# Name of the captions file that will be generated when llgal is called
+# with --gc. This file will be stored under $local_llgal_dir.
+# captions_filename = "captions"
 
-# Name of the generated index file [-i <s>]
-# index_filename = "index.html"
+##### Index #####
 
 # Cellpadding in the index table [-p <n>]
 # Must be >= 0, setting to < 0 resets to default
@@ -113,13 +124,6 @@
 # Make no slides [-s]
 # make_no_slides = 0
 
-# Prefix of generated HTML slide filenames
-# slide_filenameprefix = ""
-
-# Prefix of slide filenames when generated from filename
-# while there's no file associated (text, link, ...)
-# slide_filenameprefix_nofile = "NOFILE"
-
 # Use filename as slide filename [-n]
 # make_slide_filename_from_filename = 0
 
@@ -156,10 +160,6 @@
 # make_slide_title_from_caption = 0
 
 ##### Captions #####
-
-# Name of the captions file that will be generated when llgal is called
-# with --gc. This file will be stored under $local_llgal_dir.
-# captions_filename = "captions"
 
 # This line will be added to the captions file llgal will generate when
 # called with --gc. If the user doesn't want igal to remove this captions
