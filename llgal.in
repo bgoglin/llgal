@@ -780,6 +780,13 @@ sub get_template_file {
     }
 }
 
+# revert a path into ..
+sub back_path {
+    my $dir = shift ;
+    $dir =~ s/([^\/]+)/../g ;
+    return $dir ;
+}
+
 ######################################################################
 # sanity checks and restore defaults of numerical options
 
@@ -2512,9 +2519,7 @@ if ($make_recursive) {
 	my $entry = $entries[$i] ;
 	next if $entry->{type} != $TYPE_DIR ;
 	my $dir = $entry->{filename} ;
-	# compute path to come back from $dir
-	my $revdir = $dir ;
-	$revdir =~ s/([^\/]+)/../g ;
+	my $revdir = back_path $dir ;
 
 	# prev and next urls
 	my $prev = $entries[$i-1] ;
