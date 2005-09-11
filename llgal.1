@@ -371,6 +371,14 @@ and so on.
 Omit the image count from the captions.
 
 .TP
+.BI --next-gal " <url>"
+Add links to the previous gallery located by
+.IR <url> \fR.
+This option is used internally for recursive galleries, and
+thus not documented in
+.BI --help \fR.
+
+.TP
 .BI -p " <n>"
 The cellpadding value of the thumbnail index tables.
 The default is 3.
@@ -387,11 +395,23 @@ The text in the links might be changed through the
 configuration option.
 
 .TP
+.BI --prev-gal " <url>"
+Add links to the previous gallery located by
+.IR <url> \fR.
+This option is used internally for recursive galleries, and
+thus not documented in
+.BI --help \fR.
+
+.TP
 .BI -r
 Omit the film effect altogether.  For a simpler look you
 can also set the thumbnail background to be the same as the main
 index page background with the tile background-color option in the
 .IR llgal.css " file."
+
+.TP
+.BI --Rl
+Add links between subgalleries.
 
 .TP
 .BI -S

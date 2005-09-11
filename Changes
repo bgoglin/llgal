@@ -10,6 +10,11 @@
     is over these links.
 * Allow to change the label of links to index/prev/next in slides
   with prev/next_slide/index_link_text.
+* Add --Rl to add links between subgalleries.
+  + Add --next/prev-gal internal options to set links to prev/next
+    galleries.
+* Rename parent_link* to parent_gallery_link*. Replace --parent with
+  --parent-gal and undocument in --help (keep in manpage).
 * Rename _linktext options to _link_text.
 * Remove no_default_link_text since link text values might be
   modified at runtime, and also after captions generations.
@@ -18,8 +23,6 @@
   Hope this one will be fine.
 * Remove --sp and --tp command line options, keeping their configuration
   options (scaled_image_filenameprefix and thumbnail_image_filenameprefix).
-* Rename parent_link* to parent_gallery_link*. Replace --parent with
-  --parent-gal and undocument in --help (keep in manpage).
 * Fix and cleanup documentation.
 
 
