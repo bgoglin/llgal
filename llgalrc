@@ -189,7 +189,7 @@
 # index_title = "Index of pictures"
 
 # Change text in links to parent directory.
-# parent_link_text = "Back to parent gallery"
+# parent_gallery_link_text = "Back to parent gallery"
 
 # Label of the link from a slide to the index
 # index_link_text = "Index"
@@ -275,7 +275,7 @@
 # make_recursive = 0
 
 # Add links to the parent directory [--parent].
-# parent_link = 0
+# parent_gallery_link = 0
 
 ##### Various #####
 

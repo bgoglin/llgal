@@ -376,12 +376,14 @@ The cellpadding value of the thumbnail index tables.
 The default is 3.
 
 .TP
-.BI --parent
+.BI --parent-gal
 Add links to the parent directory.
-This option is used internally for recursive galleries.
+This option is used internally for recursive galleries, and
+thus not documented in
+.BI --help \fR.
 These links are stored as a header and a footer for the index.
 The text in the links might be changed through the
-.B parent_link_text
+.B parent_gallery_link_text
 configuration option.
 
 .TP
@@ -855,7 +857,7 @@ Default is \fB0\fR (show counter).
 Title of the gallery [--title <s>].
 Default is \fB"Index of pictures"\fR.
 .RE
-.I parent_link_text = \fI"string"
+.I parent_gallery_link_text = \fI"string"
 .RS
 Label of the link to the parent directory.
 Default is \fB"Back to parent gallery"\fR.
@@ -951,7 +953,7 @@ Default is \fB"%Y-%m-%d %H:%M:%S"\fR.
 Run recursively in subdirectories [-R].
 Default is \fB0\fR (disabled).
 .RE
-.I parent_link = <0/1>
+.I parent_gallery_link = <0/1>
 .RS
 Add links to the parent directory [--parent].
 Default is \fB0\fR (disabled).

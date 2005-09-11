@@ -213,7 +213,7 @@ my $show_no_slide_counter = 0 ;
 # title of the gallery (--title)
 my $index_title = "Index of pictures" ;
 # label of link to the parent gallery
-my $parent_link_text = "Back to parent gallery" ;
+my $parent_gallery_link_text = "Back to parent gallery" ;
 # label of link from slides to index
 my $index_link_text = "Index" ;
 # label of link from a slide to the previous one
@@ -247,7 +247,7 @@ my $timestamp_format_in_caption = "%Y-%m-%d %H:%M:%S" ;
 
 # Recursion
 # generate header and footer for link to parent gallery
-my $parent_link = 0 ;
+my $parent_gallery_link = 0 ;
 # add indentation to the begining of messages
 my $indent = "" ;
 
@@ -313,7 +313,6 @@ Layout Options:
           -n              use image file names for the HTML slide files
           --nc            omit the image count from the captions
           -p <n>          cellpadding value of thumbnail index tables ($index_cellpadding)
-          --parent        add links to the parent directory
           -r              omit the film effect altogether
           -S              add subdirectories to the list of slides
           -s              make no HTML slides, link thumbnails to images
@@ -453,8 +452,8 @@ sub process_option {
 	    $index_title = $1 ;
 	} elsif (/^index_link_text\s*=\s*"(.+)"$/) {
 	    $index_link_text = $1 ;
-	} elsif (/^parent_link_text\s*=\s*"(.+)"$/) {
-	    $parent_link_text = $1 ;
+	} elsif (/^parent_gallery_link_text\s*=\s*"(.+)"$/) {
+	    $parent_gallery_link_text = $1 ;
 	} elsif (/^prev_slide_link_text\s*=\s*"(.+)"$/) {
 	    $prev_slide_link_text = $1 ;
 	} elsif (/^next_slide_link_text\s*=\s*"(.+)"$/) {
@@ -488,8 +487,8 @@ sub process_option {
 # Recursion
 	} elsif (/^make_recursive\s*=\s*(.+)$/) {
 	    $make_recursive = $1 ;
-	} elsif (/^parent_link\s*=\s*(.+)$/) {
-	    $parent_link = $1 ;
+	} elsif (/^parent_gallery_link\s*=\s*(.+)$/) {
+	    $parent_gallery_link = $1 ;
 # What files to insert
 	} elsif (/^image_extensions\s*=\s*"(.*)"$/) {
 	    $image_extensions = $1 ;
@@ -572,7 +571,6 @@ GetOptions(
  	   'n'		=> \$make_slide_filename_from_filename,
 	   'nc'		=> \$show_no_slide_counter,
 	   'p=i'	=> \$index_cellpadding,
-	   'parent'     => \$parent_link,
            'r'		=> \$show_no_film_effect,
            'S'          => \$add_subdirs,
 	   's'		=> \$make_no_slides,
@@ -591,6 +589,7 @@ GetOptions(
 	   'option=s'	=> sub { shift ; process_option (shift) ; },
            'exclude=s'  => sub { shift ; my $entry ; $entry->{filter} = shift ; $entry->{excluded} = 1 ; push @excludes, $entry ; },
            'include=s'  => sub { shift ; my $entry ; $entry->{filter} = shift ; $entry->{excluded} = 0 ; push @excludes, $entry ; },
+           'parent-gal' => \$parent_gallery_link,
 	) or die $usage ;
 
 ######################################################################
@@ -1902,9 +1901,9 @@ for(my $i=0; $i < @entries; $i++) {
 #######################################################################
 # Add recursion header and footer
 
-if ($parent_link) {
-    unshift @headers, "<a href=\"..\">". $parent_link_text ."</a>" ;
-    push @footers, "<a href=\"..\">". $parent_link_text ."</a>" ;
+if ($parent_gallery_link) {
+    unshift @headers, "<a href=\"..\">". $parent_gallery_link_text ."</a>" ;
+    push @footers, "<a href=\"..\">". $parent_gallery_link_text ."</a>" ;
 }
 
 #######################################################################
@@ -2415,7 +2414,7 @@ if (defined $generate_config) {
     print NEWCFG "# Text:\n" ;
     print NEWCFG "index_title = \"$index_title\"\n" ;
     print NEWCFG "index_link_text = \"$index_link_text\"\n" ;
-    print NEWCFG "parent_link_text = \"$parent_link_text\"\n" ;
+    print NEWCFG "parent_gallery_link_text = \"$parent_gallery_link_text\"\n" ;
     print NEWCFG "prev_slide_link_text = \"$prev_slide_link_text\"\n" ;
     print NEWCFG "next_slide_link_text = \"$next_slide_link_text\"\n" ;
     print NEWCFG "MVI_link_text = \"$MVI_link_text\"\n" ;
@@ -2434,7 +2433,7 @@ if (defined $generate_config) {
     print NEWCFG "\n" ;
     print NEWCFG "# Recursion:\n" ;
     print NEWCFG "make_recursive = $make_recursive\n" ;
-    print NEWCFG "parent_link = $parent_link\n" ;
+    print NEWCFG "parent_gallery_link = $parent_gallery_link\n" ;
     print NEWCFG "\n" ;
     print NEWCFG "# What files to insert in the gallery:\n" ;
     print NEWCFG "image_extensions = \"$image_extensions\"\n" ;
@@ -2465,7 +2464,7 @@ if ($make_recursive) {
 	my $dir = $entry->{filename} ;
 	print "\n" ;
 	indprint "Entering subdirectory '$dir'...\n" ;
-	system ( $0, @llgal_options, "-d", "$destination_dir$dir", "--parent", "--indent", $indent."  " ) ;
+	system ( $0, @llgal_options, "-d", "$destination_dir$dir", "--parent-gal", "--indent", $indent."  " ) ;
 	die "Failed to call $0 for subdirectory $destination_dir$dir ($!).\n"
 	    if $? == -1 ;
 	immediate_warning "$0 failed for subdirectory $destination_dir$dir."

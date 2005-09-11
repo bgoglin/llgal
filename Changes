@@ -18,6 +18,8 @@
   Hope this one will be fine.
 * Remove --sp and --tp command line options, keeping their configuration
   options (scaled_image_filenameprefix and thumbnail_image_filenameprefix).
+* Rename parent_link* to parent_gallery_link*. Replace --parent with
+  --parent-gal and undocument in --help (keep in manpage).
 * Fix and cleanup documentation.
 
 
