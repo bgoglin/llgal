@@ -54,21 +54,21 @@ my $make_recursive = 0 ;        # do we run recursively in subdirectories ?
 # process these options but kept other options in @ARGV for later
 Getopt::Long::Configure('passthrough') ;
 GetOptions(
-	   'd=s' 	=> \$destination_dir,
-	   'f'		=> \$force_regen_asked,
-           'R'          => \$make_recursive,
-	   'gc'         => \$generate_captions,
-	   'gencfg=s'   => \$generate_config,
-	   'gt:s'       => sub {
+	'd=s'		=> \$destination_dir,
+	'f'		=> \$force_regen_asked,
+	'R'		=> \$make_recursive,
+	'gc'		=> \$generate_captions,
+	'gencfg=s'	=> \$generate_config,
+	'gt:s'		=> sub {
 				shift ; my $value = shift ;
 				$value = "local" if !$value ;
 				$give_templates = $value ;
-			    },
-	   'templates=s'=> \@template_dirs,
-	   'clean'	=> \$clean_asked,
-	   'cleanall'	=> \$cleanall_asked,
-	   'v|version'	=> \$version_asked,
-	   'h|help'	=> \$help_asked,
+				},
+	'templates=s'	=> \@template_dirs,
+	'clean'		=> \$clean_asked,
+	'cleanall'	=> \$cleanall_asked,
+	'v|version'	=> \$version_asked,
+	'h|help'	=> \$help_asked,
 	) ;
 
 # restore default behavior: process all options and warn on error
@@ -96,7 +96,7 @@ my @additional_config_files = () ;
 
 Getopt::Long::Configure('passthrough') ;
 GetOptions(
-	   'config=s'   => \@additional_config_files,
+	'config=s'	=> \@additional_config_files,
 	) ;
 Getopt::Long::Configure('nopassthrough') ;
 
@@ -549,47 +549,60 @@ foreach my $conf ( @additional_config_files ) {
 # process command-line arguments (overriding defaults above)
 
 GetOptions(
-           'A'          => \$add_all_files,
-	   'a'		=> sub { $show_dimensions = $show_size = 1 ; },
-	   'ad'		=> \$show_dimensions,
-	   'as'		=> \$show_size,
-	   'asu=s'	=> \$show_size_unit,
-	   'cf'		=> \$make_caption_from_filename,
-	   'cc:s'	=> sub { shift ; my $value = shift ;
-				 if ($value eq "") { $make_caption_from_image_comment = "std,exif" ; }
-				 elsif ($value eq "0") { $make_caption_from_image_comment = "" ; }
-				 else { $make_caption_from_image_comment = $value ; }
-			     },
-	   'ct'		=> \$make_caption_from_image_timestamp,
-	   'ctf=s'      => \$timestamp_format_in_caption,
-	   'i=s'	=> \$index_filename,
-	   'indent=s'   => \$indent,
-	   'k'		=> \$make_slide_title_from_caption,
-	   'L'          => \$list_links,
-	   'li'		=> sub { $index_link_image = 1 ; $prev_slide_link_image = 1 ; $next_slide_link_image = 1 ; },
-	   'lt'		=> sub { $prev_slide_link_preview = 1 ; $next_slide_link_preview = 1 ; },
- 	   'n'		=> \$make_slide_filename_from_filename,
-	   'nc'		=> \$show_no_slide_counter,
-	   'p=i'	=> \$index_cellpadding,
-           'r'		=> \$show_no_film_effect,
-           'S'          => \$add_subdirs,
-	   's'		=> \$make_no_slides,
-	   't=i'	=> \$tile_height,
-	   'u'		=> \$show_caption_under_thumbnails,
-	   'w=i'	=> \$thumbnails_per_row,
-	   'y=i'	=> \$thumbnail_height_max,
-	   'bigy=i'	=> \$slide_height_max,
-	   'bigxy=i'    => sub { shift ; $slide_width_max = $slide_height_max = shift ; },
-           'con=s'	=> sub { shift ; push (@convert_options, parse_convert_options (shift)) ; },
-           'sort=s'     => \$sort_criteria,
-	   'title=s'	=> \$index_title,
-	   'www'	=> \$www_access_rights,
-	   'wx=i'	=> \$pixels_per_row,
-	   'xy=i'	=> sub { shift ; $thumbnail_width_max = $thumbnail_height_max = shift ; },
-	   'option=s'	=> sub { shift ; process_option (shift) ; },
-           'exclude=s'  => sub { shift ; my $entry ; $entry->{filter} = shift ; $entry->{excluded} = 1 ; push @excludes, $entry ; },
-           'include=s'  => sub { shift ; my $entry ; $entry->{filter} = shift ; $entry->{excluded} = 0 ; push @excludes, $entry ; },
-           'parent-gal' => \$parent_gallery_link,
+	'A'		=> \$add_all_files,
+	'a'		=> sub { $show_dimensions = $show_size = 1 ; },
+	'ad'		=> \$show_dimensions,
+	'as'		=> \$show_size,
+	'asu=s'		=> \$show_size_unit,
+	'cf'		=> \$make_caption_from_filename,
+	'cc:s'		=> sub {
+				shift ; my $value = shift ;
+				if ($value eq "") { $make_caption_from_image_comment = "std,exif" ; }
+				elsif ($value eq "0") { $make_caption_from_image_comment = "" ; }
+				else { $make_caption_from_image_comment = $value ; }
+				},
+	'ct'		=> \$make_caption_from_image_timestamp,
+	'ctf=s'		=> \$timestamp_format_in_caption,
+	'i=s'		=> \$index_filename,
+	'indent=s'	=> \$indent,
+	'k'		=> \$make_slide_title_from_caption,
+	'L'		=> \$list_links,
+	'li'		=> sub { $index_link_image = 1 ; $prev_slide_link_image = 1 ; $next_slide_link_image = 1 ; },
+	'lt'		=> sub { $prev_slide_link_preview = 1 ; $next_slide_link_preview = 1 ; },
+	'n'		=> \$make_slide_filename_from_filename,
+	'nc'		=> \$show_no_slide_counter,
+	'p=i'		=> \$index_cellpadding,
+	'r'		=> \$show_no_film_effect,
+	'S'		=> \$add_subdirs,
+	's'		=> \$make_no_slides,
+	't=i'		=> \$tile_height,
+	'u'		=> \$show_caption_under_thumbnails,
+	'w=i'		=> \$thumbnails_per_row,
+	'y=i'		=> \$thumbnail_height_max,
+	'bigy=i'	=> \$slide_height_max,
+	'bigxy=i'	=> sub { shift ; $slide_width_max = $slide_height_max = shift ; },
+	'con=s'		=> sub { shift ; push (@convert_options, parse_convert_options (shift)) ; },
+	'sort=s'	=> \$sort_criteria,
+	'title=s'	=> \$index_title,
+	'www'		=> \$www_access_rights,
+	'wx=i'		=> \$pixels_per_row,
+	'xy=i'		=> sub { shift ; $thumbnail_width_max = $thumbnail_height_max = shift ; },
+	'option=s'	=> sub { shift ; process_option (shift) ; },
+	'exclude=s'	=> sub {
+				shift ;
+				my $entry ;
+				$entry->{filter} = shift ;
+				$entry->{excluded} = 1 ;
+				push @excludes, $entry ;
+				},
+	'include=s'	=> sub {
+				shift ;
+				my $entry ;
+				$entry->{filter} = shift ;
+				$entry->{excluded} = 0 ;
+				push @excludes, $entry ;
+				},
+	'parent-gal'	=> \$parent_gallery_link,
 	) or die $usage ;
 
 ######################################################################
