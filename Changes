@@ -1,4 +1,6 @@
 
+* Rename /etc/llgalrc to /etc/llgal/llgalrc. Also read ~/.llgal/llgalrc
+  and .llgal/llgalrc.
 * Add --li and --lt options to replace link labels in slides with
   image (requested by Cyrill Helg):
   + index.png, prev.png and next.png are added to show arrows for --li.
@@ -23,7 +25,7 @@
   Hope this one will be fine.
 * Remove --sp and --tp command line options, keeping their configuration
   options (scaled_image_filenameprefix and thumbnail_image_filenameprefix).
-* Fix and cleanup documentation.
+* Fix and cleanup documentation and Makefile.
 
 
 llgal (0.11)

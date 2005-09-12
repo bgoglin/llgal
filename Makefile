@@ -21,17 +21,17 @@ clean::
 	rm -f llgal
 
 install:: llgal
-	install -d -m 0755 $(DESTDIR)$(BINDIR) $(DESTDIR)$(DATADIR)/llgal $(DESTDIR)$(MANDIR)/man1 $(DESTDIR)$(SYSCONFDIR)
+	install -d -m 0755 $(DESTDIR)$(BINDIR)/ $(DESTDIR)$(DATADIR)/llgal/ $(DESTDIR)$(MANDIR)/man1/ $(DESTDIR)$(SYSCONFDIR)/llgal/
 	install -m 0755 llgal $(DESTDIR)$(BINDIR)/llgal
-	install -m 0644 captions.header llgal.css indextemplate.html slidetemplate.html $(DESTDIR)$(DATADIR)/llgal
-	install -m 0644 tile.png index.png prev.png next.png $(DESTDIR)$(DATADIR)/llgal
-	install -m 0644 llgalrc $(DESTDIR)$(SYSCONFDIR)
-	install -m 0644 llgal.1 $(DESTDIR)$(MANDIR)/man1
+	install -m 0644 captions.header llgal.css indextemplate.html slidetemplate.html $(DESTDIR)$(DATADIR)/llgal/
+	install -m 0644 tile.png index.png prev.png next.png $(DESTDIR)$(DATADIR)/llgal/
+	install -m 0644 llgalrc $(DESTDIR)$(SYSCONFDIR)/llgal/
+	install -m 0644 llgal.1 $(DESTDIR)$(MANDIR)/man1/
 
 uninstall::
 	rm $(DESTDIR)$(BINDIR)/llgal
-	rm -rf $(DESTDIR)$(DATADIR)/llgal
-	rm $(DESTDIR)$(SYSCONFDIR)/llgalrc
+	rm -rf $(DESTDIR)$(DATADIR)/llgal/
+	rm -rf $(DESTDIR)$(SYSCONFDIR)/llgal/
 	rm $(DESTDIR)$(MANDIR)/man1/llgal.1
 
 tarball::

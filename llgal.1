@@ -588,14 +588,19 @@ are ignored.
 
 Before parsing command line options, llgal reads several configuration
 files. It starts with
-.IR /etc/llgalrc
+.IR /etc/llgal/llgalrc
 then reads
-.IR $HOME/.llgalrc
+.IR $HOME/.llgal/llgalrc
 then the 
-.IR .llgalrc
+.IR .llgal/llgalrc
 file in the gallery directory
 and finally the local
+.IR .llgal/llgalrc
+file.
+Note that obsolete
 .IR .llgalrc
+are read together with each
+.IR .llgal/llgalrc
 file.
 Additional configuration files may also be defined with the
 .I --config
@@ -607,7 +612,7 @@ All following options may also be used on the command line through
 .I "--option 'variable = value'"\fR.
 
 See also
-.IR /etc/llgalrc
+.IR /etc/llgal/llgalrc
 for details about these options and their default values.
 
 .B llgal directories:
@@ -1082,9 +1087,9 @@ by setting them a negative value.
 
 .SH FILES
 .RE
-.I /etc/llgalrc
-.I $HOME/.llgalrc
-.I .llgalrc
+.I /etc/llgal/llgalrc
+.I $HOME/.llgal/llgalrc
+.I .llgal/llgalrc
 .RS
 System-wide, per-user and local configuration files. See
 .SM

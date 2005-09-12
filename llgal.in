@@ -86,11 +86,15 @@ my $destination_string = ($destination_dir ? "directory '$destination_dir'" : "c
 # configuration files
 
 my @config_files = () ;
-push (@config_files, "@SYSCONFDIR@/llgalrc") ;
-push (@config_files, $ENV{HOME}."/.llgalrc") ;
-push (@config_files, "${destination_dir}.llgalrc")
-    if $destination_dir ;
-push (@config_files, ".llgalrc") ;
+push (@config_files, "@SYSCONFDIR@/llgal/llgalrc") ;
+push (@config_files, $ENV{HOME}."/.llgal/llgalrc") ;
+push (@config_files, $ENV{HOME}."/.llgalrc") ; # obsolete
+if ($destination_dir) {
+    push (@config_files, "${destination_dir}.llgal/llgalrc") ;
+    push (@config_files, "${destination_dir}.llgalrc") ; # obsolete
+}
+push (@config_files, ".llgal/llgalrc") ;
+push (@config_files, ".llgalrc") ; # obsolete
 
 my @additional_config_files = () ;
 

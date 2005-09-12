@@ -1,6 +1,6 @@
 # llgal configuration options.
-# These options may be defined in /etc/llgalrc, a per -user
-# ${HOME}/.llgalrc file or a directory-specific .llgalrc.
+# These options may be defined in /etc/llgal/llgalrc, a per-user
+# ${HOME}/.llgal/llgalrc file or a directory-specific .llgal/llgalrc.
 
 # Most of these options may later be overriden by command line options.
 # Default are shown in examples below.
