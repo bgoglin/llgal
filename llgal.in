@@ -86,16 +86,18 @@ my $destination_string = ($destination_dir ? "directory '$destination_dir'" : "c
 # configuration files
 
 my @config_files = () ;
-push (@config_files, "@SYSCONFDIR@/llgal/llgalrc") ;
-push (@config_files, $ENV{HOME}."/.llgal/llgalrc") ;
-push (@config_files, $ENV{HOME}."/.llgalrc") ; # obsolete
-if ($destination_dir) {
-    push (@config_files, "${destination_dir}.llgal/llgalrc") ;
-    push (@config_files, "${destination_dir}.llgalrc") ; # obsolete
-}
-push (@config_files, ".llgal/llgalrc") ;
-push (@config_files, ".llgalrc") ; # obsolete
 
+# system-wide configuration file
+push (@config_files, "@SYSCONFDIR@/llgal/llgalrc") ;
+# user-wide configuration file
+push (@config_files, $ENV{HOME}."/.llgal/llgalrc") ;
+# destination configuration file, if not local
+push (@config_files, "${destination_dir}.llgal/llgalrc")
+    if $destination_dir ;
+# local configuration file
+push (@config_files, ".llgal/llgalrc") ;
+
+# additional configuration files
 my @additional_config_files = () ;
 
 Getopt::Long::Configure('passthrough') ;
@@ -550,11 +552,18 @@ sub process_option {
 
 # parse config files
 foreach my $conf ( @config_files ) {
-    open CONF, $conf ;
+    # warn on obsolete file
+    my $oldconf = $conf ;
+    $oldconf =~ s/llgal\/llgalrc$/llgalrc/ ;
+    print "!! Obsolete configuration file $oldconf skipped, should be moved to $conf.\n"
+	if -e $oldconf ;
+
+    # read conf
+    open CONF, $conf or next ;
     while (<CONF>) {
 	process_option $_ ;
     }
-   close CONF ;
+    close CONF ;
 }
 
 foreach my $conf ( @additional_config_files ) {
