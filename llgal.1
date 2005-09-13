@@ -576,12 +576,30 @@ defines a header (multiple ones are possible).
 .RS
 defines a footer (multiple ones are possible).
 .RE
+.B PARENT: <linktext>
+.RS
+defines the label of the link to the parent gallery.
+.RE
+.B PREV: <linktext> ---- <url>
+.RS
+defines the label of the link to the previous gallery located by <url>.
+.RE
+.B NEXT: <linktext> ---- <url>
+.RS
+defines the label of the link to the next gallery located by <url>.
+.RE
+
 .TP
 Note that you can use whatever HTML syntax in the captions.
 .RE
 Line begining with a
 .RI #
 are ignored.
+
+When generating a captions file, the
+.BI captions.header
+file is inserted at the top of the file to detail
+the syntax.
 
 
 .SH CONFIGURATION
@@ -1090,6 +1108,11 @@ System-wide, per-user and local configuration files. See
 .SM
 .B CONFIGURATION
 for details.
+.RE
+.I /usr/share/llgal/captions.header
+.RS
+Captions syntax description file that is inserted at the top
+of generated captions file.
 
 .RE
 .I /usr/share/llgal/llgal.css

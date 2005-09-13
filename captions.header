@@ -1,6 +1,9 @@
 
 # Use the following syntax (without the begining '# ') to define captions line:
 # TITLE: title of the index
+# PARENT: label of the link to the parent gallery
+# PREV: label of the link to the previous gallery ---- url of the previous gallery
+# NEXT: label of the link to the next gallery ---- url of the next gallery
 # INDEXHEAD: one header line in the index
 # INDEXFOOT: one header line in the index
 # TXT: text ---- caption

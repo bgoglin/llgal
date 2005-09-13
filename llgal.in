@@ -1750,11 +1750,22 @@ if ($generate_captions) {
 
 	# actually rewrite the caption files, removing updated entries
 	my $old_title = "" ;
+	my $old_parent_gallery_link_text = "" ;
+	my $old_prev_gallery_link_text = "" ;
+	my $old_prev_gallery_link = "" ;
+	my $old_next_gallery_link_text = "" ;
+	my $old_next_gallery_link = "" ;
 	foreach my $line (@captions) {
-	    if ($line =~ /^TITLE:\s*(.*)\s*/) {
+	    if ($line =~ /^TITLE:\s*(.*)\s*$/) {
 	        $old_title = $1 ;
-		chomp $old_title ;
-		next if $old_title ne $index_title ;
+	    } elsif ($line =~ /^PARENT:\s*(.*)\s*$/) {
+		$old_parent_gallery_link_text = $1 ;
+	    } elsif ($line =~ /^PREV:\s*(.+)\s+----\s+(.+)\s*/) {
+		$old_prev_gallery_link_text = $1 ;
+		$old_prev_gallery_link = $2 ;
+	    } elsif ($line =~ /^NEXT:\s*(.+)\s+----\s+(.+)\s*/) {
+		$old_next_gallery_link_text = $1 ;
+		$old_next_gallery_link = $2 ;
 	    }
 	    print CAP $line ;
 	}
@@ -1765,8 +1776,18 @@ if ($generate_captions) {
 	print CAP "# Appended new captions (", scalar localtime, ").\n" ;
 	print CAP "\n" ;
 
-	print CAP "TITLE: $index_title\n\n"
+	print CAP "TITLE: $index_title\n"
 	    if $old_title ne $index_title ;
+	print CAP "PARENT: $parent_gallery_link_text\n"
+	    if $parent_gallery_link
+		and $old_parent_gallery_link_text ne $parent_gallery_link_text ;
+	print CAP "PREV: $prev_gallery_link_text ---- $prev_gallery_link\n"
+	    if $old_prev_gallery_link ne $prev_gallery_link
+		or $old_prev_gallery_link_text ne $prev_gallery_link_text ;
+	print CAP "NEXT: $next_gallery_link_text ---- $next_gallery_link\n"
+	    if $old_next_gallery_link ne $next_gallery_link
+		or $old_next_gallery_link_text ne $next_gallery_link_text ;
+	print CAP "\n" ;
 
 	# it's not easy to count chars in an append-only file
 	# so we don't count them when computing the percentage
@@ -1813,7 +1834,14 @@ if ($generate_captions) {
 	print CAP "# $captions_removal_line\n" ;
 	print CAP "\n" ;
 
-	print CAP "TITLE: $index_title\n\n" ;
+	print CAP "TITLE: $index_title\n" ;
+	print CAP "PARENT: $parent_gallery_link_text\n"
+	    if $parent_gallery_link ;
+	print CAP "PREV: $prev_gallery_link_text ---- $prev_gallery_link\n"
+	    if $prev_gallery_link ;
+	print CAP "NEXT: $next_gallery_link_text ---- $next_gallery_link\n"
+	    if $next_gallery_link ;
+	print CAP "\n" ;
 
 	for (my $i = 0; $i < @entries; $i++) {
 	    my $entry = $entries[$i] ;
@@ -1886,13 +1914,28 @@ if (-e "$destination_dir$local_llgal_dir/$captions_filename") {
 		# title
 		$index_title = $1 ;
 
-	    } elsif ($line =~ m/^INDEXHEAD:\s+(.*)\s*$/) {
+	    } elsif ($line =~ m/^INDEXHEAD:\s*(.*)\s*$/) {
 		# header for the index
 		push @headers, $1 ;
 
-	    } elsif ($line =~ m/^INDEXFOOT:\s+(.*)\s*$/) {
+	    } elsif ($line =~ m/^INDEXFOOT:\s*(.*)\s*$/) {
 		# footer for the index
 		push @footers, $1 ;
+
+	    } elsif ($line =~ m/^PARENT:\s*(.*)\s*$/) {
+		# parent gallery link label
+		$parent_gallery_link = 1 ;
+		$parent_gallery_link_text = $1 ;
+
+	    } elsif ($line =~ m/^PREV:\s*(.*)\s+----\s+(.*)\s*$/) {
+		# prev gallery link label
+		$prev_gallery_link_text = $1 ;
+		$prev_gallery_link = $2 ;
+
+	    } elsif ($line =~ m/^NEXT:\s*(.*)\s+----\s+(.*)\s*$/) {
+		# next gallery link label
+		$next_gallery_link_text = $1 ;
+		$next_gallery_link = $2 ;
 
 	    } else {
 		# that's a slide, create its entry
