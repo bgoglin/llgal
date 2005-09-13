@@ -5,6 +5,8 @@ You don't care about this if you use Debian or Gentoo prepackaged
 versions that are available on http://bgoglin.free.fr/llgal
 
 Run 'make install' as root.
+If you don't want or can't install as root, you may use
+'make install DESTDIR=/home/login/where/you/want'.
 
 By default, everything is installed in /usr/local/.
 Most directories might be replaced by overriding their default values
