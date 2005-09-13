@@ -15,12 +15,12 @@ TARBALL	=	$(NAME)-$(VERSION)
 DEBIAN_TARBALL	=	$(NAME)_$(VERSION).orig
 
 llgal::
-	sed -e 's!@DATADIR@!$(DATADIR)!g' -e 's!@SYSCONFDIR@!$(SYSCONFDIR)!g' -e 's!@VERSION@!$(VERSION)!g' < llgal.in > llgal
+	sed -e 's!@DATADIR@!$(DESTDIR)$(DATADIR)!g' -e 's!@SYSCONFDIR@!$(DESTDIR)$(SYSCONFDIR)!g' -e 's!@VERSION@!$(VERSION)!g' < llgal.in > llgal
 
 clean::
 	rm -f llgal
 
-install:: llgal
+install::
 	install -d -m 0755 $(DESTDIR)$(BINDIR)/ $(DESTDIR)$(DATADIR)/llgal/ $(DESTDIR)$(MANDIR)/man1/ $(DESTDIR)$(SYSCONFDIR)/llgal/
 	install -m 0755 llgal $(DESTDIR)$(BINDIR)/llgal
 	install -m 0644 captions.header llgal.css indextemplate.html slidetemplate.html $(DESTDIR)$(DATADIR)/llgal/
