@@ -22,10 +22,12 @@
 * Remove no_default_link_text since link text values might be
   modified at runtime, and also after captions generations.
 * Rename MVI/FIL/DIR_default_link_text to MVI/FIL/DIR_link_text.
-* One more reorganization of options in llgalrc and generated config files.
-  Hope this one will be fine.
 * Remove --sp and --tp command line options, keeping their configuration
   options (scaled_image_filenameprefix and thumbnail_image_filenameprefix).
+* Write the title in the captions file when generating. Update it when
+  appending.
+* One more reorganization of options in llgalrc and generated config files.
+  Hope this one will be fine.
 * Fix compilation and installation when DESTDIR is overriden.
 * Fix and cleanup documentation and Makefile.
 

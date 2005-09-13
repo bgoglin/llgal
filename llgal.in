@@ -1745,14 +1745,29 @@ if ($generate_captions) {
 	close CAP ;
 
 	indprint "Appending new captions to $captions_filename: " ;
-	open (CAP, ">>$destination_dir$local_llgal_dir/$captions_filename")
+	open (CAP, ">$destination_dir$local_llgal_dir/$captions_filename")
 	    or die "Can't open $destination_dir$local_llgal_dir/$captions_filename file to append\n" ;
+
+	# actually rewrite the caption files, removing updated entries
+	my $old_title = "" ;
+	foreach my $line (@captions) {
+	    if ($line =~ /^TITLE:\s*(.*)\s*/) {
+	        $old_title = $1 ;
+		chomp $old_title ;
+		next if $old_title ne $index_title ;
+	    }
+	    print CAP $line ;
+	}
 
 	init_percentage () ;
 
 	print CAP "\n" ;
 	print CAP "# Appended new captions (", scalar localtime, ").\n" ;
 	print CAP "\n" ;
+
+	print CAP "TITLE: $index_title\n\n"
+	    if $old_title ne $index_title ;
+
 	# it's not easy to count chars in an append-only file
 	# so we don't count them when computing the percentage
 
@@ -1797,6 +1812,8 @@ if ($generate_captions) {
 	}
 	print CAP "# $captions_removal_line\n" ;
 	print CAP "\n" ;
+
+	print CAP "TITLE: $index_title\n\n" ;
 
 	for (my $i = 0; $i < @entries; $i++) {
 	    my $entry = $entries[$i] ;
@@ -1865,7 +1882,7 @@ if (-e "$destination_dir$local_llgal_dir/$captions_filename") {
 	$line =~ s/\s\(\s*\)$/\1/ ;
 	# only lines that don't start with # and are not empty
 	if (!($line =~ m/^\#/) && !($line =~ /^$/)) {
-	    if ($line =~ m/TITLE:\s*(.*)\s*/) {
+	    if ($line =~ m/^TITLE:\s*(.*)\s*/) {
 		# title
 		$index_title = $1 ;
 
