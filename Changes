@@ -26,6 +26,7 @@
   Hope this one will be fine.
 * Remove --sp and --tp command line options, keeping their configuration
   options (scaled_image_filenameprefix and thumbnail_image_filenameprefix).
+* Fix compilation and installation when DESTDIR is overriden.
 * Fix and cleanup documentation and Makefile.
 
 
