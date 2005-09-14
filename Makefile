@@ -1,5 +1,5 @@
 NAME	=	llgal
-VERSION	=	0.11
+VERSION	=	0.11.1
 
 .PHONY: llgal clean install uninstall tarball
 
@@ -15,32 +15,33 @@ TARBALL	=	$(NAME)-$(VERSION)
 DEBIAN_TARBALL	=	$(NAME)_$(VERSION).orig
 
 llgal::
-	sed -e 's!@DATADIR@!$(DATADIR)!g' -e 's!@SYSCONFDIR@!$(SYSCONFDIR)!g' -e 's!@VERSION@!$(VERSION)!g' < llgal.in > llgal
+	sed -e 's!@DATADIR@!$(DESTDIR)$(DATADIR)!g' -e 's!@SYSCONFDIR@!$(DESTDIR)$(SYSCONFDIR)!g' -e 's!@VERSION@!$(VERSION)!g' < llgal.in > llgal
 
 clean::
 	rm -f llgal
 
-install:: llgal
-	install -d -m 0755 $(DESTDIR)$(BINDIR) $(DESTDIR)$(DATADIR)/llgal $(DESTDIR)$(MANDIR)/man1 $(DESTDIR)$(SYSCONFDIR)
+install::
+	install -d -m 0755 $(DESTDIR)$(BINDIR)/ $(DESTDIR)$(DATADIR)/llgal/ $(DESTDIR)$(MANDIR)/man1/ $(DESTDIR)$(SYSCONFDIR)/llgal/
 	install -m 0755 llgal $(DESTDIR)$(BINDIR)/llgal
-	install -m 0644 captions.header indextemplate.html llgal.css slidetemplate.html tile.png $(DESTDIR)$(DATADIR)/llgal
-	install -m 0644 llgalrc $(DESTDIR)$(SYSCONFDIR)
-	install -m 0644 llgal.1 $(DESTDIR)$(MANDIR)/man1
+	install -m 0644 captions.header llgal.css indextemplate.html slidetemplate.html $(DESTDIR)$(DATADIR)/llgal/
+	install -m 0644 tile.png index.png prev.png next.png $(DESTDIR)$(DATADIR)/llgal/
+	install -m 0644 llgalrc $(DESTDIR)$(SYSCONFDIR)/llgal/
+	install -m 0644 llgal.1 $(DESTDIR)$(MANDIR)/man1/
 
 uninstall::
 	rm $(DESTDIR)$(BINDIR)/llgal
-	rm -rf $(DESTDIR)$(DATADIR)/llgal
-	rm $(DESTDIR)$(SYSCONFDIR)/llgalrc
+	rm -rf $(DESTDIR)$(DATADIR)/llgal/
+	rm -rf $(DESTDIR)$(SYSCONFDIR)/llgal/
 	rm $(DESTDIR)$(MANDIR)/man1/llgal.1
 
 tarball::
 	mkdir /tmp/$(TARBALL)
 	cp llgal.in /tmp/$(TARBALL)
-	cp indextemplate.html llgal.css slidetemplate.html tile.png /tmp/$(TARBALL)
+	cp captions.header llgal.css indextemplate.html slidetemplate.html /tmp/$(TARBALL)
+	cp tile.png index.png prev.png next.png /tmp/$(TARBALL)
 	cp llgalrc /tmp/$(TARBALL)
 	cp llgal.1 /tmp/$(TARBALL)
 	cp Makefile /tmp/$(TARBALL)
-	cp captions.header /tmp/$(TARBALL)
 	cp README /tmp/$(TARBALL)
 	cp COPYING /tmp/$(TARBALL)
 	cp Changes /tmp/$(TARBALL)

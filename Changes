@@ -1,3 +1,41 @@
+llgal (0.11.1)
+
+* Rename /etc/llgalrc to /etc/llgal/llgalrc. Also read ~/.llgal/llgalrc
+  and .llgal/llgalrc.
+  + Warn if an old file is found, and skip it.
+* Add --li and --lt options to replace link labels in slides with
+  image (requested by Cyrill Helg):
+  + index.png, prev.png and next.png are added to show arrows for --li.
+  + A thumbnail is shown to preview prev/next slide (if IMG) for --lt.
+  + slidetemplate is a little bit modified.
+    - The Index link is now _betwee_ Prev and Next.
+  + The css template is a little bit extended.
+  + Add configurable text that is shown when the mouse pointer
+    is over these links.
+* Allow to change the label of links to index/prev/next in slides
+  with prev/next_slide/index_link_text.
+* Add --Rl to add links between subgalleries.
+  + Add --next/prev-gal internal options to set links to prev/next
+    galleries.
+* Write the title and parent/prev/next gallery in the captions file when
+  generating. Update them when appending (without removing the previous
+  definition if it exists).
+  + Add PARENT/PREV/NEXT captions line for gallery links.
+* Rename parent_link* to parent_gallery_link*. Replace --parent with
+  --parent-gal and undocument in --help (keep in manpage).
+* Rename _linktext options to _link_text.
+* Remove no_default_link_text since link text values might be
+  modified at runtime, and also after captions generation.
+* Rename MVI/FIL/DIR_default_link_text to MVI/FIL/DIR_link_text.
+* Remove --sp and --tp command line options, keeping their configuration
+  options (scaled_image_filenameprefix and thumbnail_image_filenameprefix).
+* One more reorganization of options in llgalrc and generated config files.
+  Hope this one will be fine.
+* Fix compilation and installation when DESTDIR is overriden.
+* Fix and cleanup documentation and Makefile.
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Tue, 11 Sep 2005 09:43:55 +0200
+
 llgal (0.11)
 
 * The local llgal directory is now .llgal instead of .llgal.files.

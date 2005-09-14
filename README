@@ -4,7 +4,13 @@ llgal installation instructions
 You don't care about this if you use Debian or Gentoo prepackaged
 versions that are available on http://bgoglin.free.fr/llgal
 
-Run 'make install' as root.
+Run 'make' followed by 'make install' as root.
+
+If you don't want or can't install as root, you may use
+'make install DESTDIR=/home/login/where/you/want'.
+Note that you need to pass the same DESTDIR parameter
+during compilation (with 'make') since the installation
+directory is hardcoded in llgal.
 
 By default, everything is installed in /usr/local/.
 Most directories might be replaced by overriding their default values

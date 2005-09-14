@@ -346,6 +346,20 @@ Might be used when the directory only contains subgalleries and thus does
 not need any slide or thumbnail.
 
 .TP
+.BI --li
+Replace link labels in slides (usually \fBIndex\fR, \fBPrev\fR and \fBNext\fR)
+with images (usually \fBindex.png\fR, \fBprev.png\fR and \fBnext.png\fR).
+
+.TP
+.BI --lt
+Replace link labels in slides (usually \fBPrev\fR and \fBNext\fR) with
+a thumbnail to preview previous/next slide.
+If passed together with
+.BI --li \fR,
+thumbnail preview is used for links to previous/next slide
+while the image is for the link to the index is kept. 
+
+.TP
 .BI -n
 Use the image file names for the HTML slide files.  Otherwise
 the default behavior is to simply name your slides
@@ -357,18 +371,36 @@ and so on.
 Omit the image count from the captions.
 
 .TP
+.BI --next-gal " <url>"
+Add links to the previous gallery located by
+.IR <url> \fR.
+This option is used internally for recursive galleries, and
+thus not documented in
+.BI --help \fR.
+
+.TP
 .BI -p " <n>"
 The cellpadding value of the thumbnail index tables.
 The default is 3.
 
 .TP
-.BI --parent
+.BI --parent-gal
 Add links to the parent directory.
-This option is used internally for recursive galleries.
+This option is used internally for recursive galleries, and
+thus not documented in
+.BI --help \fR.
 These links are stored as a header and a footer for the index.
 The text in the links might be changed through the
-.B parent_linktext
+.B parent_gallery_link_text
 configuration option.
+
+.TP
+.BI --prev-gal " <url>"
+Add links to the previous gallery located by
+.IR <url> \fR.
+This option is used internally for recursive galleries, and
+thus not documented in
+.BI --help \fR.
 
 .TP
 .BI -r
@@ -376,6 +408,10 @@ Omit the film effect altogether.  For a simpler look you
 can also set the thumbnail background to be the same as the main
 index page background with the tile background-color option in the
 .IR llgal.css " file."
+
+.TP
+.BI --Rl
+Add links between subgalleries.
 
 .TP
 .BI -S
@@ -411,10 +447,6 @@ Setting to the empty string means \fBnone\fR.
 \fBrev\fR might be added for reverse sort.
 
 .TP
-.BI --sp " <s>"
-Change slide image filename prefix
-
-.TP
 .BI -t " <n>"
 Height (in pixels) of the tiled image used to simulate the top
 and bottom film effect on the thumbnail index page.  This
@@ -428,10 +460,6 @@ file with your own design.
 Substitutes the string 
 .I <s>
 for "<!--TITLE-->" in the index. The default is "Index of Pictures".
-
-.TP
-.BI --tp " <s>"
-Change thumbnail image filename prefix.
 
 .TP
 .BI -u
@@ -548,6 +576,19 @@ defines a header (multiple ones are possible).
 .RS
 defines a footer (multiple ones are possible).
 .RE
+.B PARENT: <linktext>
+.RS
+defines the label of the link to the parent gallery.
+.RE
+.B PREV: <linktext> ---- <url>
+.RS
+defines the label of the link to the previous gallery located by <url>.
+.RE
+.B NEXT: <linktext> ---- <url>
+.RS
+defines the label of the link to the next gallery located by <url>.
+.RE
+
 .TP
 Note that you can use whatever HTML syntax in the captions.
 .RE
@@ -555,19 +596,24 @@ Line begining with a
 .RI #
 are ignored.
 
+When generating a captions file, the
+.BI captions.header
+file is inserted at the top of the file to detail
+the syntax.
+
 
 .SH CONFIGURATION
 
 Before parsing command line options, llgal reads several configuration
 files. It starts with
-.IR /etc/llgalrc
+.IR /etc/llgal/llgalrc
 then reads
-.IR $HOME/.llgalrc
+.IR $HOME/.llgal/llgalrc
 then the 
-.IR .llgalrc
+.IR .llgal/llgalrc
 file in the gallery directory
 and finally the local
-.IR .llgalrc
+.IR .llgal/llgalrc
 file.
 Additional configuration files may also be defined with the
 .I --config
@@ -579,7 +625,7 @@ All following options may also be used on the command line through
 .I "--option 'variable = value'"\fR.
 
 See also
-.IR /etc/llgalrc
+.IR /etc/llgal/llgalrc
 for details about these options and their default values.
 
 .B llgal directories:
@@ -619,6 +665,21 @@ Default is \fBllgal.css\fR.
 Name of the film tile image.
 Default is \fBtile.png\fR.
 .RE
+.I index_link_image_filename = \fI"filename"
+.RS
+Change image name for link to the index.
+Default is \fB"index.png"\fR.
+.RE
+.I next_slide_link_image_filename = \fI"filename"
+.RS
+Change image name for link to the next slide.
+Default is \fB"next.png"\fR.
+.RE
+.I previous_slide_link_image_filename = \fI"filename"
+.RS
+Change image name for link to the previous slide.
+Default is \fB"prev.png"\fR.
+.RE
 .I indextemplate_filename = \fI"filename"
 .RS
 Name of the HTML index template.
@@ -637,26 +698,42 @@ Default is \fBslidetemplate.html\fR.
 The name of the subdirectory where llgal generated files will be stored.
 Default is \fB.llgal\fR.
 .RE
-.I scaled_image_filenameprefix = \fI"filename prefix"
-.RS
-Prefix used to determine slide-image filenames from
-original images (in case of --bigxy or --bigy) [--sp <s>].
-Default is \fBscaled_\fR.
-.RE
-.I thumbnail_image_filenameprefix = \fI"filename prefix"
-.RS
-Prefix used to determine thumbnail filenames from
-original images [--tp <s>].
-Default is \fBthumb_\fR.
-.RE
-
-.B Index:
-
 .I index_filename = \fI"filename"
 .RS
 Name of the generated index file [-i <s>].
 Default is \fBindex.html\fR.
 .RE
+.I slide_filenameprefix = \fI"filename prefix"
+.RS
+Prefix of generated HTML slide filenames.
+Default is \fB""\fR.
+.RE
+.I slide_filenameprefix_nofile = \fI"filename prefix"
+.RS
+Prefix of slide filenames when generated from filename
+while there's no file associated (text, link, ...).
+Default is \fBNOFILE\fR.
+.RE
+.I scaled_image_filenameprefix = \fI"filename prefix"
+.RS
+Prefix used to determine slide-image filenames from original images
+(in case of --bigxy or --bigy).
+Default is \fBscaled_\fR.
+.RE
+.I thumbnail_image_filenameprefix = \fI"filename prefix"
+.RS
+Prefix used to determine thumbnail filenames from original images.
+Default is \fBthumb_\fR.
+.RE
+.I captions_filename = \fI"filename"
+.RS
+Name of the caption file that will be generated when llgal is called with --gc,
+or will be automatically used if it exists to generate slide captions.
+Default is \fBcaptions\fR.
+.RE
+
+.B Index:
+
 .I index_cellpadding = <pixels>
 .RS
 Cellpadding in the index table [-p <n>].
@@ -672,22 +749,11 @@ Default is \fB0\fR (disabled).
 Pixels per row of thumbnails in index [-wx <n>].
 Default is \fB0\fR (unlimited).
 .RE
-
-.B Film effect:
-
-.I show_no_film_effect = <0/1>
+.I thumbnails_per_row = <pixels>
 .RS
-Omit film effect [-r].
-Default is \fB1\fR (enabled).
+Thumbnails per row in index [-w <n>].
+Default is \fB5\fR.
 .RE
-.I tile_height = <pixels>
-.RS
-Film tile height [-t <n>].
-Default is \fB21\fR.
-.RE
-
-.B Thumbnails:
-
 .I thumbnail_height_max = <pixels>
 .RS
 Maximal height of thumbnails [-y <n>].
@@ -698,10 +764,20 @@ Default is \fB75\fR.
 Maximal width of thumbnails [--xy <n>]
 Default is \fB0\fR (unlimited).
 .RE
-.I thumbnails_per_row = <pixels>
+.I show_caption_under_thumbnails = <0/1>
 .RS
-Thumbnails per row in index [-w <n>].
-Default is \fB5\fR.
+Write captions under thumbnails [-u].
+Default is \fB0\fR (disabled).
+.RE
+.I show_no_film_effect = <0/1>
+.RS
+Omit film effect [-r].
+Default is \fB1\fR (enabled).
+.RE
+.I tile_height = <pixels>
+.RS
+Film tile height [-t <n>].
+Default is \fB21\fR.
 .RE
 
 .B Slides:
@@ -720,27 +796,6 @@ Default is \fB0\fR (disabled).
 .RS
 Also use extension in slide filename when generated from filename.
 Default is \fB0\fR (disabled).
-.RE
-.I make_slide_title_from_caption = <0/1>
-.RS
-Generate slide titles from captions [-k].
-Default is \fB0\fR (disabled).
-.RE
-.I show_no_slide_counter = <0/1>
-.RS
-Do not show slide counter in captions [--nc].
-Default is \fB0\fR (show counter).
-.RE
-.I slide_filenameprefix = \fI"filename prefix"
-.RS
-Prefix of generated HTML slide filenames.
-Default is \fB""\fR.
-.RE
-.I slide_filenameprefix_nofile = \fI"filename prefix"
-.RS
-Prefix of slide filenames when generated from filename
-while there's no file associated (text, link, ...).
-Default is \fBNOFILE\fR.
 .RE
 .I slide_width_max = <pixels>
 .RS
@@ -762,15 +817,39 @@ Default is \fB400\fR.
 Default height of text slides.
 Default is \fB300\fR.
 .RE
+.I index_link_image = <0/1>
+.RS
+Use an image instead of a text label for the link to the index [--li].
+Default is \fB0\fR (disabled).
+.RE
+.I prev_slide_link_image = <0/1>
+.RS
+Use an image instead of a text label for the link to the previous slide [--li].
+Default is \fB0\fR (disabled).
+.RE
+.I next_slide_link_image = <0/1>
+.RS
+Use an image instead of a text label for the link to the next slide [--li].
+Default is \fB0\fR (disabled).
+.RE
+.I prev_slide_link_preview = <0/1>
+.RS
+Use a thumbnail preview instead of a text label for the link to the previous slide [--lt].
+Default is \fB0\fR (disabled).
+.RE
+.I next_slide_link_preview = <0/1>
+.RS
+Use a thumbnail preview instead of a text label for the link to the next slide [--lt].
+Default is \fB0\fR (disabled).
+.RE
+.I make_slide_title_from_caption = <0/1>
+.RS
+Generate slide titles from captions [-k].
+Default is \fB0\fR (disabled).
+.RE
 
 .B Captions:
 
-.I captions_filename = \fI"filename"
-.RS
-Name of the caption file that will be generated when llgal is called with --gc,
-or will be automatically used if it exists to generate slide captions.
-Default is \fBcaptions\fR.
-.RE
 .I captions_removal_line = \fI"string"
 .RS
 This line will be added to the caption file llgal will generate when called with --gc.
@@ -793,11 +872,6 @@ Default is \fB""\fR (disabled).
 Add image timestamp to generated captions [--ct].
 Default is \fB0\fR (disabled).
 .RE
-.I show_caption_under_thumbnails = <0/1>
-.RS
-Write captions under thumbnails [-u].
-Default is \fB0\fR (disabled).
-.RE
 .I show_dimensions = <0/1>
 .RS
 Show image dimensions [-a, -ad].
@@ -808,81 +882,96 @@ Default is \fB0\fR (disabled).
 Show file sizes [-a, -as].
 Default is \fB0\fR (disabled).
 .RE
-
-.B Exclude:
-
-.I exclude = \fI"string"
+.I show_no_slide_counter = <0/1>
 .RS
-Exclude files whose name matches [--exclude <s>].
-This option may be used several times.
-Dot begining files and html files are excluded by default.
-.RE
-.I include = \fI"string"
-.RS
-Include files whose name matches and were previously excluded [--include <s>].
-This option may be used several times.
-The order of includes and excludes is respected.
+Do not show slide counter in captions [--nc].
+Default is \fB0\fR (show counter).
 .RE
 
 .B Text:
 
-.I MVI_default_linktext = \fI"string"
-.RS
-Change the text that prefixes the filename when generating
-linktext for movies without a captions file.
-Default is \fB"Open movie "\fR.
-.RE
-.I FIL_default_linktext = \fI"string"
-.RS
-Change the text that prefixes the filename when generating
-linktext for files without a captions file.
-Default is \fB"Download file "\fR.
-.RE
-.I DIR_default_linktext = \fI"string"
-.RS
-Change the text that prefixes the filename when generating
-linktext for directories without a captions file.
-Default is \fB"Open subgallery "\fR.
-.RE
-.I alt_full_text = \fI"string"
-.RS
-Change the default text that is shown as an image alternative
-for full-size images in slides.
-Default is \fB""\fR.
-.RE
-.I alt_scaled_text = \fI"string"
-.RS
-Change the default text that is shown as an image alternative
-for scaled images in slides.
-Default is \fB"Scaled image "\fR.
-.RE
-.I alt_thumbnail_text = \fI"string"
-.RS
-Change the default text that is shown as an image alternative
-for thumbnails in the index.
-Default is \fB"Thumbnail "\fR.
-.RE
 .I index_title = \fI"string"
 .RS
 Title of the gallery [--title <s>].
 Default is \fB"Index of pictures"\fR.
 .RE
+.I parent_gallery_link_text = \fI"string"
+.RS
+Label of the link to the parent directory.
+Default is \fB"Back to parent gallery"\fR.
+.RE
+.I index_link_text = \fI"string"
+.RS
+Label of the link from a slide to the index.
+Default is \fB"Index"\fR.
+.RE
+.I prev_slide_link_text = \fI"string"
+.RS
+Label of the link from a slide to the prev one.
+Default is \fB"Prev&gt;&gt;"\fR.
+.RE
+.I next_slide_link_text = \fI"string"
+.RS
+Label of the link from a slide to the next one.
+Default is \fB"Next&gt;&gt;"\fR.
+.RE
+.I MVI_link_text = \fI"string"
+.RS
+Text prefixing the filename when generating link text for movies without
+a captions file.
+Default is \fB"Open movie "\fR.
+.RE
+.I FIL_link_text = \fI"string"
+.RS
+Text prefixing the filename when generating link text for files without
+a captions file.
+Default is \fB"Download file "\fR.
+.RE
+.I DIR_link_text = \fI"string"
+.RS
+Text prefixing the filename when generating link text for directories
+without a captions file.
+Default is \fB"Open subgallery "\fR.
+.RE
+.I alt_full_text = \fI"string"
+.RS
+Text shown as an image alternative for full-size images in slides.
+Default is \fB""\fR.
+.RE
+.I alt_scaled_text = \fI"string"
+.RS
+Text shown as an image alternative for scaled images in slides.
+Default is \fB"Scaled image "\fR.
+.RE
+.I alt_thumbnail_text = \fI"string"
+.RS
+Text shown as an image alternative for thumbnails in the index.
+Default is \fB"Thumbnail "\fR.
+.RE
 .I over_scaled_text = \fI"string"
 .RS
-Change the default text that is shown when the mouse pointer
-is over a scaled image in a slide.
+Text shown when the mouse pointer is over a scaled image in a slide.
 Default is \fB"Click to see full size"\fR.
 .RE
 .I over_thumbnail_text = \fI"string"
 .RS
-Change the default text that is shown when the mouse pointer
-is over a thumbnail.
+Text shown when the mouse pointer is over a thumbnail.
 Default is \fB"Click to enlarge "\fR.
 .RE
-.I parent_linktext = \fI"string"
+.I over_index_link_text = \fI"string"
 .RS
-Change text in links to parent directory.
-Default is \fB"Back to parent gallery"\fR.
+Text shown when the mouse pointer is over a link from a slide to the index.
+Default is \fB"Return to the index"\fR.
+.RE
+.I over_prev_slide_link_text = \fI"string"
+.RS
+Text shown when the mouse pointer is over a link from a slide to the previous one.
+Default is \fB"Previous slide "\fR.
+.RE
+.I over_next_slide_link_text = \fI"string"
+.RS
+Text shown when the mouse pointer is over a link from a slide to the next one.
+Default is \fB"Next slide "\fR.
 .RE
 .I show_size_unit = \fI"string"
 .RS
@@ -902,14 +991,24 @@ Default is \fB"%Y-%m-%d %H:%M:%S"\fR.
 Run recursively in subdirectories [-R].
 Default is \fB0\fR (disabled).
 .RE
-.I parent_link = <0/1>
+.I parent_gallery_link = <0/1>
 .RS
 Add links to the parent directory [--parent].
 Default is \fB0\fR (disabled).
 .RE
 
-.B Various:
+.B What files to insert in the gallery:
 
+.I image_extensions = \fI"|-separated strings"
+.RS
+Extensions that are matched when searching images
+Default is \fB"jpe?g|tiff?|png|gif"\fR.
+.RE
+.I movie_extensions = \fI"|-separated strings"
+.RS
+Extensions that are matched when searching movies
+Default is \fB"mpe?g|mov|avi"\fR.
+.RE
 .I add_all_files = <0/1>
 .RS
 Add all files to the list of entries, not only images and movies [-A].
@@ -920,6 +1019,26 @@ Default is \fB0\fR (disabled).
 Add subdirectories to the list of entries [-S].
 Default is \fB0\fR (disabled).
 .RE
+.I exclude = \fI"string"
+.RS
+Exclude files whose name matches [--exclude <s>].
+This option may be used several times.
+Dot begining files and html files are excluded by default.
+.RE
+.I include = \fI"string"
+.RS
+Include files whose name matches and were previously excluded [--include <s>].
+This option may be used several times.
+The order of includes and excludes is respected.
+.RE
+.I sort_criteria = \fI"string"
+.RS
+Sort criteria when scanning files in the working directory.
+Default is \fBname\fR.
+.RE
+
+.B Various:
+
 .I convert_options = \fI"string"
 .RS
 Options to pass to convert [--con <s>].
@@ -936,35 +1055,15 @@ Default is \fB""\fR.
 Additional options to pass to convert when creating thumbnails.
 Default is \fB""\fR.
 .RE
-.I config_file = <s>
-.RS
-Additional configuration file [--config <s>].
-This option may be used several times.
-.RE
-.I image_extensions = \fI"|-separated strings"
-.RS
-Extensions that are matched when searching images
-Default is \fB"jpe?g|tiff?|png|gif"\fR.
-.RE
-.I movie_extensions = \fI"|-separated strings"
-.RS
-Extensions that are matched when searching movies
-Default is \fB"mpe?g|mov|avi"\fR.
-.RE
-.I no_default_linktext = <0/1>
-.RS
-Don't show prefix when generating link text.
-Default is \fB0\fR (show prefix).
-.RE
-.I sort_criteria = \fI"|-separated strings"
-.RS
-Change sort criteria when scanning files in the working directory.
-Default is \fBname\fR.
-.RE
 .I www_access_rights = <0/1>
 .RS
 Make all generated files world readable [-www].
 Default is \fB0\fR (disabled).
+.RE
+.I config_file = <s>
+.RS
+Additional configuration file [--config <s>].
+This option may be used several times.
 .RE
 
 
@@ -1001,14 +1100,19 @@ by setting them a negative value.
 
 .SH FILES
 .RE
-.I /etc/llgalrc
-.I $HOME/.llgalrc
-.I .llgalrc
+.I /etc/llgal/llgalrc
+.I $HOME/.llgal/llgalrc
+.I .llgal/llgalrc
 .RS
 System-wide, per-user and local configuration files. See
 .SM
 .B CONFIGURATION
 for details.
+.RE
+.I /usr/share/llgal/captions.header
+.RS
+Captions syntax description file that is inserted at the top
+of generated captions file.
 
 .RE
 .I /usr/share/llgal/llgal.css
@@ -1019,7 +1123,19 @@ The default style sheet template.
 .RS
 The tiled image used for the film effect.
 .RE
-Both files are required on the website.
+.I /usr/share/llgal/index.png
+.RS
+The link image used for the index.
+.RE
+.I /usr/share/llgal/prev.png
+.RS
+The link image used for the previous slide.
+.RE
+.I /usr/share/llgal/next.png
+.RS
+The link image used for the next slide.
+.RE
+All files are required on the website.
 .BR llgal
 will copy them to the local
 IR .llgal
@@ -1039,7 +1155,7 @@ But,
 .BR llgal
 will thus them to generate HTML webpages og the gallery.
 
-The user may change these 4 templates by storing files with
+The user may change all these templates by storing files with
 the same name in its user template directory
 .IR $HOME/.llgal
 or in the local
