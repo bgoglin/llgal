@@ -471,6 +471,10 @@ sub process_option {
 	    $index_link_text = $1 ;
 	} elsif (/^parent_gallery_link_text\s*=\s*"(.+)"$/) {
 	    $parent_gallery_link_text = $1 ;
+	} elsif (/^prev_gallery_link_text\s*=\s*"(.+)"$/) {
+	    $prev_gallery_link_text = $1 ;
+	} elsif (/^next_gallery_link_text\s*=\s*"(.+)"$/) {
+	    $next_gallery_link_text = $1 ;
 	} elsif (/^prev_slide_link_text\s*=\s*"(.+)"$/) {
 	    $prev_slide_link_text = $1 ;
 	} elsif (/^next_slide_link_text\s*=\s*"(.+)"$/) {

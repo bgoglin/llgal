@@ -191,6 +191,12 @@
 # Change text in links to parent directory.
 # parent_gallery_link_text = "Back to parent gallery"
 
+# Change text in links to previous gallery.
+# prev_gallery_link_text = "Previous gallery "
+
+# Change text in links to next directory.
+# next_gallery_link_text = "Next gallery "
+
 # Label of the link from a slide to the index
 # index_link_text = "Index"
 
