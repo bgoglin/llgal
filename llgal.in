@@ -1380,44 +1380,35 @@ sub generate_caption_from_image_infos {
 ###################################################################################
 # generate entries
 
-sub create_entry {
+sub create_file_entry {
     my $entry ;
     my $type = shift ;
     my $filename = shift ;
-    my $url = shift ;
     my $linktext = shift ;
     my $caption = shift ;
 
-    # check files
-    if ($type == $TYPE_IMG or $type == $TYPE_MVI or $type == $TYPE_FIL or $type == $TYPE_DIR) {
+    # check file
+    return undef
+	if check_file ("$destination_dir$filename") < 0 ;
+    if ($type == $TYPE_IMG) {
 	return undef
-	    if check_file ("$destination_dir$filename") < 0 ;
-	if ($type == $TYPE_IMG) {
-	    return undef
-		if check_image ("$destination_dir$filename") < 0 ;
-	} elsif ($type == $TYPE_MVI) {
-	    return undef
-		if check_movie ("$destination_dir$filename") < 0 ;
-	}
+	    if check_image ("$destination_dir$filename") < 0 ;
+    } elsif ($type == $TYPE_MVI) {
+	return undef
+	    if check_movie ("$destination_dir$filename") < 0 ;
     }
 
     # set the type
     $entry->{type} = $type ;
 
     # set the filename
-    if (not defined $filename) {
-	$filename = $slide_filenameprefix_nofile.($nofiles++) ;
-    }
     $entry->{filename} = $filename ;
+
+    # make a safe url
+    $entry->{url} = make_safe_url ($filename) ;
 
     # keep real filename for later
     my $real_filename = "$destination_dir$filename" ;
-
-    # make a safe url
-    if (not defined $url) {
-	$url = $filename ;
-    }
-    $entry->{url} = make_safe_url ($url) ;
 
     # the link text (will be HTML-safe after caption file generation)
     if (not defined $linktext) {
@@ -1595,6 +1586,67 @@ sub create_entry {
     return $entry ;
 }
 
+sub create_nofile_entry {
+    my $entry ;
+    my $type = shift ;
+    my $url = shift ;
+    my $linktext = shift ;
+    my $caption = shift ;
+
+    # set the type
+    $entry->{type} = $type ;
+
+    # set the filename
+    my $filename = $slide_filenameprefix_nofile.($nofiles++) ;
+    $entry->{filename} = $filename ;
+
+    # keep real filename for later
+    my $real_filename = "$destination_dir$filename" ;
+
+    # make a safe url
+    if (not defined $url) {
+	$url = $filename ;
+    }
+    $entry->{url} = make_safe_url ($url) ;
+
+    # the link text (will be HTML-safe after caption file generation)
+    $entry->{linktext} = $linktext ;
+
+    # the caption (will be HTML-safe after caption file generation)
+    $entry->{caption} = $caption ;
+
+    # title is based on the filename
+    my $title = $filename ;
+    $title =~ s/&/&amp;/g ;
+#    $title =~ s/"/&\#34;/g ;
+    
+    # add caption to the title if asked
+    $title .= ": ". $caption
+	if $make_slide_title_from_caption ;
+
+    $entry->{title} = $title ;
+
+    # do not generate more if we are only generating captions
+    return $entry
+	if $generate_captions ; # TODO: currently impossible
+
+    # dimstring
+    $entry->{dimstring} = "" ;
+
+    # default thumbnail dimensions
+    $entry->{thumb_xdim} = $default_thumb_xdim ;
+    $entry->{thumb_ydim} = $default_thumb_ydim ;
+
+    # dimstring is empty
+    $entry->{thumb_dimstring} = "" ;
+
+    if (!$make_no_slides) {
+	# scaled image, its url and dimensions
+	$entry->{scaled_dimstring} = $entry->{dimstring} ;
+    }
+    return $entry ;
+}
+
 # generate slide number, filename and url only when the order of entries is fixed
 sub generate_slidename {
     my $entry = shift ;
@@ -1665,7 +1717,7 @@ sub get_entries_from_directory {
 	if (-d "$destination_dir$filename") {
 	    # directory
 	    if ($add_subdirs) {
-		my $entry = create_entry ($TYPE_DIR, $filename, undef, undef, undef) ;
+		my $entry = create_file_entry ($TYPE_DIR, $filename, undef, undef) ;
 		push @entries, $entry
 		    if defined $entry ;
 	    }
@@ -1676,14 +1728,14 @@ sub get_entries_from_directory {
 
 	    if ($filename =~ /($image_extensions)$/i) {
 		# image
-		my $entry = create_entry ($TYPE_IMG, $filename, undef, undef, undef) ;
+		my $entry = create_file_entry ($TYPE_IMG, $filename, undef, undef) ;
 		goto JUST_A_FILE
 		    if not defined $entry ;
 		push @entries, $entry ;
 
 	    } elsif ($filename =~ /($movie_extensions)$/i) {
 		# movie
-		my $entry = create_entry ($TYPE_MVI, $filename, undef, undef, undef) ;
+		my $entry = create_file_entry ($TYPE_MVI, $filename, undef, undef) ;
 		goto JUST_A_FILE
 		    if not defined $entry ;
 		push @entries, $entry ;
@@ -1692,7 +1744,7 @@ sub get_entries_from_directory {
 	      JUST_A_FILE:
 		if ($add_all_files) {
 		    # not an image, not a movie, just a file
-		    my $entry = create_entry ($TYPE_FIL, $filename, undef, undef, undef) ;
+		    my $entry = create_file_entry ($TYPE_FIL, $filename, undef, undef) ;
 		    push @entries, $entry
 			if defined $entry ;
 		}
@@ -1945,28 +1997,28 @@ if (-e "$destination_dir$local_llgal_dir/$captions_filename") {
 		# - \s is facultative after TYP: at the begining
 		if ($line =~ m/^TXT:\s*(.+)\s+----\s*(?:\s(.*))?\s*$/) {
 		    # text slide
-		    $entry = create_entry ($TYPE_TXT, undef, undef, $1, $2) ;
+		    $entry = create_nofile_entry ($TYPE_TXT, undef, $1, $2) ;
 
 		} elsif ($line =~ m/^LNK:\s*(.+)\s+----\s+(.+)\s+----\s*(?:\s(.*))?\s*$/) {
 		    # link slide
-		    $entry = create_entry ($TYPE_LNK, undef, $1, $2, $3) ;
+		    $entry = create_nofile_entry ($TYPE_LNK, $1, $2, $3) ;
 
 		} elsif ($line =~ m/^DIR:\s*(.+)\s+----\s+(.+)\s+----\s*(?:\s(.*))?\s*$/) {
 		    # directory slide
-		    $entry = create_entry ($TYPE_DIR, $1, undef, $2, $3) ;
+		    $entry = create_file_entry ($TYPE_DIR, $1, $2, $3) ;
 
 		} elsif ($line =~ m/^MVI:\s*(.+)\s+----\s+(.+)\s+----\s*(?:\s(.*))?\s*$/) {
 		    # movie slide
-		    $entry = create_entry ($TYPE_MVI, $1, undef, $2, $3) ;
+		    $entry = create_file_entry ($TYPE_MVI, $1, $2, $3) ;
 
 		} elsif ($line =~ m/^FIL:\s*(.+)\s+----\s+(.+)\s+----\s*(?:\s(.*))?\s*$/) {
 		    # movie slide
-		    $entry = create_entry ($TYPE_FIL, $1, undef, $2, $3) ;
+		    $entry = create_file_entry ($TYPE_FIL, $1, $2, $3) ;
 
 		} elsif ($line =~ m/^IMG:\s*(.+)\s+----\s*(?:\s(.*))?\s*$/
 			 or $line =~ m/^(.+)\s+----\s*(?:\s(.*))?\s*$/) {
 		    # image slide (default)
-		    $entry = create_entry ($TYPE_IMG, $1, undef, undef, $2) ;
+		    $entry = create_file_entry ($TYPE_IMG, $1, undef, $2) ;
 
 		} else {
 		    die "Unrecognized line #$. in captions file: \"$line\"\n" ;
