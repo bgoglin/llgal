@@ -1789,27 +1789,26 @@ if ($generate_captions) {
 
     indprint "Found ". (scalar @entries) ." files in $destination_string\n" ;
 
+    my @captions = () ;
+
+    # store old values from the captions file, if it exists
+    my $old_title = undef ;
+    my $old_parent_gallery_link_text = undef ;
+    my $old_prev_gallery_link_text = undef ;
+    my $old_prev_gallery_link = undef ;
+    my $old_next_gallery_link_text = undef ;
+    my $old_next_gallery_link = undef ;
+
     if (-e "$destination_dir$local_llgal_dir/$captions_filename") {
 	indprint "Reading existing captions from $captions_filename.\n" ;
 	open (CAP, "$destination_dir$local_llgal_dir/$captions_filename")
 	    or die "Can't open $destination_dir$local_llgal_dir/$captions_filename for reading\n" ;
-	my @captions = <CAP> ;
+	@captions = <CAP> ;
 	close CAP ;
 
-	indprint "Appending new captions to $captions_filename: " ;
-	open (CAP, ">$destination_dir$local_llgal_dir/$captions_filename")
-	    or die "Can't open $destination_dir$local_llgal_dir/$captions_filename file to append\n" ;
-
-	# actually rewrite the caption files, removing updated entries
-	my $old_title = "" ;
-	my $old_parent_gallery_link_text = "" ;
-	my $old_prev_gallery_link_text = "" ;
-	my $old_prev_gallery_link = "" ;
-	my $old_next_gallery_link_text = "" ;
-	my $old_next_gallery_link = "" ;
 	foreach my $line (@captions) {
 	    if ($line =~ /^TITLE:\s*(.*)\s*$/) {
-	        $old_title = $1 ;
+		$old_title = $1 ;
 	    } elsif ($line =~ /^PARENT:\s*(.*)\s*$/) {
 		$old_parent_gallery_link_text = $1 ;
 	    } elsif ($line =~ /^PREV:\s*(.+)\s+----\s+(.+)\s*/) {
@@ -1822,60 +1821,18 @@ if ($generate_captions) {
 	    print CAP $line ;
 	}
 
-	init_percentage () ;
+	indprint "Appending new captions to $captions_filename: " ;
+	open (CAP, ">>$destination_dir$local_llgal_dir/$captions_filename")
+	    or die "Can't open $destination_dir$local_llgal_dir/$captions_filename file to append\n" ;
 
 	print CAP "\n" ;
 	print CAP "# Appended new captions (", scalar localtime, ").\n" ;
 	print CAP "\n" ;
-
-	print CAP "TITLE: $index_title\n"
-	    if $old_title ne $index_title ;
-	print CAP "PARENT: $parent_gallery_link_text\n"
-	    if $parent_gallery_link
-		and $old_parent_gallery_link_text ne $parent_gallery_link_text ;
-	print CAP "PREV: $prev_gallery_link_text ---- $prev_gallery_link\n"
-	    if $old_prev_gallery_link ne $prev_gallery_link
-		or $old_prev_gallery_link_text ne $prev_gallery_link_text ;
-	print CAP "NEXT: $next_gallery_link_text ---- $next_gallery_link\n"
-	    if $old_next_gallery_link ne $next_gallery_link
-		or $old_next_gallery_link_text ne $next_gallery_link_text ;
-	print CAP "\n" ;
-
-	# it's not easy to count chars in an append-only file
-	# so we don't count them when computing the percentage
-
-	for (my $i = 0; $i < @entries; $i++) {
-	    my $entry = $entries[$i] ;
-	    my $type = $entry->{type} ;
-	    if ($type == $TYPE_IMG) {
-		print CAP "IMG: ". $entry->{filename}
-		." ---- ". $entry->{caption} ."\n"
-		    unless grep { $captions[$_] =~ m/^(\s*IMG:)?\s*$entry->{filename}\s+----\s/ } ( 0 .. $#captions ) ;
-	    } elsif ($type == $TYPE_MVI) {
-		print CAP "MVI: " . $entry->{filename}
-		." ---- ". $entry->{linktext}
-		." ---- ". $entry->{caption} ."\n"
-		    unless grep { $captions[$_] =~ m/^\s*MVI:\s*$entry->{filename}\s+----\s/ } ( 0 .. $#captions ) ;
-	    } elsif ($type == $TYPE_FIL) {
-		print CAP "FIL: " . $entry->{filename}
-		." ---- ". $entry->{linktext}
-		." ---- ". $entry->{caption} ."\n"
-		    unless grep { $captions[$_] =~ m/^\s*FIL:\s*$entry->{filename}\s+----\s/ } ( 0 .. $#captions ) ;
-	    } elsif ($type == $TYPE_DIR) {
-		print CAP "DIR: " . $entry->{filename}
-		." ---- ". $entry->{linktext}
-		." ---- ". $entry->{caption} ."\n"
-		    unless grep { $captions[$_] =~ m/^\s*DIR:\s*$entry->{filename}\s+----\s/ } ( 0 .. $#captions ) ;
-	    }
-	    print_percentage ($i+1, scalar @entries) ;
-	}
-	end_percentage () ;
     } else {
 	indprint "Creating the $captions_filename file: " ;
 	open (CAP, ">$destination_dir$local_llgal_dir/$captions_filename")
 	    or die "Can't create $destination_dir$local_llgal_dir/$captions_filename file\n" ;
 
-	init_percentage () ;
 	print CAP "# This is llgal's $captions_filename file, first generated ", scalar localtime, ".\n" ;
 	if (open CAPHEADER, "$llgal_share_dir/$captions_header_filename") {
 	    while (my $line = <CAPHEADER>) { print CAP $line ; }
@@ -1885,39 +1842,61 @@ if ($generate_captions) {
 	}
 	print CAP "# $captions_removal_line\n" ;
 	print CAP "\n" ;
-
-	print CAP "TITLE: $index_title\n" ;
-	print CAP "PARENT: $parent_gallery_link_text\n"
-	    if $parent_gallery_link ;
-	print CAP "PREV: $prev_gallery_link_text ---- $prev_gallery_link\n"
-	    if $prev_gallery_link ;
-	print CAP "NEXT: $next_gallery_link_text ---- $next_gallery_link\n"
-	    if $next_gallery_link ;
-	print CAP "\n" ;
-
-	for (my $i = 0; $i < @entries; $i++) {
-	    my $entry = $entries[$i] ;
-	    my $type = $entry->{type} ;
-	    if ($type == $TYPE_IMG) {
-		print CAP "IMG: ". $entry->{filename}
-		." ---- ". $entry->{caption} ."\n" ;
-	    } elsif ($type == $TYPE_MVI) {
-		print CAP "MVI: " . $entry->{filename}
-		." ---- ". $entry->{linktext}
-		." ---- ". $entry->{caption} ."\n" ;
-	    } elsif ($type == $TYPE_FIL) {
-		print CAP "FIL: " . $entry->{filename}
-		." ---- ". $entry->{linktext}
-		." ---- ". $entry->{caption} ."\n" ;
-	    } elsif ($type == $TYPE_DIR) {
-		print CAP "DIR: " . $entry->{filename}
-		." ---- ". $entry->{linktext}
-		." ---- ". $entry->{caption} ."\n" ;
-	    }
-	    print_percentage ($i+1, @entries) ;
-	}
-	end_percentage () ;
     }
+
+    print CAP "TITLE: $index_title\n"
+	if !defined $old_title
+	    or $old_title ne $index_title ;
+    print CAP "PARENT: $parent_gallery_link_text\n"
+	if $parent_gallery_link and
+	    ( !defined $old_parent_gallery_link_text
+	    or $old_parent_gallery_link_text ne $parent_gallery_link_text ) ;
+    print CAP "PREV: $prev_gallery_link_text ---- $prev_gallery_link\n"
+	if $prev_gallery_link and
+	    ( !defined $old_prev_gallery_link
+	    or $old_prev_gallery_link ne $prev_gallery_link
+	    or $old_prev_gallery_link_text ne $prev_gallery_link_text ) ;
+    print CAP "NEXT: $next_gallery_link_text ---- $next_gallery_link\n"
+	if $next_gallery_link and
+	    ( !defined $old_next_gallery_link
+	    or $old_next_gallery_link ne $next_gallery_link
+	    or $old_next_gallery_link_text ne $next_gallery_link_text ) ;
+    print CAP "\n" ;
+
+    init_percentage () ;
+
+    for (my $i = 0; $i < @entries; $i++) {
+	my $entry = $entries[$i] ;
+	my $type = $entry->{type} ;
+	if ($type == $TYPE_IMG) {
+	    print CAP "IMG: ". $entry->{filename}
+		." ---- ". $entry->{caption} ."\n"
+		unless grep { $captions[$_] =~ m/^(\s*IMG:)?\s*$entry->{filename}\s+----\s/ }
+		    ( 0 .. $#captions ) ;
+	} elsif ($type == $TYPE_MVI) {
+	    print CAP "MVI: " . $entry->{filename}
+		." ---- ". $entry->{linktext}
+		." ---- ". $entry->{caption} ."\n"
+		unless grep { $captions[$_] =~ m/^\s*MVI:\s*$entry->{filename}\s+----\s/ }
+		    ( 0 .. $#captions ) ;
+	} elsif ($type == $TYPE_FIL) {
+	    print CAP "FIL: " . $entry->{filename}
+		." ---- ". $entry->{linktext}
+		." ---- ". $entry->{caption} ."\n"
+		unless grep { $captions[$_] =~ m/^\s*FIL:\s*$entry->{filename}\s+----\s/ }
+		    ( 0 .. $#captions ) ;
+	} elsif ($type == $TYPE_DIR) {
+	    print CAP "DIR: " . $entry->{filename}
+		." ---- ". $entry->{linktext}
+		." ---- ". $entry->{caption} ."\n"
+		unless grep { $captions[$_] =~ m/^\s*DIR:\s*$entry->{filename}\s+----\s/ }
+		    ( 0 .. $#captions ) ;
+	}
+	print_percentage ($i+1, scalar @entries) ;
+    }
+
+    end_percentage () ;
+
     close CAP ;
     show_warnings ;
 
