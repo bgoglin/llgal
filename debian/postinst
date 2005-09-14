@@ -1,0 +1,22 @@
+#!/bin/sh
+set -e
+#DEBHELPER#
+
+# Move a conffile without triggering a dpkg question
+mv_conffile() {
+    OLDCONFFILE="$1"
+    NEWCONFFILE="$2"
+
+    if [ -e "$OLDCONFFILE" ]; then
+	echo "Preserving user changes to $NEWCONFFILE ..."
+	mv -f "$NEWCONFFILE" "$NEWCONFFILE".dpkg-new
+	mv -f "$OLDCONFFILE" "$NEWCONFFILE"
+    fi
+}
+
+case "$1" in
+configure)
+    if dpkg --compare-versions "$2" le "0.11-1"; then
+	mv_conffile "/etc/llgalrc" "/etc/llgal/llgalrc"
+    fi
+esac
