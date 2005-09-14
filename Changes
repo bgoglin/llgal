@@ -1,3 +1,4 @@
+llgal (0.11.1)
 
 * Rename /etc/llgalrc to /etc/llgal/llgalrc. Also read ~/.llgal/llgalrc
   and .llgal/llgalrc.
@@ -24,7 +25,7 @@
   --parent-gal and undocument in --help (keep in manpage).
 * Rename _linktext options to _link_text.
 * Remove no_default_link_text since link text values might be
-  modified at runtime, and also after captions generations.
+  modified at runtime, and also after captions generation.
 * Rename MVI/FIL/DIR_default_link_text to MVI/FIL/DIR_link_text.
 * Remove --sp and --tp command line options, keeping their configuration
   options (scaled_image_filenameprefix and thumbnail_image_filenameprefix).
@@ -33,6 +34,7 @@
 * Fix compilation and installation when DESTDIR is overriden.
 * Fix and cleanup documentation and Makefile.
 
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Tue, 11 Sep 2005 09:43:55 +0200
 
 llgal (0.11)
 

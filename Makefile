@@ -1,5 +1,5 @@
 NAME	=	llgal
-VERSION	=	0.11
+VERSION	=	0.11.1
 
 .PHONY: llgal clean install uninstall tarball
 
