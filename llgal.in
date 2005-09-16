@@ -1604,14 +1604,10 @@ sub create_nofile_entry {
     my $filename = $slide_filenameprefix_nofile.($nofiles++) ;
     $entry->{filename} = $filename ;
 
-    # keep real filename for later
-    my $real_filename = "$destination_dir$filename" ;
-
     # make a safe url
-    if (not defined $url) {
-	$url = $filename ;
+    if (defined $url) {
+	$entry->{url} = make_safe_url ($url) ;
     }
-    $entry->{url} = make_safe_url ($url) ;
 
     # the link text (will be HTML-safe after caption file generation)
     $entry->{linktext} = $linktext ;
@@ -1645,7 +1641,7 @@ sub create_nofile_entry {
     $entry->{thumb_dimstring} = "" ;
 
     if (!$make_no_slides) {
-	# scaled image, its url and dimensions
+	# scaled image dimensions
 	$entry->{scaled_dimstring} = $entry->{dimstring} ;
     }
     return $entry ;
