@@ -1721,7 +1721,7 @@ sub get_entries_from_directory {
 
 # generate slide number, filename and url only when the order of entries is fixed
 sub finalize_entries {
-    @entries = @_ ;
+    my @entries = @_ ;
 
     for(my $i=0; $i < @entries; $i++) {
 	my $entry = $entries[$i] ;
