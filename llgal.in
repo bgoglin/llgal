@@ -1213,9 +1213,6 @@ my $TYPE_MVI = 3 ;
 my $TYPE_FIL = 4 ;
 my $TYPE_DIR = 5 ;
 
-# number of entries that don't have any file associated with them
-my $nofiles = 0 ;
-
 # headers and footers
 my @headers = () ;
 my @footers = () ;
@@ -1600,10 +1597,6 @@ sub create_nofile_entry {
     # set the type
     $entry->{type} = $type ;
 
-    # set the filename
-    my $filename = $slide_filenameprefix_nofile.($nofiles++) ;
-    $entry->{filename} = $filename ;
-
     # make a safe url
     if (defined $url) {
 	$entry->{url} = make_safe_url ($url) ;
@@ -1615,15 +1608,10 @@ sub create_nofile_entry {
     # the caption (will be HTML-safe after caption file generation)
     $entry->{caption} = $caption ;
 
-    # title is based on the filename
-    my $title = $filename ;
-    $title =~ s/&/&amp;/g ;
-#    $title =~ s/"/&\#34;/g ;
-    
     # add caption to the title if asked
-    $title .= ": ". $caption
+    my $title = "" ;
+    $title = $caption
 	if $make_slide_title_from_caption ;
-
     $entry->{title} = $title ;
 
     # do not generate more if we are only generating captions
@@ -1645,32 +1633,6 @@ sub create_nofile_entry {
 	$entry->{scaled_dimstring} = $entry->{dimstring} ;
     }
     return $entry ;
-}
-
-# generate slide number, filename and url only when the order of entries is fixed
-sub generate_slidename {
-    my $entry = shift ;
-    my $number = shift ;
-    my $filename = $entry->{filename} ;
-
-    # HTML slide and its url
-    if (!$make_no_slides) {
-	my $slide_filename ;
-	if ($make_slide_filename_from_filename) {
-	    if ($make_slide_filename_from_extension) {
-		$slide_filename = $filename .".html" ;
-	    } else {
-		my @parts = split (/\./, $filename) ;
-		pop @parts ;
-		my $basename = join ('.', @parts) ;
-		$slide_filename = $basename .".html" ;
-	    }
-	} else {
-	    $slide_filename = "$slide_filenameprefix$number.html" ;
-	}
-	$entry->{slide_filename} = $slide_filename ;
-	$entry->{slide_url} = make_safe_url_nowarn ($slide_filename) ;
-    }
 }
 
 # generating entry table from files in target directory
@@ -1755,6 +1717,40 @@ sub get_entries_from_directory {
     }
     end_percentage () ;
     show_warnings ;
+}
+
+# generate slide number, filename and url only when the order of entries is fixed
+sub finalize_entries {
+    @entries = @_ ;
+
+    for(my $i=0; $i < @entries; $i++) {
+	my $entry = $entries[$i] ;
+	my $type = $entry->{type} ;
+	my $number = $i+1 ;
+	my $filename = $entry->{filename} ;
+
+	# HTML slide and its url
+	if (!$make_no_slides) {
+	    my $slide_filename ;
+	    if ($make_slide_filename_from_filename) {
+		if ($type == $TYPE_TXT or $type == $TYPE_LNK) {
+		    $slide_filename = "$slide_filenameprefix_nofile$number.html" ;
+		} elsif ($make_slide_filename_from_extension) {
+		    $slide_filename = "$filename.html" ;
+		} else {
+		    my @parts = split (/\./, $filename) ;
+		    pop @parts ;
+		    my $basename = join ('.', @parts) ;
+		    $slide_filename = "$basename.html" ;
+		}
+	    } else {
+		$slide_filename = "$slide_filenameprefix$number.html" ;
+	    }
+	    $entry->{slide_filename} = $slide_filename ;
+	    $entry->{slide_url} = make_safe_url_nowarn ($slide_filename) ;
+	}
+    }
+    return @entries ;
 }
 
 #######################################################################
@@ -2038,9 +2034,7 @@ if ($list_links) {
     @entries = @table_entries ;
 }
 
-for(my $i=0; $i < @entries; $i++) {
-    generate_slidename ($entries[$i], $i+1) ;
-}
+@entries = finalize_entries (@entries) ;
 
 #######################################################################
 # Add recursion header and footer

@@ -1,6 +1,9 @@
 
 * Add missing documentation and option processing for
   prev/next_gallery_link_text.
+* Slides without file now have they slide_filename numbered with the
+  number of the slide for make_slide_filename_from_filename (-n)
+  instead of starting from 1.
 
 
 llgal (0.11.1)
