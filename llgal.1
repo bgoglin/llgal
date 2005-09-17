@@ -1022,10 +1022,25 @@ Default is \fB"%Y-%m-%d %H:%M:%S"\fR.
 Run recursively in subdirectories [-R].
 Default is \fB0\fR (disabled).
 .RE
+.I link_subgalleries = <0/1>
+.RS
+Add links between subgalleries [--Rl].
+Default is \fB0\fR (disabled).
+.RE
 .I parent_gallery_link = <0/1>
 .RS
 Add links to the parent directory [--parent].
 Default is \fB0\fR (disabled).
+.RE
+.I prev_gallery_link = \fI"string"
+.RS
+Add links to the previous subgallery [--prev-gal <url>].
+Default is \fB""\fR (disabled).
+.RE
+.I next_gallery_link = \fI"string"
+.RS
+Add links to the next subgallery [--next-gal <url>].
+Default is \fB""\fR (disabled).
 .RE
 
 .B What files to insert in the gallery:

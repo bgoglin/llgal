@@ -6,7 +6,7 @@
   The -i option (index_filename) thus now takes a filename without
   extension.
 * Add missing documentation and option processing for
-  prev/next_gallery_link_text.
+  prev/next_gallery_link[_text]/link_subgalleries.
 * Slides without file now have they slide_filename numbered with the
   number of the slide for make_slide_filename_from_filename (-n)
   instead of starting from 1.
