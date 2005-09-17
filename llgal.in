@@ -1183,7 +1183,6 @@ sub init_gallery {
     @{$gallery->{headers}} = () ;
     @{$gallery->{footers}} = () ;
     @{$gallery->{entries}} = () ;
-    @{$gallery->{nofiles}} = 0 ;
     @{$gallery->{listed_entries}} = () ;
     return $gallery ;
 }
