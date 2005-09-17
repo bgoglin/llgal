@@ -13,6 +13,7 @@
   instead of starting from 1.
 * Add missing documentation and option processing for
   prev/next_gallery_link[_text]/link_subgalleries.
+* Add force_image_regeneration configuration option for -f.
 * Rework the internal code to easy multiple gallery generation
   in the same process.
 
