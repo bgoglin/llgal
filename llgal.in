@@ -48,7 +48,6 @@ my $cleanall_asked = 0 ;	# clean up all generated and user modified files
 my $generate_config = undef ;   # generate a config file
 my $generate_captions = 0 ;     # generate (or update) captions
 my $give_templates = undef ;	# give templates to the given directory
-my @template_dirs = () ;	# user-added directories where templates might be found
 my $make_recursive = 0 ;        # do we run recursively in subdirectories ?
 
 # process these options but kept other options in @ARGV for later
@@ -64,7 +63,6 @@ GetOptions(
 				$value = "local" if !$value ;
 				$give_templates = $value ;
 				},
-	'templates=s'	=> \@template_dirs,
 	'clean'		=> \$clean_asked,
 	'cleanall'	=> \$cleanall_asked,
 	'v|version'	=> \$version_asked,
@@ -115,6 +113,8 @@ my $text_slide_height_default = 300 ;
 # llgal directories
 my $llgal_share_dir = "@DATADIR@/llgal" ;
 my $user_share_dir = $ENV{HOME}."/.llgal" ;
+# user-added directories where templates might be found
+my @template_dirs = () ;
 
 # Name of generic llgal files
 my $captions_header_filename = "captions.header" ;
@@ -286,57 +286,57 @@ my $usage = << "END_OF_USAGE" ;
 This is llgal $version the Loulous HTML image slide show generator.
 Syntax:  llgal [-option -option ...]
 Behavior Options:
-          -d <dir>           operate on files in directory <dir> ($destination_dir)
-          -f                 force thumbnail and scaled slide regeneration
-          -R                 run recursively in subdirectories
-          --gc               generate or update the captions file
-          --gencfg <file>    generate the configuration file <file>
-          --gt [<dir>]       give templates to the directory <dir>
-          --templates <dir>  use templates in <dir>
-          --clean            remove all generated files
-          --cleanall         remove all generated and user modified files
-          -v, --version      show version
-          -h, --help         displays this brief help
+    -d <dir>           operate on files in directory <dir> ($destination_dir)
+    -f                 force thumbnail and scaled slide regeneration
+    -R                 run recursively in subdirectories
+    --gc               generate or update the captions file
+    --gencfg <file>    generate the configuration file <file>
+    --gt [<dir>]       give templates to the directory <dir>
+    --clean            remove all generated files
+    --cleanall         remove all generated and user modified files
+    -v, --version      show version
+    -h, --help         displays this brief help
 Layout Options:
-          -A              add all non-image non-video files to the list of slides
-          -a              write image sizes under thumbnails on index page
-          --ad            like -a, but write only the image dimensions
-          --as            like -a, but write only the file size (in kbytes)
-          --asu <s>       change file size unit ($show_size_unit)
-          --bigy <n>      like -y, use it if you have very large image files
-          --bigxy <n>     like --xy, use it if you have very large image files
-          --cf            use file names as captions
-          --cc [<s>]      use image comments as captions
-          --ct            use image timestamps as captions
-          --ctf <s>       timestamp format in captions (strftime format)
-          --con <s>       options to pass to convert (e.g. -quality N)
-          --exclude <s>   exclude matching files
-          -i <file>       name of the main thumbnail index file ($index_filename)
-          --include <s>   include matching files that were excluded
-          -k              use the image captions for the HTML slide titles
-          --li            use images for links in slides
-          --lt            use thumbnail preview for links in slides
-          -L              list links outside of the table
-          -n              use image file names for the HTML slide files
-          --nc            omit the image count from the captions
-          -p <n>          cellpadding value of thumbnail index tables ($index_cellpadding)
-          --php           use php extension for generated webpages
-          -r              omit the film effect altogether
-          --Rl            add links between subgalleries
-          -S              add subdirectories to the list of slides
-          -s              make no HTML slides, link thumbnails to images
-          --sort <s>      sort files with criteria <s>
-          -t <n>          height of the film tiled image ($tile_height)
-          --title <s>     string to substitute for TITLE in index template
-          -u              write captions under thumbnails on index page
-          -w <n>          rows in thumbnail index are at most <n> images wide ($thumbnails_per_row)
-          --www           make all llgal files world-readable
-          --wx <n>        rows in thumbnail index are at most <n> pixels wide
-          --xy <n>        scale thumbs to <n> pixels in their longer dimension
-          -y <n>          scale all thumbnails to the same height <n> ($thumbnail_height_max)
-          --config <s>    pass an additional configuration files
-          --option <s>    pass an additional option as in configuration files
-Note:     default values are given in parentheses (where applicable).
+    -A                 add all non-image non-video files to the list of slides
+    -a                 write image sizes under thumbnails on index page
+    --ad               like -a, but write only the image dimensions
+    --as               like -a, but write only the file size (in kbytes)
+    --asu <s>          change file size unit ($show_size_unit)
+    --bigy <n>         like -y, use it if you have very large image files
+    --bigxy <n>        like --xy, use it if you have very large image files
+    --cf               use file names as captions
+    --cc [<s>]         use image comments as captions
+    --ct               use image timestamps as captions
+    --ctf <s>          timestamp format in captions (strftime format)
+    --con <s>          options to pass to convert (e.g. -quality N)
+    --exclude <s>      exclude matching files
+    -i <file>          name of the main thumbnail index file ($index_filename)
+    --include <s>      include matching files that were excluded
+    -k                 use the image captions for the HTML slide titles
+    --li               use images for links in slides
+    --lt               use thumbnail preview for links in slides
+    -L                 list links outside of the table
+    -n                 use image file names for the HTML slide files
+    --nc               omit the image count from the captions
+    -p <n>             cellpadding value of thumbnail index tables ($index_cellpadding)
+    --php              use php extension for generated webpages
+    -r                 omit the film effect altogether
+    --Rl               add links between subgalleries
+    -S                 add subdirectories to the list of slides
+    -s                 make no HTML slides, link thumbnails to images
+    --sort <s>         sort files with criteria <s>
+    -t <n>             height of the film tiled image ($tile_height)
+    --templates <dir>  use templates in <dir>
+    --title <s>        string to substitute for TITLE in index template
+    -u                 write captions under thumbnails on index page
+    -w <n>             rows in thumbnail index are at most <n> images wide ($thumbnails_per_row)
+    --www              make all llgal files world-readable
+    --wx <n>           rows in thumbnail index are at most <n> pixels wide
+    --xy <n>           scale thumbs to <n> pixels in their longer dimension
+    -y <n>             scale all thumbnails to the same height <n> ($thumbnail_height_max)
+    --config <s>       pass an additional configuration files
+    --option <s>       pass an additional option as in configuration files
+  default values are given in parentheses (where applicable).
 Author:  Brice Goglin
 Homepage:  http://bgoglin.free.fr/llgal
 Report bugs to:  <llgal-devel AT gna.org>
@@ -613,6 +613,7 @@ GetOptions(
 	'bigxy=i'	=> sub { shift ; $slide_width_max = $slide_height_max = shift ; },
 	'con=s'		=> sub { shift ; push (@convert_options, parse_convert_options (shift)) ; },
 	'sort=s'	=> \$sort_criteria,
+	'templates=s'	=> \@template_dirs,
 	'title=s'	=> \$index_title,
 	'www'		=> \$www_access_rights,
 	'wx=i'		=> \$pixels_per_row,
