@@ -1103,33 +1103,9 @@ sub clean_files {
     closedir DIR ;
 }
 
-if ($clean_asked) {
-    indprint "Removing all non-modified llgal files...\n" ;
-    clean_files 0 ;
-    show_warnings ;
-
-    if ($make_recursive) {
-	opendir DIR, "./$destination_dir" ; # destination is empty for './'
-	while (my $dir = readdir DIR) {
-	    if ($dir =~ /^[^.]/ && -d "$destination_dir$dir") {
-		print "\n" ;
-		indprint "Entering subdirectory '$dir'...\n" ;
-		system ( $0, @llgal_options, "-d", "$destination_dir$dir", "--indent", $indent."  " ) ;
-		die "Failed to call $0 for subdirectory $destination_dir$dir ($!).\n"
-		    if $? == -1 ;
-		immediate_warning "$0 failed for subdirectory $destination_dir$dir."
-		    if $? ;
-		indprint "Leaving subdirectory '$dir'.\n" ;
-	    }
-	}
-    }
-    closedir DIR ;
-    exit 0 ;
-}
-
-if ($cleanall_asked) {
-    indprint "Removing all llgal files...\n" ;
-    clean_files 1 ;
+sub recursive_clean_files {
+    my $cleanall = shift ;
+    clean_files $cleanall ;
     show_warnings ;
 
     if ($make_recursive) {
@@ -1154,13 +1130,8 @@ if ($cleanall_asked) {
 #####################################################################
 # Give templates to the given directory
 
-if ($give_templates) {
-    my $destdir = $give_templates ;
-    $destdir = $local_llgal_dir
-	if $destdir eq "local" ;
-    $destdir = $user_share_dir
-	if $destdir eq "user" ;
-
+sub give_templates {
+    my $destdir = shift ;
     if ( ! -e $destdir ) {
 	indprint "Creating template directory $destdir...\n" ;
 	mkdir $destdir
@@ -1179,11 +1150,6 @@ if ($give_templates) {
 	    copy_file ($filename, $srcdir, $destdir ) ;
 	}
     }
-
-    indprint "You may now edit templates in $destdir and generate new galleries.\n" ;
-    indprint "You may also remove any template that you do not want to modify.\n" ;
-
-    exit 0 ;
 }
 
 #####################################################################
@@ -1194,6 +1160,15 @@ if ($give_templates) {
 # - @listed_entries (list of entries which are shown as simple links)
 # - @headers and @footers
 
+sub init_gallery {
+    my $gallery ;
+    @{$gallery->{headers}} = () ;
+    @{$gallery->{footers}} = () ;
+    @{$gallery->{entries}} = () ;
+    @{$gallery->{nofiles}} = 0 ;
+    @{$gallery->{listed_entries}} = () ;
+    return $gallery ;
+}
 
 # Entries are hashed composed of
 # - type: see below
@@ -2553,19 +2528,37 @@ sub call_recursive {
 }
 
 #######################################################################
-# main gallery creation
-
-sub init_gallery {
-    my $gallery ;
-    @{$gallery->{headers}} = () ;
-    @{$gallery->{footers}} = () ;
-    @{$gallery->{entries}} = () ;
-    @{$gallery->{nofiles}} = 0 ;
-    @{$gallery->{listed_entries}} = () ;
-    return $gallery ;
-}
+# main code
 
 check_destination ;
+
+# special behaviors
+
+if ($clean_asked) {
+    indprint "Removing all non-modified llgal files...\n" ;
+    recursive_clean_files 0 ;
+    exit 0 ;
+}
+
+if ($cleanall_asked) {
+    indprint "Removing all llgal files...\n" ;
+    recursive_clean_files 1 ;
+    exit 0 ;
+}
+
+if ($give_templates) {
+    my $destdir = $give_templates ;
+    $destdir = $local_llgal_dir
+	if $destdir eq "local" ;
+    $destdir = $user_share_dir
+	if $destdir eq "user" ;
+    give_templates $destdir ;
+    indprint "You may now edit templates in $destdir and generate new galleries.\n" ;
+    indprint "You may also remove any template that you do not want to modify.\n" ;
+    exit 0 ;
+}
+
+# main gallery creation
 
 my $root_gallery = init_gallery () ;
 
