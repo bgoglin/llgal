@@ -326,8 +326,15 @@ Exclude files whose name matches \fBs\fR.
 .TP
 .BI -i " <file>"
 Name of the main thumbnail index file.  The default is
-.IR index.html ,
+.IR index ,
 as desirable for most web servers.
+The default extension is
+.IR html
+and might be changed with
+.I --php
+or the
+.I www_extension
+configuration option.
 
 .TP
 .BI --include " <s>"
@@ -382,6 +389,20 @@ thus not documented in
 .BI -p " <n>"
 The cellpadding value of the thumbnail index tables.
 The default is 3.
+
+.TP
+.BI --php
+Change the default extension of generated webpages from
+.IR html
+to
+.IR php \fR.
+Note that template names are not modified and keep their
+.IR html
+extension even if they contain some PHP code.
+Note that
+.B llgal
+will only remove existing webpages corresponding to this
+extension when generating a new gallery or cleaning.
 
 .TP
 .BI --parent-gal
@@ -701,7 +722,7 @@ Default is \fB.llgal\fR.
 .I index_filename = \fI"filename"
 .RS
 Name of the generated index file [-i <s>].
-Default is \fBindex.html\fR.
+Default is \fBindex\fR.
 .RE
 .I slide_filenameprefix = \fI"filename prefix"
 .RS
@@ -1067,8 +1088,13 @@ Default is \fB""\fR.
 .RE
 .I www_access_rights = <0/1>
 .RS
-Make all generated files world readable [-www].
+Make all generated files world readable [--www].
 Default is \fB0\fR (disabled).
+.RE
+.I www_extension = \fI"string"
+.RS
+Extension of generated webpages [--php].
+Default is \fB"html"\fR.
 .RE
 .I config_file = <s>
 .RS

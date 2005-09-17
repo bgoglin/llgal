@@ -133,7 +133,7 @@ my $slidetemplate_filename = "slidetemplate.html" ;
 # local llgal directory
 my $local_llgal_dir = ".llgal" ;
 # name of the index file (-i)
-my $index_filename = "index.html" ;
+my $index_filename = "index" ;
 # prefix of HTML slide filenames
 my $slide_filenameprefix = "" ;
 # prefix of HTML slide filenames when generated from filename
@@ -279,6 +279,8 @@ my @scaled_convert_options = () ;
 my @thumbnail_convert_options = () ;
 # makes everything world-readable (--www)
 my $www_access_rights = 0 ;
+# extension of generate webpages (--php)
+my $www_extension = "html" ;
 
 ######################################################################
 # Create usage now to use defaults values
@@ -321,6 +323,7 @@ Layout Options:
           -n              use image file names for the HTML slide files
           --nc            omit the image count from the captions
           -p <n>          cellpadding value of thumbnail index tables ($index_cellpadding)
+          --php           use php extension for generated webpages
           -r              omit the film effect altogether
           --Rl            add links between subgalleries
           -S              add subdirectories to the list of slides
@@ -538,6 +541,8 @@ sub process_option {
 	    push (@thumbnail_convert_options, $1) ;
 	} elsif (/^www_access_rights\s*=\s*(.+)$/) {
 	    $www_access_rights = $1 ;
+	} elsif (/^www_extension\s*=\s*"(.+)"$/) {
+	    $www_extension = $1 ;
 	} elsif (/^additional_configuration_file\s*=\s*"(.+)"$/) {
 	    push (@additional_config_files, parse_convert_options ($1)) ;
 # Error
@@ -598,6 +603,7 @@ GetOptions(
 	'n'		=> \$make_slide_filename_from_filename,
 	'nc'		=> \$show_no_slide_counter,
 	'p=i'		=> \$index_cellpadding,
+	'php'		=> sub { $www_extension = "php" ; },
 	'r'		=> \$show_no_film_effect,
 	'Rl'		=> \$link_subgalleries,
 	'S'		=> \$add_subdirs,
@@ -1096,7 +1102,7 @@ sub clean_files {
 
     opendir DIR, "./$destination_dir" ; # destination is empty for './'
     while ($_ = readdir DIR ) {
-	if (/.html$/) {
+	if (/.$www_extension$/) {
 	    unlink "$destination_dir$_" ;
 	}
     }
@@ -1370,7 +1376,7 @@ sub create_file_entry {
     # make a safe url
     $entry->{url} = make_safe_url ($filename) ;
 
-    # the link text (will be HTML-safe after caption file generation)
+    # the link text (will be web-safe after caption file generation)
     if (not defined $linktext) {
 	if ($type == $TYPE_MVI) {
 	    $linktext = $MVI_link_text.$filename ;
@@ -1384,7 +1390,7 @@ sub create_file_entry {
     }
     $entry->{linktext} = $linktext ;
 
-    # the caption (will be HTML-safe after caption file generation)
+    # the caption (will be web-safe after caption file generation)
     if (not defined $caption) {
 	my @texts = () ;
 	push (@texts, $filename)
@@ -1569,10 +1575,10 @@ sub create_nofile_entry {
 	$entry->{url} = make_safe_url ($url) ;
     }
 
-    # the link text (will be HTML-safe after caption file generation)
+    # the link text (will be web-safe after caption file generation)
     $entry->{linktext} = $linktext ;
 
-    # the caption (will be HTML-safe after caption file generation)
+    # the caption (will be web-safe after caption file generation)
     $entry->{caption} = $caption ;
 
     # add caption to the title if asked
@@ -1642,17 +1648,17 @@ sub finalize_entries {
 	    my $slide_filename ;
 	    if ($make_slide_filename_from_filename) {
 		if ($type == $TYPE_TXT or $type == $TYPE_LNK) {
-		    $slide_filename = "$slide_filenameprefix_nofile$number.html" ;
+		    $slide_filename = "$slide_filenameprefix_nofile$number.$www_extension" ;
 		} elsif ($make_slide_filename_from_extension) {
-		    $slide_filename = "$filename.html" ;
+		    $slide_filename = "$filename.$www_extension" ;
 		} else {
 		    my @parts = split (/\./, $filename) ;
 		    pop @parts ;
 		    my $basename = join ('.', @parts) ;
-		    $slide_filename = "$basename.html" ;
+		    $slide_filename = "$basename.$www_extension" ;
 		}
 	    } else {
-		$slide_filename = "$slide_filenameprefix$number.html" ;
+		$slide_filename = "$slide_filenameprefix$number.$www_extension" ;
 	    }
 	    $entry->{slide_filename} = $slide_filename ;
 	    $entry->{slide_url} = make_safe_url_nowarn ($slide_filename) ;
@@ -1670,8 +1676,8 @@ sub get_entries_from_directory {
 
     opendir DIR, "./$destination_dir" # destination is empty for './'
 	or die "Can't open $destination_string ($!)\n" ;
-    # get all files, except dot-starting ones and .html ending ones
-    my @filenames = grep ((!/\.html$/i and !/^\./), readdir DIR) ;
+    # get all files, except dot-starting ones and webpages
+    my @filenames = grep ((!/\.$www_extension$/i and !/^\./), readdir DIR) ;
     closedir DIR ;
 
     # sort now so that slide numbering doesn't become wrong later
@@ -2072,9 +2078,9 @@ sub generate_slides {
     my $gallery = shift ;
     my @entries = @{$gallery->{entries}} ;
 
-    # remove old .html files
-    system ("rm -f ${destination_dir}*.html") ;
-    die "Failed to remove existing HTML slides.\n"
+    # remove old webpages
+    system ("rm -f ${destination_dir}*.$www_extension") ;
+    die "Failed to remove existing webpages.\n"
 	if $? ;
 
     # find the slidetemplate
@@ -2157,7 +2163,7 @@ sub generate_slides {
 		if $index_link_image ;
 	    $line =~ s/<!--INDEX-LINK-TEXT-->/$index_link/g ;
 
-	    $line =~ s/<!--INDEX-FILE-->/$index_filename\" title=\"$over_index_link_text/g ;
+	    $line =~ s/<!--INDEX-FILE-->/$index_filename.$www_extension\" title=\"$over_index_link_text/g ;
 
 	    # process PREV-SLIDE
 	    my $prev = $entries[$i-1] ;
@@ -2216,11 +2222,11 @@ sub generate_index {
     indprint "Using '$indextemplate' as HTML index template.\n" ;
 
     # open the template and the destination
-    indprint "Creating the $index_filename file: " ;
+    indprint "Creating the $index_filename.$www_extension file: " ;
     open(IXR, "$indextemplate")
 	or die "Can't open the index template file '$indextemplate'\n" ;
-    open(IXW, ">$destination_dir$index_filename")
-	or die "Can't create main $index_filename file\n" ;
+    open(IXW, ">$destination_dir$index_filename.$www_extension")
+	or die "Can't create main $index_filename.$www_extension file\n" ;
 
     # headers
     my $line ;
@@ -2454,7 +2460,7 @@ sub make_www_rights {
     indprint "Making all llgal files world-readable for WWW publishing.\n" ;
     
     # index
-    make_readable "$destination_dir$index_filename" ;
+    make_readable "$destination_dir$index_filename.$www_extension" ;
     # .llgal
     make_readable_and_traversable "$destination_dir$local_llgal_dir" ;
     # css
@@ -2764,6 +2770,7 @@ if (defined $generate_config) {
     print NEWCFG "scaled_convert_options = \"". (join_convert_options (@scaled_convert_options)) ."\"\n" ;
     print NEWCFG "thumbnail_convert_options = \"". (join_convert_options (@thumbnail_convert_options)) ."\"\n" ;
     print NEWCFG "www_access_rights = $www_access_rights\n" ;
+    print NEWCFG "www_extension = \"$www_extension\"\n" ;
     print NEWCFG "\n" ;
 
     close NEWCFG ;

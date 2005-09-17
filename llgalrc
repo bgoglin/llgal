@@ -62,7 +62,7 @@
 # local_llgal_dir = ".llgal"
 
 # Name of the generated index file [-i <s>]
-# index_filename = "index.html"
+# index_filename = "index"
 
 # Prefix of generated HTML slide filenames
 # slide_filenameprefix = ""
@@ -305,6 +305,9 @@
 
 # Give access rights for www access [--www]
 # www_access_rights = 0
+
+# Extension of generate webpages [--php]
+# www_extension = "www"
 
 # Additional configuration file [--config <s>]
 # This option may be used multiple times.

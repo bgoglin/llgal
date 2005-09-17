@@ -1,4 +1,10 @@
 
+* Add --php to generate webpages with the php extension instead of html
+  (requested by David Baelde). Templates are still named with the html
+  extensions. The www_extension configuration option also enables
+  extension configuration.
+  The -i option (index_filename) thus now takes a filename without
+  extension.
 * Add missing documentation and option processing for
   prev/next_gallery_link_text.
 * Slides without file now have they slide_filename numbered with the
