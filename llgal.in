@@ -1370,9 +1370,6 @@ sub create_file_entry {
     # make a safe url
     $entry->{url} = make_safe_url ($filename) ;
 
-    # keep real filename for later
-    my $real_filename = "$destination_dir$filename" ;
-
     # the link text (will be HTML-safe after caption file generation)
     if (not defined $linktext) {
 	if ($type == $TYPE_MVI) {
@@ -1413,8 +1410,16 @@ sub create_file_entry {
     $entry->{title} = $title ;
 
     # do not generate more if we are only generating captions
-    return $entry
-	if $generate_captions ;
+    return $entry ;
+}
+
+sub fill_file_entry {
+    my $entry = shift ;
+    my $type = $entry->{type} ;
+    my $filename = $entry->{filename} ;
+
+    # keep real filename for later
+    my $real_filename = "$destination_dir$filename" ;
 
     # xdim, ydim, kbytes of the image or movie
     if ($type == $TYPE_IMG) {
@@ -1577,8 +1582,11 @@ sub create_nofile_entry {
     $entry->{title} = $title ;
 
     # do not generate more if we are only generating captions
-    return $entry
-	if $generate_captions ; # TODO: currently impossible
+    return $entry ;
+}
+
+sub fill_nofile_entry {
+    my $entry = shift ;
 
     # dimstring
     $entry->{dimstring} = "" ;
@@ -1595,6 +1603,27 @@ sub create_nofile_entry {
 	$entry->{scaled_dimstring} = $entry->{dimstring} ;
     }
     return $entry ;
+}
+
+# fill entries, everything that's not required for
+# captions generation, but may be done early
+sub fill_entries {
+    my $gallery = shift ;
+    my @entries = @{$gallery->{entries}} ;
+    my @final_entries = () ;
+
+    for my $entry (@entries) {
+	my $type = $entry->{type} ;
+	my $final_entry ;
+	if ($type == $TYPE_TXT or $type == $TYPE_LNK) {
+	    $final_entry = fill_nofile_entry $entry ;
+	} else {
+	    $final_entry = fill_file_entry $entry ;
+	}
+	push @final_entries, $final_entry
+	    if defined $final_entry ;
+    } 
+    @{$gallery->{entries}} = @final_entries ;
 }
 
 # generate slide number, filename and url only when the order of entries is fixed
@@ -2587,10 +2616,12 @@ if ($generate_captions) {
 
 if (-e "$destination_dir$local_llgal_dir/$captions_filename") {
     read_captions_file $root_gallery ;
+    fill_entries $root_gallery ;
     indprint "Found ". (scalar @{$root_gallery->{entries}}) ." files in the captions file.\n" ;
 } else {
     # generate the gallery without captions file
     get_entries_from_directory $root_gallery ;
+    fill_entries $root_gallery ;
     indprint "Found ". (scalar @{$root_gallery->{entries}}) ." files in $destination_string\n" ;
 }
 
