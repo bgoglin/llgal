@@ -74,14 +74,6 @@ GetOptions(
 # restore default behavior: process all options and warn on error
 Getopt::Long::Configure('nopassthrough') ;
 
-# add a final /
-$destination_dir .= "/"
-    unless $destination_dir =~ m@/$@ ;
-# remove starting ./
-$destination_dir =~ s/^(\.\/+)+// ;
-# factorization
-my $destination_string = ($destination_dir ? "directory '$destination_dir'" : "current directory") ;
-
 ######################################################################
 # configuration files
 
@@ -804,6 +796,24 @@ sub back_path {
     return $dir ;
 }
 
+# generating safe url
+sub make_safe_url_nowarn {
+    my $file = shift ;
+    my $safe = uri_escape ($file) ;
+    return $safe ;
+}
+
+sub make_safe_url {
+    my $file = shift ;
+    my $safe = uri_escape ($file) ;
+
+    add_warning "Non-ascii characters were escaped in filename '$file'."
+	if $safe ne $file and $file =~ /[\x80-\xFF]/ ;
+
+    return $safe ;
+}
+
+
 ######################################################################
 # sanity checks and restore defaults of numerical options
 
@@ -1142,7 +1152,7 @@ if ($cleanall_asked) {
 }
 
 #####################################################################
-# give templates to the given directory
+# Give templates to the given directory
 
 if ($give_templates) {
     my $destdir = $give_templates ;
@@ -1179,8 +1189,12 @@ if ($give_templates) {
 #####################################################################
 # Main variables
 
-# The whole entry list
-my @entries ;
+# The main gallery is composed of
+# - @entries (the entry list)
+# - @listed_entries (list of entries which are shown as simple links)
+# - @headers and @footers
+
+
 # Entries are hashed composed of
 # - type: see below
 # - filename (original filename with extension)
@@ -1213,34 +1227,9 @@ my $TYPE_MVI = 3 ;
 my $TYPE_FIL = 4 ;
 my $TYPE_DIR = 5 ;
 
-# headers and footers
-my @headers = () ;
-my @footers = () ;
-
-# list of entries which are shown as simple links
-my @listed_links = () ;
-
-###################################################################################
-# generating safe url
-
-sub make_safe_url_nowarn {
-    my $file = shift ;
-    my $safe = uri_escape ($file) ;
-    return $safe ;
-}
-
-sub make_safe_url {
-    my $file = shift ;
-    my $safe = uri_escape ($file) ;
-
-    add_warning "Non-ascii characters were escaped in filename '$file'."
-	if $safe ne $file and $file =~ /[\x80-\xFF]/ ;
-
-    return $safe ;
-}
-
-# Create the url of the local llgal directory
-my $local_llgal_url = make_safe_url_nowarn ($local_llgal_dir) ;
+# various temporary globals
+my $destination_string ;
+my $local_llgal_url ;
 
 ###################################################################################
 # checking files
@@ -1377,7 +1366,7 @@ sub generate_caption_from_image_infos {
  }
 
 ###################################################################################
-# generate entries
+# Generate entries
 
 sub create_file_entry {
     my $entry ;
@@ -1633,8 +1622,47 @@ sub create_nofile_entry {
     return $entry ;
 }
 
-# generating entry table from files in target directory
+# generate slide number, filename and url only when the order of entries is fixed
+sub finalize_entries {
+    my $gallery = shift ;
+    my @entries = @{$gallery->{entries}} ;
+
+    for(my $i=0; $i < @entries; $i++) {
+	my $entry = $entries[$i] ;
+	my $type = $entry->{type} ;
+	my $number = $i+1 ;
+	my $filename = $entry->{filename} ;
+
+	# HTML slide and its url
+	if (!$make_no_slides) {
+	    my $slide_filename ;
+	    if ($make_slide_filename_from_filename) {
+		if ($type == $TYPE_TXT or $type == $TYPE_LNK) {
+		    $slide_filename = "$slide_filenameprefix_nofile$number.html" ;
+		} elsif ($make_slide_filename_from_extension) {
+		    $slide_filename = "$filename.html" ;
+		} else {
+		    my @parts = split (/\./, $filename) ;
+		    pop @parts ;
+		    my $basename = join ('.', @parts) ;
+		    $slide_filename = "$basename.html" ;
+		}
+	    } else {
+		$slide_filename = "$slide_filenameprefix$number.html" ;
+	    }
+	    $entry->{slide_filename} = $slide_filename ;
+	    $entry->{slide_url} = make_safe_url_nowarn ($slide_filename) ;
+	}
+    }
+    @{$gallery->{entries}} = @entries ;
+}
+
+#######################################################################
+# Generating entry table from files in target directory
+
 sub get_entries_from_directory {
+    my $gallery = shift ;
+    my @entries = () ;
 
     opendir DIR, "./$destination_dir" # destination is empty for './'
 	or die "Can't open $destination_string ($!)\n" ;
@@ -1715,71 +1743,57 @@ sub get_entries_from_directory {
     }
     end_percentage () ;
     show_warnings ;
-}
 
-# generate slide number, filename and url only when the order of entries is fixed
-sub finalize_entries {
-    my @entries = @_ ;
-
-    for(my $i=0; $i < @entries; $i++) {
-	my $entry = $entries[$i] ;
-	my $type = $entry->{type} ;
-	my $number = $i+1 ;
-	my $filename = $entry->{filename} ;
-
-	# HTML slide and its url
-	if (!$make_no_slides) {
-	    my $slide_filename ;
-	    if ($make_slide_filename_from_filename) {
-		if ($type == $TYPE_TXT or $type == $TYPE_LNK) {
-		    $slide_filename = "$slide_filenameprefix_nofile$number.html" ;
-		} elsif ($make_slide_filename_from_extension) {
-		    $slide_filename = "$filename.html" ;
-		} else {
-		    my @parts = split (/\./, $filename) ;
-		    pop @parts ;
-		    my $basename = join ('.', @parts) ;
-		    $slide_filename = "$basename.html" ;
-		}
-	    } else {
-		$slide_filename = "$slide_filenameprefix$number.html" ;
-	    }
-	    $entry->{slide_filename} = $slide_filename ;
-	    $entry->{slide_url} = make_safe_url_nowarn ($slide_filename) ;
-	}
-    }
-    return @entries ;
+    @{$gallery->{entries}} = @entries ;
 }
 
 #######################################################################
 # Check acces rights and create local subdirectory to place all llgal files
 
-die "Destination $destination_string does not exist.\n"
-    if ! -e "./$destination_dir" ; # destination is empty for './'
-die "Destination $destination_string is not a directory.\n"
-    if ! -d "./$destination_dir" ; # destination is empty for './'
+sub check_destination {
 
-# temporary check, to be removed soon
-if ($local_llgal_dir ne ".llgal.files" and -e "${destination_dir}.llgal.files") {
-  immediate_warning "!! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !!" ;
-  immediate_warning "llgal now uses '.llgal' instead '.llgal.files'. !!" ;
-  immediate_warning "You should probably update it.                  !!" ;
-  immediate_warning "!! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !!" ;
-}
+    # cleanup destination
+    # add a final /
+    $destination_dir .= "/"
+	unless $destination_dir =~ m@/$@ ;
+    # remove starting ./
+    $destination_dir =~ s/^(\.\/+)+// ;
+    # factorization
+    $destination_string = ($destination_dir ? "directory '$destination_dir'" : "current directory") ;
 
-if (! -e "$destination_dir$local_llgal_dir") {
-    mkdir "$destination_dir$local_llgal_dir"
-	or die "Failed to create $destination_dir$local_llgal_dir directory ($!)" ;
+    # check destination
+    die "Destination $destination_string does not exist.\n"
+	if ! -e "./$destination_dir" ; # destination is empty for './'
+    die "Destination $destination_string is not a directory.\n"
+	if ! -d "./$destination_dir" ; # destination is empty for './'
+
+    # Create the url of the local llgal directory
+    $local_llgal_url = make_safe_url_nowarn ($local_llgal_dir) ;
+
+    # temporary check, to be removed soon
+    if ($local_llgal_dir ne ".llgal.files" and -e "${destination_dir}.llgal.files") {
+	immediate_warning "!! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !!" ;
+	immediate_warning "llgal now uses '.llgal' instead '.llgal.files'. !!" ;
+	immediate_warning "You should probably update it.                  !!" ;
+	immediate_warning "!! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !!" ;
+    }
+
+    if (! -e "$destination_dir$local_llgal_dir") {
+	mkdir "$destination_dir$local_llgal_dir"
+	    or die "Failed to create $destination_dir$local_llgal_dir directory ($!)" ;
+    }
+    die "Local llgal '$destination_dir$local_llgal_dir' is not a directory.\n"
+	if ! -d "$destination_dir$local_llgal_dir" ;
 }
-die "Local llgal '$destination_dir$local_llgal_dir' is not a directory.\n"
-    if ! -d "$destination_dir$local_llgal_dir" ;
 
 #######################################################################
-# Generate captions if asked
+# Generate captions file
 
-if ($generate_captions) {
-    # create and fill $captions_filename file if it doesn't exist
-    get_entries_from_directory ;
+sub generate_captions_file {
+    my $gallery = shift ;
+
+    get_entries_from_directory $gallery ;
+    my @entries = @{$gallery->{entries}} ;
 
     indprint "Found ". (scalar @entries) ." files in $destination_string\n" ;
 
@@ -1893,34 +1907,17 @@ if ($generate_captions) {
 
     close CAP ;
     show_warnings ;
-
-    if ($make_recursive) {
-	my @dir_entries = grep { $_->{type} == $TYPE_DIR } @entries ;
-	print "\n"
-	    if @dir_entries ;
-	foreach my $entry (@dir_entries) {
-	    my $dir = $entry->{filename} ;
-	    indprint "Entering subdirectory '$dir'...\n" ;
-	    system ( $0, @llgal_options, "-d", "$destination_dir$dir", "--indent", "  ".$indent ) ;
-	    die "Failed to call $0 for subdirectory $destination_dir$dir ($!).\n"
-		if $? == -1 ;
-	    immediate_warning "$0 failed for subdirectory $destination_dir$dir."
-		if $? ;
-	    indprint "Leaving subdirectory '$dir'.\n" ;
-	    print "\n" ;
-	}
-    }
-
-    indprint "Now edit the $destination_dir$local_llgal_dir/$captions_filename file to your liking and run llgal\n" ;
-    exit 0 ;
-
 }
 
 #######################################################################
-# Use captions file if it exists
+# Read entry list in the captions file
 
-if (-e "$destination_dir$local_llgal_dir/$captions_filename") {
-    # read in files specified in the captions file since it exists
+sub read_captions_file {
+    my $gallery = shift ;
+    my @entries = () ;
+    my @headers = () ;
+    my @footers = () ;
+
     indprint "Reading the $captions_filename file and preparing entries: " ;
     init_percentage () ;
 
@@ -1947,6 +1944,7 @@ if (-e "$destination_dir$local_llgal_dir/$captions_filename") {
 		# footer for the index
 		push @footers, $1 ;
 
+# TODO move these to $gallery
 	    } elsif ($line =~ m/^PARENT:\s*(.*)\s*$/) {
 		# parent gallery link label
 		$parent_gallery_link = 1 ;
@@ -2007,58 +2005,69 @@ if (-e "$destination_dir$local_llgal_dir/$captions_filename") {
     close CAP ;
     end_percentage () ;
     show_warnings ;
-    indprint "Found ". (scalar @entries) ." files in the captions file.\n" ;
-
-} else {
-    # generate the gallery without captions file
-    get_entries_from_directory ;
-
-    show_warnings ;
-    indprint "Found ". (scalar @entries) ." files in $destination_string\n" ;
+    
+    @{$gallery->{entries}} = @entries ;
+    @{$gallery->{headers}} = @headers ;
+    @{$gallery->{footers}} = @footers ;
 }
 
-# extract entries from the table
-if ($list_links) {
+#######################################################################
+# Extract entries from the table
+
+sub extract_listed_entries {
+    my $gallery = shift ;
+    my @entries = @{$gallery->{entries}} ;
+
     my @table_entries = () ;
+    my @listed_entries = () ;
     while (@entries) {
 	my $entry = shift @entries ;
 	my $type = $entry->{type} ;
 	if ($type == $TYPE_LNK or $type == $TYPE_DIR or $type == $TYPE_MVI or $type == $TYPE_FIL) {
-	    push @listed_links, $entry ;
+	    push @listed_entries, $entry ;
 	} else {
 	    push @table_entries, $entry ;
 	}
     }
-    @entries = @table_entries ;
+    @{$gallery->{entries}} = @table_entries ;
+    @{$gallery->{listed_entries}} = @listed_entries ;
 }
-
-@entries = finalize_entries (@entries) ;
 
 #######################################################################
 # Add recursion header and footer
 
-# parent, prev and next, in reverse order
-unshift @headers, "<div style=\"text-align: right;\"><a href=\"$next_gallery_link\">$next_gallery_link_text$next_gallery_link</a></div>"
-    if $next_gallery_link ;
-unshift @headers, "<a href=\"$prev_gallery_link\">$prev_gallery_link_text$prev_gallery_link</a>"
-    if $prev_gallery_link ;
-unshift @headers, "<a href=\"..\">$parent_gallery_link_text</a>"
-    if $parent_gallery_link ;
+sub add_headers_footers {
+    my $gallery = shift ;
+    my @headers = @{$gallery->{headers}} ;
+    my @footers = @{$gallery->{footers}} ;
+    
+    # parent, prev and next, in reverse order
+    unshift @headers, "<div style=\"text-align: right;\"><a href=\"$next_gallery_link\">$next_gallery_link_text$next_gallery_link</a></div>"
+	if $next_gallery_link ;
+    unshift @headers, "<a href=\"$prev_gallery_link\">$prev_gallery_link_text$prev_gallery_link</a>"
+	if $prev_gallery_link ;
+    unshift @headers, "<a href=\"..\">$parent_gallery_link_text</a>"
+	if $parent_gallery_link ;
+    
+    # prev, next and parent
+    push @footers, "<a href=\"$prev_gallery_link\">$prev_gallery_link_text$prev_gallery_link</a>"
+	if $prev_gallery_link ;
+    push @footers, "<div style=\"text-align: right;\"><a href=\"$next_gallery_link\">$next_gallery_link_text$next_gallery_link</a></div>"
+	if $next_gallery_link ;
+    push @footers, "<a href=\"..\">$parent_gallery_link_text</a>"
+	if $parent_gallery_link ;
 
-# prev, next and parent
-push @footers, "<a href=\"$prev_gallery_link\">$prev_gallery_link_text$prev_gallery_link</a>"
-    if $prev_gallery_link ;
-push @footers, "<div style=\"text-align: right;\"><a href=\"$next_gallery_link\">$next_gallery_link_text$next_gallery_link</a></div>"
-    if $next_gallery_link ;
-push @footers, "<a href=\"..\">$parent_gallery_link_text</a>"
-    if $parent_gallery_link ;
+    @{$gallery->{headers}} = @headers ;
+    @{$gallery->{footers}} = @footers ;
+}
 
 #######################################################################
 # Create the individual slide show files
 
-if ($make_no_slides) {
-    indprint "Linking thumbnails directly to image files...  Making no html slides.\n" ;
-} else {
+sub generate_slides {
+    my $gallery = shift ;
+    my @entries = @{$gallery->{entries}} ;
+
     # remove old .html files
     system ("rm -f ${destination_dir}*.html") ;
     die "Failed to remove existing HTML slides.\n"
@@ -2081,7 +2090,7 @@ if ($make_no_slides) {
     for (my $i = 0; $i < @entries; $i++) {
 	open(SW, ">$destination_dir$entries[$i]->{slide_filename}")
 	    or die "Can't create slide file\n" ;
-	my $entry = $entries[$i] ;
+	my $entry = @entries[$i] ;
 	my $type = $entry->{type} ;
 	my $title = $entry->{title} ;
 
@@ -2191,216 +2200,227 @@ show_warnings ;
 #######################################################################
 # Creating the index file
 
-# find the indextemplate
-my $indextemplate = find_template_file ($indextemplate_filename, 1) . "/$indextemplate_filename" ;
-indprint "Using '$indextemplate' as HTML index template.\n" ;
+sub generate_index {
+    my $gallery = shift ;
+    my @entries = @{$gallery->{entries}} ;
+    my @listed_entries = @{$gallery->{listed_entries}} ;
+    my @headers = @{$gallery->{headers}} ;
+    my @footers = @{$gallery->{footers}} ;    
 
-# open the template and the destination
-indprint "Creating the $index_filename file: " ;
-open(IXR, "$indextemplate")
-    or die "Can't open the index template file '$indextemplate'\n" ;
-open(IXW, ">$destination_dir$index_filename")
-    or die "Can't create main $index_filename file\n" ;
+    # find the indextemplate
+    my $indextemplate = find_template_file ($indextemplate_filename, 1) . "/$indextemplate_filename" ;
+    indprint "Using '$indextemplate' as HTML index template.\n" ;
 
-# headers
-my $line ;
-while (defined($line = <IXR>)) {
-    if ($line =~ m/<!--HEADERS-->/) {
-	foreach my $header (@headers) {
-	    print IXW "    <div class=\"header\">" . $header . "</div>\n" ;
-	}
-    } else {
-	$line =~ s/LLGAL-OPTIONS/@llgal_options/g ;
-        $line =~ s/<!--TITLE-->/$index_title/g ;
-	$line =~ s/<!--CSS-->/$local_llgal_dir\/$css_filename/g ;
-	print IXW "$line" ;
-# stop at <!-- ********** -->
-	last if $line =~ m/\*{10}/ ;
-    }
-}
+    # open the template and the destination
+    indprint "Creating the $index_filename file: " ;
+    open(IXR, "$indextemplate")
+	or die "Can't open the index template file '$indextemplate'\n" ;
+    open(IXW, ">$destination_dir$index_filename")
+	or die "Can't create main $index_filename file\n" ;
 
-# for each row
-my $num ;
-my $forced_width_warning = 0 ;
-init_percentage () ;
-for (my $i = 0; $i < @entries; $i += $num) {
-    $num = 0 ;
-
-# figure out how many to put in next row.
-    my $width = 0 ;
-    while ( ($i+$num < @entries)
-	    && (!$thumbnails_per_row or $num < $thumbnails_per_row)
-	    && (!$pixels_per_row or $width < $pixels_per_row) ) {
-	$width += $entries[$num+$i]->{thumb_xdim} ;
-	$num++ ;
-	# add cellpadding
-	$width += $index_cellpadding ;
-    }
-    if ($pixels_per_row > 0 && $width > $pixels_per_row) {
-	if ($num >= 2) {
-	    $num-- ;
+    # headers
+    my $line ;
+    while (defined($line = <IXR>)) {
+	if ($line =~ m/<!--HEADERS-->/) {
+	    foreach my $header (@headers) {
+		print IXW "    <div class=\"header\">" . $header . "</div>\n" ;
+	    }
 	} else {
-	    $forced_width_warning++ ;
+	    $line =~ s/LLGAL-OPTIONS/@llgal_options/g ;
+	    $line =~ s/<!--TITLE-->/$index_title/g ;
+	    $line =~ s/<!--CSS-->/$local_llgal_dir\/$css_filename/g ;
+	    print IXW "$line" ;
+	    # stop at <!-- ********** -->
+	    last if $line =~ m/\*{10}/ ;
 	}
     }
 
-# Table header
-    if ($show_no_film_effect) {
-	print IXW "<table class=\"index\" style=\"border-spacing: ", $index_cellpadding, "px 0px;\">\n" ;
-    } else {
-	print IXW "<table class=\"index with-tile\" style=\"border-spacing: ", $index_cellpadding, "px 0px;\">\n" ;
+    # for each row
+    my $num ;
+    my $forced_width_warning = 0 ;
+    init_percentage () ;
+    for (my $i = 0; $i < @entries; $i += $num) {
+	$num = 0 ;
+	
+	# figure out how many to put in next row.
+	my $width = 0 ;
+	while ( ($i+$num < @entries)
+		&& (!$thumbnails_per_row or $num < $thumbnails_per_row)
+		&& (!$pixels_per_row or $width < $pixels_per_row) ) {
+	    $width += $entries[$num+$i]->{thumb_xdim} ;
+	    $num++ ;
+	    # add cellpadding
+	    $width += $index_cellpadding ;
+	}
+	if ($pixels_per_row > 0 && $width > $pixels_per_row) {
+	    if ($num >= 2) {
+		$num-- ;
+	    } else {
+		$forced_width_warning++ ;
+	    }
+	}
+
+	# Table header
+	if ($show_no_film_effect) {
+	    print IXW "<table class=\"index\" style=\"border-spacing: ", $index_cellpadding, "px 0px;\">\n" ;
+	} else {
+	    print IXW "<table class=\"index with-tile\" style=\"border-spacing: ", $index_cellpadding, "px 0px;\">\n" ;
+	}
+
+	# Row header
+	print IXW "  <tr><td class=\"tiled\" colspan=\"", ($show_no_film_effect?$num:$num+2), "\">&nbsp;</td></tr>\n"
+	    unless $show_no_film_effect ;
+	print IXW "  <tr>\n" ;
+	print IXW "    <td class=\"thumb\">&nbsp;</td>\n"
+	    unless $show_no_film_effect ;
+
+	# Actual row of thumbnails
+	for (my $j = 0; $j < $num; $j++) {
+	    my $entry = $entries[$i+$j] ;
+	    my $type = $entry->{type} ;
+	    my $width = $entry->{thumb_xdim} ;
+	    my $height = $entry->{thumb_ydim} ;
+	    
+	    if ($type == $TYPE_TXT or $type == $TYPE_LNK or $type == $TYPE_MVI or $type == $TYPE_FIL or $type == $TYPE_DIR) {
+		print IXW "    <td class=\"text-thumb\" style=\"width: ", $width, "px; height: ", $height, "px;\">\n" ;
+		print IXW "      " ;
+		if ($type == $TYPE_TXT) {
+		    print IXW "<a href=\"$entry->{slide_url}\" title=\"$entry->{title}\">$entry->{linktext}</a>" ;
+		} else {
+		    # directly open links from the index
+		    print IXW "<a href=\"$entry->{url}\" title=\"$entry->{title} $entry->{dimstring}\">$entry->{linktext}</a>" ;
+		}
+		print IXW "</td>\n" ;
+	    } elsif ($type == $TYPE_IMG) {
+		my $altname = $entry->{title} ;
+		print IXW "    <td class=\"thumb\" style=\"width: ${width}px; height: ${height}px;\">\n" ;
+		if ($make_no_slides) {
+		    print IXW "      <a href=\"$entry->{url}\"" ;
+		} else {
+		    print IXW "      <a href=\"$entry->{slide_url}\"" ;
+		}
+		print IXW " title=\"$over_thumbnail_text$altname $entry->{scaled_dimstring}\">" ;
+		print IXW "<img src=\"$entry->{thumb_url}\" alt=\"$alt_thumbnail_text$altname $entry->{thumb_dimstring}\" />" ;
+		print IXW "</a></td>\n" ;
+	    } else {
+		die "Unknown type $type.\n" ;
+	    }
+	    print_percentage ($i+$j+1, scalar @entries) ;
+	}
+
+	# Row footer
+	print IXW "    <td class=\"thumb\">&nbsp;</td>\n"
+	    unless $show_no_film_effect ;
+	print IXW "  </tr>\n" ;
+	print IXW "  <tr><td class=\"tiled\" colspan=\"", $num+2, "\">&nbsp;</td></tr>\n"
+	    unless $show_no_film_effect ;
+
+	# Dimensions and filesizes
+	if ($show_dimensions or $show_size) {
+	    print IXW "  <tr>\n" ;
+	    print IXW "    <td>&nbsp;</td>\n"
+		unless $show_no_film_effect ;
+	    for (my $j = 0; $j < $num; $j++) {
+		my $entry = $entries[$i+$j] ;
+		print IXW "    <td class=\"thumb-dim\">$entry->{scaled_dimstring}</td>\n" ;
+	    }
+	    print IXW "    <td>&nbsp;</td>\n"
+		unless $show_no_film_effect ;
+	    print IXW "  </tr>\n" ;
+	}
+
+	# Write image captions under images if option -u is given
+	if ($show_caption_under_thumbnails) {
+	    print IXW "  <tr>\n" ;
+	    print IXW "<td>&nbsp;</td>\n"
+		unless $show_no_film_effect ;
+	    for (my $j = 0; $j < $num; $j++) {
+		my $entry = $entries[$i+$j] ;
+		print IXW "    <td class=\"thumb-caption\">$entry->{caption}</td>\n" ;
+	    }
+	    print IXW "  </tr>\n" ;
+	}
+	
+	# Table footer
+	print IXW "</table>\n<br />\n" ;
     }
-
-# Row header
-    print IXW "  <tr><td class=\"tiled\" colspan=\"", ($show_no_film_effect?$num:$num+2), "\">&nbsp;</td></tr>\n"
-	unless $show_no_film_effect ;
-    print IXW "  <tr>\n" ;
-    print IXW "    <td class=\"thumb\">&nbsp;</td>\n"
-	unless $show_no_film_effect ;
-
-# Actual row of thumbnails
-    for (my $j = 0; $j < $num; $j++) {
-	my $entry = $entries[$i+$j] ;
-	my $type = $entry->{type} ;
-	my $width = $entry->{thumb_xdim} ;
-	my $height = $entry->{thumb_ydim} ;
-
-	if ($type == $TYPE_TXT or $type == $TYPE_LNK or $type == $TYPE_MVI or $type == $TYPE_FIL or $type == $TYPE_DIR) {
-	    print IXW "    <td class=\"text-thumb\" style=\"width: ", $width, "px; height: ", $height, "px;\">\n" ;
-            print IXW "      " ;
+    
+    # list links
+    if ($list_links) {
+	foreach my $entry (@listed_entries) {
+	    my $type = $entry->{type} ;
+	    print IXW "<div class=\"header\">" ;
 	    if ($type == $TYPE_TXT) {
-		print IXW "<a href=\"$entry->{slide_url}\" title=\"$entry->{title}\">$entry->{linktext}</a>" ;
+		print IXW $entry->{linktext} ;
 	    } else {
 		# directly open links from the index
 		print IXW "<a href=\"$entry->{url}\" title=\"$entry->{title} $entry->{dimstring}\">$entry->{linktext}</a>" ;
 	    }
-	    print IXW "</td>\n" ;
-	} elsif ($type == $TYPE_IMG) {
-	    my $altname = $entry->{title} ;
-	    print IXW "    <td class=\"thumb\" style=\"width: ${width}px; height: ${height}px;\">\n" ;
-	    if ($make_no_slides) {
-		print IXW "      <a href=\"$entry->{url}\"" ;
-	    } else {
-		print IXW "      <a href=\"$entry->{slide_url}\"" ;
+	    print IXW "</div>\n" ;
+	}
+    }
+
+    # search next <!-- ********** -->
+    while (defined($line = <IXR>)) {
+	last if $line =~ m/\*{10}/ ;
+    }
+    
+    # footers
+    while (defined ($line = <IXR>)) {
+	if ($line =~ m/<!--FOOTERS-->/) {
+	    foreach my $footer (@footers) {
+		print IXW "    <div class=\"footer\">" . $footer . "</div>\n" ;
 	    }
-	    print IXW " title=\"$over_thumbnail_text$altname $entry->{scaled_dimstring}\">" ;
-	    print IXW "<img src=\"$entry->{thumb_url}\" alt=\"$alt_thumbnail_text$altname $entry->{thumb_dimstring}\" />" ;
-	    print IXW "</a></td>\n" ;
 	} else {
-	    die "Unknown type $type.\n" ;
+	    $line =~ s/<!--TITLE-->/$index_title/g ;
+	    print IXW "$line" ;
 	}
-	print_percentage ($i+$j+1, scalar @entries) ;
     }
+    close IXW ;
+    close IXR ;
 
-# Row footer
-    print IXW "    <td class=\"thumb\">&nbsp;</td>\n"
-	unless $show_no_film_effect ;
-    print IXW "  </tr>\n" ;
-    print IXW "  <tr><td class=\"tiled\" colspan=\"", $num+2, "\">&nbsp;</td></tr>\n"
-	unless $show_no_film_effect ;
-
-# Dimensions and filesizes
-    if ($show_dimensions or $show_size) {
-	print IXW "  <tr>\n" ;
-	print IXW "    <td>&nbsp;</td>\n"
-	    unless $show_no_film_effect ;
-	for (my $j = 0; $j < $num; $j++) {
-	    my $entry = $entries[$i+$j] ;
-	    print IXW "    <td class=\"thumb-dim\">$entry->{scaled_dimstring}</td>\n" ;
-	}
-	print IXW "    <td>&nbsp;</td>\n"
-	    unless $show_no_film_effect ;
-	print IXW "  </tr>\n" ;
-    }
-
-# Write image captions under images if option -u is given
-    if ($show_caption_under_thumbnails) {
-	print IXW "  <tr>\n" ;
-	print IXW "<td>&nbsp;</td>\n"
-	    unless $show_no_film_effect ;
-	for (my $j = 0; $j < $num; $j++) {
-	    my $entry = $entries[$i+$j] ;
-	    print IXW "    <td class=\"thumb-caption\">$entry->{caption}</td>\n" ;
-	}
-	print IXW "  </tr>\n" ;
-    }
-
-# Table footer
-    print IXW "</table>\n<br />\n" ;
+    end_percentage () ;
+    show_warnings ;
+    
+    immediate_warning "Row width max ($pixels_per_row) too low for one single thumbnail. "
+	. "Forced $forced_width_warning time". ($forced_width_warning>1?"s":"") ."."
+	if $forced_width_warning ;
 }
-
-# list links
-if ($list_links) {
-    foreach my $entry (@listed_links) {
-	my $type = $entry->{type} ;
-	print IXW "<div class=\"header\">" ;
-	if ($type == $TYPE_TXT) {
-	    print IXW $entry->{linktext} ;
-	} else {
-	    # directly open links from the index
-	    print IXW "<a href=\"$entry->{url}\" title=\"$entry->{title} $entry->{dimstring}\">$entry->{linktext}</a>" ;
-	}
-	print IXW "</div>\n" ;
-    }
-}
-
-# search next <!-- ********** -->
-while (defined($line = <IXR>)) {
-    last if $line =~ m/\*{10}/ ;
-}
-
-# footers
-while (defined ($line = <IXR>)) {
-    if ($line =~ m/<!--FOOTERS-->/) {
-	foreach my $footer (@footers) {
-	    print IXW "    <div class=\"footer\">" . $footer . "</div>\n" ;
-	}
-    } else {
-	$line =~ s/<!--TITLE-->/$index_title/g ;
-	print IXW "$line" ;
-    }
-}
-close IXW ;
-close IXR ;
-
-end_percentage () ;
-show_warnings ;
-
-immediate_warning "Row width max ($pixels_per_row) too low for one single thumbnail. "
-    . "Forced $forced_width_warning time". ($forced_width_warning>1?"s":"") ."."
-    if $forced_width_warning ;
 
 #######################################################################
+# Get llgal files
 
-# Get the film tile for the index
-if ($show_no_film_effect) {
-    indprint "Omitting film effect.\n" ;
-} else {
-    get_template_file ($filmtile_filename) ;
-    # rescale the tiled image if needed
-    my $tileh = (imgsize ("$destination_dir$local_llgal_dir/$filmtile_filename"))[1] ;
-    if ($tile_height != $tileh) {
-	my ($status, @output) = system_with_output
-	    ( "reduce film tile",
-	      "mogrify", "-scale", "x$tile_height", "$destination_dir$local_llgal_dir/$filmtile_filename" ) ;
-	if ($status) {
-	    # die on whatever error
-	    immediate_external_warnings @output ;
-	    die "Failed to execute 'mogrify' to reduce the film tile.\n" ;
+sub get_files {
+    # Get the film tile for the index
+    if ($show_no_film_effect) {
+	indprint "Omitting film effect.\n" ;
+    } else {
+	get_template_file ($filmtile_filename) ;
+	# rescale the tiled image if needed
+	my $tileh = (imgsize ("$destination_dir$local_llgal_dir/$filmtile_filename"))[1] ;
+	if ($tile_height != $tileh) {
+	    my ($status, @output) = system_with_output
+		( "reduce film tile",
+		  "mogrify", "-scale", "x$tile_height", "$destination_dir$local_llgal_dir/$filmtile_filename" ) ;
+	    if ($status) {
+		# die on whatever error
+		immediate_external_warnings @output ;
+		die "Failed to execute 'mogrify' to reduce the film tile.\n" ;
+	    }
 	}
     }
+
+    # Get link images
+    get_template_file ($index_link_image_filename)
+	if $index_link_image ;
+    get_template_file ($prev_slide_link_image_filename)
+	if $prev_slide_link_image and ! $prev_slide_link_preview ;
+    get_template_file ($next_slide_link_image_filename)
+	if $next_slide_link_image and ! $next_slide_link_preview ;
+
+    # Get the css
+    get_template_file ($css_filename) ;
 }
-
-# Get link images
-get_template_file ($index_link_image_filename)
-    if $index_link_image ;
-get_template_file ($prev_slide_link_image_filename)
-    if $prev_slide_link_image and ! $prev_slide_link_preview ;
-get_template_file ($next_slide_link_image_filename)
-    if $next_slide_link_image and ! $next_slide_link_preview ;
-
-# Get the css
-get_template_file ($css_filename) ;
 
 #######################################################################
 # Chmod
@@ -2422,7 +2442,11 @@ sub make_readable_and_traversable {
 }   
 
 # If --www was invoked make all files world-readable at the END
-if ($www_access_rights) {
+sub make_www_rights {
+    my $gallery = shift ;
+    my @entries = @{$gallery->{entries}} ;
+    my @listed_entries = @{$gallery->{listed_entries}} ;
+
     indprint "Making all llgal files world-readable for WWW publishing.\n" ;
     
     # index
@@ -2471,7 +2495,7 @@ if ($www_access_rights) {
     }
 
     # entries that are just listed
-    foreach my $entry (@listed_links) {
+    foreach my $entry (@listed_entries) {
 	my $type = $entry->{type} ;
 	
 	# target
@@ -2485,6 +2509,120 @@ if ($www_access_rights) {
     
     show_warnings ;
 }
+
+#######################################################################
+# Process subdirectories
+
+sub call_recursive {
+    my $gallery = shift ;
+    my @entries = @{$gallery->{entries}} ;
+    my @listed_entries = @{$gallery->{listed_entries}} ;
+    
+    for (my $i = 0; $i < @entries; $i++) {
+	my $entry = @entries[$i] ;
+	next if $entry->{type} != $TYPE_DIR ;
+	my $dir = $entry->{filename} ;
+	my $revdir = back_path $dir ;
+
+	# prev and next urls
+	my $prev = $entries[$i-1] ;
+	my @prev_opts = () ;
+	my $next = $entries[$i==@entries-1 ? 0 : $i+1] ;
+	my @next_opts = () ;
+
+	if ($link_subgalleries) {
+	    if ($prev->{type} == $TYPE_DIR) {
+		@prev_opts = ("--prev-gal", "$revdir/$prev->{url}") ;
+	    }
+	    if ($next->{type} == $TYPE_DIR) {
+	        @next_opts = ("--next-gal", "$revdir/$next->{url}") ;
+	    }
+	}
+
+	print "\n" ;
+	indprint "Entering subdirectory '$dir'...\n" ;
+	system ( $0, @llgal_options, "-d", "$destination_dir$dir",
+		 "--parent-gal", @prev_opts, @next_opts,
+		 "--indent", $indent."  " ) ;
+	die "Failed to call $0 for subdirectory $destination_dir$dir ($!).\n"
+	    if $? == -1 ;
+	immediate_warning "$0 failed for subdirectory $destination_dir$dir."
+	    if $? ;
+	indprint "Leaving subdirectory '$dir'.\n" ;
+    }
+}
+
+#######################################################################
+# main gallery creation
+
+sub init_gallery {
+    my $gallery ;
+    @{$gallery->{headers}} = () ;
+    @{$gallery->{footers}} = () ;
+    @{$gallery->{entries}} = () ;
+    @{$gallery->{nofiles}} = 0 ;
+    @{$gallery->{listed_entries}} = () ;
+    return $gallery ;
+}
+
+check_destination ;
+
+my $root_gallery = init_gallery () ;
+
+if ($generate_captions) {
+    generate_captions_file $root_gallery ;
+    indprint "Now edit the $destination_dir$local_llgal_dir/$captions_filename file to your liking and run llgal\n" ;
+
+    if ($make_recursive) {
+	my @dir_entries = grep { $_->{type} == $TYPE_DIR } @{$root_gallery->{entries}} ;
+	print "\n"
+	    if @dir_entries ;
+	foreach my $entry (@dir_entries) {
+	    my $dir = $entry->{filename} ;
+	    indprint "Entering subdirectory '$dir'...\n" ;
+	    system ( $0, @llgal_options, "-d", "$destination_dir$dir", "--indent", "  ".$indent ) ;
+	    die "Failed to call $0 for subdirectory $destination_dir$dir ($!).\n"
+		if $? == -1 ;
+	    immediate_warning "$0 failed for subdirectory $destination_dir$dir."
+		if $? ;
+	    indprint "Leaving subdirectory '$dir'.\n" ;
+	    print "\n" ;
+	}
+    }
+    exit 0 ;
+}
+
+if (-e "$destination_dir$local_llgal_dir/$captions_filename") {
+    read_captions_file $root_gallery ;
+    indprint "Found ". (scalar @{$root_gallery->{entries}}) ." files in the captions file.\n" ;
+} else {
+    # generate the gallery without captions file
+    get_entries_from_directory $root_gallery ;
+    indprint "Found ". (scalar @{$root_gallery->{entries}}) ." files in $destination_string\n" ;
+}
+
+extract_listed_entries $root_gallery
+    if $list_links ;
+
+finalize_entries $root_gallery ;
+
+add_headers_footers $root_gallery ;
+
+if ($make_no_slides) {
+    indprint "Linking thumbnails directly to image files...  Making no html slides.\n" ;
+} else {
+    generate_slides $root_gallery ;
+}
+
+generate_index $root_gallery ;
+
+get_files ;
+
+make_www_rights $root_gallery
+    if $www_access_rights ;
+
+call_recursive $root_gallery
+    if $make_recursive ;
 
 #######################################################################
 # If --gencfg was invoked, generate a configuration file
@@ -2605,42 +2743,4 @@ if (defined $generate_config) {
     print NEWCFG "\n" ;
 
     close NEWCFG ;
-}
-
-#######################################################################
-# Process subdirectories
-
-if ($make_recursive) {
-    for (my $i = 0; $i < @entries; $i++) {
-	my $entry = $entries[$i] ;
-	next if $entry->{type} != $TYPE_DIR ;
-	my $dir = $entry->{filename} ;
-	my $revdir = back_path $dir ;
-
-	# prev and next urls
-	my $prev = $entries[$i-1] ;
-	my @prev_opts = () ;
-	my $next = $entries[$i==@entries-1 ? 0 : $i+1] ;
-	my @next_opts = () ;
-
-	if ($link_subgalleries) {
-	    if ($prev->{type} == $TYPE_DIR) {
-		@prev_opts = ("--prev-gal", "$revdir/$prev->{url}") ;
-	    }
-	    if ($next->{type} == $TYPE_DIR) {
-	        @next_opts = ("--next-gal", "$revdir/$next->{url}") ;
-	    }
-	}
-
-	print "\n" ;
-	indprint "Entering subdirectory '$dir'...\n" ;
-	system ( $0, @llgal_options, "-d", "$destination_dir$dir",
-		 "--parent-gal", @prev_opts, @next_opts,
-		 "--indent", $indent."  " ) ;
-	die "Failed to call $0 for subdirectory $destination_dir$dir ($!).\n"
-	    if $? == -1 ;
-	immediate_warning "$0 failed for subdirectory $destination_dir$dir."
-	    if $? ;
-	indprint "Leaving subdirectory '$dir'.\n" ;
-    }
 }

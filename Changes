@@ -4,6 +4,8 @@
 * Slides without file now have they slide_filename numbered with the
   number of the slide for make_slide_filename_from_filename (-n)
   instead of starting from 1.
+* Rework the internal code to easy multiple gallery generation
+  in the same process.
 
 
 llgal (0.11.1)
