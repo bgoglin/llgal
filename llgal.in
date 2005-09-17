@@ -39,16 +39,28 @@ sub join_convert_options {
 ######################################################################
 # process general command-line options
 
-my $destination_dir = "." ;	# look in current directory "."
-my $force_regen_asked = 0 ;	# force thumbnail regeneration
-my $version_asked = 0 ;		# show version
-my $help_asked = 0 ;		# displays brief usage message
-my $clean_asked = 0 ;		# clean up all generated files
-my $cleanall_asked = 0 ;	# clean up all generated and user modified files
-my $generate_config = undef ;   # generate a config file
-my $generate_captions = 0 ;     # generate (or update) captions
-my $give_templates = undef ;	# give templates to the given directory
-my $make_recursive = 0 ;        # do we run recursively in subdirectories ?
+# look in current directory "."
+my $destination_dir = "." ;
+# show version
+my $version_asked = 0 ;
+# displays brief usage message
+my $help_asked = 0 ;
+# clean up all generated files
+my $clean_asked = 0 ;
+# clean up all generated and user modified files
+my $cleanall_asked = 0 ;
+# generate (or update) captions
+my $generate_captions = 0 ;
+# give templates to the given directory
+my $give_templates = undef ;
+
+# Special behavior options
+# force thumbnails and scaled images regeneration
+my $force_image_regeneration = 0 ;
+# generate a config file
+my $generate_config = undef ;
+# do we run recursively in subdirectories ?
+my $make_recursive = 0 ;
 
 # process these options but kept other options in @ARGV for later
 Getopt::Long::Configure('passthrough') ;
@@ -56,7 +68,7 @@ GetOptions(
 	'clean'		=> \$clean_asked,
 	'cleanall'	=> \$cleanall_asked,
 	'd=s'		=> \$destination_dir,
-	'f'		=> \$force_regen_asked,
+	'f'		=> \$force_image_regeneration,
 	'gc'		=> \$generate_captions,
 	'gencfg=s'	=> \$generate_config,
 	'gt:s'		=> sub {
@@ -536,6 +548,8 @@ sub process_option {
 	    push (@scaled_convert_options, parse_convert_options ($1)) ;
 	} elsif (/^thumbnail_convert_options\s*=\s*"(.*)"$/) {
 	    push (@thumbnail_convert_options, $1) ;
+	} elsif (/^force_image_regeneration\s*=\s*(.*)$/) {
+	    $force_image_regeneration = $1 ;
 	} elsif (/^www_access_rights\s*=\s*(.+)$/) {
 	    $www_access_rights = $1 ;
 	} elsif (/^www_extension\s*=\s*"(.+)"$/) {
@@ -1471,7 +1485,7 @@ sub fill_file_entry {
 
 	# thumbnails dimensions
 	my $real_thumb_filename = "$destination_dir$entry->{thumb_filename}" ;
-	if ((! -e "$real_thumb_filename") or $force_regen_asked) {
+	if ((! -e "$real_thumb_filename") or $force_image_regeneration) {
 	    my ($status, @output) = system_with_output
 		( "create '$real_filename' thumbnail",
 		  @thumbnail_create_command, "$real_filename", "$real_thumb_filename" ) ;
@@ -1513,7 +1527,7 @@ sub fill_file_entry {
 	    # scaled image dimensions
 	    my $real_scaled_filename = "$destination_dir$entry->{scaled_filename}" ;
 	    my ($x,$y) ;
-	    if ((! -e "$real_scaled_filename") or $force_regen_asked) {
+	    if ((! -e "$real_scaled_filename") or $force_image_regeneration) {
 		# only scale down, never up.
 		($x,$y) = imgsize ("$real_filename") ;
 		my ($status, @output) ;
@@ -2767,6 +2781,7 @@ if (defined $generate_config) {
     print NEWCFG "convert_options = \"". (join_convert_options (@convert_options)) ."\"\n" ;
     print NEWCFG "scaled_convert_options = \"". (join_convert_options (@scaled_convert_options)) ."\"\n" ;
     print NEWCFG "thumbnail_convert_options = \"". (join_convert_options (@thumbnail_convert_options)) ."\"\n" ;
+    print NEWCFG "force_image_regeneration = $force_image_regeneration\n" ;
     print NEWCFG "www_access_rights = $www_access_rights\n" ;
     print NEWCFG "www_extension = \"$www_extension\"\n" ;
     print NEWCFG "\n" ;
