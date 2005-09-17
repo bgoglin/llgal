@@ -530,12 +530,12 @@ sub process_option {
 	} elsif (/^add_subdirs\s*=\s*(.+)$/) {
 	    $add_subdirs = $1 ;
 	} elsif (/^exclude\s*=\s*"(.+)"$/) {
-	    my $entry ;
+	    my $entry = () ;
 	    $entry->{excluded} = 1 ;
 	    $entry->{filter} = $1 ;
 	    push (@excludes, $entry) ;
 	} elsif (/^include\s*=\s*"(.+)"$/) {
-	    my $entry ;
+	    my $entry = () ;
 	    $entry->{excluded} = 0 ;
 	    $entry->{filter} = $1 ;
 	    push (@excludes, $entry) ;
@@ -635,14 +635,14 @@ GetOptions(
 	'y=i'		=> \$thumbnail_height_max,
 	'exclude=s'	=> sub {
 				shift ;
-				my $entry ;
+				my $entry = () ;
 				$entry->{filter} = shift ;
 				$entry->{excluded} = 1 ;
 				push @excludes, $entry ;
 				},
 	'include=s'	=> sub {
 				shift ;
-				my $entry ;
+				my $entry = () ;
 				$entry->{filter} = shift ;
 				$entry->{excluded} = 0 ;
 				push @excludes, $entry ;
@@ -1179,7 +1179,7 @@ sub give_templates {
 # - @headers and @footers
 
 sub init_gallery {
-    my $gallery ;
+    my $gallery = () ;
     @{$gallery->{headers}} = () ;
     @{$gallery->{footers}} = () ;
     @{$gallery->{entries}} = () ;
@@ -1361,7 +1361,7 @@ sub generate_caption_from_image_infos {
 # Generate entries
 
 sub create_file_entry {
-    my $entry ;
+    my $entry = () ;
     my $type = shift ;
     my $filename = shift ;
     my $linktext = shift ;
@@ -1572,7 +1572,7 @@ sub fill_file_entry {
 }
 
 sub create_nofile_entry {
-    my $entry ;
+    my $entry = () ;
     my $type = shift ;
     my $url = shift ;
     my $linktext = shift ;
