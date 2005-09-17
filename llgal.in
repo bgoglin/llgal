@@ -514,9 +514,9 @@ sub process_option {
 	    $make_recursive = $1 ;
 	} elsif (/^parent_gallery_link\s*=\s*(.+)$/) {
 	    $parent_gallery_link = $1 ;
-	} elsif (/^prev_gallery_link\s*=\s*"(.+)"$/) {
+	} elsif (/^prev_gallery_link\s*=\s*(.+)$/) {
 	    $prev_gallery_link = $1 ;
-	} elsif (/^next_gallery_link\s*=\s*"(.+)"$/) {
+	} elsif (/^next_gallery_link\s*=\s*(.+)$/) {
 	    $next_gallery_link = $1 ;
 	} elsif (/^link_subgalleries\s*=\s*(.+)$/) {
 	    $link_subgalleries = $1 ;
