@@ -53,9 +53,10 @@ my $make_recursive = 0 ;        # do we run recursively in subdirectories ?
 # process these options but kept other options in @ARGV for later
 Getopt::Long::Configure('passthrough') ;
 GetOptions(
+	'clean'		=> \$clean_asked,
+	'cleanall'	=> \$cleanall_asked,
 	'd=s'		=> \$destination_dir,
 	'f'		=> \$force_regen_asked,
-	'R'		=> \$make_recursive,
 	'gc'		=> \$generate_captions,
 	'gencfg=s'	=> \$generate_config,
 	'gt:s'		=> sub {
@@ -63,10 +64,9 @@ GetOptions(
 				$value = "local" if !$value ;
 				$give_templates = $value ;
 				},
-	'clean'		=> \$clean_asked,
-	'cleanall'	=> \$cleanall_asked,
-	'v|version'	=> \$version_asked,
 	'h|help'	=> \$help_asked,
+	'R'		=> \$make_recursive,
+	'v|version'	=> \$version_asked,
 	) ;
 
 # restore default behavior: process all options and warn on error
@@ -286,16 +286,16 @@ my $usage = << "END_OF_USAGE" ;
 This is llgal $version the Loulous HTML image slide show generator.
 Syntax:  llgal [-option -option ...]
 Behavior Options:
+    --clean            remove all generated files
+    --cleanall         remove all generated and user modified files
     -d <dir>           operate on files in directory <dir> ($destination_dir)
     -f                 force thumbnail and scaled slide regeneration
-    -R                 run recursively in subdirectories
     --gc               generate or update the captions file
     --gencfg <file>    generate the configuration file <file>
     --gt [<dir>]       give templates to the directory <dir>
-    --clean            remove all generated files
-    --cleanall         remove all generated and user modified files
-    -v, --version      show version
     -h, --help         displays this brief help
+    -R                 run recursively in subdirectories
+    -v, --version      show version
 Layout Options:
     -A                 add all non-image non-video files to the list of slides
     -a                 write image sizes under thumbnails on index page
@@ -309,6 +309,7 @@ Layout Options:
     --ct               use image timestamps as captions
     --ctf <s>          timestamp format in captions (strftime format)
     --con <s>          options to pass to convert (e.g. -quality N)
+    --config <s>       pass an additional configuration files
     --exclude <s>      exclude matching files
     -i <file>          name of the main thumbnail index file ($index_filename)
     --include <s>      include matching files that were excluded
@@ -318,6 +319,7 @@ Layout Options:
     -L                 list links outside of the table
     -n                 use image file names for the HTML slide files
     --nc               omit the image count from the captions
+    --option <s>       pass an additional option as in configuration files
     -p <n>             cellpadding value of thumbnail index tables ($index_cellpadding)
     --php              use php extension for generated webpages
     -r                 omit the film effect altogether
@@ -334,8 +336,6 @@ Layout Options:
     --wx <n>           rows in thumbnail index are at most <n> pixels wide
     --xy <n>           scale thumbs to <n> pixels in their longer dimension
     -y <n>             scale all thumbnails to the same height <n> ($thumbnail_height_max)
-    --config <s>       pass an additional configuration files
-    --option <s>       pass an additional option as in configuration files
   default values are given in parentheses (where applicable).
 Author:  Brice Goglin
 Homepage:  http://bgoglin.free.fr/llgal
@@ -582,15 +582,18 @@ GetOptions(
 	'ad'		=> \$show_dimensions,
 	'as'		=> \$show_size,
 	'asu=s'		=> \$show_size_unit,
-	'cf'		=> \$make_caption_from_filename,
+	'bigy=i'	=> \$slide_height_max,
+	'bigxy=i'	=> sub { shift ; $slide_width_max = $slide_height_max = shift ; },
 	'cc:s'		=> sub {
 				shift ; my $value = shift ;
 				if ($value eq "") { $make_caption_from_image_comment = "std,exif" ; }
 				elsif ($value eq "0") { $make_caption_from_image_comment = "" ; }
 				else { $make_caption_from_image_comment = $value ; }
 				},
+	'cf'		=> \$make_caption_from_filename,
 	'ct'		=> \$make_caption_from_image_timestamp,
 	'ctf=s'		=> \$timestamp_format_in_caption,
+	'con=s'		=> sub { shift ; push (@convert_options, parse_convert_options (shift)) ; },
 	'i=s'		=> \$index_filename,
 	'indent=s'	=> \$indent,
 	'k'		=> \$make_slide_title_from_caption,
@@ -599,26 +602,23 @@ GetOptions(
 	'lt'		=> sub { $prev_slide_link_preview = 1 ; $next_slide_link_preview = 1 ; },
 	'n'		=> \$make_slide_filename_from_filename,
 	'nc'		=> \$show_no_slide_counter,
+	'option=s'	=> sub { shift ; process_option (shift) ; },
 	'p=i'		=> \$index_cellpadding,
 	'php'		=> sub { $www_extension = "php" ; },
 	'r'		=> \$show_no_film_effect,
 	'Rl'		=> \$link_subgalleries,
 	'S'		=> \$add_subdirs,
 	's'		=> \$make_no_slides,
-	't=i'		=> \$tile_height,
-	'u'		=> \$show_caption_under_thumbnails,
-	'w=i'		=> \$thumbnails_per_row,
-	'y=i'		=> \$thumbnail_height_max,
-	'bigy=i'	=> \$slide_height_max,
-	'bigxy=i'	=> sub { shift ; $slide_width_max = $slide_height_max = shift ; },
-	'con=s'		=> sub { shift ; push (@convert_options, parse_convert_options (shift)) ; },
 	'sort=s'	=> \$sort_criteria,
+	't=i'		=> \$tile_height,
 	'templates=s'	=> \@template_dirs,
 	'title=s'	=> \$index_title,
+	'u'		=> \$show_caption_under_thumbnails,
+	'w=i'		=> \$thumbnails_per_row,
 	'www'		=> \$www_access_rights,
 	'wx=i'		=> \$pixels_per_row,
 	'xy=i'		=> sub { shift ; $thumbnail_width_max = $thumbnail_height_max = shift ; },
-	'option=s'	=> sub { shift ; process_option (shift) ; },
+	'y=i'		=> \$thumbnail_height_max,
 	'exclude=s'	=> sub {
 				shift ;
 				my $entry ;
