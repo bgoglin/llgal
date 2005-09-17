@@ -1245,8 +1245,6 @@ my $local_llgal_url = make_safe_url_nowarn ($local_llgal_dir) ;
 ###################################################################################
 # checking files
 
-my $nexcludes = @excludes ;
-
 sub check_file {
     my $filename = shift ;
 
@@ -1256,7 +1254,7 @@ sub check_file {
     }
 
     my $excluded = 0 ;
-    for(my $i = 0; $i < $nexcludes; $i++) {
+    for(my $i = 0; $i < @excludes; $i++) {
 	my $entry = @excludes[$i] ;
 	if ($filename =~ /^(.*\/)*$entry->{filter}$/) {
 	    $excluded = $entry->{excluded}
