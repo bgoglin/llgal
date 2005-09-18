@@ -262,9 +262,11 @@ my $link_subgalleries = 0 ;
 # generate header and footer for link to parent gallery
 my $parent_gallery_link = 0 ;
 # generate header and footer for link to previous subgallery
-my $prev_gallery_link = "" ;
+my $prev_gallery_link = 0 ;
+my $prev_gallery_link_target = "" ;
 # generate header and footer for link to next subgallery
-my $next_gallery_link = "" ;
+my $next_gallery_link = 0 ;
+my $next_gallery_link_target = "" ;
 # add indentation to the begining of messages
 my $indent = "" ;
 
@@ -514,10 +516,14 @@ sub process_option {
 	    $make_recursive = $1 ;
 	} elsif (/^parent_gallery_link\s*=\s*(.+)$/) {
 	    $parent_gallery_link = $1 ;
-	} elsif (/^prev_gallery_link\s*=\s*"(.*)"$/) {
+	} elsif (/^prev_gallery_link\s*=\s*(.+)$/) {
 	    $prev_gallery_link = $1 ;
-	} elsif (/^next_gallery_link\s*=\s*"(.*)"$/) {
+	} elsif (/^prev_gallery_link_target\s*=\s*"(.*)"$/) {
+	    $prev_gallery_link_target = $1 ;
+	} elsif (/^next_gallery_link\s*=\s*(.+)$/) {
 	    $next_gallery_link = $1 ;
+	} elsif (/^next_gallery_link_target\s*=\s*"(.*)"$/) {
+	    $next_gallery_link_target = $1 ;
 	} elsif (/^link_subgalleries\s*=\s*(.+)$/) {
 	    $link_subgalleries = $1 ;
 # What files to insert
@@ -648,8 +654,8 @@ GetOptions(
 				push @excludes, $entry ;
 				},
 	'parent-gal'	=> \$parent_gallery_link,
-	'prev-gal=s'	=> \$prev_gallery_link,
-	'next-gal=s'	=> \$next_gallery_link,
+	'prev-gal=s'	=> sub { shift ; $prev_gallery_link_target = shift ; $prev_gallery_link = 1 ; },
+	'next-gal=s'	=> sub { shift ; $next_gallery_link_target = shift ; $next_gallery_link = 1 ; },
 	) or die $usage ;
 
 ######################################################################
@@ -1821,12 +1827,18 @@ sub generate_captions_file {
     my @captions = () ;
 
     # store old values from the captions file, if it exists
-    my $old_title = undef ;
-    my $old_parent_gallery_link_text = undef ;
-    my $old_prev_gallery_link_text = undef ;
-    my $old_prev_gallery_link = undef ;
-    my $old_next_gallery_link_text = undef ;
-    my $old_next_gallery_link = undef ;
+    my $old_title ;
+
+    my $old_parent_gallery_link = 0 ;
+    my $old_parent_gallery_link_text ;
+
+    my $old_prev_gallery_link = 0 ;
+    my $old_prev_gallery_link_target ;
+    my $old_prev_gallery_link_text ;
+
+    my $old_next_gallery_link = 0 ;
+    my $old_next_gallery_link_target ;
+    my $old_next_gallery_link_text ;
 
     if (-e "$destination_dir$local_llgal_dir/$captions_filename") {
 	indprint "Reading existing captions from $captions_filename.\n" ;
@@ -1839,13 +1851,16 @@ sub generate_captions_file {
 	    if ($line =~ /^TITLE:\s*(.*)\s*$/) {
 		$old_title = $1 ;
 	    } elsif ($line =~ /^PARENT:\s*(.*)\s*$/) {
+		$old_parent_gallery_link = 1 ;
 		$old_parent_gallery_link_text = $1 ;
 	    } elsif ($line =~ /^PREV:\s*(.+)\s+----\s+(.+)\s*/) {
+		$old_prev_gallery_link = 1 ;
+		$old_prev_gallery_link_target = $2 ;
 		$old_prev_gallery_link_text = $1 ;
-		$old_prev_gallery_link = $2 ;
 	    } elsif ($line =~ /^NEXT:\s*(.+)\s+----\s+(.+)\s*/) {
+		$old_next_gallery_link = 1 ;
+		$old_next_gallery_link_target = $2 ;
 		$old_next_gallery_link_text = $1 ;
-		$old_next_gallery_link = $2 ;
 	    }
 	    print CAP $line ;
 	}
@@ -1878,17 +1893,17 @@ sub generate_captions_file {
 	    or $old_title ne $index_title ;
     print CAP "PARENT: $parent_gallery_link_text\n"
 	if $parent_gallery_link and
-	    ( !defined $old_parent_gallery_link_text
+	    ( !$old_parent_gallery_link
 	    or $old_parent_gallery_link_text ne $parent_gallery_link_text ) ;
-    print CAP "PREV: $prev_gallery_link_text ---- $prev_gallery_link\n"
+    print CAP "PREV: $prev_gallery_link_text ---- $prev_gallery_link_target\n"
 	if $prev_gallery_link and
-	    ( !defined $old_prev_gallery_link
-	    or $old_prev_gallery_link ne $prev_gallery_link
+	    ( !$old_prev_gallery_link
+	    or $old_prev_gallery_link_target ne $prev_gallery_link_target
 	    or $old_prev_gallery_link_text ne $prev_gallery_link_text ) ;
-    print CAP "NEXT: $next_gallery_link_text ---- $next_gallery_link\n"
+    print CAP "NEXT: $next_gallery_link_text ---- $next_gallery_link_target\n"
 	if $next_gallery_link and
-	    ( !defined $old_next_gallery_link
-	    or $old_next_gallery_link ne $next_gallery_link
+	    ( !$old_next_gallery_link
+	    or $old_next_gallery_link_target ne $next_gallery_link_target
 	    or $old_next_gallery_link_text ne $next_gallery_link_text ) ;
     print CAP "\n" ;
 
@@ -2063,17 +2078,17 @@ sub add_headers_footers {
     my @footers = @{$gallery->{footers}} ;
     
     # parent, prev and next, in reverse order
-    unshift @headers, "<div style=\"text-align: right;\"><a href=\"$next_gallery_link\">$next_gallery_link_text$next_gallery_link</a></div>"
+    unshift @headers, "<div style=\"text-align: right;\"><a href=\"$next_gallery_link_target\">$next_gallery_link_text$next_gallery_link_target</a></div>"
 	if $next_gallery_link ;
-    unshift @headers, "<a href=\"$prev_gallery_link\">$prev_gallery_link_text$prev_gallery_link</a>"
+    unshift @headers, "<a href=\"$prev_gallery_link_target\">$prev_gallery_link_text$prev_gallery_link_target</a>"
 	if $prev_gallery_link ;
     unshift @headers, "<a href=\"..\">$parent_gallery_link_text</a>"
 	if $parent_gallery_link ;
     
     # prev, next and parent
-    push @footers, "<a href=\"$prev_gallery_link\">$prev_gallery_link_text$prev_gallery_link</a>"
+    push @footers, "<a href=\"$prev_gallery_link_target\">$prev_gallery_link_text$prev_gallery_link_target</a>"
 	if $prev_gallery_link ;
-    push @footers, "<div style=\"text-align: right;\"><a href=\"$next_gallery_link\">$next_gallery_link_text$next_gallery_link</a></div>"
+    push @footers, "<div style=\"text-align: right;\"><a href=\"$next_gallery_link_target\">$next_gallery_link_text$next_gallery_link_target</a></div>"
 	if $next_gallery_link ;
     push @footers, "<a href=\"..\">$parent_gallery_link_text</a>"
 	if $parent_gallery_link ;
@@ -2763,8 +2778,10 @@ if (defined $generate_config) {
     print NEWCFG "make_recursive = $make_recursive\n" ;
     print NEWCFG "link_subgalleries = $link_subgalleries\n" ;
     print NEWCFG "parent_gallery_link = $parent_gallery_link\n" ;
-    print NEWCFG "prev_gallery_link = \"$prev_gallery_link\"\n" ;
-    print NEWCFG "next_gallery_link = \"$next_gallery_link\"\n" ;
+    print NEWCFG "prev_gallery_link = $prev_gallery_link\n" ;
+    print NEWCFG "prev_gallery_link_target = \"$prev_gallery_link_target\"\n" ;
+    print NEWCFG "next_gallery_link = $next_gallery_link\n" ;
+    print NEWCFG "next_gallery_link_target = \"$next_gallery_link_target\"\n" ;
     print NEWCFG "\n" ;
     print NEWCFG "# What files to insert in the gallery:\n" ;
     print NEWCFG "image_extensions = \"$image_extensions\"\n" ;
