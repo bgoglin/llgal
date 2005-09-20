@@ -2816,8 +2816,8 @@ get_files ;
 make_www_rights $root_gallery
     if $opts->{www_access_rights} ;
 
-call_recursive $root_gallery
-    if $make_recursive ;
-
 generate_config $generate_config
     if defined $generate_config ;
+
+call_recursive $root_gallery
+    if $make_recursive ;
