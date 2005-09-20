@@ -87,18 +87,17 @@ Getopt::Long::Configure('nopassthrough') ;
 ######################################################################
 # configuration files
 
-my @config_files = () ;
-
+my @generic_config_files = () ;
 # system-wide configuration file
-push (@config_files, "@SYSCONFDIR@/llgal/llgalrc") ;
+push (@generic_config_files, "@SYSCONFDIR@/llgal/llgalrc") ;
 # user-wide configuration file
-push (@config_files, $ENV{HOME}."/.llgal/llgalrc") ;
+push (@generic_config_files, $ENV{HOME}."/.llgal/llgalrc") ;
+
 # destination configuration file
-push (@config_files, "${destination_dir}.llgal/llgalrc") ;
+my $destination_config_file = ".llgal/llgalrc" ;
 
 # additional configuration files
 my @additional_config_files = () ;
-
 Getopt::Long::Configure('passthrough') ;
 GetOptions(
 	'config=s'	=> \@additional_config_files,
@@ -572,25 +571,27 @@ sub process_option {
     }
 }
 
-# parse config files
-foreach my $conf ( @config_files ) {
+sub parse_generic_config_file {
+    my $file = shift ;
     # warn on obsolete file
-    my $oldconf = $conf ;
-    $oldconf =~ s/llgal\/llgalrc$/llgalrc/ ;
-    print "!! Obsolete configuration file $oldconf skipped, should be moved to $conf.\n"
-	if -e $oldconf ;
+    my $oldconffile = $file ;
+    $oldconffile =~ s/llgal\/llgalrc$/llgalrc/ ;
+    print "!! Obsolete configuration file $oldconffile skipped, should be moved to $file.\n"
+	if -e $oldconffile ;
 
     # read conf
-    open CONF, $conf or next ;
-    while (<CONF>) {
-	process_option $opts, $_ ;
+    if (open CONF, $file) {
+	while (<CONF>) {
+	    process_option $opts, $_ ;
+	}
+	close CONF ;
     }
-    close CONF ;
 }
 
-foreach my $conf ( @additional_config_files ) {
-    open CONF, $conf
-	or die "Failed to open additional configuration file '$conf' ($!).\n" ;
+sub parse_additional_config_file {
+    my $file = shift ;
+    open CONF, $file
+	or die "Failed to open additional configuration file '$file' ($!).\n" ;
     while (<CONF>) {
 	process_option $opts, $_ ;
     }
@@ -2596,6 +2597,14 @@ sub call_recursive {
 # main code
 
 check_destination ;
+
+foreach my $conf (@generic_config_files) {
+    parse_generic_config_file $conf ;
+}
+parse_generic_config_file "${destination_dir}$destination_config_file" ;
+foreach my $conf (@additional_config_files) {
+    parse_additional_config_file $conf ;
+}
 
 # special behaviors
 
