@@ -1057,6 +1057,11 @@ my @slide_copy_command = ("cp", "-f") ;
 sub clean_files {
     my $cleanall = shift ;
     my $notdeleted = 0 ;
+    if ($cleanall) {
+	indprint "Cleaning all in directory $destination_dir...\n" ;
+    } else {
+	indprint "Cleaning in directory $destination_dir...\n" ;
+    }
 
     opendir DIR, "$destination_dir$opts->{local_llgal_dir}"
 	or die "Can't open directory $destination_dir$opts->{local_llgal_dir} ($!)\n" ;
@@ -1130,30 +1135,6 @@ sub clean_files {
 	}
     }
     closedir DIR ;
-}
-
-sub recursive_clean_files {
-    my $cleanall = shift ;
-    clean_files $cleanall ;
-    show_warnings ;
-
-    if ($make_recursive) {
-	opendir DIR, "./$destination_dir" ; # destination is empty for './'
-	while (my $dir = readdir DIR) {
-	    if ($dir =~ /^[^.]/ && -d "$destination_dir$dir") {
-		print "\n" ;
-		indprint "Entering subdirectory '$dir'...\n" ;
-		system ( $0, @llgal_options, "-d", "$destination_dir$dir", "--indent", $opts->{indent}."  " ) ;
-		die "Failed to call $0 for subdirectory $destination_dir$dir ($!).\n"
-		    if $? == -1 ;
-		immediate_warning "$0 failed for subdirectory $destination_dir$dir."
-		    if $? ;
-		indprint "Leaving subdirectory '$dir'.\n" ;
-	    }
-	}
-    }
-    closedir DIR ;
-    exit 0 ;
 }
 
 #####################################################################
@@ -2734,15 +2715,27 @@ foreach my $conf (@additional_config_files) {
 
 # special behaviors
 
-if ($clean_asked) {
-    indprint "Removing all non-modified llgal files...\n" ;
-    recursive_clean_files 0 ;
-    exit 0 ;
-}
+if ($clean_asked or $cleanall_asked) {
+    my $cleanall = shift ;
+    clean_files $cleanall_asked ;
+    show_warnings ;
 
-if ($cleanall_asked) {
-    indprint "Removing all llgal files...\n" ;
-    recursive_clean_files 1 ;
+    if ($make_recursive) {
+	opendir DIR, "./$destination_dir" ; # destination is empty for './'
+	while (my $dir = readdir DIR) {
+	    if ($dir =~ /^[^.]/ && -d "$destination_dir$dir") {
+		print "\n" ;
+		indprint "Entering subdirectory '$dir'...\n" ;
+		system ( $0, @llgal_options, "-d", "$destination_dir$dir", "--indent", $opts->{indent}."  " ) ;
+		die "Failed to call $0 for subdirectory $destination_dir$dir ($!).\n"
+		    if $? == -1 ;
+		immediate_warning "$0 failed for subdirectory $destination_dir$dir."
+		    if $? ;
+		indprint "Leaving subdirectory '$dir'.\n" ;
+	    }
+	}
+    }
+    closedir DIR ;
     exit 0 ;
 }
 
