@@ -19,6 +19,8 @@
 * Rework the internal code to easy multiple gallery generation
   in the same process.
 * Reorganize usage and manpage with an additional behavior section.
+* Add TEMPLATES section in the manpage to document the replacement
+  of fields when generating webpages from the templates.
 
 
 llgal (0.11.1)

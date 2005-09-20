@@ -40,6 +40,12 @@ See
 .B FILES
 for details.
 
+The HTML webpages are generated from the templates by replacing
+several fields (See
+.SM
+.B TEMPLATES
+).
+
 
 .SH BEHAVIOR OPTIONS
 
@@ -61,7 +67,7 @@ Remove all files
 .B llgal
 may have created earlier. This includes thumbnails, scaled down slides, all 
 HTML files, captions file, film effect picture, indextemplate and slidetemplate 
-and the stylesheet file.
+and the style-sheet file.
 
 .TP
 .BI --gc
@@ -1142,6 +1148,79 @@ This option may be used several times.
 .RE
 
 
+.SH TEMPLATES
+
+When generating the index, the following fields will be replaced in
+.IR indextemplate.html
+by the associated value (that is computed by
+.B llgal
+).
+
+.I <!--TITLE-->
+.RS
+The title of the index.
+.RE
+.I <!--CSS-->
+.RS
+The CSS style-sheet.
+.RE
+.I <!--HEADERS-->
+.RS
+The list of headers that are given in the captions file.
+.RE
+.I <!--FOOTERS-->
+.RS
+The list of footers that are given in the captions file.
+.RE
+
+When generating slides, the following fields will be replaced in
+.IR slidetemplate.html
+by the associated value (that is computed by
+.B llgal
+).
+
+.I <!--SLIDE-TITLE-->
+.RS
+The title of the slide.
+.RE
+.I <!--CSS-->
+.RS
+The CSS style-sheet.
+.RE
+.I <!--INDEX-FILE-->
+.RS
+The filename of the index.
+.RE
+.I <!--INDEX-LINK-TEXT-->
+.RS
+The label of the link to the index (might be an image).
+.RE
+.I <!--PREV-SLIDE-->
+and
+.I <!--NEXT-SLIDE-->
+.RS
+The filename of the previous and next slides.
+.RE
+.I <!--NEXT-SLIDE-LINK-TEXT-->
+and
+.I <!--PREV-SLIDE-LINK-TEXT-->
+.RS
+The label of the link to previous and next slides (might be an image).
+.RE
+.I <!--THIS-SLIDE-->
+.RS
+The actual contents of the slide (might be an image).
+.RE
+.I <!--THIS-SLIDE-STYLE-->
+.RS
+The style of the slide contents (is defined in the CSS style-sheet).
+.RE
+.I <!--IMAGE-CAPTION-->
+.RS
+The caption of the slide.
+.RE
+
+
 .SH LANGUAGE
 All configuration options produce english text by default.
 If you wish to create your gallery in another language, you should
@@ -1192,7 +1271,7 @@ of generated captions file.
 .RE
 .I /usr/share/llgal/llgal.css
 .RS
-The default style sheet template.
+The default style-sheet template.
 .RE
 .I /usr/share/llgal/tile.png
 .RS
@@ -1228,7 +1307,12 @@ The default file used to generate slides.
 These files are not required on the website.
 But,
 .BR llgal
-will thus them to generate HTML webpages og the gallery.
+will use them to generate HTML webpages of the gallery
+by replacing several fields with text or images
+(See
+.SM
+.B TEMPLATES
+).
 
 The user may change all these templates by storing files with
 the same name in its user template directory
