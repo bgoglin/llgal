@@ -2748,6 +2748,23 @@ if ($give_templates) {
     give_templates $destdir ;
     indprint "You may now edit templates in $destdir and generate new galleries.\n" ;
     indprint "You may also remove any template that you do not want to modify.\n" ;
+
+    if ($make_recursive) {
+	opendir DIR, "./$destination_dir" ; # destination is empty for './'
+	while (my $dir = readdir DIR) {
+	    if ($dir =~ /^[^.]/ && -d "$destination_dir$dir") {
+		print "\n" ;
+		indprint "Entering subdirectory '$dir'...\n" ;
+		system ( $0, @llgal_options, "-d", "$destination_dir$dir", "--indent", $opts->{indent}."  " ) ;
+		die "Failed to call $0 for subdirectory $destination_dir$dir ($!).\n"
+		    if $? == -1 ;
+		immediate_warning "$0 failed for subdirectory $destination_dir$dir."
+		    if $? ;
+		indprint "Leaving subdirectory '$dir'.\n" ;
+	    }
+	}
+    }
+    closedir DIR ;
     exit 0 ;
 }
 

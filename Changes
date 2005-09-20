@@ -8,6 +8,7 @@
 * When called with -d, llgal only read the llgalrc configuration file
   in the destination directory since the local one may be easily added
   through --config.
+* Add recursive --gt (give templates to all subdirectories).
 * Slides without file now have they slide_filename numbered with the
   number of the slide for make_slide_filename_from_filename (-n)
   instead of starting from 1.
