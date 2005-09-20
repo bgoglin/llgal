@@ -122,176 +122,179 @@ my $text_slide_height_default = 300 ;
 ######################################################################
 # all configuration variables
 
+my $opts = {
 # llgal directories
-my $llgal_share_dir = "@DATADIR@/llgal" ;
-my $user_share_dir = $ENV{HOME}."/.llgal" ;
+    llgal_share_dir => "@DATADIR@/llgal",
+    user_share_dir => $ENV{HOME}."/.llgal",
 # user-added directories where templates might be found
-my @template_dirs = () ;
+    template_dirs => [],
 
 # Name of generic llgal files
-my $captions_header_filename = "captions.header" ;
-my $css_filename = "llgal.css" ;
-my $filmtile_filename = "tile.png" ;
-my $index_link_image_filename = "index.png" ;
-my $prev_slide_link_image_filename = "prev.png" ;
-my $next_slide_link_image_filename = "next.png" ;
-my $indextemplate_filename = "indextemplate.html" ;
-my $slidetemplate_filename = "slidetemplate.html" ;
+    captions_header_filename => "captions.header",
+    css_filename => "llgal.css",
+    filmtile_filename => "tile.png",
+    index_link_image_filename => "index.png",
+    prev_slide_link_image_filename => "prev.png",
+    next_slide_link_image_filename => "next.png",
+    indextemplate_filename => "indextemplate.html",
+    slidetemplate_filename => "slidetemplate.html",
 
 # Location and name of generated files
 # local llgal directory
-my $local_llgal_dir = ".llgal" ;
+    local_llgal_dir => ".llgal",
 # name of the index file (-i)
-my $index_filename = "index" ;
+    index_filename => "index",
 # prefix of HTML slide filenames
-my $slide_filenameprefix = "" ;
+    slide_filenameprefix => "",
 # prefix of HTML slide filenames when generated from filename
 # while there's no file associated (text, link, ...)
-my $slide_filenameprefix_nofile = "NOFILE" ;
+    slide_filenameprefix_nofile => "NOFILE",
 # scaled and thumbnail image filename prefix
-my $scaled_image_filenameprefix = "scaled_" ;
-my $thumbnail_image_filenameprefix = "thumb_" ;
+    scaled_image_filenameprefix => "scaled_",
+    thumbnail_image_filenameprefix => "thumb_",
 # captions filename
-my $captions_filename = "captions" ;
+    captions_filename => "captions",
 
 # Index
 # cellpadding value for the thumbnail index tables (-p)
-my $index_cellpadding = $index_cellpadding_default ;
+    index_cellpadding => $index_cellpadding_default,
 # list links outside f the table (-L)
-my $list_links = 0 ;
+    list_links => 0,
 # how many pixels per row at most in index (--wx)
-my $pixels_per_row = $pixels_per_row_default ;
+    pixels_per_row => $pixels_per_row_default,
 # how many thumbnails per row at most in index (-w)
-my $thumbnails_per_row = $thumbnails_per_row_default ;
+    thumbnails_per_row => $thumbnails_per_row_default,
 # max height of a thumbnail (--xy or -y)
-my $thumbnail_height_max = $thumbnail_height_max_default ;
+    thumbnail_height_max => $thumbnail_height_max_default,
 # scale thumb longer dimension (--xy)
-my $thumbnail_width_max = $thumbnail_width_max_default ;
+    thumbnail_width_max => $thumbnail_width_max_default,
 # write captions under thumbnails on index page (-u)
-my $show_caption_under_thumbnails = 0 ;
+    show_caption_under_thumbnails => 0,
 # omit the film effect altogether (-r)
-my $show_no_film_effect = 0 ;
+    show_no_film_effect => 0,
 # height of the tile.png tiled image (-t)
-my $tile_height = $tile_height_default ;
+    tile_height => $tile_height_default,
 
 # Slides
 # make no slides, just thumbnail links to images (-s)
-my $make_no_slides = 0 ;
+    make_no_slides => 0,
 # use image names as slide names (-n)
-my $make_slide_filename_from_filename = 0 ;
+    make_slide_filename_from_filename => 0,
 # also use image extension in the slide names
-my $make_slide_filename_from_extension = 0 ;
+    make_slide_filename_from_extension => 0,
 # max width of the slides (--bigxy)
-my $slide_width_max = $slide_width_max_default ;
+    slide_width_max => $slide_width_max_default,
 # max height of the slides (--bigxy or --bigy)
-my $slide_height_max = $slide_height_max_default ;
+    slide_height_max => $slide_height_max_default,
 # default text slide width
-my $text_slide_width = $text_slide_width_default ;
+    text_slide_width => $text_slide_width_default,
 # default text slide height
-my $text_slide_height = $text_slide_height_default ;
+    text_slide_height => $text_slide_height_default,
 # use an image for link from a slide to the index, previous or next slide
-my $index_link_image = 0 ;
-my $prev_slide_link_image = 0 ;
-my $next_slide_link_image = 0 ;
+    index_link_image => 0,
+    prev_slide_link_image => 0,
+    next_slide_link_image => 0,
 # use an image preview for link from a slide to the previous or next slide
-my $prev_slide_link_preview = 0 ;
-my $next_slide_link_preview = 0 ;
+    prev_slide_link_preview => 0,
+    next_slide_link_preview => 0,
 # use captions as slide titles (-k)
-my $make_slide_title_from_caption = 0 ;
+    make_slide_title_from_caption => 0,
 
 # Captions
 # this line will be placed in caption generated file
 # the user may remove it to prevent llgal from removing the caption file with --clean
-my $captions_removal_line = "REMOVE THIS LINE IF LLGAL SHOULD NOT REMOVE THIS FILE" ;
+    captions_removal_line => "REMOVE THIS LINE IF LLGAL SHOULD NOT REMOVE THIS FILE",
 # use image comment as captions (--cc)
-my $make_caption_from_image_comment = 0 ;
+    make_caption_from_image_comment => 0,
 # use image timestamp as captions (--ct)
-my $make_caption_from_image_timestamp = 0 ;
+    make_caption_from_image_timestamp => 0,
 # preserve image names as captions (--cf)
-my $make_caption_from_filename = 0 ;
+    make_caption_from_filename => 0,
 # to write image dimensions (-a or --ad)
-my $show_dimensions = 0 ;
+    show_dimensions => 0,
 # to write image size (-a or --as)
-my $show_size = 0 ;
+    show_size => 0,
 # omit the image slide from the caption (--nc)
-my $show_no_slide_counter = 0 ;
+    show_no_slide_counter => 0,
 
 # Text
 # title of the gallery (--title)
-my $index_title = "Index of pictures" ;
+    index_title => "Index of pictures",
 # label of link to the parent gallery
-my $parent_gallery_link_text = "Back to parent gallery" ;
+    parent_gallery_link_text => "Back to parent gallery",
 # label of link to previous gallery
-my $prev_gallery_link_text = "Previous gallery " ;
+    prev_gallery_link_text => "Previous gallery ",
 # label of link to previous gallery
-my $next_gallery_link_text = "Next gallery " ;
+    next_gallery_link_text => "Next gallery ",
 # label of link from slides to index
-my $index_link_text = "Index" ;
+    index_link_text => "Index",
 # label of link from a slide to the previous one
-my $prev_slide_link_text = "&lt;&lt;Prev" ;
+    prev_slide_link_text => "&lt;&lt;Prev",
 # label of link from a slide to the next one
-my $next_slide_link_text = "Next&gt;&gt;" ;
+    next_slide_link_text => "Next&gt;&gt;",
 # text prefixing the link text
-my $MVI_link_text = "Open movie " ;
-my $FIL_link_text = "Download file " ;
-my $DIR_link_text = "Open subgallery " ;
+    MVI_link_text => "Open movie ",
+    FIL_link_text => "Download file ",
+    DIR_link_text => "Open subgallery ",
 # alternative text for full-size images in slides
-my $alt_full_text = "" ;
+    alt_full_text => "",
 # alternative text for scaled images in slides
-my $alt_scaled_text = "Scaled image " ;
+    alt_scaled_text => "Scaled image ",
 # alternative text for thumbnails in the index
-my $alt_thumbnail_text = "Thumbnail " ;
+    alt_thumbnail_text => "Thumbnail ",
 # text shown when the mouse pointer is over a scaled image in a slide
-my $over_scaled_text = "Click to see full size " ;
+    over_scaled_text => "Click to see full size ",
 # text shown when the mouse pointer is over a thumbnail
-my $over_thumbnail_text = "Click to enlarge " ;
+    over_thumbnail_text => "Click to enlarge ",
 # text shown when the mouse pointer is over a link to the index
-my $over_index_link_text = "Return to the index" ;
+    over_index_link_text => "Return to the index",
 # text shown when the mouse pointer is over a link to the previous slide
-my $over_prev_slide_link_text = "Previous slide " ;
+    over_prev_slide_link_text => "Previous slide ",
 # text shown when the mouse pointer is over a link to the next slide
-my $over_next_slide_link_text = "Next slide " ;
+    over_next_slide_link_text => "Next slide ",
 # change kB to another unit (--asu)
-my $show_size_unit = "kB" ;
+    show_size_unit => "kB",
 # format of the timestamp in captions (--ctf)
-my $timestamp_format_in_caption = "%Y-%m-%d %H:%M:%S" ;
+    timestamp_format_in_caption => "%Y-%m-%d %H:%M:%S",
 
 # Recursion
 # add links between subgalleries
-my $link_subgalleries = 0 ;
+    link_subgalleries => 0,
 # generate header and footer for link to parent gallery
-my $parent_gallery_link = 0 ;
+    parent_gallery_link => 0,
 # generate header and footer for link to previous subgallery
-my $prev_gallery_link = 0 ;
-my $prev_gallery_link_target = "" ;
+    prev_gallery_link => 0,
+    prev_gallery_link_target => "",
 # generate header and footer for link to next subgallery
-my $next_gallery_link = 0 ;
-my $next_gallery_link_target = "" ;
+    next_gallery_link => 0,
+    next_gallery_link_target => "",
 # add indentation to the begining of messages
-my $indent = "" ;
+    indent => "",
 
 # What files to insert in the gallery
 # image and movie extensions
-my $image_extensions = "jpe?g|tiff?|png|gif" ;
-my $movie_extensions = "mpe?g|mov|avi" ;
+    image_extensions => "jpe?g|tiff?|png|gif",
+    movie_extensions => "mpe?g|mov|avi",
 # add all files, not only images and movies (-A)
-my $add_all_files = 0 ;
+    add_all_files => 0,
 # add subdirectories to entry list (-S)
-my $add_subdirs = 0 ;
+    add_subdirs => 0,
 # exclude/include
-my @excludes = () ;
+    excludes => [],
 # sort criteria
-my $sort_criteria = "name" ;
+    sort_criteria => "name",
 
 # Various
 # options to be passed to convert (--con)
-my @convert_options = () ;
-my @scaled_convert_options = () ;
-my @thumbnail_convert_options = () ;
+    convert_options => [],
+    scaled_convert_options => [],
+    thumbnail_convert_options => [],
 # makes everything world-readable (--www)
-my $www_access_rights = 0 ;
+    www_access_rights => 0,
 # extension of generate webpages (--php)
-my $www_extension = "html" ;
+    www_extension => "html",
+
+} ;
 
 ######################################################################
 # Create usage now to use defaults values
@@ -315,7 +318,7 @@ Layout Options:
     -a                 write image sizes under thumbnails on index page
     --ad               like -a, but write only the image dimensions
     --as               like -a, but write only the file size (in kbytes)
-    --asu <s>          change file size unit ($show_size_unit)
+    --asu <s>          change file size unit ($opts->{show_size_unit})
     --bigy <n>         like -y, use it if you have very large image files
     --bigxy <n>        like --xy, use it if you have very large image files
     --cf               use file names as captions
@@ -325,7 +328,7 @@ Layout Options:
     --con <s>          options to pass to convert (e.g. -quality N)
     --config <s>       pass an additional configuration files
     --exclude <s>      exclude matching files
-    -i <file>          name of the main thumbnail index file ($index_filename)
+    -i <file>          name of the main thumbnail index file ($opts->{index_filename})
     --include <s>      include matching files that were excluded
     -k                 use the image captions for the HTML slide titles
     --li               use images for links in slides
@@ -334,22 +337,22 @@ Layout Options:
     -n                 use image file names for the HTML slide files
     --nc               omit the image count from the captions
     --option <s>       pass an additional option as in configuration files
-    -p <n>             cellpadding value of thumbnail index tables ($index_cellpadding)
+    -p <n>             cellpadding value of thumbnail index tables ($opts->{index_cellpadding})
     --php              use php extension for generated webpages
     -r                 omit the film effect altogether
     --Rl               add links between subgalleries
     -S                 add subdirectories to the list of slides
     -s                 make no HTML slides, link thumbnails to images
     --sort <s>         sort files with criteria <s>
-    -t <n>             height of the film tiled image ($tile_height)
+    -t <n>             height of the film tiled image ($opts->{tile_height})
     --templates <dir>  use templates in <dir>
     --title <s>        string to substitute for TITLE in index template
     -u                 write captions under thumbnails on index page
-    -w <n>             rows in thumbnail index are at most <n> images wide ($thumbnails_per_row)
+    -w <n>             rows in thumbnail index are at most <n> images wide ($opts->{thumbnails_per_row})
     --www              make all llgal files world-readable
     --wx <n>           rows in thumbnail index are at most <n> pixels wide
     --xy <n>           scale thumbs to <n> pixels in their longer dimension
-    -y <n>             scale all thumbnails to the same height <n> ($thumbnail_height_max)
+    -y <n>             scale all thumbnails to the same height <n> ($opts->{thumbnail_height_max})
   default values are given in parentheses (where applicable).
 Author:  Brice Goglin
 Homepage:  http://bgoglin.free.fr/llgal
@@ -366,206 +369,207 @@ die "This is llgal version $version.\n"
 # parse options in config files
 
 sub process_option {
-	$_ = shift ;
-	chomp $_ ;
+    my $opts = shift ;
+    $_ = shift ;
+    chomp $_ ;
 # llgal directories
-    	if (/^llgal_share_dir\s*=\s*"(.+)"$/) {
-	    $llgal_share_dir = $1 ;
-	} elsif (/^user_share_dir\s*=\s*"(\/.+)"$/) {
-	    $user_share_dir = $1 ;
-	} elsif (/^user_share_dir\s*=\s*"(.+)"$/) {
-	    $user_share_dir = $ENV{HOME}."/".$1 ;
-	} elsif (/^template_dir\s*=\s*"(.+)"$/) {
-	    push (@template_dirs, $1) ;
+    if (/^llgal_share_dir\s*=\s*"(.+)"$/) {
+	$opts->{llgal_share_dir} = $1 ;
+    } elsif (/^user_share_dir\s*=\s*"(\/.+)"$/) {
+	$opts->{user_share_dir} = $1 ;
+    } elsif (/^user_share_dir\s*=\s*"(.+)"$/) {
+	$opts->{user_share_dir} = $ENV{HOME}."/".$1 ;
+    } elsif (/^template_dir\s*=\s*"(.+)"$/) {
+	push (@{$opts->{template_dirs}}, $1) ;
 # Name of generic llgal files
-	} elsif (/^captions_header_filename\s*=\s*"(.+)"$/) {
-	    $captions_header_filename = $1 ;
-	} elsif (/^css_filename\s*=\s*"(.+)"$/) {
-	    $css_filename = $1 ;
-	} elsif (/^filmtile_filename\s*=\s*"(.+)"$/) {
-	    $filmtile_filename = $1 ;
-	} elsif (/^index_link_image_filename\s*=\s*"(.+)"$/) {
-	    $index_link_image_filename = $1 ;
-	} elsif (/^prev_slide_link_image_filename\s*=\s*"(.+)"$/) {
-	    $prev_slide_link_image_filename = $1 ;
-	} elsif (/^next_slide_link_image_filename\s*=\s*"(.+)"$/) {
-	    $next_slide_link_image_filename = $1 ;
-	} elsif (/^indextemplate_filename\s*=\s*"(.+)"$/) {
-	    $indextemplate_filename = $1 ;
-	} elsif (/^slidetemplate_filename\s*=\s*"(.+)"$/) {
-	    $slidetemplate_filename = $1 ;
+    } elsif (/^captions_header_filename\s*=\s*"(.+)"$/) {
+	$opts->{captions_header_filename} = $1 ;
+    } elsif (/^css_filename\s*=\s*"(.+)"$/) {
+	$opts->{css_filename} = $1 ;
+    } elsif (/^filmtile_filename\s*=\s*"(.+)"$/) {
+	$opts->{filmtile_filename} = $1 ;
+    } elsif (/^index_link_image_filename\s*=\s*"(.+)"$/) {
+	$opts->{index_link_image_filename} = $1 ;
+    } elsif (/^prev_slide_link_image_filename\s*=\s*"(.+)"$/) {
+	$opts->{prev_slide_link_image_filename} = $1 ;
+    } elsif (/^next_slide_link_image_filename\s*=\s*"(.+)"$/) {
+	$opts->{next_slide_link_image_filename} = $1 ;
+    } elsif (/^indextemplate_filename\s*=\s*"(.+)"$/) {
+	$opts->{indextemplate_filename} = $1 ;
+    } elsif (/^slidetemplate_filename\s*=\s*"(.+)"$/) {
+	$opts->{slidetemplate_filename} = $1 ;
 # Location and name of generated files
-	} elsif (/^local_llgal_dir\s*=\s*"(.+)"$/) {
-	    $local_llgal_dir = $1 ;
-	} elsif (/^index_filename\s*=\s*"(.+)"$/) {
-	    $index_filename = $1 ;
-	} elsif (/^slide_filenameprefix\s*=\s*"(.*)"$/) {
-	    $slide_filenameprefix = $1 ;
-	} elsif (/^slide_filenameprefix_nofile\s*=\s*"(.+)"$/) {
-	    $slide_filenameprefix_nofile = $1 ;
-	} elsif (/^scaled_image_filenameprefix\s*=\s*"(.+)"$/) {
-	    $scaled_image_filenameprefix = $1 ;
-	} elsif (/^thumbnail_image_filenameprefix\s*=\s*"(.+)"$/) {
-	    $thumbnail_image_filenameprefix = $1 ;
-	} elsif (/^captions_filename\s*=\s*"(.+)"$/) {
-	    $captions_filename = $1 ;
+    } elsif (/^local_llgal_dir\s*=\s*"(.+)"$/) {
+	$opts->{local_llgal_dir} = $1 ;
+    } elsif (/^index_filename\s*=\s*"(.+)"$/) {
+	$opts->{index_filename} = $1 ;
+    } elsif (/^slide_filenameprefix\s*=\s*"(.*)"$/) {
+	$opts->{slide_filenameprefix} = $1 ;
+    } elsif (/^slide_filenameprefix_nofile\s*=\s*"(.+)"$/) {
+	$opts->{slide_filenameprefix_nofile} = $1 ;
+    } elsif (/^scaled_image_filenameprefix\s*=\s*"(.+)"$/) {
+	$opts->{scaled_image_filenameprefix} = $1 ;
+    } elsif (/^thumbnail_image_filenameprefix\s*=\s*"(.+)"$/) {
+	$opts->{thumbnail_image_filenameprefix} = $1 ;
+    } elsif (/^captions_filename\s*=\s*"(.+)"$/) {
+	$opts->{captions_filename} = $1 ;
 # Index
-	} elsif (/^index_cellpadding\s*=\s*(.+)$/) { # >= 0, -1 for default
-	    $index_cellpadding = $1 ;
-	} elsif (/^list_links\s*=\s*(.+)$/) {
-	    $list_links = $1 ;
-	} elsif (/^pixels_per_row\s*=\s*(.+)$/) { # > 0, 0 for unlimited, -1 for default
-	    $pixels_per_row = $1 ;
-	} elsif (/^thumbnails_per_row\s*=\s*(.+)$/) { # > 0, 0 for unlimited, -1 for default
-	    $thumbnails_per_row = $1 ;
-	} elsif (/^thumbnail_height_max\s*=\s*(.+)$/) { # > 0, -1 for default
-	    $thumbnail_height_max = $1 ;
-	} elsif (/^thumbnail_width_max\s*=\s*(.+)$/) { # > 0, 0 for unlimited, -1 for default
-	    $thumbnail_width_max = $1 ;
-	} elsif (/^show_caption_under_thumbnails\s*=\s*(.+)$/) {
-	    $show_caption_under_thumbnails = $1 ;
-	} elsif (/^show_no_film_effect\s*=\s*(.+)$/) {
-	    $show_no_film_effect = $1 ;
-	} elsif (/^tile_height\s*=\s*(.+)$/) { # >= 0, -1 for default
-	    $tile_height = $1 ;
+    } elsif (/^index_cellpadding\s*=\s*(.+)$/) { # >= 0, -1 for default
+	$opts->{index_cellpadding} = $1 ;
+    } elsif (/^list_links\s*=\s*(.+)$/) {
+	$opts->{list_links} = $1 ;
+    } elsif (/^pixels_per_row\s*=\s*(.+)$/) { # > 0, 0 for unlimited, -1 for default
+	$opts->{pixels_per_row} = $1 ;
+    } elsif (/^thumbnails_per_row\s*=\s*(.+)$/) { # > 0, 0 for unlimited, -1 for default
+	$opts->{thumbnails_per_row} = $1 ;
+    } elsif (/^thumbnail_height_max\s*=\s*(.+)$/) { # > 0, -1 for default
+	$opts->{thumbnail_height_max} = $1 ;
+    } elsif (/^thumbnail_width_max\s*=\s*(.+)$/) { # > 0, 0 for unlimited, -1 for default
+	$opts->{thumbnail_width_max} = $1 ;
+    } elsif (/^show_caption_under_thumbnails\s*=\s*(.+)$/) {
+	$opts->{show_caption_under_thumbnails} = $1 ;
+    } elsif (/^show_no_film_effect\s*=\s*(.+)$/) {
+	$opts->{show_no_film_effect} = $1 ;
+    } elsif (/^tile_height\s*=\s*(.+)$/) { # >= 0, -1 for default
+	$opts->{tile_height} = $1 ;
 # Slides
-	} elsif (/^make_no_slides\s*=\s*(.+)$/) {
-	    $make_no_slides = $1 ;
-	} elsif (/^make_slide_filename_from_filename\s*=\s*(.+)$/) {
-	    $make_slide_filename_from_filename = $1 ;
-	} elsif (/^make_slide_filename_from_extension\s*=\s*(.+)$/) {
-	    $make_slide_filename_from_extension = $1 ;
-	} elsif (/^slide_width_max\s*=\s*(.+)$/) { # > 0, 0 for unlimited, -1 for default
-	    $slide_width_max = $1 ;
-	} elsif (/^slide_height_max\s*=\s*(.+)$/) { # > 0, 0 for unlimited, -1 for default
-	    $slide_height_max = $1 ;
-	} elsif (/^text_slide_width\s*=\s*(.+)$/) { # > 0, -1 for default
-	    $text_slide_width = $1 ;
-	} elsif (/^text_slide_height\s*=\s*(.+)$/) { # > 0, -1 for default
-	    $text_slide_height = $1 ;
-	} elsif (/^index_link_image\s*=\s*(.+)$/) {
-	    $index_link_image = $1 ;
-	} elsif (/^prev_slide_link_image\s*=\s*(.+)$/) {
-	    $prev_slide_link_image = $1 ;
-	} elsif (/^next_slide_link_image\s*=\s*(.+)$/) {
-	    $next_slide_link_image = $1 ;
-	} elsif (/^prev_slide_link_preview\s*=\s*(.+)$/) {
-	    $prev_slide_link_preview = $1 ;
-	} elsif (/^next_slide_link_preview\s*=\s*(.+)$/) {
-	    $next_slide_link_preview = $1 ;
-	} elsif (/^make_slide_title_from_caption\s*=\s*(.+)$/) {
-	    $make_slide_title_from_caption = $1 ;
+    } elsif (/^make_no_slides\s*=\s*(.+)$/) {
+	$opts->{make_no_slides} = $1 ;
+    } elsif (/^make_slide_filename_from_filename\s*=\s*(.+)$/) {
+	$opts->{make_slide_filename_from_filename} = $1 ;
+    } elsif (/^make_slide_filename_from_extension\s*=\s*(.+)$/) {
+	$opts->{make_slide_filename_from_extension} = $1 ;
+    } elsif (/^slide_width_max\s*=\s*(.+)$/) { # > 0, 0 for unlimited, -1 for default
+	$opts->{slide_width_max} = $1 ;
+    } elsif (/^slide_height_max\s*=\s*(.+)$/) { # > 0, 0 for unlimited, -1 for default
+	$opts->{slide_height_max} = $1 ;
+    } elsif (/^text_slide_width\s*=\s*(.+)$/) { # > 0, -1 for default
+	$opts->{text_slide_width} = $1 ;
+    } elsif (/^text_slide_height\s*=\s*(.+)$/) { # > 0, -1 for default
+	$opts->{text_slide_height} = $1 ;
+    } elsif (/^index_link_image\s*=\s*(.+)$/) {
+	$opts->{index_link_image} = $1 ;
+    } elsif (/^prev_slide_link_image\s*=\s*(.+)$/) {
+	$opts->{prev_slide_link_image} = $1 ;
+    } elsif (/^next_slide_link_image\s*=\s*(.+)$/) {
+	$opts->{next_slide_link_image} = $1 ;
+    } elsif (/^prev_slide_link_preview\s*=\s*(.+)$/) {
+	$opts->{prev_slide_link_preview} = $1 ;
+    } elsif (/^next_slide_link_preview\s*=\s*(.+)$/) {
+	$opts->{next_slide_link_preview} = $1 ;
+    } elsif (/^make_slide_title_from_caption\s*=\s*(.+)$/) {
+	$opts->{make_slide_title_from_caption} = $1 ;
 # Captions
-	} elsif (/^captions_removal_line\s*=\s*"(.+)"$/) {
-	    $captions_removal_line = $1 ;
-	} elsif (/^make_caption_from_image_comment\s*=\s*"(.*)"$/) {
-	    $make_caption_from_image_comment = $1 ;
-	} elsif (/^make_caption_from_image_timestamp\s*=\s*(.+)$/) {
-	    $make_caption_from_image_timestamp = $1 ;
-	} elsif (/^make_caption_from_filename\s*=\s*(.+)$/) {
-	    $make_caption_from_filename = $1 ;
-	} elsif (/^show_dimensions\s*=\s*(.+)$/) {
-	    $show_dimensions = $1 ;
-	} elsif (/^show_size\s*=\s*(.+)$/) {
-	    $show_size = $1 ;
-	} elsif (/^show_no_slide_counter\s*=\s*(.+)$/) {
-	    $show_no_slide_counter = $1 ;
+    } elsif (/^captions_removal_line\s*=\s*"(.+)"$/) {
+	$opts->{captions_removal_line} = $1 ;
+    } elsif (/^make_caption_from_image_comment\s*=\s*"(.*)"$/) {
+	$opts->{make_caption_from_image_comment} = $1 ;
+    } elsif (/^make_caption_from_image_timestamp\s*=\s*(.+)$/) {
+	$opts->{make_caption_from_image_timestamp} = $1 ;
+    } elsif (/^make_caption_from_filename\s*=\s*(.+)$/) {
+	$opts->{make_caption_from_filename} = $1 ;
+    } elsif (/^show_dimensions\s*=\s*(.+)$/) {
+	$opts->{show_dimensions} = $1 ;
+    } elsif (/^show_size\s*=\s*(.+)$/) {
+	$opts->{show_size} = $1 ;
+    } elsif (/^show_no_slide_counter\s*=\s*(.+)$/) {
+	$opts->{show_no_slide_counter} = $1 ;
 # Text
-	} elsif (/^index_title\s*=\s*"(.*)"$/) {
-	    $index_title = $1 ;
-	} elsif (/^index_link_text\s*=\s*"(.+)"$/) {
-	    $index_link_text = $1 ;
-	} elsif (/^parent_gallery_link_text\s*=\s*"(.+)"$/) {
-	    $parent_gallery_link_text = $1 ;
-	} elsif (/^prev_gallery_link_text\s*=\s*"(.*)"$/) {
-	    $prev_gallery_link_text = $1 ;
-	} elsif (/^next_gallery_link_text\s*=\s*"(.*)"$/) {
-	    $next_gallery_link_text = $1 ;
-	} elsif (/^prev_slide_link_text\s*=\s*"(.+)"$/) {
-	    $prev_slide_link_text = $1 ;
-	} elsif (/^next_slide_link_text\s*=\s*"(.+)"$/) {
-	    $next_slide_link_text = $1 ;
-	} elsif (/^MVI_link_text\s*=\s*"(.*)"$/) {
-	    $MVI_link_text = $1 ;
-	} elsif (/^FIL_link_text\s*=\s*"(.*)"$/) {
-	    $FIL_link_text = $1 ;
-	} elsif (/^DIR_link_text\s*=\s*"(.*)"$/) {
-	    $DIR_link_text = $1 ;
-	} elsif (/^alt_full_text\s*=\s*"(.*)"$/) {
-	    $alt_full_text = $1 ;
-	} elsif (/^alt_scaled_text\s*=\s*"(.*)"$/) {
-	    $alt_scaled_text = $1 ;
-	} elsif (/^alt_thumbnail_text\s*=\s*"(.*)"$/) {
-	    $alt_thumbnail_text = $1 ;
-	} elsif (/^over_scaled_text\s*=\s*"(.*)"$/) {
-	    $over_scaled_text = $1 ;
-	} elsif (/^over_thumbnail_text\s*=\s*"(.*)"$/) {
-	    $over_thumbnail_text = $1 ;
-	} elsif (/^over_index_link_text\s*=\s*"(.*)"$/) {
-	    $over_index_link_text = $1 ;
-	} elsif (/^over_prev_slide_link_text\s*=\s*"(.*)"$/) {
-	    $over_prev_slide_link_text = $1 ;
-	} elsif (/^over_next_slide_link_text\s*=\s*"(.*)"$/) {
-	    $over_next_slide_link_text = $1 ;
-	} elsif (/^show_size_unit\s*=\s*"(.*)"$/) {
-	    $show_size_unit = $1 ;
-	} elsif (/^timestamp_format_in_caption\s*=\s*"(.+)"$/) {
-	    $timestamp_format_in_caption = $1 ;
+    } elsif (/^index_title\s*=\s*"(.*)"$/) {
+	$opts->{index_title} = $1 ;
+    } elsif (/^index_link_text\s*=\s*"(.+)"$/) {
+	$opts->{index_link_text} = $1 ;
+    } elsif (/^parent_gallery_link_text\s*=\s*"(.+)"$/) {
+	$opts->{parent_gallery_link_text} = $1 ;
+    } elsif (/^prev_gallery_link_text\s*=\s*"(.*)"$/) {
+	$opts->{prev_gallery_link_text} = $1 ;
+    } elsif (/^next_gallery_link_text\s*=\s*"(.*)"$/) {
+	$opts->{next_gallery_link_text} = $1 ;
+    } elsif (/^prev_slide_link_text\s*=\s*"(.+)"$/) {
+	$opts->{prev_slide_link_text} = $1 ;
+    } elsif (/^next_slide_link_text\s*=\s*"(.+)"$/) {
+	$opts->{next_slide_link_text} = $1 ;
+    } elsif (/^MVI_link_text\s*=\s*"(.*)"$/) {
+	$opts->{MVI_link_text} = $1 ;
+    } elsif (/^FIL_link_text\s*=\s*"(.*)"$/) {
+	$opts->{FIL_link_text} = $1 ;
+    } elsif (/^DIR_link_text\s*=\s*"(.*)"$/) {
+	$opts->{DIR_link_text} = $1 ;
+    } elsif (/^alt_full_text\s*=\s*"(.*)"$/) {
+	$opts->{alt_full_text} = $1 ;
+    } elsif (/^alt_scaled_text\s*=\s*"(.*)"$/) {
+	$opts->{alt_scaled_text} = $1 ;
+    } elsif (/^alt_thumbnail_text\s*=\s*"(.*)"$/) {
+	$opts->{alt_thumbnail_text} = $1 ;
+    } elsif (/^over_scaled_text\s*=\s*"(.*)"$/) {
+	$opts->{over_scaled_text} = $1 ;
+    } elsif (/^over_thumbnail_text\s*=\s*"(.*)"$/) {
+	$opts->{over_thumbnail_text} = $1 ;
+    } elsif (/^over_index_link_text\s*=\s*"(.*)"$/) {
+	$opts->{over_index_link_text} = $1 ;
+    } elsif (/^over_prev_slide_link_text\s*=\s*"(.*)"$/) {
+	$opts->{over_prev_slide_link_text} = $1 ;
+    } elsif (/^over_next_slide_link_text\s*=\s*"(.*)"$/) {
+	$opts->{over_next_slide_link_text} = $1 ;
+    } elsif (/^show_size_unit\s*=\s*"(.*)"$/) {
+	$opts->{show_size_unit} = $1 ;
+    } elsif (/^timestamp_format_in_caption\s*=\s*"(.+)"$/) {
+	$opts->{timestamp_format_in_caption} = $1 ;
 # Recursion
-	} elsif (/^make_recursive\s*=\s*(.+)$/) {
-	    $make_recursive = $1 ;
-	} elsif (/^parent_gallery_link\s*=\s*(.+)$/) {
-	    $parent_gallery_link = $1 ;
-	} elsif (/^prev_gallery_link\s*=\s*(.+)$/) {
-	    $prev_gallery_link = $1 ;
-	} elsif (/^prev_gallery_link_target\s*=\s*"(.*)"$/) {
-	    $prev_gallery_link_target = $1 ;
-	} elsif (/^next_gallery_link\s*=\s*(.+)$/) {
-	    $next_gallery_link = $1 ;
-	} elsif (/^next_gallery_link_target\s*=\s*"(.*)"$/) {
-	    $next_gallery_link_target = $1 ;
-	} elsif (/^link_subgalleries\s*=\s*(.+)$/) {
-	    $link_subgalleries = $1 ;
+    } elsif (/^make_recursive\s*=\s*(.+)$/) {
+	$make_recursive = $1 ;
+    } elsif (/^parent_gallery_link\s*=\s*(.+)$/) {
+	$opts->{parent_gallery_link} = $1 ;
+    } elsif (/^prev_gallery_link\s*=\s*(.+)$/) {
+	$opts->{prev_gallery_link} = $1 ;
+    } elsif (/^prev_gallery_link_target\s*=\s*"(.*)"$/) {
+	$opts->{prev_gallery_link_target} = $1 ;
+    } elsif (/^next_gallery_link\s*=\s*(.+)$/) {
+	$opts->{next_gallery_link} = $1 ;
+    } elsif (/^next_gallery_link_target\s*=\s*"(.*)"$/) {
+	$opts->{next_gallery_link_target} = $1 ;
+    } elsif (/^link_subgalleries\s*=\s*(.+)$/) {
+	$opts->{link_subgalleries} = $1 ;
 # What files to insert
-	} elsif (/^image_extensions\s*=\s*"(.*)"$/) {
-	    $image_extensions = $1 ;
-	} elsif (/^movie_extensions\s*=\s*"(.*)"$/) {
-	    $movie_extensions = $1 ;
-	} elsif (/^add_all_files\s*=\s*(.+)$/) {
-	    $add_all_files = $1 ;
-	} elsif (/^add_subdirs\s*=\s*(.+)$/) {
-	    $add_subdirs = $1 ;
-	} elsif (/^exclude\s*=\s*"(.+)"$/) {
-	    my $entry = () ;
-	    $entry->{excluded} = 1 ;
-	    $entry->{filter} = $1 ;
-	    push (@excludes, $entry) ;
-	} elsif (/^include\s*=\s*"(.+)"$/) {
-	    my $entry = () ;
-	    $entry->{excluded} = 0 ;
-	    $entry->{filter} = $1 ;
-	    push (@excludes, $entry) ;
-	} elsif (/^sort_criteria\s*=\s*"(.+)"$/) {
-	    $sort_criteria = $1 ;
+    } elsif (/^image_extensions\s*=\s*"(.*)"$/) {
+	$opts->{image_extensions} = $1 ;
+    } elsif (/^movie_extensions\s*=\s*"(.*)"$/) {
+	$opts->{movie_extensions} = $1 ;
+    } elsif (/^add_all_files\s*=\s*(.+)$/) {
+	$opts->{add_all_files} = $1 ;
+    } elsif (/^add_subdirs\s*=\s*(.+)$/) {
+	$opts->{add_subdirs} = $1 ;
+    } elsif (/^exclude\s*=\s*"(.+)"$/) {
+	my $entry = () ;
+	$entry->{excluded} = 1 ;
+	$entry->{filter} = $1 ;
+	push (@{$opts->{excludes}}, $entry) ;
+    } elsif (/^include\s*=\s*"(.+)"$/) {
+	my $entry = () ;
+	$entry->{excluded} = 0 ;
+	$entry->{filter} = $1 ;
+	push (@{$opts->{excludes}}, $entry) ;
+    } elsif (/^sort_criteria\s*=\s*"(.+)"$/) {
+	$opts->{sort_criteria} = $1 ;
 # Various
-	} elsif (/^convert_options\s*=\s*"(.*)"$/) {
-	    push (@convert_options, parse_convert_options ($1)) ;
-	} elsif (/^scaled_convert_options\s*=\s*"(.*)"$/) {
-	    push (@scaled_convert_options, parse_convert_options ($1)) ;
-	} elsif (/^thumbnail_convert_options\s*=\s*"(.*)"$/) {
-	    push (@thumbnail_convert_options, $1) ;
-	} elsif (/^force_image_regeneration\s*=\s*(.*)$/) {
-	    $force_image_regeneration = $1 ;
-	} elsif (/^www_access_rights\s*=\s*(.+)$/) {
-	    $www_access_rights = $1 ;
-	} elsif (/^www_extension\s*=\s*"(.+)"$/) {
-	    $www_extension = $1 ;
-	} elsif (/^additional_configuration_file\s*=\s*"(.+)"$/) {
-	    push (@additional_config_files, parse_convert_options ($1)) ;
+    } elsif (/^convert_options\s*=\s*"(.*)"$/) {
+	push (@{$opts->{convert_options}}, parse_convert_options ($1)) ;
+    } elsif (/^scaled_convert_options\s*=\s*"(.*)"$/) {
+	push (@{$opts->{scaled_convert_options}}, parse_convert_options ($1)) ;
+    } elsif (/^thumbnail_convert_options\s*=\s*"(.*)"$/) {
+	push (@{$opts->{thumbnail_convert_options}}, $1) ;
+    } elsif (/^force_image_regeneration\s*=\s*(.*)$/) {
+	$force_image_regeneration = $1 ;
+    } elsif (/^www_access_rights\s*=\s*(.+)$/) {
+	$opts->{www_access_rights} = $1 ;
+    } elsif (/^www_extension\s*=\s*"(.+)"$/) {
+	$opts->{www_extension} = $1 ;
+    } elsif (/^additional_configuration_file\s*=\s*"(.+)"$/) {
+	push (@{$opts->{additional_config_files}}, parse_convert_options ($1)) ;
 # Error
-	} elsif (/^[^#]/ && !/^(\s*)$/) {
-	    die "Unrecognized option line #$.: \"$_\"\n" ;
-	}
+    } elsif (/^[^#]/ && !/^(\s*)$/) {
+	die "Unrecognized option line #$.: \"$_\"\n" ;
+    }
 }
 
 # parse config files
@@ -579,7 +583,7 @@ foreach my $conf ( @config_files ) {
     # read conf
     open CONF, $conf or next ;
     while (<CONF>) {
-	process_option $_ ;
+	process_option $opts, $_ ;
     }
     close CONF ;
 }
@@ -588,7 +592,7 @@ foreach my $conf ( @additional_config_files ) {
     open CONF, $conf
 	or die "Failed to open additional configuration file '$conf' ($!).\n" ;
     while (<CONF>) {
-	process_option $_ ;
+	process_option $opts, $_ ;
     }
    close CONF ;
 }
@@ -597,65 +601,65 @@ foreach my $conf ( @additional_config_files ) {
 # process command-line arguments (overriding defaults above)
 
 GetOptions(
-	'A'		=> \$add_all_files,
-	'a'		=> sub { $show_dimensions = $show_size = 1 ; },
-	'ad'		=> \$show_dimensions,
-	'as'		=> \$show_size,
-	'asu=s'		=> \$show_size_unit,
-	'bigy=i'	=> \$slide_height_max,
-	'bigxy=i'	=> sub { shift ; $slide_width_max = $slide_height_max = shift ; },
+	'A'		=> \$opts->{add_all_files},
+	'a'		=> sub { $opts->{show_dimensions} = $opts->{show_size} = 1 ; },
+	'ad'		=> \$opts->{show_dimensions},
+	'as'		=> \$opts->{show_size},
+	'asu=s'		=> \$opts->{show_size_unit},
+	'bigy=i'	=> \$opts->{slide_height_max},
+	'bigxy=i'	=> sub { shift ; $opts->{slide_width_max} = $opts->{slide_height_max} = shift ; },
 	'cc:s'		=> sub {
 				shift ; my $value = shift ;
-				if ($value eq "") { $make_caption_from_image_comment = "std,exif" ; }
-				elsif ($value eq "0") { $make_caption_from_image_comment = "" ; }
-				else { $make_caption_from_image_comment = $value ; }
+				if ($value eq "") { $opts->{make_caption_from_image_comment} = "std,exif" ; }
+				elsif ($value eq "0") { $opts->{make_caption_from_image_comment} = "" ; }
+				else { $opts->{make_caption_from_image_comment} = $value ; }
 				},
-	'cf'		=> \$make_caption_from_filename,
-	'ct'		=> \$make_caption_from_image_timestamp,
-	'ctf=s'		=> \$timestamp_format_in_caption,
-	'con=s'		=> sub { shift ; push (@convert_options, parse_convert_options (shift)) ; },
-	'i=s'		=> \$index_filename,
-	'indent=s'	=> \$indent,
-	'k'		=> \$make_slide_title_from_caption,
-	'L'		=> \$list_links,
-	'li'		=> sub { $index_link_image = 1 ; $prev_slide_link_image = 1 ; $next_slide_link_image = 1 ; },
-	'lt'		=> sub { $prev_slide_link_preview = 1 ; $next_slide_link_preview = 1 ; },
-	'n'		=> \$make_slide_filename_from_filename,
-	'nc'		=> \$show_no_slide_counter,
+	'cf'		=> \$opts->{make_caption_from_filename},
+	'ct'		=> \$opts->{make_caption_from_image_timestamp},
+	'ctf=s'		=> \$opts->{timestamp_format_in_caption},
+	'con=s'		=> sub { shift ; push (@{$opts->{convert_options}}, parse_convert_options (shift)) ; },
+	'i=s'		=> \$opts->{index_filename},
+	'indent=s'	=> \$opts->{indent},
+	'k'		=> \$opts->{make_slide_title_from_caption},
+	'L'		=> \$opts->{list_links},
+	'li'		=> sub { $opts->{index_link_image} = 1 ; $opts->{prev_slide_link_image} = 1 ; $opts->{next_slide_link_image} = 1 ; },
+	'lt'		=> sub { $opts->{prev_slide_link_preview} = 1 ; $opts->{next_slide_link_preview} = 1 ; },
+	'n'		=> \$opts->{make_slide_filename_from_filename},
+	'nc'		=> \$opts->{show_no_slide_counter},
 	'option=s'	=> sub { shift ; process_option (shift) ; },
-	'p=i'		=> \$index_cellpadding,
-	'php'		=> sub { $www_extension = "php" ; },
-	'r'		=> \$show_no_film_effect,
-	'Rl'		=> \$link_subgalleries,
-	'S'		=> \$add_subdirs,
-	's'		=> \$make_no_slides,
-	'sort=s'	=> \$sort_criteria,
-	't=i'		=> \$tile_height,
-	'templates=s'	=> \@template_dirs,
-	'title=s'	=> \$index_title,
-	'u'		=> \$show_caption_under_thumbnails,
-	'w=i'		=> \$thumbnails_per_row,
-	'www'		=> \$www_access_rights,
-	'wx=i'		=> \$pixels_per_row,
-	'xy=i'		=> sub { shift ; $thumbnail_width_max = $thumbnail_height_max = shift ; },
-	'y=i'		=> \$thumbnail_height_max,
+	'p=i'		=> \$opts->{index_cellpadding},
+	'php'		=> sub { $opts->{www_extension} = "php" ; },
+	'r'		=> \$opts->{show_no_film_effect},
+	'Rl'		=> \$opts->{link_subgalleries},
+	'S'		=> \$opts->{add_subdirs},
+	's'		=> \$opts->{make_no_slides},
+	'sort=s'	=> \$opts->{sort_criteria},
+	't=i'		=> \$opts->{tile_height},
+	'templates=s'	=> \@{$opts->{template_dirs}},
+	'title=s'	=> \$opts->{index_title},
+	'u'		=> \$opts->{show_caption_under_thumbnails},
+	'w=i'		=> \$opts->{thumbnails_per_row},
+	'www'		=> \$opts->{www_access_rights},
+	'wx=i'		=> \$opts->{pixels_per_row},
+	'xy=i'		=> sub { shift ; $opts->{thumbnail_width_max} = $opts->{thumbnail_height_max} = shift ; },
+	'y=i'		=> \$opts->{thumbnail_height_max},
 	'exclude=s'	=> sub {
 				shift ;
 				my $entry = () ;
 				$entry->{filter} = shift ;
 				$entry->{excluded} = 1 ;
-				push @excludes, $entry ;
+				push @{$opts->{excludes}}, $entry ;
 				},
 	'include=s'	=> sub {
 				shift ;
 				my $entry = () ;
 				$entry->{filter} = shift ;
 				$entry->{excluded} = 0 ;
-				push @excludes, $entry ;
+				push @{$opts->{excludes}}, $entry ;
 				},
-	'parent-gal'	=> \$parent_gallery_link,
-	'prev-gal=s'	=> sub { shift ; $prev_gallery_link_target = shift ; $prev_gallery_link = 1 ; },
-	'next-gal=s'	=> sub { shift ; $next_gallery_link_target = shift ; $next_gallery_link = 1 ; },
+	'parent-gal'	=> \$opts->{parent_gallery_link},
+	'prev-gal=s'	=> sub { shift ; $opts->{prev_gallery_link_target} = shift ; $opts->{prev_gallery_link} = 1 ; },
+	'next-gal=s'	=> sub { shift ; $opts->{next_gallery_link_target} = shift ; $opts->{next_gallery_link} = 1 ; },
 	) or die $usage ;
 
 ######################################################################
@@ -664,7 +668,7 @@ GetOptions(
 # Print messages with indentation according to recursion level
 
 sub indprint {
-    print $indent ;
+    print $opts->{indent} ;
     print @_ ;
 }
 
@@ -782,34 +786,34 @@ sub copy_file {
 # find path to the template file in generic directories
 sub find_generic_template_file {
     my ($filename, $check) = (shift, shift) ;
-    foreach my $dir (@template_dirs) {
+    foreach my $dir (@{$opts->{template_dirs}}) {
 	return $dir
 	    if -e "$dir/$filename" ;
     }
-    return $user_share_dir
-	if -e "$user_share_dir/$filename" ;
-    die "File '$llgal_share_dir/$filename' does not exist.\nPlease install llgal properly.\n"
-	unless -e "$llgal_share_dir/$filename" || !$check ;
-    return $llgal_share_dir ;
+    return $opts->{user_share_dir}
+	if -e "$opts->{user_share_dir}/$filename" ;
+    die "File '$opts->{llgal_share_dir}/$filename' does not exist.\nPlease install llgal properly.\n"
+	unless -e "$opts->{llgal_share_dir}/$filename" || !$check ;
+    return $opts->{llgal_share_dir} ;
 }
 
 # find path to the template, using the local one if it exists
 sub find_template_file {
     my ($filename, $check) = (shift, shift) ;
-    return $local_llgal_dir
-	if -e "$local_llgal_dir/$filename" ;
+    return $opts->{local_llgal_dir}
+	if -e "$opts->{local_llgal_dir}/$filename" ;
     return find_generic_template_file ($filename, $check) ;
 }
 
 # get a template file from generic directories and save it to local directory
 sub get_template_file {
     my $filename = shift ;
-    if (-e "$destination_dir$local_llgal_dir/$filename") {
-	indprint "Found $filename in $destination_dir$local_llgal_dir/, using it.\n" ;
+    if (-e "$destination_dir$opts->{local_llgal_dir}/$filename") {
+	indprint "Found $filename in $destination_dir$opts->{local_llgal_dir}/, using it.\n" ;
     } else {
 	my $srcdir = find_generic_template_file ($filename, 1) ;
-	indprint "No $filename in $destination_dir$local_llgal_dir/, getting a copy from $srcdir\n" ;
-	copy_file ($filename, $srcdir, "$destination_dir$local_llgal_dir" ) ;
+	indprint "No $filename in $destination_dir$opts->{local_llgal_dir}/, getting a copy from $srcdir\n" ;
+	copy_file ($filename, $srcdir, "$destination_dir$opts->{local_llgal_dir}" ) ;
     }
 }
 
@@ -845,7 +849,7 @@ sub make_safe_url {
 # pwd and destination_dir even if destination_dir is an absolute path
 my $path = getcwd."/".$destination_dir ;
 if ($path =~ m@/*(?:[^/]+/+)*([^/]+)/+$@) {
-    if ($1 eq $local_llgal_dir) {
+    if ($1 eq $opts->{local_llgal_dir}) {
 	immediate_warning "!! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !!" ;
 	immediate_warning "Your working directory looks like a .llgal directory. !!" ;
 	immediate_warning "This might not be what you really want to do.         !!" ;
@@ -855,193 +859,193 @@ if ($path =~ m@/*(?:[^/]+/+)*([^/]+)/+$@) {
 
 # thumbnail_width_max must be > 0 or 0 for unlimited
 die "Please give an integer value for thumbnail width max\n"
-    unless is_integer ($thumbnail_width_max) ;
-if ($thumbnail_width_max < 0) {
+    unless is_integer ($opts->{thumbnail_width_max}) ;
+if ($opts->{thumbnail_width_max} < 0) {
     indprint "Thumbnail width max value < 0, restoring to default (".
 	($thumbnail_width_max_default?$thumbnail_width_max_default:"unlimited") .")\n" ;
-    $thumbnail_width_max = $thumbnail_width_max_default ;
+    $opts->{thumbnail_width_max} = $thumbnail_width_max_default ;
 }
 die "Please give a positive thumbnail width max value (or 0 for unlimited)\n"
-    unless $thumbnail_width_max >= 0 ;
+    unless $opts->{thumbnail_width_max} >= 0 ;
 
 # thumbnail_height_max must be > 0
 die "Please give an integer value for thumbnail height max\n"
-    unless is_integer ($thumbnail_height_max) ;
-if ($thumbnail_height_max < 0) {
+    unless is_integer ($opts->{thumbnail_height_max}) ;
+if ($opts->{thumbnail_height_max} < 0) {
     indprint "Thumbnail height max value < 0, restoring to default ($thumbnail_height_max_default)\n" ;
-    $thumbnail_height_max = $thumbnail_height_max_default ;
+    $opts->{thumbnail_height_max} = $thumbnail_height_max_default ;
 }
 die "Please give a positive thumbnail height max value\n"
-    unless $thumbnail_height_max > 0 ;
+    unless $opts->{thumbnail_height_max} > 0 ;
 
 # thumbnails_per_row must be > 0 or 0 for unlimited
 die "Please give an integer value for thumbnails per row\n"
-    unless is_integer ($thumbnails_per_row) ;
-if ($thumbnails_per_row < 0) {
+    unless is_integer ($opts->{thumbnails_per_row}) ;
+if ($opts->{thumbnails_per_row} < 0) {
     indprint "Thumbnails per row value < 0, restoring to default (".
 	($thumbnails_per_row_default?$thumbnails_per_row_default:"unlimited") .")\n" ;
-    $thumbnails_per_row = $thumbnails_per_row_default ;
+    $opts->{thumbnails_per_row} = $thumbnails_per_row_default ;
 }
 die "Please give a positive thumbnails per row value (or 0 for unlimited)\n"
-    unless $thumbnails_per_row >= 0 ;
+    unless $opts->{thumbnails_per_row} >= 0 ;
 
 # pixels_per_row must be > 0 or 0 for unlimited
 die "Please give an integer value for pixels per row\n"
-    unless is_integer ($pixels_per_row) ;
-if ($pixels_per_row < 0) {
+    unless is_integer ($opts->{pixels_per_row}) ;
+if ($opts->{pixels_per_row} < 0) {
     indprint "Pixels per row value < 0, restoring to default (".
 	($pixels_per_row_default?$pixels_per_row_default:"unlimited") .")\n" ;
-    $pixels_per_row = $pixels_per_row_default ;
+    $opts->{pixels_per_row} = $pixels_per_row_default ;
 }
 die "Please give a positive pixels per row value (or 0 for unlimited)\n"
-    unless $pixels_per_row >= 0 ;
+    unless $opts->{pixels_per_row} >= 0 ;
 
 # index_cellpadding must be >= 0
 die "Please give an integer value for index cellpadding\n"
-    unless is_integer ($index_cellpadding) ;
-if ($index_cellpadding < 0) {
+    unless is_integer ($opts->{index_cellpadding}) ;
+if ($opts->{index_cellpadding} < 0) {
     indprint "Index cellpadding value < 0, restoring to default ($index_cellpadding_default)\n" ;
-    $index_cellpadding = $index_cellpadding_default ;
+    $opts->{index_cellpadding} = $index_cellpadding_default ;
 }
 die "Please give a positive or null index cellpadding value\n"
-    unless $index_cellpadding >= 0 ;
+    unless $opts->{index_cellpadding} >= 0 ;
 
 # tile_height must be >= 0
 die "Please give an integer value for tile height\n"
-    unless is_integer ($tile_height) ;
-if ($tile_height < 0) {
+    unless is_integer ($opts->{tile_height}) ;
+if ($opts->{tile_height} < 0) {
     indprint "Tile height value < 0, restoring to default value ($tile_height_default)\n" ;
-    $tile_height = $tile_height_default ;
+    $opts->{tile_height} = $tile_height_default ;
 }
 die "Please give a positive or null tile height value\n"
-    unless $tile_height >= 0 ;
+    unless $opts->{tile_height} >= 0 ;
 
 # text_slide_width must be > 0
 die "Please give an integer value for text slide width\n"
-    unless is_integer ($text_slide_width) ;
-if ($text_slide_width < 0) {
+    unless is_integer ($opts->{text_slide_width}) ;
+if ($opts->{text_slide_width} < 0) {
     indprint "Text slide width value < 0, restoring to default ($text_slide_width_default)\n" ;
-    $text_slide_width = $text_slide_width_default ;
+    $opts->{text_slide_width} = $text_slide_width_default ;
 }
 die "Please give a positive text slide width value\n"
-    unless $text_slide_width > 0 ;
+    unless $opts->{text_slide_width} > 0 ;
 
 # text_slide_height must be > 0
 die "Please give an integer value for text slide height\n"
-    unless is_integer ($text_slide_height) ;
-if ($text_slide_height < 0) {
+    unless is_integer ($opts->{text_slide_height}) ;
+if ($opts->{text_slide_height} < 0) {
     indprint "Text slide height value < 0, restoring to default ($text_slide_height_default)\n" ;
-    $text_slide_height = $text_slide_height_default ;
+    $opts->{text_slide_height} = $text_slide_height_default ;
 }
 die "Please give a positive text slide height value\n"
-    unless $text_slide_height > 0 ;
+    unless $opts->{text_slide_height} > 0 ;
 
 # slide_width_max must be > 0, 0 for unlimited
 die "Please give an integer value for slide width max\n"
-    unless is_integer ($slide_width_max) ;
-if ($slide_width_max < 0) {
+    unless is_integer ($opts->{slide_width_max}) ;
+if ($opts->{slide_width_max} < 0) {
     indprint "Slide width max value < 0, restoring to default (".
 	($slide_width_max_default?$slide_width_max_default:"unlimited") .")\n" ;
-    $slide_width_max = $slide_width_max_default ;
+    $opts->{slide_width_max} = $slide_width_max_default ;
 }
 die "Please give a positive slide width max value (or 0 for unlimited)\n"
-    unless $slide_width_max >= 0 ;
+    unless $opts->{slide_width_max} >= 0 ;
 
 # slide_height_max must be > 0, 0 for unlimited
 die "Please give an integer value for slide height max\n"
-    unless is_integer ($slide_height_max) ;
-if ($slide_height_max < 0) {
+    unless is_integer ($opts->{slide_height_max}) ;
+if ($opts->{slide_height_max} < 0) {
     indprint "Slide height max value < 0, restoring to default (".
 	($slide_height_max_default?$slide_height_max_default:"unlimited") .")\n" ;
-    $slide_height_max = $slide_height_max_default ;
+    $opts->{slide_height_max} = $slide_height_max_default ;
 }
 die "Please give a positive slide height max value (or 0 for unlimited)\n"
-    unless $slide_height_max >= 0 ;
+    unless $opts->{slide_height_max} >= 0 ;
 
 # either pixels or thumbnails per row must be limited
 die "Please limit pixels or thumbnails per row\n"
-    unless $pixels_per_row > 0 or $thumbnails_per_row > 0 ;
+    unless $opts->{pixels_per_row} > 0 or $opts->{thumbnails_per_row} > 0 ;
 
 ######################################################################
 # other sanity check
 
 # cannot have --bigy/xy and -s
 die "Please choose between --bigy/xy and -s\n"
-    if ($slide_height_max or $slide_width_max) && $make_no_slides ;
+    if ($opts->{slide_height_max} or $opts->{slide_width_max}) && $opts->{make_no_slides} ;
 
 # check a few string that have to be non-empty
 die "Please give a non-empty llgal share directory\n"
-    if $llgal_share_dir eq "" ;
+    if $opts->{llgal_share_dir} eq "" ;
 die "Please give a non-empty user share directory\n"
-    if $user_share_dir eq "" ;
+    if $opts->{user_share_dir} eq "" ;
 die "Please give a non-empty CSS filename\n"
-    if $css_filename eq "" ;
+    if $opts->{css_filename} eq "" ;
 die "Please give a non-empty film tile filename\n"
-    if $filmtile_filename eq "" ;
+    if $opts->{filmtile_filename} eq "" ;
 die "Please give a non-empty index link image filename\n"
-    if $index_link_image_filename eq "" ;
+    if $opts->{index_link_image_filename} eq "" ;
 die "Please give a non-empty previous slide link image filename\n"
-    if $prev_slide_link_image_filename eq "" ;
+    if $opts->{prev_slide_link_image_filename} eq "" ;
 die "Please give a non-empty next slide link image filename\n"
-    if $next_slide_link_image_filename eq "" ;
+    if $opts->{next_slide_link_image_filename} eq "" ;
 die "Please give a non-empty index template filename\n"
-    if $indextemplate_filename eq "" ;
+    if $opts->{indextemplate_filename} eq "" ;
 die "Please give a non-empty slide template filename\n"
-    if $slidetemplate_filename eq "" ;
+    if $opts->{slidetemplate_filename} eq "" ;
 die "Please give a non-empty local llgal directory\n"
-    if $local_llgal_dir eq "" ;
+    if $opts->{local_llgal_dir} eq "" ;
 die "Please give a non-empty slide filename prefix\n"
-    if $scaled_image_filenameprefix eq "" ;
+    if $opts->{scaled_image_filenameprefix} eq "" ;
 die "Please give a non-empty thumbnail filename prefix\n"
-    if $thumbnail_image_filenameprefix eq "" ;
+    if $opts->{thumbnail_image_filenameprefix} eq "" ;
 die "Please give a non-empty index filename\n"
-    if $index_filename eq "" ;
+    if $opts->{index_filename} eq "" ;
 die "Please give a non-empty caption filename\n"
-    if $captions_filename eq "" ;
+    if $opts->{captions_filename} eq "" ;
 die "Please give a non-empty caption removal line\n"
-    if $captions_removal_line eq "" ;
+    if $opts->{captions_removal_line} eq "" ;
 
 ######################################################################
 # prepare a few globals for later
 
 # adapt text slide width and height in case of --bigxy or --bigy
-if ($slide_height_max > 0) {
-    $text_slide_width = $text_slide_width / $text_slide_height * $slide_height_max ;
-    $text_slide_height = $slide_height_max ;
+if ($opts->{slide_height_max} > 0) {
+    $opts->{text_slide_width} = $opts->{text_slide_width} / $opts->{text_slide_height} * $opts->{slide_height_max} ;
+    $opts->{text_slide_height} = $opts->{slide_height_max} ;
 }
-if ($slide_width_max > 0 and $text_slide_width > $slide_width_max) {
-    $text_slide_height = $text_slide_height / $text_slide_width * $slide_width_max ;
-    $text_slide_width = $slide_width_max ;
+if ($opts->{slide_width_max} > 0 and $opts->{text_slide_width} > $opts->{slide_width_max}) {
+    $opts->{text_slide_height} = $opts->{text_slide_height} / $opts->{text_slide_width} * $opts->{slide_width_max} ;
+    $opts->{text_slide_width} = $opts->{slide_width_max} ;
 }
 
 # thumbnail default size (for text and link slide especially)
 my ($default_thumb_xdim, $default_thumb_ydim) ;
-if ($thumbnail_width_max > 0) {
-    ($default_thumb_xdim, $default_thumb_ydim) = ($thumbnail_width_max, $thumbnail_height_max) ;
+if ($opts->{thumbnail_width_max} > 0) {
+    ($default_thumb_xdim, $default_thumb_ydim) = ($opts->{thumbnail_width_max}, $opts->{thumbnail_height_max}) ;
 } else {
-    ($default_thumb_xdim, $default_thumb_ydim) = ($thumbnail_height_max * 4/3, $thumbnail_height_max) ;
+    ($default_thumb_xdim, $default_thumb_ydim) = ($opts->{thumbnail_height_max} * 4/3, $opts->{thumbnail_height_max}) ;
 }
 
 # convert options for thumbnails
 my @thumbnail_scale_options ;
-if ($thumbnail_width_max > 0) {
-    @thumbnail_scale_options = ("-scale", $thumbnail_width_max."x".$thumbnail_height_max.">") ;
+if ($opts->{thumbnail_width_max} > 0) {
+    @thumbnail_scale_options = ("-scale", $opts->{thumbnail_width_max}."x".$opts->{thumbnail_height_max}.">") ;
 } else {
-    @thumbnail_scale_options = ("-scale", "x".$thumbnail_height_max) ;
+    @thumbnail_scale_options = ("-scale", "x".$opts->{thumbnail_height_max}) ;
 }
-my @thumbnail_create_command = ("convert", "+profile", "*", @convert_options, @thumbnail_convert_options, @thumbnail_scale_options) ;
+my @thumbnail_create_command = ("convert", "+profile", "*", @{$opts->{convert_options}}, @{$opts->{thumbnail_convert_options}}, @thumbnail_scale_options) ;
 
 # convert options for slides
-my @slide_create_command = ("convert", "+profile", "*", @convert_options, @scaled_convert_options ) ;
-if ($slide_height_max > 0) {
-    if ($slide_width_max > 0) {
-	push (@slide_create_command, ("-scale", "${slide_width_max}x$slide_height_max")) ;
+my @slide_create_command = ("convert", "+profile", "*", @{$opts->{convert_options}}, @{$opts->{scaled_convert_options}} ) ;
+if ($opts->{slide_height_max} > 0) {
+    if ($opts->{slide_width_max} > 0) {
+	push (@slide_create_command, ("-scale", "$opts->{slide_width_max}x$opts->{slide_height_max}")) ;
     } else {
-	push (@slide_create_command, ("-scale", "x$slide_height_max")) ;
+	push (@slide_create_command, ("-scale", "x$opts->{slide_height_max}")) ;
     }
 } else {
-    if ($slide_width_max > 0) {
-	push (@slide_create_command, ("-scale", "${slide_width_max}x")) ;
+    if ($opts->{slide_width_max} > 0) {
+	push (@slide_create_command, ("-scale", "$opts->{slide_width_max}x")) ;
     }
 }
 my @slide_copy_command = ("cp", "-f") ;
@@ -1053,14 +1057,14 @@ sub clean_files {
     my $cleanall = shift ;
     my $notdeleted = 0 ;
 
-    opendir DIR, "$destination_dir$local_llgal_dir"
-	or die "Can't open directory $destination_dir$local_llgal_dir ($!)\n" ;
+    opendir DIR, "$destination_dir$opts->{local_llgal_dir}"
+	or die "Can't open directory $destination_dir$opts->{local_llgal_dir} ($!)\n" ;
     while ($_ = readdir DIR) {
-	if (/^$thumbnail_image_filenameprefix/ or /^$scaled_image_filenameprefix/) {
-	    unlink "$destination_dir$local_llgal_dir/$_" ;
-	} elsif (/^$filmtile_filename$/ or /^$index_link_image_filename$/
-		 or /^$prev_slide_link_image_filename$/ or /^$next_slide_link_image_filename$/
-		 or /^$css_filename$/) {
+	if (/^$opts->{thumbnail_image_filenameprefix}/ or /^$opts->{scaled_image_filenameprefix}/) {
+	    unlink "$destination_dir$opts->{local_llgal_dir}/$_" ;
+	} elsif (/^$opts->{filmtile_filename}$/ or /^$opts->{index_link_image_filename}$/
+		 or /^$opts->{prev_slide_link_image_filename}$/ or /^$opts->{next_slide_link_image_filename}$/
+		 or /^$opts->{css_filename}$/) {
 	    my $original = (find_generic_template_file $_, 0)."/".$_ ;
 	    my $diff = 0 ;
 	    my @output ;
@@ -1068,43 +1072,43 @@ sub clean_files {
 	    if (!$cleanall) {
 		($diff, @output) = system_with_output
 		    ("compare $_ with its original",
-		     "cmp", "-s", "$destination_dir$local_llgal_dir/$_", "$original") ;
+		     "cmp", "-s", "$destination_dir$opts->{local_llgal_dir}/$_", "$original") ;
 		if ($diff == -1) {
 		    immediate_external_warnings @output ;
-		    die "Failed to execute 'cmp' to check whether '$destination_dir$local_llgal_dir/$_' has been modified ($!).\n" ;
+		    die "Failed to execute 'cmp' to check whether '$destination_dir$opts->{local_llgal_dir}/$_' has been modified ($!).\n" ;
 		}
 		add_external_warnings @output ;
 		# on other errors, assume files are different ($diff != 0)
 	    }
 	    if ($diff) {
-		add_warning "Preserved '$destination_dir$local_llgal_dir/$_' since it seems to be modified." ;
+		add_warning "Preserved '$destination_dir$opts->{local_llgal_dir}/$_' since it seems to be modified." ;
 		$notdeleted++ ;
 	    } else {
-		if (!unlink "$destination_dir$local_llgal_dir/$_" and ! $!{ENOENT}) {
-		    add_warning "Failed to remove file '$destination_dir$local_llgal_dir/$_'." ;
+		if (!unlink "$destination_dir$opts->{local_llgal_dir}/$_" and ! $!{ENOENT}) {
+		    add_warning "Failed to remove file '$destination_dir$opts->{local_llgal_dir}/$_'." ;
 		}
 	    }
-	} elsif (/^$captions_filename$/) {
+	} elsif (/^$opts->{captions_filename}$/) {
 	    my $grep = 0 ;
 	    my @output ;
 	    # default is cleanall, which removes everything, as if the removal line was here
 	    if (!$cleanall) {
 		($grep, @output) = system_with_output
 		    ("check for caption removal line",
-		     "grep", "-q", "$captions_removal_line", "$destination_dir$local_llgal_dir/$_") ;
+		     "grep", "-q", "$opts->{captions_removal_line}", "$destination_dir$opts->{local_llgal_dir}/$_") ;
 		if ($grep == -1) {
 		    immediate_external_warnings @output ;
-		    die "Failed to execute 'grep' to check whether '$destination_dir$local_llgal_dir/$_' has been modified ($!).\n" ;
+		    die "Failed to execute 'grep' to check whether '$destination_dir$opts->{local_llgal_dir}/$_' has been modified ($!).\n" ;
 		}
 		add_external_warnings @output ;
 		# on other errors, assume file doesn't contain the caption removal line ($grep != 0)
 	    }
 	    if ($grep) {
-		add_warning "Preserved '$destination_dir$local_llgal_dir/$_' since it seems to be modified." ;
+		add_warning "Preserved '$destination_dir$opts->{local_llgal_dir}/$_' since it seems to be modified." ;
 		$notdeleted++ ;
 	    } else {
-		if (!unlink "$destination_dir$local_llgal_dir/$_" and ! $!{ENOENT}) {
-		    add_warning "Failed to remove file '$destination_dir$local_llgal_dir/$_'." ;
+		if (!unlink "$destination_dir$opts->{local_llgal_dir}/$_" and ! $!{ENOENT}) {
+		    add_warning "Failed to remove file '$destination_dir$opts->{local_llgal_dir}/$_'." ;
 		}
 	    }
 	} else {
@@ -1113,14 +1117,14 @@ sub clean_files {
     }
     closedir DIR ;
     if ($notdeleted <= 2 && $cleanall) {
-	if (!rmdir "$destination_dir$local_llgal_dir"  and ! $!{ENOENT}) {
-	    add_warning "Failed to remove directory '$destination_dir$local_llgal_dir' ($!)." ;
+	if (!rmdir "$destination_dir$opts->{local_llgal_dir}"  and ! $!{ENOENT}) {
+	    add_warning "Failed to remove directory '$destination_dir$opts->{local_llgal_dir}' ($!)." ;
 	}
     }
 
     opendir DIR, "./$destination_dir" ; # destination is empty for './'
     while ($_ = readdir DIR ) {
-	if (/.$www_extension$/) {
+	if (/.$opts->{www_extension}$/) {
 	    unlink "$destination_dir$_" ;
 	}
     }
@@ -1138,7 +1142,7 @@ sub recursive_clean_files {
 	    if ($dir =~ /^[^.]/ && -d "$destination_dir$dir") {
 		print "\n" ;
 		indprint "Entering subdirectory '$dir'...\n" ;
-		system ( $0, @llgal_options, "-d", "$destination_dir$dir", "--indent", $indent."  " ) ;
+		system ( $0, @llgal_options, "-d", "$destination_dir$dir", "--indent", $opts->{indent}."  " ) ;
 		die "Failed to call $0 for subdirectory $destination_dir$dir ($!).\n"
 		    if $? == -1 ;
 		immediate_warning "$0 failed for subdirectory $destination_dir$dir."
@@ -1163,9 +1167,9 @@ sub give_templates {
     }
 
     foreach my $filename
-	( $css_filename, $filmtile_filename, $index_link_image_filename,
-	  $prev_slide_link_image_filename, $next_slide_link_image_filename,
-	  $indextemplate_filename, $slidetemplate_filename ) {
+	( $opts->{css_filename}, $opts->{filmtile_filename}, $opts->{index_link_image_filename},
+	  $opts->{prev_slide_link_image_filename}, $opts->{next_slide_link_image_filename},
+	  $opts->{indextemplate_filename}, $opts->{slidetemplate_filename} ) {
 	if ( -e "$destdir/$filename" ) {
 	    indprint "$filename already exists in $destdir.\n" ;
 	} else {
@@ -1241,8 +1245,8 @@ sub check_file {
     }
 
     my $excluded = 0 ;
-    for(my $i = 0; $i < @excludes; $i++) {
-	my $entry = @excludes[$i] ;
+    for(my $i = 0; $i < @{$opts->{excludes}}; $i++) {
+	my $entry = @{$opts->{excludes}}[$i] ;
 	if ($filename =~ /^(.*\/)*$entry->{filter}$/) {
 	    $excluded = $entry->{excluded}
 	}
@@ -1313,7 +1317,7 @@ sub generate_caption_from_image_comment {
     my $infos = shift ;
     my @texts = () ;
     # Loop until a non-empty comment list is found
-    foreach my $types (split (/,/, $make_caption_from_image_comment)) {
+    foreach my $types (split (/,/, $opts->{make_caption_from_image_comment})) {
 	# types is a + separated string of types
 	foreach my $type (split (/\+/, $types)) {
 	    if ($type =~ /^std$/i) {
@@ -1342,7 +1346,7 @@ sub generate_caption_from_image_timestamp {
     if ($imagetime ne "") {
 	my @timearray = split (/[: ]/, $imagetime) ;
 	my @gmtime = ($timearray[5], $timearray[4], $timearray[3], $timearray[2], $timearray[1]-1, $timearray[0]-1900, 0, 0) ;
-	return strftime ($timestamp_format_in_caption, @gmtime) ;
+	return strftime ($opts->{timestamp_format_in_caption}, @gmtime) ;
     }
     return "" ;
 }
@@ -1352,11 +1356,11 @@ sub generate_caption_from_image_infos {
      my $filename = shift ;
      my $infos = image_info ("$destination_dir$filename") ;
      my @texts = () ;
-     if ($make_caption_from_image_comment) {
+     if ($opts->{make_caption_from_image_comment}) {
 	 my @comments = generate_caption_from_image_comment ($filename, $infos) ;
 	 push (@texts, @comments) ;
      }
-     if ($make_caption_from_image_timestamp) {
+     if ($opts->{make_caption_from_image_timestamp}) {
 	 my $timestamp = generate_caption_from_image_timestamp ($filename, $infos) ;
 	 push (@texts, $timestamp) ;
      }
@@ -1396,11 +1400,11 @@ sub create_file_entry {
     # the link text (will be web-safe after caption file generation)
     if (not defined $linktext) {
 	if ($type == $TYPE_MVI) {
-	    $linktext = $MVI_link_text.$filename ;
+	    $linktext = $opts->{MVI_link_text}.$filename ;
 	} elsif ($type == $TYPE_FIL) {
-	    $linktext = $FIL_link_text.$filename ;
+	    $linktext = $opts->{FIL_link_text}.$filename ;
 	} elsif ($type == $TYPE_DIR) {
-	    $linktext = $DIR_link_text.$filename ;
+	    $linktext = $opts->{DIR_link_text}.$filename ;
 	}
 	$linktext =~ s/&/&amp;/g ;
 #       $linktext =~ s/"/&\#34;/g ;
@@ -1411,7 +1415,7 @@ sub create_file_entry {
     if (not defined $caption) {
 	my @texts = () ;
 	push (@texts, $filename)
-	    if $make_caption_from_filename ;
+	    if $opts->{make_caption_from_filename} ;
 	push (@texts, generate_caption_from_image_infos ($filename))
 	    if $type == $TYPE_IMG ;
 	$caption = join (' - ', grep {$_} @texts) ;
@@ -1428,7 +1432,7 @@ sub create_file_entry {
     
     # add caption to the title if asked
     $title .= ": ". $caption
-	if $make_slide_title_from_caption ;
+	if $opts->{make_slide_title_from_caption} ;
 
     $entry->{title} = $title ;
 
@@ -1462,18 +1466,18 @@ sub fill_file_entry {
 
     # dimstring
     if ($type == $TYPE_IMG) {
-	if ($show_dimensions && $show_size) {
-	    $entry->{dimstring} = "($entry->{xdim}x$entry->{ydim}, $entry->{kbytes}$show_size_unit)" ;
-	} elsif ($show_size) {
-	    $entry->{dimstring} = "($entry->{kbytes}$show_size_unit)" ;
-	} elsif ($show_dimensions) {
+	if ($opts->{show_dimensions} && $opts->{show_size}) {
+	    $entry->{dimstring} = "($entry->{xdim}x$entry->{ydim}, $entry->{kbytes}$opts->{show_size_unit})" ;
+	} elsif ($opts->{show_size}) {
+	    $entry->{dimstring} = "($entry->{kbytes}$opts->{show_size_unit})" ;
+	} elsif ($opts->{show_dimensions}) {
 	    $entry->{dimstring} = "($entry->{xdim}x$entry->{ydim})" ;
 	} else {
 	    $entry->{dimstring} = "" ;
 	}
     } elsif ($type == $TYPE_MVI or $type == $TYPE_FIL) {
-	if ($show_size) {
-	    $entry->{dimstring} = "($entry->{kbytes}$show_size_unit)" ;
+	if ($opts->{show_size}) {
+	    $entry->{dimstring} = "($entry->{kbytes}$opts->{show_size_unit})" ;
 	} else {
 	    $entry->{dimstring} = "" ;
 	}
@@ -1484,8 +1488,8 @@ sub fill_file_entry {
     # thumbnail, its url and dimensions
     if ($type == $TYPE_IMG) {
 	# filename and url
-	my $thumbnail_filename = "$thumbnail_image_filenameprefix$filename" ;
-	$entry->{thumb_filename} = "$local_llgal_dir/$thumbnail_filename" ;
+	my $thumbnail_filename = "$opts->{thumbnail_image_filenameprefix}$filename" ;
+	$entry->{thumb_filename} = "$opts->{local_llgal_dir}/$thumbnail_filename" ;
 	$entry->{thumb_url} = "$local_llgal_url/". make_safe_url_nowarn ($thumbnail_filename) ;
 
 	# thumbnails dimensions
@@ -1506,7 +1510,7 @@ sub fill_file_entry {
 	($entry->{thumb_xdim},$entry->{thumb_ydim}) = imgsize ("$real_thumb_filename") ;
 
 	# dimstring
-	if ($show_dimensions) {
+	if ($opts->{show_dimensions}) {
 	    $entry->{thumb_dimstring} = "($entry->{thumb_xdim}x$entry->{thumb_ydim})" ;
 	} else {
 	    $entry->{thumb_dimstring} = "" ;
@@ -1521,12 +1525,12 @@ sub fill_file_entry {
         $entry->{thumb_dimstring} = "" ;
     }
 
-    if (!$make_no_slides) {
+    if (!$opts->{make_no_slides}) {
 	# scaled image, its url and dimensions
-	if ($type == $TYPE_IMG and ($slide_width_max > 0 or $slide_height_max > 0)) {
+	if ($type == $TYPE_IMG and ($opts->{slide_width_max} > 0 or $opts->{slide_height_max} > 0)) {
 	    # filename and url
-	    my $scaled_filename = "$scaled_image_filenameprefix$filename" ;
-	    $entry->{scaled_filename} = "$local_llgal_dir/$scaled_filename" ;
+	    my $scaled_filename = "$opts->{scaled_image_filenameprefix}$filename" ;
+	    $entry->{scaled_filename} = "$opts->{local_llgal_dir}/$scaled_filename" ;
 	    $entry->{scaled_url} = "$local_llgal_url/". make_safe_url_nowarn ($scaled_filename) ;
 
 	    # scaled image dimensions
@@ -1536,7 +1540,7 @@ sub fill_file_entry {
 		# only scale down, never up.
 		($x,$y) = imgsize ("$real_filename") ;
 		my ($status, @output) ;
-		if ($x <= $slide_width_max and $y <= $slide_height_max) {
+		if ($x <= $opts->{slide_width_max} and $y <= $opts->{slide_height_max}) {
 		    ($status, @output) = system_with_output
 			( "copy '$real_filename' scaled image",
 			  @slide_copy_command, "$real_filename", "$real_scaled_filename" ) ;
@@ -1560,11 +1564,11 @@ sub fill_file_entry {
 	    $entry->{scaled_kbytes} = (-s "$real_scaled_filename") >> 10 ;
 
 	    # dimstring
-	    if ($show_dimensions && $show_size) {
-		$entry->{scaled_dimstring} = "($entry->{scaled_xdim}x$entry->{scaled_ydim}, $entry->{scaled_kbytes}$show_size_unit)" ;
-	    } elsif ($show_size) {
-		$entry->{scaled_dimstring} = "($entry->{scaled_kbytes}$show_size_unit)" ;
-	    } elsif ($show_dimensions) {
+	    if ($opts->{show_dimensions} && $opts->{show_size}) {
+		$entry->{scaled_dimstring} = "($entry->{scaled_xdim}x$entry->{scaled_ydim}, $entry->{scaled_kbytes}$opts->{show_size_unit})" ;
+	    } elsif ($opts->{show_size}) {
+		$entry->{scaled_dimstring} = "($entry->{scaled_kbytes}$opts->{show_size_unit})" ;
+	    } elsif ($opts->{show_dimensions}) {
 		$entry->{scaled_dimstring} = "($entry->{scaled_xdim}x$entry->{scaled_ydim})" ;
 	    } else {
 		$entry->{scaled_dimstring} = "" ;
@@ -1601,7 +1605,7 @@ sub create_nofile_entry {
     # add caption to the title if asked
     my $title = "" ;
     $title = $caption
-	if $make_slide_title_from_caption ;
+	if $opts->{make_slide_title_from_caption} ;
     $entry->{title} = $title ;
 
     # do not generate more if we are only generating captions
@@ -1621,7 +1625,7 @@ sub fill_nofile_entry {
     # dimstring is empty
     $entry->{thumb_dimstring} = "" ;
 
-    if (!$make_no_slides) {
+    if (!$opts->{make_no_slides}) {
 	# scaled image dimensions
 	$entry->{scaled_dimstring} = $entry->{dimstring} ;
     }
@@ -1661,21 +1665,21 @@ sub finalize_entries {
 	my $filename = $entry->{filename} ;
 
 	# HTML slide and its url
-	if (!$make_no_slides) {
+	if (!$opts->{make_no_slides}) {
 	    my $slide_filename ;
-	    if ($make_slide_filename_from_filename) {
+	    if ($opts->{make_slide_filename_from_filename}) {
 		if ($type == $TYPE_TXT or $type == $TYPE_LNK) {
-		    $slide_filename = "$slide_filenameprefix_nofile$number.$www_extension" ;
-		} elsif ($make_slide_filename_from_extension) {
-		    $slide_filename = "$filename.$www_extension" ;
+		    $slide_filename = "$opts->{slide_filenameprefix_nofile}$number.$opts->{www_extension}" ;
+		} elsif ($opts->{make_slide_filename_from_extension}) {
+		    $slide_filename = "$filename.$opts->{www_extension}" ;
 		} else {
 		    my @parts = split (/\./, $filename) ;
 		    pop @parts ;
 		    my $basename = join ('.', @parts) ;
-		    $slide_filename = "$basename.$www_extension" ;
+		    $slide_filename = "$basename.$opts->{www_extension}" ;
 		}
 	    } else {
-		$slide_filename = "$slide_filenameprefix$number.$www_extension" ;
+		$slide_filename = "$opts->{slide_filenameprefix}$number.$opts->{www_extension}" ;
 	    }
 	    $entry->{slide_filename} = $slide_filename ;
 	    $entry->{slide_url} = make_safe_url_nowarn ($slide_filename) ;
@@ -1694,34 +1698,34 @@ sub get_entries_from_directory {
     opendir DIR, "./$destination_dir" # destination is empty for './'
 	or die "Can't open $destination_string ($!)\n" ;
     # get all files, except dot-starting ones and webpages
-    my @filenames = grep ((!/\.$www_extension$/i and !/^\./), readdir DIR) ;
+    my @filenames = grep ((!/\.$opts->{www_extension}$/i and !/^\./), readdir DIR) ;
     closedir DIR ;
 
     # sort now so that slide numbering doesn't become wrong later
-    if ($sort_criteria eq "name") {
+    if ($opts->{sort_criteria} eq "name") {
 	@filenames = sort @filenames ;
-    } elsif ($sort_criteria eq "revname") {
+    } elsif ($opts->{sort_criteria} eq "revname") {
 	@filenames = sort { $b cmp $a } @filenames ;
 
-    } elsif ($sort_criteria eq "iname") {
+    } elsif ($opts->{sort_criteria} eq "iname") {
 	@filenames = sort { uc($a) cmp uc($b) } @filenames ;
-    } elsif ($sort_criteria eq "reviname") {
+    } elsif ($opts->{sort_criteria} eq "reviname") {
 	@filenames = sort { uc($b) cmp uc($a) } @filenames ;
 
-    } elsif ($sort_criteria eq "date" or $sort_criteria eq "time") {
+    } elsif ($opts->{sort_criteria} eq "date" or $opts->{sort_criteria} eq "time") {
 	@filenames = sort { (-M $a) <=> (-M $b) } @filenames ;
-    } elsif ($sort_criteria eq "revdate" or $sort_criteria eq "revtime") {
+    } elsif ($opts->{sort_criteria} eq "revdate" or $opts->{sort_criteria} eq "revtime") {
 	@filenames = sort { (-M $b) <=> (-M $a) } @filenames ;
 
-    } elsif ($sort_criteria eq "size") {
+    } elsif ($opts->{sort_criteria} eq "size") {
 	@filenames = sort { (-s $a) <=> (-s $b) } @filenames ;
-    } elsif ($sort_criteria eq "revsize") {
+    } elsif ($opts->{sort_criteria} eq "revsize") {
 	@filenames = sort { (-s $b) <=> (-s $a) } @filenames ;
 
-    } elsif ($sort_criteria eq "none" or $sort_criteria eq "") {
+    } elsif ($opts->{sort_criteria} eq "none" or $opts->{sort_criteria} eq "") {
 	# do not sort
     } else {
-	die "Unknown sort criteria '$sort_criteria'.\n" ;
+	die "Unknown sort criteria '$opts->{sort_criteria}'.\n" ;
     }
 
     indprint "Preparing entries: " ;
@@ -1731,7 +1735,7 @@ sub get_entries_from_directory {
 	my $filename = @filenames[$i] ;
 	if (-d "$destination_dir$filename") {
 	    # directory
-	    if ($add_subdirs) {
+	    if ($opts->{add_subdirs}) {
 		my $entry = create_file_entry ($TYPE_DIR, $filename, undef, undef) ;
 		push @entries, $entry
 		    if defined $entry ;
@@ -1741,14 +1745,14 @@ sub get_entries_from_directory {
 	    # file
 	    my $entry = undef ;
 
-	    if ($filename =~ /($image_extensions)$/i) {
+	    if ($filename =~ /($opts->{image_extensions})$/i) {
 		# image
 		my $entry = create_file_entry ($TYPE_IMG, $filename, undef, undef) ;
 		goto JUST_A_FILE
 		    if not defined $entry ;
 		push @entries, $entry ;
 
-	    } elsif ($filename =~ /($movie_extensions)$/i) {
+	    } elsif ($filename =~ /($opts->{movie_extensions})$/i) {
 		# movie
 		my $entry = create_file_entry ($TYPE_MVI, $filename, undef, undef) ;
 		goto JUST_A_FILE
@@ -1757,7 +1761,7 @@ sub get_entries_from_directory {
 
 	    } else {
 	      JUST_A_FILE:
-		if ($add_all_files) {
+		if ($opts->{add_all_files}) {
 		    # not an image, not a movie, just a file
 		    my $entry = create_file_entry ($TYPE_FIL, $filename, undef, undef) ;
 		    push @entries, $entry
@@ -1795,22 +1799,22 @@ sub check_destination {
 	if ! -d "./$destination_dir" ; # destination is empty for './'
 
     # Create the url of the local llgal directory
-    $local_llgal_url = make_safe_url_nowarn ($local_llgal_dir) ;
+    $local_llgal_url = make_safe_url_nowarn ($opts->{local_llgal_dir}) ;
 
     # temporary check, to be removed soon
-    if ($local_llgal_dir ne ".llgal.files" and -e "${destination_dir}.llgal.files") {
+    if ($opts->{local_llgal_dir} ne ".llgal.files" and -e "${destination_dir}.llgal.files") {
 	immediate_warning "!! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !!" ;
 	immediate_warning "llgal now uses '.llgal' instead '.llgal.files'. !!" ;
 	immediate_warning "You should probably update it.                  !!" ;
 	immediate_warning "!! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !!" ;
     }
 
-    if (! -e "$destination_dir$local_llgal_dir") {
-	mkdir "$destination_dir$local_llgal_dir"
-	    or die "Failed to create $destination_dir$local_llgal_dir directory ($!)" ;
+    if (! -e "$destination_dir$opts->{local_llgal_dir}") {
+	mkdir "$destination_dir$opts->{local_llgal_dir}"
+	    or die "Failed to create $destination_dir$opts->{local_llgal_dir} directory ($!)" ;
     }
-    die "Local llgal '$destination_dir$local_llgal_dir' is not a directory.\n"
-	if ! -d "$destination_dir$local_llgal_dir" ;
+    die "Local llgal '$destination_dir$opts->{local_llgal_dir}' is not a directory.\n"
+	if ! -d "$destination_dir$opts->{local_llgal_dir}" ;
 }
 
 #######################################################################
@@ -1840,10 +1844,10 @@ sub generate_captions_file {
     my $old_next_gallery_link_target ;
     my $old_next_gallery_link_text ;
 
-    if (-e "$destination_dir$local_llgal_dir/$captions_filename") {
-	indprint "Reading existing captions from $captions_filename.\n" ;
-	open (CAP, "$destination_dir$local_llgal_dir/$captions_filename")
-	    or die "Can't open $destination_dir$local_llgal_dir/$captions_filename for reading\n" ;
+    if (-e "$destination_dir$opts->{local_llgal_dir}/$opts->{captions_filename}") {
+	indprint "Reading existing captions from $opts->{captions_filename}.\n" ;
+	open (CAP, "$destination_dir$opts->{local_llgal_dir}/$opts->{captions_filename}")
+	    or die "Can't open $destination_dir$opts->{local_llgal_dir}/$opts->{captions_filename} for reading\n" ;
 	@captions = <CAP> ;
 	close CAP ;
 
@@ -1865,46 +1869,46 @@ sub generate_captions_file {
 	    print CAP $line ;
 	}
 
-	indprint "Appending new captions to $captions_filename: " ;
-	open (CAP, ">>$destination_dir$local_llgal_dir/$captions_filename")
-	    or die "Can't open $destination_dir$local_llgal_dir/$captions_filename file to append\n" ;
+	indprint "Appending new captions to $opts->{captions_filename}: " ;
+	open (CAP, ">>$destination_dir$opts->{local_llgal_dir}/$opts->{captions_filename}")
+	    or die "Can't open $destination_dir$opts->{local_llgal_dir}/$opts->{captions_filename} file to append\n" ;
 
 	print CAP "\n" ;
 	print CAP "# Appended new captions (", scalar localtime, ").\n" ;
 	print CAP "\n" ;
     } else {
-	indprint "Creating the $captions_filename file: " ;
-	open (CAP, ">$destination_dir$local_llgal_dir/$captions_filename")
-	    or die "Can't create $destination_dir$local_llgal_dir/$captions_filename file\n" ;
+	indprint "Creating the $opts->{captions_filename} file: " ;
+	open (CAP, ">$destination_dir$opts->{local_llgal_dir}/$opts->{captions_filename}")
+	    or die "Can't create $destination_dir$opts->{local_llgal_dir}/$opts->{captions_filename} file\n" ;
 
-	print CAP "# This is llgal's $captions_filename file, first generated ", scalar localtime, ".\n" ;
-	if (open CAPHEADER, "$llgal_share_dir/$captions_header_filename") {
+	print CAP "# This is llgal's $opts->{captions_filename} file, first generated ", scalar localtime, ".\n" ;
+	if (open CAPHEADER, "$opts->{llgal_share_dir}/$opts->{captions_header_filename}") {
 	    while (my $line = <CAPHEADER>) { print CAP $line ; }
 	    close CAPHEADER ;
 	} else {
-	    add_warning "Failed to open $captions_header_filename\n" ;
+	    add_warning "Failed to open $opts->{captions_header_filename}\n" ;
 	}
-	print CAP "# $captions_removal_line\n" ;
+	print CAP "# $opts->{captions_removal_line}\n" ;
 	print CAP "\n" ;
     }
 
-    print CAP "TITLE: $index_title\n"
+    print CAP "TITLE: $opts->{index_title}\n"
 	if !defined $old_title
-	    or $old_title ne $index_title ;
-    print CAP "PARENT: $parent_gallery_link_text\n"
-	if $parent_gallery_link and
+	    or $old_title ne $opts->{index_title} ;
+    print CAP "PARENT: $opts->{parent_gallery_link_text}\n"
+	if $opts->{parent_gallery_link} and
 	    ( !$old_parent_gallery_link
-	    or $old_parent_gallery_link_text ne $parent_gallery_link_text ) ;
-    print CAP "PREV: $prev_gallery_link_text ---- $prev_gallery_link_target\n"
-	if $prev_gallery_link and
+	    or $old_parent_gallery_link_text ne $opts->{parent_gallery_link_text} ) ;
+    print CAP "PREV: $opts->{prev_gallery_link_text} ---- $opts->{prev_gallery_link_target}\n"
+	if $opts->{prev_gallery_link} and
 	    ( !$old_prev_gallery_link
-	    or $old_prev_gallery_link_target ne $prev_gallery_link_target
-	    or $old_prev_gallery_link_text ne $prev_gallery_link_text ) ;
-    print CAP "NEXT: $next_gallery_link_text ---- $next_gallery_link_target\n"
-	if $next_gallery_link and
+	    or $old_prev_gallery_link_target ne $opts->{prev_gallery_link_target}
+	    or $old_prev_gallery_link_text ne $opts->{prev_gallery_link_text} ) ;
+    print CAP "NEXT: $opts->{next_gallery_link_text} ---- $opts->{next_gallery_link_target}\n"
+	if $opts->{next_gallery_link} and
 	    ( !$old_next_gallery_link
-	    or $old_next_gallery_link_target ne $next_gallery_link_target
-	    or $old_next_gallery_link_text ne $next_gallery_link_text ) ;
+	    or $old_next_gallery_link_target ne $opts->{next_gallery_link_target}
+	    or $old_next_gallery_link_text ne $opts->{next_gallery_link_text} ) ;
     print CAP "\n" ;
 
     init_percentage () ;
@@ -1954,11 +1958,11 @@ sub read_captions_file {
     my @headers = () ;
     my @footers = () ;
 
-    indprint "Reading the $captions_filename file and preparing entries: " ;
+    indprint "Reading the $opts->{captions_filename} file and preparing entries: " ;
     init_percentage () ;
 
-    open(CAP,"$destination_dir$local_llgal_dir/$captions_filename")
-	or die "Can't open $destination_dir$local_llgal_dir/$captions_filename file\n" ;
+    open(CAP,"$destination_dir$opts->{local_llgal_dir}/$opts->{captions_filename}")
+	or die "Can't open $destination_dir$opts->{local_llgal_dir}/$opts->{captions_filename} file\n" ;
 
     my $size = (-s CAP) ;
     my $line ;
@@ -1970,7 +1974,7 @@ sub read_captions_file {
 	if (!($line =~ m/^\#/) && !($line =~ /^$/)) {
 	    if ($line =~ m/^TITLE:\s*(.*)\s*/) {
 		# title
-		$index_title = $1 ;
+		$opts->{index_title} = $1 ;
 
 	    } elsif ($line =~ m/^INDEXHEAD:\s*(.*)\s*$/) {
 		# header for the index
@@ -1983,18 +1987,18 @@ sub read_captions_file {
 # TODO move these to $gallery
 	    } elsif ($line =~ m/^PARENT:\s*(.*)\s*$/) {
 		# parent gallery link label
-		$parent_gallery_link = 1 ;
-		$parent_gallery_link_text = $1 ;
+		$opts->{parent_gallery_link} = 1 ;
+		$opts->{parent_gallery_link_text} = $1 ;
 
 	    } elsif ($line =~ m/^PREV:\s*(.*)\s+----\s+(.*)\s*$/) {
 		# prev gallery link label
-		$prev_gallery_link_text = $1 ;
-		$prev_gallery_link = $2 ;
+		$opts->{prev_gallery_link_text} = $1 ;
+		$opts->{prev_gallery_link} = $2 ;
 
 	    } elsif ($line =~ m/^NEXT:\s*(.*)\s+----\s+(.*)\s*$/) {
 		# next gallery link label
-		$next_gallery_link_text = $1 ;
-		$next_gallery_link = $2 ;
+		$opts->{next_gallery_link_text} = $1 ;
+		$opts->{next_gallery_link} = $2 ;
 
 	    } else {
 		# that's a slide, create its entry
@@ -2078,20 +2082,20 @@ sub add_headers_footers {
     my @footers = @{$gallery->{footers}} ;
     
     # parent, prev and next, in reverse order
-    unshift @headers, "<div style=\"text-align: right;\"><a href=\"$next_gallery_link_target\">$next_gallery_link_text$next_gallery_link_target</a></div>"
-	if $next_gallery_link ;
-    unshift @headers, "<a href=\"$prev_gallery_link_target\">$prev_gallery_link_text$prev_gallery_link_target</a>"
-	if $prev_gallery_link ;
-    unshift @headers, "<a href=\"..\">$parent_gallery_link_text</a>"
-	if $parent_gallery_link ;
+    unshift @headers, "<div style=\"text-align: right;\"><a href=\"$opts->{next_gallery_link_target}\">$opts->{next_gallery_link_text}$opts->{next_gallery_link_target}</a></div>"
+	if $opts->{next_gallery_link} ;
+    unshift @headers, "<a href=\"$opts->{prev_gallery_link_target}\">$opts->{prev_gallery_link_text}$opts->{prev_gallery_link_target}</a>"
+	if $opts->{prev_gallery_link} ;
+    unshift @headers, "<a href=\"..\">$opts->{parent_gallery_link_text}</a>"
+	if $opts->{parent_gallery_link} ;
     
     # prev, next and parent
-    push @footers, "<a href=\"$prev_gallery_link_target\">$prev_gallery_link_text$prev_gallery_link_target</a>"
-	if $prev_gallery_link ;
-    push @footers, "<div style=\"text-align: right;\"><a href=\"$next_gallery_link_target\">$next_gallery_link_text$next_gallery_link_target</a></div>"
-	if $next_gallery_link ;
-    push @footers, "<a href=\"..\">$parent_gallery_link_text</a>"
-	if $parent_gallery_link ;
+    push @footers, "<a href=\"$opts->{prev_gallery_link_target}\">$opts->{prev_gallery_link_text}$opts->{prev_gallery_link_target}</a>"
+	if $opts->{prev_gallery_link} ;
+    push @footers, "<div style=\"text-align: right;\"><a href=\"$opts->{next_gallery_link_target}\">$opts->{next_gallery_link_text}$opts->{next_gallery_link_target}</a></div>"
+	if $opts->{next_gallery_link} ;
+    push @footers, "<a href=\"..\">$opts->{parent_gallery_link_text}</a>"
+	if $opts->{parent_gallery_link} ;
 
     @{$gallery->{headers}} = @headers ;
     @{$gallery->{footers}} = @footers ;
@@ -2105,12 +2109,12 @@ sub generate_slides {
     my @entries = @{$gallery->{entries}} ;
 
     # remove old webpages
-    system ("rm -f ${destination_dir}*.$www_extension") ;
+    system ("rm -f ${destination_dir}*.$opts->{www_extension}") ;
     die "Failed to remove existing webpages.\n"
 	if $? ;
 
     # find the slidetemplate
-    my $slidetemplate = find_template_file ($slidetemplate_filename, 1) . "/$slidetemplate_filename" ;
+    my $slidetemplate = find_template_file ($opts->{slidetemplate_filename}, 1) . "/$opts->{slidetemplate_filename}" ;
     indprint "Using '$slidetemplate' as HTML slide template.\n" ;
 
     # keep the slidetemplate in memory instead of always reopening it
@@ -2133,15 +2137,15 @@ sub generate_slides {
 	my @slidetemplate_text_copy = @slidetemplate_text ; # don't touch the original template
         for my $line (@slidetemplate_text_copy) {
 	    $line =~ s/<!--SLIDE-TITLE-->/$title/g ;
-	    $line =~ s/<!--TITLE-->/$index_title/g ;
-	    $line =~ s/<!--CSS-->/$local_llgal_dir\/$css_filename/g ;
+	    $line =~ s/<!--TITLE-->/$opts->{index_title}/g ;
+	    $line =~ s/<!--CSS-->/$opts->{local_llgal_dir}\/$opts->{css_filename}/g ;
 
 	    # set the style
 	    if ($line =~ m/<!--THIS-SLIDE-STYLE-->/g) {
 		if ($type == $TYPE_IMG) {
 		    $line =~ s/<!--THIS-SLIDE-STYLE-->/image-slide/ ;
 		} else {
-		    $line =~ s/<!--THIS-SLIDE-STYLE-->/text-slide" style="width: ${text_slide_width}px; height: ${text_slide_height}px;/ ;
+		    $line =~ s/<!--THIS-SLIDE-STYLE-->/text-slide" style="width: $opts->{text_slide_width}px; height: $opts->{text_slide_height}px;/ ;
 		}
 	    }
 
@@ -2152,11 +2156,11 @@ sub generate_slides {
 
 		    if (defined $entry->{scaled_filename}) {
 			# scaled image with link to the real image
-			$line =~ s/<!--THIS-SLIDE-->/<a href="$entry->{url}" title="$over_scaled_text$title $entry->{dimstring}"><img src="$entry->{scaled_url}" alt="$alt_scaled_text$title $entry->{scaled_dimstring}" \/><\/a>/ ;
+			$line =~ s/<!--THIS-SLIDE-->/<a href="$entry->{url}" title="$opts->{over_scaled_text}$title $entry->{dimstring}"><img src="$entry->{scaled_url}" alt="$opts->{alt_scaled_text}$title $entry->{scaled_dimstring}" \/><\/a>/ ;
 
 		    } else {
 			# real image
-			$line =~ s/<!--THIS-SLIDE-->/<img src="$entry->{url}" alt="$alt_full_text$title $entry->{dimstring}" title="$title $entry->{dimstring}" \/>/g ;
+			$line =~ s/<!--THIS-SLIDE-->/<img src="$entry->{url}" alt="$opts->{alt_full_text}$title $entry->{dimstring}" title="$title $entry->{dimstring}" \/>/g ;
 
 		    }
 		} elsif ($type == $TYPE_TXT) {
@@ -2170,7 +2174,7 @@ sub generate_slides {
 
 	    # add the caption, with the image counter unless --nc is specified
 	    my $imagecaption ;
-	    if ($show_no_slide_counter) {
+	    if ($opts->{show_no_slide_counter}) {
 		$imagecaption = $entry->{caption} ;
 	    } else{
 		$imagecaption = $entry->{caption} . "&nbsp;&nbsp;&nbsp;(" . ($i+1) ."/". (scalar @entries) .")" ;
@@ -2183,45 +2187,45 @@ sub generate_slides {
 	    $line =~ s/<!--THIS-SLIDE-->/$entry->{slide_url}/g ;
 
 	    # process INDEX-FILE
-	    my $index_link = $index_link_text ;
-	    $index_link = "<img src=\"$local_llgal_dir/". (make_safe_url $index_link_image_filename)
-		."\" alt=\"$index_link_text\" class=\"image-link\" />"
-		if $index_link_image ;
+	    my $index_link = $opts->{index_link_text} ;
+	    $index_link = "<img src=\"$opts->{local_llgal_dir}/". (make_safe_url $opts->{index_link_image_filename})
+		."\" alt=\"$opts->{index_link_text}\" class=\"image-link\" />"
+		if $opts->{index_link_image} ;
 	    $line =~ s/<!--INDEX-LINK-TEXT-->/$index_link/g ;
 
-	    $line =~ s/<!--INDEX-FILE-->/$index_filename.$www_extension\" title=\"$over_index_link_text/g ;
+	    $line =~ s/<!--INDEX-FILE-->/$opts->{index_filename}.$opts->{www_extension}\" title=\"$opts->{over_index_link_text}/g ;
 
 	    # process PREV-SLIDE
 	    my $prev = $entries[$i-1] ;
 
 	    my $prev_slide_link ;
-	    if ($prev_slide_link_preview and $prev->{type} == $TYPE_IMG) {
-		$prev_slide_link = "<img src=\"$prev->{thumb_url}\" alt=\"$prev_slide_link_text\"/>" ;
-	    } elsif ($prev_slide_link_image) {
-		$prev_slide_link = "<img src=\"$local_llgal_dir/". (make_safe_url $prev_slide_link_image_filename)
-		    ."\" alt=\"$prev_slide_link_text\" class=\"image-link\" />" ;
+	    if ($opts->{prev_slide_link_preview} and $prev->{type} == $TYPE_IMG) {
+		$prev_slide_link = "<img src=\"$prev->{thumb_url}\" alt=\"$opts->{prev_slide_link_text}\"/>" ;
+	    } elsif ($opts->{prev_slide_link_image}) {
+		$prev_slide_link = "<img src=\"$opts->{local_llgal_dir}/". (make_safe_url $opts->{prev_slide_link_image_filename})
+		    ."\" alt=\"$opts->{prev_slide_link_text}\" class=\"image-link\" />" ;
 	    } else {
-		$prev_slide_link = $prev_slide_link_text ;
+		$prev_slide_link = $opts->{prev_slide_link_text} ;
 	    }
 	    $line =~ s/<!--PREV-SLIDE-LINK-TEXT-->/$prev_slide_link/g ;
 
-	    $line =~ s/<!--PREV-SLIDE-->/$prev->{slide_url}\" title=\"$over_prev_slide_link_text$prev->{title}/g ;
+	    $line =~ s/<!--PREV-SLIDE-->/$prev->{slide_url}\" title=\"$opts->{over_prev_slide_link_text}$prev->{title}/g ;
 
 	    # process NEXT-SLIDE
 	    my $next = $entries[$i==@entries-1 ? 0 : $i+1] ;
 
 	    my $next_slide_link ;
-	    if ($next_slide_link_preview and $next->{type} == $TYPE_IMG) {
-		$next_slide_link = "<img src=\"$next->{thumb_url}\" alt=\"$next_slide_link_text\"/>" ;
-	    } elsif ($next_slide_link_image ) {
-		$next_slide_link = "<img src=\"$local_llgal_dir/". (make_safe_url $next_slide_link_image_filename)
-		    ."\" alt=\"$next_slide_link_text\" class=\"image-link\" />" ;
+	    if ($opts->{next_slide_link_preview} and $next->{type} == $TYPE_IMG) {
+		$next_slide_link = "<img src=\"$next->{thumb_url}\" alt=\"$opts->{next_slide_link_text}\"/>" ;
+	    } elsif ($opts->{next_slide_link_image} ) {
+		$next_slide_link = "<img src=\"$opts->{local_llgal_dir}/". (make_safe_url $opts->{next_slide_link_image_filename})
+		    ."\" alt=\"$opts->{next_slide_link_text}\" class=\"image-link\" />" ;
 	    } else {
-		$next_slide_link = $next_slide_link_text ;
+		$next_slide_link = $opts->{next_slide_link_text} ;
 	    }
 	    $line =~ s/<!--NEXT-SLIDE-LINK-TEXT-->/$next_slide_link/g ;
 
-	    $line =~ s/<!--NEXT-SLIDE-->/$next->{slide_url}\" title=\"$over_next_slide_link_text$next->{title}/g ;
+	    $line =~ s/<!--NEXT-SLIDE-->/$next->{slide_url}\" title=\"$opts->{over_next_slide_link_text}$next->{title}/g ;
 
 	    # output the line
 	    print SW "$line" ;
@@ -2244,15 +2248,15 @@ sub generate_index {
     my @footers = @{$gallery->{footers}} ;    
 
     # find the indextemplate
-    my $indextemplate = find_template_file ($indextemplate_filename, 1) . "/$indextemplate_filename" ;
+    my $indextemplate = find_template_file ($opts->{indextemplate_filename}, 1) . "/$opts->{indextemplate_filename}" ;
     indprint "Using '$indextemplate' as HTML index template.\n" ;
 
     # open the template and the destination
-    indprint "Creating the $index_filename.$www_extension file: " ;
+    indprint "Creating the $opts->{index_filename}.$opts->{www_extension} file: " ;
     open(IXR, "$indextemplate")
 	or die "Can't open the index template file '$indextemplate'\n" ;
-    open(IXW, ">$destination_dir$index_filename.$www_extension")
-	or die "Can't create main $index_filename.$www_extension file\n" ;
+    open(IXW, ">$destination_dir$opts->{index_filename}.$opts->{www_extension}")
+	or die "Can't create main $opts->{index_filename}.$opts->{www_extension} file\n" ;
 
     # headers
     my $line ;
@@ -2263,8 +2267,8 @@ sub generate_index {
 	    }
 	} else {
 	    $line =~ s/LLGAL-OPTIONS/@llgal_options/g ;
-	    $line =~ s/<!--TITLE-->/$index_title/g ;
-	    $line =~ s/<!--CSS-->/$local_llgal_dir\/$css_filename/g ;
+	    $line =~ s/<!--TITLE-->/$opts->{index_title}/g ;
+	    $line =~ s/<!--CSS-->/$opts->{local_llgal_dir}\/$opts->{css_filename}/g ;
 	    print IXW "$line" ;
 	    # stop at <!-- ********** -->
 	    last if $line =~ m/\*{10}/ ;
@@ -2281,14 +2285,14 @@ sub generate_index {
 	# figure out how many to put in next row.
 	my $width = 0 ;
 	while ( ($i+$num < @entries)
-		&& (!$thumbnails_per_row or $num < $thumbnails_per_row)
-		&& (!$pixels_per_row or $width < $pixels_per_row) ) {
+		&& (!$opts->{thumbnails_per_row} or $num < $opts->{thumbnails_per_row})
+		&& (!$opts->{pixels_per_row} or $width < $opts->{pixels_per_row}) ) {
 	    $width += $entries[$num+$i]->{thumb_xdim} ;
 	    $num++ ;
 	    # add cellpadding
-	    $width += $index_cellpadding ;
+	    $width += $opts->{index_cellpadding} ;
 	}
-	if ($pixels_per_row > 0 && $width > $pixels_per_row) {
+	if ($opts->{pixels_per_row} > 0 && $width > $opts->{pixels_per_row}) {
 	    if ($num >= 2) {
 		$num-- ;
 	    } else {
@@ -2297,18 +2301,18 @@ sub generate_index {
 	}
 
 	# Table header
-	if ($show_no_film_effect) {
-	    print IXW "<table class=\"index\" style=\"border-spacing: ", $index_cellpadding, "px 0px;\">\n" ;
+	if ($opts->{show_no_film_effect}) {
+	    print IXW "<table class=\"index\" style=\"border-spacing: ", $opts->{index_cellpadding}, "px 0px;\">\n" ;
 	} else {
-	    print IXW "<table class=\"index with-tile\" style=\"border-spacing: ", $index_cellpadding, "px 0px;\">\n" ;
+	    print IXW "<table class=\"index with-tile\" style=\"border-spacing: ", $opts->{index_cellpadding}, "px 0px;\">\n" ;
 	}
 
 	# Row header
-	print IXW "  <tr><td class=\"tiled\" colspan=\"", ($show_no_film_effect?$num:$num+2), "\">&nbsp;</td></tr>\n"
-	    unless $show_no_film_effect ;
+	print IXW "  <tr><td class=\"tiled\" colspan=\"", ($opts->{show_no_film_effect}?$num:$num+2), "\">&nbsp;</td></tr>\n"
+	    unless $opts->{show_no_film_effect} ;
 	print IXW "  <tr>\n" ;
 	print IXW "    <td class=\"thumb\">&nbsp;</td>\n"
-	    unless $show_no_film_effect ;
+	    unless $opts->{show_no_film_effect} ;
 
 	# Actual row of thumbnails
 	for (my $j = 0; $j < $num; $j++) {
@@ -2330,13 +2334,13 @@ sub generate_index {
 	    } elsif ($type == $TYPE_IMG) {
 		my $altname = $entry->{title} ;
 		print IXW "    <td class=\"thumb\" style=\"width: ${width}px; height: ${height}px;\">\n" ;
-		if ($make_no_slides) {
+		if ($opts->{make_no_slides}) {
 		    print IXW "      <a href=\"$entry->{url}\"" ;
 		} else {
 		    print IXW "      <a href=\"$entry->{slide_url}\"" ;
 		}
-		print IXW " title=\"$over_thumbnail_text$altname $entry->{scaled_dimstring}\">" ;
-		print IXW "<img src=\"$entry->{thumb_url}\" alt=\"$alt_thumbnail_text$altname $entry->{thumb_dimstring}\" />" ;
+		print IXW " title=\"$opts->{over_thumbnail_text}$altname $entry->{scaled_dimstring}\">" ;
+		print IXW "<img src=\"$entry->{thumb_url}\" alt=\"$opts->{alt_thumbnail_text}$altname $entry->{thumb_dimstring}\" />" ;
 		print IXW "</a></td>\n" ;
 	    } else {
 		die "Unknown type $type.\n" ;
@@ -2346,30 +2350,30 @@ sub generate_index {
 
 	# Row footer
 	print IXW "    <td class=\"thumb\">&nbsp;</td>\n"
-	    unless $show_no_film_effect ;
+	    unless $opts->{show_no_film_effect} ;
 	print IXW "  </tr>\n" ;
 	print IXW "  <tr><td class=\"tiled\" colspan=\"", $num+2, "\">&nbsp;</td></tr>\n"
-	    unless $show_no_film_effect ;
+	    unless $opts->{show_no_film_effect} ;
 
 	# Dimensions and filesizes
-	if ($show_dimensions or $show_size) {
+	if ($opts->{show_dimensions} or $opts->{show_size}) {
 	    print IXW "  <tr>\n" ;
 	    print IXW "    <td>&nbsp;</td>\n"
-		unless $show_no_film_effect ;
+		unless $opts->{show_no_film_effect} ;
 	    for (my $j = 0; $j < $num; $j++) {
 		my $entry = $entries[$i+$j] ;
 		print IXW "    <td class=\"thumb-dim\">$entry->{scaled_dimstring}</td>\n" ;
 	    }
 	    print IXW "    <td>&nbsp;</td>\n"
-		unless $show_no_film_effect ;
+		unless $opts->{show_no_film_effect} ;
 	    print IXW "  </tr>\n" ;
 	}
 
 	# Write image captions under images if option -u is given
-	if ($show_caption_under_thumbnails) {
+	if ($opts->{show_caption_under_thumbnails}) {
 	    print IXW "  <tr>\n" ;
 	    print IXW "<td>&nbsp;</td>\n"
-		unless $show_no_film_effect ;
+		unless $opts->{show_no_film_effect} ;
 	    for (my $j = 0; $j < $num; $j++) {
 		my $entry = $entries[$i+$j] ;
 		print IXW "    <td class=\"thumb-caption\">$entry->{caption}</td>\n" ;
@@ -2382,7 +2386,7 @@ sub generate_index {
     }
     
     # list links
-    if ($list_links) {
+    if ($opts->{list_links}) {
 	foreach my $entry (@listed_entries) {
 	    my $type = $entry->{type} ;
 	    print IXW "<div class=\"header\">" ;
@@ -2408,7 +2412,7 @@ sub generate_index {
 		print IXW "    <div class=\"footer\">" . $footer . "</div>\n" ;
 	    }
 	} else {
-	    $line =~ s/<!--TITLE-->/$index_title/g ;
+	    $line =~ s/<!--TITLE-->/$opts->{index_title}/g ;
 	    print IXW "$line" ;
 	}
     }
@@ -2418,7 +2422,7 @@ sub generate_index {
     end_percentage () ;
     show_warnings ;
     
-    immediate_warning "Row width max ($pixels_per_row) too low for one single thumbnail. "
+    immediate_warning "Row width max ($opts->{pixels_per_row}) too low for one single thumbnail. "
 	. "Forced $forced_width_warning time". ($forced_width_warning>1?"s":"") ."."
 	if $forced_width_warning ;
 }
@@ -2428,16 +2432,16 @@ sub generate_index {
 
 sub get_files {
     # Get the film tile for the index
-    if ($show_no_film_effect) {
+    if ($opts->{show_no_film_effect}) {
 	indprint "Omitting film effect.\n" ;
     } else {
-	get_template_file ($filmtile_filename) ;
+	get_template_file ($opts->{filmtile_filename}) ;
 	# rescale the tiled image if needed
-	my $tileh = (imgsize ("$destination_dir$local_llgal_dir/$filmtile_filename"))[1] ;
-	if ($tile_height != $tileh) {
+	my $tileh = (imgsize ("$destination_dir$opts->{local_llgal_dir}/$opts->{filmtile_filename}"))[1] ;
+	if ($opts->{tile_height} != $tileh) {
 	    my ($status, @output) = system_with_output
 		( "reduce film tile",
-		  "mogrify", "-scale", "x$tile_height", "$destination_dir$local_llgal_dir/$filmtile_filename" ) ;
+		  "mogrify", "-scale", "x$opts->{tile_height}", "$destination_dir$opts->{local_llgal_dir}/$opts->{filmtile_filename}" ) ;
 	    if ($status) {
 		# die on whatever error
 		immediate_external_warnings @output ;
@@ -2447,15 +2451,15 @@ sub get_files {
     }
 
     # Get link images
-    get_template_file ($index_link_image_filename)
-	if $index_link_image ;
-    get_template_file ($prev_slide_link_image_filename)
-	if $prev_slide_link_image and ! $prev_slide_link_preview ;
-    get_template_file ($next_slide_link_image_filename)
-	if $next_slide_link_image and ! $next_slide_link_preview ;
+    get_template_file ($opts->{index_link_image_filename})
+	if $opts->{index_link_image} ;
+    get_template_file ($opts->{prev_slide_link_image_filename})
+	if $opts->{prev_slide_link_image} and ! $opts->{prev_slide_link_preview} ;
+    get_template_file ($opts->{next_slide_link_image_filename})
+	if $opts->{next_slide_link_image} and ! $opts->{next_slide_link_preview} ;
 
     # Get the css
-    get_template_file ($css_filename) ;
+    get_template_file ($opts->{css_filename}) ;
 }
 
 #######################################################################
@@ -2486,23 +2490,23 @@ sub make_www_rights {
     indprint "Making all llgal files world-readable for WWW publishing.\n" ;
     
     # index
-    make_readable "$destination_dir$index_filename.$www_extension" ;
+    make_readable "$destination_dir$opts->{index_filename}.$opts->{www_extension}" ;
     # .llgal
-    make_readable_and_traversable "$destination_dir$local_llgal_dir" ;
+    make_readable_and_traversable "$destination_dir$opts->{local_llgal_dir}" ;
     # css
-    make_readable "$destination_dir$local_llgal_dir/$css_filename" ;
+    make_readable "$destination_dir$opts->{local_llgal_dir}/$opts->{css_filename}" ;
     # filmtile
-    make_readable "$destination_dir$local_llgal_dir/$filmtile_filename"
-	if ! $show_no_film_effect ;
+    make_readable "$destination_dir$opts->{local_llgal_dir}/$opts->{filmtile_filename}"
+	if ! $opts->{show_no_film_effect} ;
     # index link image
-    make_readable "$destination_dir$local_llgal_dir/$index_link_image_filename"
- 	if $index_link_image ;
+    make_readable "$destination_dir$opts->{local_llgal_dir}/$opts->{index_link_image_filename}"
+ 	if $opts->{index_link_image} ;
     # prev slide link image
-    make_readable "$destination_dir$local_llgal_dir/$prev_slide_link_image_filename"
- 	if $prev_slide_link_image and ! $prev_slide_link_preview;
+    make_readable "$destination_dir$opts->{local_llgal_dir}/$opts->{prev_slide_link_image_filename}"
+ 	if $opts->{prev_slide_link_image} and ! $opts->{prev_slide_link_preview};
     # next slide link image
-    make_readable "$destination_dir$local_llgal_dir/$next_slide_link_image_filename"
- 	if $next_slide_link_image and ! $next_slide_link_preview ;
+    make_readable "$destination_dir$opts->{local_llgal_dir}/$opts->{next_slide_link_image_filename}"
+ 	if $opts->{next_slide_link_image} and ! $opts->{next_slide_link_preview} ;
     
     # entries that have a slide
     foreach my $entry (@entries) {
@@ -2518,14 +2522,14 @@ sub make_www_rights {
 	
 	# slide
 	make_readable "$destination_dir$entry->{slide_filename}"
-	    if ! $make_no_slides ;
+	    if ! $opts->{make_no_slides} ;
 	
 	if ($type == $TYPE_IMG) {
 	    # thumbnail
 	    make_readable "$destination_dir$entry->{thumb_filename}" ;
 	    # scaled image
 	    make_readable "$destination_dir$entry->{scaled_filename}"
-		if ($slide_width_max > 0 or $slide_height_max > 0) and !$make_no_slides ;
+		if ($opts->{slide_width_max} > 0 or $opts->{slide_height_max} > 0) and !$opts->{make_no_slides} ;
 	}
 	
     }
@@ -2566,7 +2570,7 @@ sub call_recursive {
 	my $next = $entries[$i==@entries-1 ? 0 : $i+1] ;
 	my @next_opts = () ;
 
-	if ($link_subgalleries) {
+	if ($opts->{link_subgalleries}) {
 	    if ($prev->{type} == $TYPE_DIR) {
 		@prev_opts = ("--prev-gal", "$revdir/$prev->{url}") ;
 	    }
@@ -2579,7 +2583,7 @@ sub call_recursive {
 	indprint "Entering subdirectory '$dir'...\n" ;
 	system ( $0, @llgal_options, "-d", "$destination_dir$dir",
 		 "--parent-gal", @prev_opts, @next_opts,
-		 "--indent", $indent."  " ) ;
+		 "--indent", $opts->{indent}."  " ) ;
 	die "Failed to call $0 for subdirectory $destination_dir$dir ($!).\n"
 	    if $? == -1 ;
 	immediate_warning "$0 failed for subdirectory $destination_dir$dir."
@@ -2609,9 +2613,9 @@ if ($cleanall_asked) {
 
 if ($give_templates) {
     my $destdir = $give_templates ;
-    $destdir = $local_llgal_dir
+    $destdir = $opts->{local_llgal_dir}
 	if $destdir eq "local" ;
-    $destdir = $user_share_dir
+    $destdir = $opts->{user_share_dir}
 	if $destdir eq "user" ;
     give_templates $destdir ;
     indprint "You may now edit templates in $destdir and generate new galleries.\n" ;
@@ -2625,7 +2629,7 @@ my $root_gallery = init_gallery () ;
 
 if ($generate_captions) {
     generate_captions_file $root_gallery ;
-    indprint "Now edit the $destination_dir$local_llgal_dir/$captions_filename file to your liking and run llgal\n" ;
+    indprint "Now edit the $destination_dir$opts->{local_llgal_dir}/$opts->{captions_filename} file to your liking and run llgal\n" ;
 
     if ($make_recursive) {
 	my @dir_entries = grep { $_->{type} == $TYPE_DIR } @{$root_gallery->{entries}} ;
@@ -2634,7 +2638,7 @@ if ($generate_captions) {
 	foreach my $entry (@dir_entries) {
 	    my $dir = $entry->{filename} ;
 	    indprint "Entering subdirectory '$dir'...\n" ;
-	    system ( $0, @llgal_options, "-d", "$destination_dir$dir", "--indent", "  ".$indent ) ;
+	    system ( $0, @llgal_options, "-d", "$destination_dir$dir", "--indent", "  ".$opts->{indent} ) ;
 	    die "Failed to call $0 for subdirectory $destination_dir$dir ($!).\n"
 		if $? == -1 ;
 	    immediate_warning "$0 failed for subdirectory $destination_dir$dir."
@@ -2646,7 +2650,7 @@ if ($generate_captions) {
     exit 0 ;
 }
 
-if (-e "$destination_dir$local_llgal_dir/$captions_filename") {
+if (-e "$destination_dir$opts->{local_llgal_dir}/$opts->{captions_filename}") {
     read_captions_file $root_gallery ;
     fill_entries $root_gallery ;
     indprint "Found ". (scalar @{$root_gallery->{entries}}) ." files in the captions file.\n" ;
@@ -2658,13 +2662,13 @@ if (-e "$destination_dir$local_llgal_dir/$captions_filename") {
 }
 
 extract_listed_entries $root_gallery
-    if $list_links ;
+    if $opts->{list_links} ;
 
 finalize_entries $root_gallery ;
 
 add_headers_footers $root_gallery ;
 
-if ($make_no_slides) {
+if ($opts->{make_no_slides}) {
     indprint "Linking thumbnails directly to image files...  Making no html slides.\n" ;
 } else {
     generate_slides $root_gallery ;
@@ -2675,7 +2679,7 @@ generate_index $root_gallery ;
 get_files ;
 
 make_www_rights $root_gallery
-    if $www_access_rights ;
+    if $opts->{www_access_rights} ;
 
 call_recursive $root_gallery
     if $make_recursive ;
@@ -2694,112 +2698,112 @@ if (defined $generate_config) {
     print NEWCFG "# You may modify and reuse it as you want.\n" ;
     print NEWCFG "\n" ;
     print NEWCFG "# llgal directories:\n" ;
-    print NEWCFG "llgal_share_dir = \"$llgal_share_dir\"\n" ;
-    print NEWCFG "user_share_dir = \"$user_share_dir\"\n" ;
-    map { print NEWCFG "template_dir = \"$_\"\n" ; } @template_dirs ;
+    print NEWCFG "llgal_share_dir = \"$opts->{llgal_share_dir}\"\n" ;
+    print NEWCFG "user_share_dir = \"$opts->{user_share_dir}\"\n" ;
+    map { print NEWCFG "template_dir = \"$_\"\n" ; } @{$opts->{template_dirs}} ;
     print NEWCFG "\n" ;
     print NEWCFG "# Name of generic llgal files:\n" ;
-    print NEWCFG "captions_header_filename = \"$captions_header_filename\"\n" ;
-    print NEWCFG "css_filename = \"$css_filename\"\n" ;
-    print NEWCFG "filmtile_filename = \"$filmtile_filename\"\n" ;
-    print NEWCFG "index_link_image_filename = \"$index_link_image_filename\"\n" ;
-    print NEWCFG "prev_slide_link_image_filename = \"$prev_slide_link_image_filename\"\n" ;
-    print NEWCFG "next_slide_link_image_filename = \"$next_slide_link_image_filename\"\n" ;
-    print NEWCFG "indextemplate_filename = \"$indextemplate_filename\"\n" ;
-    print NEWCFG "slidetemplate_filename = \"$slidetemplate_filename\"\n" ;
+    print NEWCFG "captions_header_filename = \"$opts->{captions_header_filename}\"\n" ;
+    print NEWCFG "css_filename = \"$opts->{css_filename}\"\n" ;
+    print NEWCFG "filmtile_filename = \"$opts->{filmtile_filename}\"\n" ;
+    print NEWCFG "index_link_image_filename = \"$opts->{index_link_image_filename}\"\n" ;
+    print NEWCFG "prev_slide_link_image_filename = \"$opts->{prev_slide_link_image_filename}\"\n" ;
+    print NEWCFG "next_slide_link_image_filename = \"$opts->{next_slide_link_image_filename}\"\n" ;
+    print NEWCFG "indextemplate_filename = \"$opts->{indextemplate_filename}\"\n" ;
+    print NEWCFG "slidetemplate_filename = \"$opts->{slidetemplate_filename}\"\n" ;
     print NEWCFG "\n" ;
     print NEWCFG "# Location and name of generated files:\n" ;
-    print NEWCFG "local_llgal_dir = \"$local_llgal_dir\"\n" ;
-    print NEWCFG "index_filename = \"$index_filename\"\n" ;
-    print NEWCFG "slide_filenameprefix = \"$slide_filenameprefix\"\n" ;
-    print NEWCFG "slide_filenameprefix_nofile = \"$slide_filenameprefix_nofile\"\n" ;
-    print NEWCFG "scaled_image_filenameprefix = \"$scaled_image_filenameprefix\"\n" ;
-    print NEWCFG "thumbnail_image_filenameprefix = \"$thumbnail_image_filenameprefix\"\n" ;
-    print NEWCFG "captions_filename = \"$captions_filename\"\n" ;
+    print NEWCFG "local_llgal_dir = \"$opts->{local_llgal_dir}\"\n" ;
+    print NEWCFG "index_filename = \"$opts->{index_filename}\"\n" ;
+    print NEWCFG "slide_filenameprefix = \"$opts->{slide_filenameprefix}\"\n" ;
+    print NEWCFG "slide_filenameprefix_nofile = \"$opts->{slide_filenameprefix_nofile}\"\n" ;
+    print NEWCFG "scaled_image_filenameprefix = \"$opts->{scaled_image_filenameprefix}\"\n" ;
+    print NEWCFG "thumbnail_image_filenameprefix = \"$opts->{thumbnail_image_filenameprefix}\"\n" ;
+    print NEWCFG "captions_filename = \"$opts->{captions_filename}\"\n" ;
     print NEWCFG "\n" ;
     print NEWCFG "# Index:\n" ;
-    print NEWCFG "index_cellpadding = $index_cellpadding\n" ;
-    print NEWCFG "list_links = $list_links\n" ;
-    print NEWCFG "pixels_per_row = $pixels_per_row\n" ;
-    print NEWCFG "thumbnails_per_row = $thumbnails_per_row\n" ;
-    print NEWCFG "thumbnail_width_max = $thumbnail_width_max\n" ;
-    print NEWCFG "thumbnail_height_max = $thumbnail_height_max\n" ;
-    print NEWCFG "show_caption_under_thumbnails = $show_caption_under_thumbnails\n" ;
-    print NEWCFG "show_no_film_effect = $show_no_film_effect\n" ;
-    print NEWCFG "tile_height = $tile_height\n" ;
+    print NEWCFG "index_cellpadding = $opts->{index_cellpadding}\n" ;
+    print NEWCFG "list_links = $opts->{list_links}\n" ;
+    print NEWCFG "pixels_per_row = $opts->{pixels_per_row}\n" ;
+    print NEWCFG "thumbnails_per_row = $opts->{thumbnails_per_row}\n" ;
+    print NEWCFG "thumbnail_width_max = $opts->{thumbnail_width_max}\n" ;
+    print NEWCFG "thumbnail_height_max = $opts->{thumbnail_height_max}\n" ;
+    print NEWCFG "show_caption_under_thumbnails = $opts->{show_caption_under_thumbnails}\n" ;
+    print NEWCFG "show_no_film_effect = $opts->{show_no_film_effect}\n" ;
+    print NEWCFG "tile_height = $opts->{tile_height}\n" ;
     print NEWCFG "\n" ;
     print NEWCFG "# Slides:\n" ;
-    print NEWCFG "make_no_slides = $make_no_slides\n" ;
-    print NEWCFG "make_slide_filename_from_filename = $make_slide_filename_from_filename\n" ;
-    print NEWCFG "make_slide_filename_from_extension = $make_slide_filename_from_extension\n" ;
-    print NEWCFG "slide_width_max = $slide_width_max\n" ;
-    print NEWCFG "slide_height_max = $slide_height_max\n" ;
-    print NEWCFG "text_slide_width = $text_slide_width\n" ;
-    print NEWCFG "text_slide_height = $text_slide_height\n" ;
-    print NEWCFG "index_link_image = $index_link_image\n" ;
-    print NEWCFG "prev_slide_link_image = $prev_slide_link_image\n" ;
-    print NEWCFG "next_slide_link_image = $next_slide_link_image\n" ;
-    print NEWCFG "prev_slide_link_preview = $prev_slide_link_preview\n" ;
-    print NEWCFG "next_slide_link_preview = $next_slide_link_preview\n" ;
-    print NEWCFG "make_slide_title_from_caption = $make_slide_title_from_caption\n" ;
+    print NEWCFG "make_no_slides = $opts->{make_no_slides}\n" ;
+    print NEWCFG "make_slide_filename_from_filename = $opts->{make_slide_filename_from_filename}\n" ;
+    print NEWCFG "make_slide_filename_from_extension = $opts->{make_slide_filename_from_extension}\n" ;
+    print NEWCFG "slide_width_max = $opts->{slide_width_max}\n" ;
+    print NEWCFG "slide_height_max = $opts->{slide_height_max}\n" ;
+    print NEWCFG "text_slide_width = $opts->{text_slide_width}\n" ;
+    print NEWCFG "text_slide_height = $opts->{text_slide_height}\n" ;
+    print NEWCFG "index_link_image = $opts->{index_link_image}\n" ;
+    print NEWCFG "prev_slide_link_image = $opts->{prev_slide_link_image}\n" ;
+    print NEWCFG "next_slide_link_image = $opts->{next_slide_link_image}\n" ;
+    print NEWCFG "prev_slide_link_preview = $opts->{prev_slide_link_preview}\n" ;
+    print NEWCFG "next_slide_link_preview = $opts->{next_slide_link_preview}\n" ;
+    print NEWCFG "make_slide_title_from_caption = $opts->{make_slide_title_from_caption}\n" ;
     print NEWCFG "\n" ;
     print NEWCFG "# Captions:\n" ;
-    print NEWCFG "captions_removal_line = \"$captions_removal_line\"\n" ;
-    print NEWCFG "make_caption_from_image_comment = \"$make_caption_from_image_comment\"\n" ;
-    print NEWCFG "make_caption_from_image_timestamp = $make_caption_from_image_timestamp\n" ;
-    print NEWCFG "make_caption_from_filename = $make_caption_from_filename\n" ;
-    print NEWCFG "show_dimensions = $show_dimensions\n" ;
-    print NEWCFG "show_size = $show_size\n" ;
-    print NEWCFG "show_no_slide_counter = $show_no_slide_counter\n" ;
+    print NEWCFG "captions_removal_line = \"$opts->{captions_removal_line}\"\n" ;
+    print NEWCFG "make_caption_from_image_comment = \"$opts->{make_caption_from_image_comment}\"\n" ;
+    print NEWCFG "make_caption_from_image_timestamp = $opts->{make_caption_from_image_timestamp}\n" ;
+    print NEWCFG "make_caption_from_filename = $opts->{make_caption_from_filename}\n" ;
+    print NEWCFG "show_dimensions = $opts->{show_dimensions}\n" ;
+    print NEWCFG "show_size = $opts->{show_size}\n" ;
+    print NEWCFG "show_no_slide_counter = $opts->{show_no_slide_counter}\n" ;
     print NEWCFG "\n" ;
     print NEWCFG "# Text:\n" ;
-    print NEWCFG "index_title = \"$index_title\"\n" ;
-    print NEWCFG "index_link_text = \"$index_link_text\"\n" ;
-    print NEWCFG "parent_gallery_link_text = \"$parent_gallery_link_text\"\n" ;
-    print NEWCFG "prev_gallery_link_text = \"$prev_gallery_link_text\"\n" ;
-    print NEWCFG "next_gallery_link_text = \"$next_gallery_link_text\"\n" ;
-    print NEWCFG "prev_slide_link_text = \"$prev_slide_link_text\"\n" ;
-    print NEWCFG "next_slide_link_text = \"$next_slide_link_text\"\n" ;
-    print NEWCFG "MVI_link_text = \"$MVI_link_text\"\n" ;
-    print NEWCFG "FIL_link_text = \"$FIL_link_text\"\n" ;
-    print NEWCFG "DIR_link_text = \"$DIR_link_text\"\n" ;
-    print NEWCFG "alt_full_text = \"$alt_full_text\"\n" ;
-    print NEWCFG "alt_scaled_text = \"$alt_scaled_text\"\n" ;
-    print NEWCFG "alt_thumbnail_text = \"$alt_thumbnail_text\"\n" ;
-    print NEWCFG "over_scaled_text = \"$over_scaled_text\"\n" ;
-    print NEWCFG "over_thumbnail_text = \"$over_thumbnail_text\"\n" ;
-    print NEWCFG "over_index_link_text = \"$over_index_link_text\"\n" ;
-    print NEWCFG "over_prev_slide_link_text = \"$over_prev_slide_link_text\"\n" ;
-    print NEWCFG "over_next_slide_link_text = \"$over_next_slide_link_text\"\n" ;
-    print NEWCFG "show_size_unit = \"$show_size_unit\"\n" ;
-    print NEWCFG "timestamp_format_in_caption = \"$timestamp_format_in_caption\"\n" ;
+    print NEWCFG "index_title = \"$opts->{index_title}\"\n" ;
+    print NEWCFG "index_link_text = \"$opts->{index_link_text}\"\n" ;
+    print NEWCFG "parent_gallery_link_text = \"$opts->{parent_gallery_link_text}\"\n" ;
+    print NEWCFG "prev_gallery_link_text = \"$opts->{prev_gallery_link_text}\"\n" ;
+    print NEWCFG "next_gallery_link_text = \"$opts->{next_gallery_link_text}\"\n" ;
+    print NEWCFG "prev_slide_link_text = \"$opts->{prev_slide_link_text}\"\n" ;
+    print NEWCFG "next_slide_link_text = \"$opts->{next_slide_link_text}\"\n" ;
+    print NEWCFG "MVI_link_text = \"$opts->{MVI_link_text}\"\n" ;
+    print NEWCFG "FIL_link_text = \"$opts->{FIL_link_text}\"\n" ;
+    print NEWCFG "DIR_link_text = \"$opts->{DIR_link_text}\"\n" ;
+    print NEWCFG "alt_full_text = \"$opts->{alt_full_text}\"\n" ;
+    print NEWCFG "alt_scaled_text = \"$opts->{alt_scaled_text}\"\n" ;
+    print NEWCFG "alt_thumbnail_text = \"$opts->{alt_thumbnail_text}\"\n" ;
+    print NEWCFG "over_scaled_text = \"$opts->{over_scaled_text}\"\n" ;
+    print NEWCFG "over_thumbnail_text = \"$opts->{over_thumbnail_text}\"\n" ;
+    print NEWCFG "over_index_link_text = \"$opts->{over_index_link_text}\"\n" ;
+    print NEWCFG "over_prev_slide_link_text = \"$opts->{over_prev_slide_link_text}\"\n" ;
+    print NEWCFG "over_next_slide_link_text = \"$opts->{over_next_slide_link_text}\"\n" ;
+    print NEWCFG "show_size_unit = \"$opts->{show_size_unit}\"\n" ;
+    print NEWCFG "timestamp_format_in_caption = \"$opts->{timestamp_format_in_caption}\"\n" ;
     print NEWCFG "\n" ;
     print NEWCFG "# Recursion:\n" ;
     print NEWCFG "make_recursive = $make_recursive\n" ;
-    print NEWCFG "link_subgalleries = $link_subgalleries\n" ;
-    print NEWCFG "parent_gallery_link = $parent_gallery_link\n" ;
-    print NEWCFG "prev_gallery_link = $prev_gallery_link\n" ;
-    print NEWCFG "prev_gallery_link_target = \"$prev_gallery_link_target\"\n" ;
-    print NEWCFG "next_gallery_link = $next_gallery_link\n" ;
-    print NEWCFG "next_gallery_link_target = \"$next_gallery_link_target\"\n" ;
+    print NEWCFG "link_subgalleries = $opts->{link_subgalleries}\n" ;
+    print NEWCFG "parent_gallery_link = $opts->{parent_gallery_link}\n" ;
+    print NEWCFG "prev_gallery_link = $opts->{prev_gallery_link}\n" ;
+    print NEWCFG "prev_gallery_link_target = \"$opts->{prev_gallery_link_target}\"\n" ;
+    print NEWCFG "next_gallery_link = $opts->{next_gallery_link}\n" ;
+    print NEWCFG "next_gallery_link_target = \"$opts->{next_gallery_link_target}\"\n" ;
     print NEWCFG "\n" ;
     print NEWCFG "# What files to insert in the gallery:\n" ;
-    print NEWCFG "image_extensions = \"$image_extensions\"\n" ;
-    print NEWCFG "movie_extensions = \"$movie_extensions\"\n" ;
-    print NEWCFG "add_all_files = $add_all_files\n" ;
-    print NEWCFG "add_subdirs = $add_subdirs\n" ;
+    print NEWCFG "image_extensions = \"$opts->{image_extensions}\"\n" ;
+    print NEWCFG "movie_extensions = \"$opts->{movie_extensions}\"\n" ;
+    print NEWCFG "add_all_files = $opts->{add_all_files}\n" ;
+    print NEWCFG "add_subdirs = $opts->{add_subdirs}\n" ;
     map {
 	print NEWCFG ($_->{excluded} ? "exclude" : "include"). " = \"". $_->{filter} ."\"\n" ;
-    } @excludes ;
-    print NEWCFG "sort_criteria = \"$sort_criteria\"\n" ;
+    } @{$opts->{excludes}} ;
+    print NEWCFG "sort_criteria = \"$opts->{sort_criteria}\"\n" ;
     print NEWCFG "\n" ;
     print NEWCFG "# Various:\n" ;
-    print NEWCFG "convert_options = \"". (join_convert_options (@convert_options)) ."\"\n" ;
-    print NEWCFG "scaled_convert_options = \"". (join_convert_options (@scaled_convert_options)) ."\"\n" ;
-    print NEWCFG "thumbnail_convert_options = \"". (join_convert_options (@thumbnail_convert_options)) ."\"\n" ;
+    print NEWCFG "convert_options = \"". (join_convert_options (@{$opts->{convert_options}})) ."\"\n" ;
+    print NEWCFG "scaled_convert_options = \"". (join_convert_options (@{$opts->{scaled_convert_options}})) ."\"\n" ;
+    print NEWCFG "thumbnail_convert_options = \"". (join_convert_options (@{$opts->{thumbnail_convert_options}})) ."\"\n" ;
     print NEWCFG "force_image_regeneration = $force_image_regeneration\n" ;
-    print NEWCFG "www_access_rights = $www_access_rights\n" ;
-    print NEWCFG "www_extension = \"$www_extension\"\n" ;
+    print NEWCFG "www_access_rights = $opts->{www_access_rights}\n" ;
+    print NEWCFG "www_extension = \"$opts->{www_extension}\"\n" ;
     print NEWCFG "\n" ;
 
     close NEWCFG ;
