@@ -67,18 +67,19 @@ Getopt::Long::Configure('passthrough') ;
 GetOptions(
 	'clean'		=> \$clean_asked,
 	'cleanall'	=> \$cleanall_asked,
-	'd=s'		=> \$destination_dir,
-	'f'		=> \$force_image_regeneration,
 	'gc'		=> \$generate_captions,
-	'gencfg=s'	=> \$generate_config,
 	'gt:s'		=> sub {
 				shift ; my $value = shift ;
 				$value = "local" if !$value ;
 				$give_templates = $value ;
 				},
 	'h|help'	=> \$help_asked,
-	'R'		=> \$make_recursive,
 	'v|version'	=> \$version_asked,
+
+	'd=s'		=> \$destination_dir,
+	'f'		=> \$force_image_regeneration,
+	'gencfg=s'	=> \$generate_config,
+	'R'		=> \$make_recursive,
 	) ;
 
 # restore default behavior: process all options and warn on error
@@ -302,40 +303,44 @@ my $usage = << "END_OF_USAGE" ;
 This is llgal $version the Loulous HTML image slide show generator.
 Syntax:  llgal [-option -option ...]
 Behavior Options:
+  llgal generates a gallery, except with one of the following options:
     --clean            remove all generated files
     --cleanall         remove all generated and user modified files
-    -d <dir>           operate on files in directory <dir> ($destination_dir)
-    -f                 force thumbnail and scaled slide regeneration
     --gc               generate or update the captions file
-    --gencfg <file>    generate the configuration file <file>
     --gt [<dir>]       give templates to the directory <dir>
     -h, --help         displays this brief help
-    -R                 run recursively in subdirectories
     -v, --version      show version
+Additional Behavior Options:
+  The behavior might also be modified with the following options,
+  either when generating a gallery or not:
+    --config <s>       pass an additional configuration files
+    -d <dir>           operate on files in directory <dir> ($destination_dir)
+    -f                 force thumbnail and scaled slide regeneration
+    --gencfg <file>    generate the configuration file <file>
+    --option <s>       pass an additional option as in configuration files
+    -R                 run recursively in subdirectories
 Layout Options:
     -A                 add all non-image non-video files to the list of slides
     -a                 write image sizes under thumbnails on index page
     --ad               like -a, but write only the image dimensions
     --as               like -a, but write only the file size (in kbytes)
     --asu <s>          change file size unit ($opts->{show_size_unit})
-    --bigy <n>         like -y, use it if you have very large image files
     --bigxy <n>        like --xy, use it if you have very large image files
-    --cf               use file names as captions
+    --bigy <n>         like -y, use it if you have very large image files
     --cc [<s>]         use image comments as captions
+    --cf               use file names as captions
     --ct               use image timestamps as captions
     --ctf <s>          timestamp format in captions (strftime format)
     --con <s>          options to pass to convert (e.g. -quality N)
-    --config <s>       pass an additional configuration files
     --exclude <s>      exclude matching files
     -i <file>          name of the main thumbnail index file ($opts->{index_filename})
     --include <s>      include matching files that were excluded
     -k                 use the image captions for the HTML slide titles
+    -L                 list links outside of the table
     --li               use images for links in slides
     --lt               use thumbnail preview for links in slides
-    -L                 list links outside of the table
     -n                 use image file names for the HTML slide files
     --nc               omit the image count from the captions
-    --option <s>       pass an additional option as in configuration files
     -p <n>             cellpadding value of thumbnail index tables ($opts->{index_cellpadding})
     --php              use php extension for generated webpages
     -r                 omit the film effect altogether
@@ -352,7 +357,7 @@ Layout Options:
     --wx <n>           rows in thumbnail index are at most <n> pixels wide
     --xy <n>           scale thumbs to <n> pixels in their longer dimension
     -y <n>             scale all thumbnails to the same height <n> ($opts->{thumbnail_height_max})
-  default values are given in parentheses (where applicable).
+  Default values are given in parentheses (where applicable).
 Author:  Brice Goglin
 Homepage:  http://bgoglin.free.fr/llgal
 Report bugs to:  <llgal-devel AT gna.org>
@@ -607,8 +612,8 @@ GetOptions(
 	'ad'		=> \$opts->{show_dimensions},
 	'as'		=> \$opts->{show_size},
 	'asu=s'		=> \$opts->{show_size_unit},
-	'bigy=i'	=> \$opts->{slide_height_max},
 	'bigxy=i'	=> sub { shift ; $opts->{slide_width_max} = $opts->{slide_height_max} = shift ; },
+	'bigy=i'	=> \$opts->{slide_height_max},
 	'cc:s'		=> sub {
 				shift ; my $value = shift ;
 				if ($value eq "") { $opts->{make_caption_from_image_comment} = "std,exif" ; }
