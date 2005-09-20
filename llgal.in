@@ -300,7 +300,7 @@ my $opts = {
 # Create usage now to use defaults values
 
 my $usage = << "END_OF_USAGE" ;
-This is llgal $version the Loulous HTML image slide show generator.
+This is llgal $version, the image slide show generator.
 Syntax:  llgal [-option -option ...]
 Behavior Options:
   llgal generates a gallery, except with one of the following options:
@@ -359,8 +359,8 @@ Layout Options:
     -y <n>             scale all thumbnails to the same height <n> ($opts->{thumbnail_height_max})
   Default values are given in parentheses (where applicable).
 Author:  Brice Goglin
-Homepage:  http://bgoglin.free.fr/llgal
-Report bugs to:  <llgal-devel AT gna.org>
+Homepage:  http://home.gna.org/llgal
+Report bugs to:  <llgal-users AT gna.org>
 END_OF_USAGE
 
 # process help and version now

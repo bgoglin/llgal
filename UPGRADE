@@ -63,4 +63,4 @@ move .thumb_* and .slide_* files to .llgal/thumb_* and scaled_*
 so that llgal uses them.
 
 
-If you have any question, contact <llgal-devel AT gna.org>.
+If you have any question, contact <llgal-users AT gna.org>.

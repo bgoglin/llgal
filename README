@@ -2,7 +2,7 @@ llgal installation instructions
 ===============================
 
 You don't care about this if you use Debian or Gentoo prepackaged
-versions that are available on http://bgoglin.free.fr/llgal
+versions that are available on http://bgoglin.free.fr/llgal.
 
 Run 'make' followed by 'make install' as root.
 
@@ -41,5 +41,5 @@ llgal currently works with versions 1.16/2.992/1.35.
 
 
 If you experience any problem,
-please see http://bgoglin.free.fr/llgal
-or report to <llgal-devel AT gna.org>.
+please see http://home.gna.org/llgal
+or report to <llgal-users AT gna.org>.
