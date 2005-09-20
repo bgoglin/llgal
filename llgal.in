@@ -2552,155 +2552,14 @@ sub make_www_rights {
 }
 
 #######################################################################
-# Process subdirectories
-
-sub call_recursive {
-    my $gallery = shift ;
-    my @entries = @{$gallery->{entries}} ;
-    my @listed_entries = @{$gallery->{listed_entries}} ;
-    
-    for (my $i = 0; $i < @entries; $i++) {
-	my $entry = @entries[$i] ;
-	next if $entry->{type} != $TYPE_DIR ;
-	my $dir = $entry->{filename} ;
-	my $revdir = back_path $dir ;
-
-	# prev and next urls
-	my $prev = $entries[$i-1] ;
-	my @prev_opts = () ;
-	my $next = $entries[$i==@entries-1 ? 0 : $i+1] ;
-	my @next_opts = () ;
-
-	if ($opts->{link_subgalleries}) {
-	    if ($prev->{type} == $TYPE_DIR) {
-		@prev_opts = ("--prev-gal", "$revdir/$prev->{url}") ;
-	    }
-	    if ($next->{type} == $TYPE_DIR) {
-	        @next_opts = ("--next-gal", "$revdir/$next->{url}") ;
-	    }
-	}
-
-	print "\n" ;
-	indprint "Entering subdirectory '$dir'...\n" ;
-	system ( $0, @llgal_options, "-d", "$destination_dir$dir",
-		 "--parent-gal", @prev_opts, @next_opts,
-		 "--indent", $opts->{indent}."  " ) ;
-	die "Failed to call $0 for subdirectory $destination_dir$dir ($!).\n"
-	    if $? == -1 ;
-	immediate_warning "$0 failed for subdirectory $destination_dir$dir."
-	    if $? ;
-	indprint "Leaving subdirectory '$dir'.\n" ;
-    }
-}
-
-#######################################################################
-# main code
-
-check_destination ;
-
-foreach my $conf (@generic_config_files) {
-    parse_generic_config_file $conf ;
-}
-parse_generic_config_file "${destination_dir}$destination_config_file" ;
-foreach my $conf (@additional_config_files) {
-    parse_additional_config_file $conf ;
-}
-
-# special behaviors
-
-if ($clean_asked) {
-    indprint "Removing all non-modified llgal files...\n" ;
-    recursive_clean_files 0 ;
-    exit 0 ;
-}
-
-if ($cleanall_asked) {
-    indprint "Removing all llgal files...\n" ;
-    recursive_clean_files 1 ;
-    exit 0 ;
-}
-
-if ($give_templates) {
-    my $destdir = $give_templates ;
-    $destdir = $opts->{local_llgal_dir}
-	if $destdir eq "local" ;
-    $destdir = $opts->{user_share_dir}
-	if $destdir eq "user" ;
-    give_templates $destdir ;
-    indprint "You may now edit templates in $destdir and generate new galleries.\n" ;
-    indprint "You may also remove any template that you do not want to modify.\n" ;
-    exit 0 ;
-}
-
-# main gallery creation
-
-my $root_gallery = init_gallery () ;
-
-if ($generate_captions) {
-    generate_captions_file $root_gallery ;
-    indprint "Now edit the $destination_dir$opts->{local_llgal_dir}/$opts->{captions_filename} file to your liking and run llgal\n" ;
-
-    if ($make_recursive) {
-	my @dir_entries = grep { $_->{type} == $TYPE_DIR } @{$root_gallery->{entries}} ;
-	print "\n"
-	    if @dir_entries ;
-	foreach my $entry (@dir_entries) {
-	    my $dir = $entry->{filename} ;
-	    indprint "Entering subdirectory '$dir'...\n" ;
-	    system ( $0, @llgal_options, "-d", "$destination_dir$dir", "--indent", "  ".$opts->{indent} ) ;
-	    die "Failed to call $0 for subdirectory $destination_dir$dir ($!).\n"
-		if $? == -1 ;
-	    immediate_warning "$0 failed for subdirectory $destination_dir$dir."
-		if $? ;
-	    indprint "Leaving subdirectory '$dir'.\n" ;
-	    print "\n" ;
-	}
-    }
-    exit 0 ;
-}
-
-if (-e "$destination_dir$opts->{local_llgal_dir}/$opts->{captions_filename}") {
-    read_captions_file $root_gallery ;
-    fill_entries $root_gallery ;
-    indprint "Found ". (scalar @{$root_gallery->{entries}}) ." files in the captions file.\n" ;
-} else {
-    # generate the gallery without captions file
-    get_entries_from_directory $root_gallery ;
-    fill_entries $root_gallery ;
-    indprint "Found ". (scalar @{$root_gallery->{entries}}) ." files in $destination_string\n" ;
-}
-
-extract_listed_entries $root_gallery
-    if $opts->{list_links} ;
-
-finalize_entries $root_gallery ;
-
-add_headers_footers $root_gallery ;
-
-if ($opts->{make_no_slides}) {
-    indprint "Linking thumbnails directly to image files...  Making no html slides.\n" ;
-} else {
-    generate_slides $root_gallery ;
-}
-
-generate_index $root_gallery ;
-
-get_files ;
-
-make_www_rights $root_gallery
-    if $opts->{www_access_rights} ;
-
-call_recursive $root_gallery
-    if $make_recursive ;
-
-#######################################################################
 # If --gencfg was invoked, generate a configuration file
 
-if (defined $generate_config) {
+sub generate_config {
+    my $file = shift ;
     die "Cannot generate $generate_config which already exists."
-	if -e "$generate_config" ;
-    open NEWCFG, ">$generate_config"
-	or die "Cannot open $generate_config configuration file ($!).\n" ;
+	if -e "$file" ;
+    open NEWCFG, ">$file"
+	or die "Cannot open $file ($!).\n" ;
 
     print NEWCFG "# This is a llgal configuration file.\n" ;
     print NEWCFG "# It was automatically generated.\n" ;
@@ -2817,3 +2676,148 @@ if (defined $generate_config) {
 
     close NEWCFG ;
 }
+
+#######################################################################
+# Process subdirectories
+
+sub call_recursive {
+    my $gallery = shift ;
+    my @entries = @{$gallery->{entries}} ;
+    my @listed_entries = @{$gallery->{listed_entries}} ;
+    
+    for (my $i = 0; $i < @entries; $i++) {
+	my $entry = @entries[$i] ;
+	next if $entry->{type} != $TYPE_DIR ;
+	my $dir = $entry->{filename} ;
+	my $revdir = back_path $dir ;
+
+	# prev and next urls
+	my $prev = $entries[$i-1] ;
+	my @prev_opts = () ;
+	my $next = $entries[$i==@entries-1 ? 0 : $i+1] ;
+	my @next_opts = () ;
+
+	if ($opts->{link_subgalleries}) {
+	    if ($prev->{type} == $TYPE_DIR) {
+		@prev_opts = ("--prev-gal", "$revdir/$prev->{url}") ;
+	    }
+	    if ($next->{type} == $TYPE_DIR) {
+	        @next_opts = ("--next-gal", "$revdir/$next->{url}") ;
+	    }
+	}
+
+	print "\n" ;
+	indprint "Entering subdirectory '$dir'...\n" ;
+	system ( $0, @llgal_options, "-d", "$destination_dir$dir",
+		 "--parent-gal", @prev_opts, @next_opts,
+		 "--indent", $opts->{indent}."  " ) ;
+	die "Failed to call $0 for subdirectory $destination_dir$dir ($!).\n"
+	    if $? == -1 ;
+	immediate_warning "$0 failed for subdirectory $destination_dir$dir."
+	    if $? ;
+	indprint "Leaving subdirectory '$dir'.\n" ;
+    }
+}
+
+#######################################################################
+# Main code
+
+check_destination ;
+
+foreach my $conf (@generic_config_files) {
+    parse_generic_config_file $conf ;
+}
+parse_generic_config_file "${destination_dir}$destination_config_file" ;
+foreach my $conf (@additional_config_files) {
+    parse_additional_config_file $conf ;
+}
+
+# special behaviors
+
+if ($clean_asked) {
+    indprint "Removing all non-modified llgal files...\n" ;
+    recursive_clean_files 0 ;
+    exit 0 ;
+}
+
+if ($cleanall_asked) {
+    indprint "Removing all llgal files...\n" ;
+    recursive_clean_files 1 ;
+    exit 0 ;
+}
+
+if ($give_templates) {
+    my $destdir = $give_templates ;
+    $destdir = $opts->{local_llgal_dir}
+	if $destdir eq "local" ;
+    $destdir = $opts->{user_share_dir}
+	if $destdir eq "user" ;
+    give_templates $destdir ;
+    indprint "You may now edit templates in $destdir and generate new galleries.\n" ;
+    indprint "You may also remove any template that you do not want to modify.\n" ;
+    exit 0 ;
+}
+
+# main gallery creation
+
+my $root_gallery = init_gallery () ;
+
+if ($generate_captions) {
+    generate_captions_file $root_gallery ;
+    indprint "Now edit the $destination_dir$opts->{local_llgal_dir}/$opts->{captions_filename} file to your liking and run llgal\n" ;
+
+    if ($make_recursive) {
+	my @dir_entries = grep { $_->{type} == $TYPE_DIR } @{$root_gallery->{entries}} ;
+	print "\n"
+	    if @dir_entries ;
+	foreach my $entry (@dir_entries) {
+	    my $dir = $entry->{filename} ;
+	    indprint "Entering subdirectory '$dir'...\n" ;
+	    system ( $0, @llgal_options, "-d", "$destination_dir$dir", "--indent", "  ".$opts->{indent} ) ;
+	    die "Failed to call $0 for subdirectory $destination_dir$dir ($!).\n"
+		if $? == -1 ;
+	    immediate_warning "$0 failed for subdirectory $destination_dir$dir."
+		if $? ;
+	    indprint "Leaving subdirectory '$dir'.\n" ;
+	    print "\n" ;
+	}
+    }
+    exit 0 ;
+}
+
+if (-e "$destination_dir$opts->{local_llgal_dir}/$opts->{captions_filename}") {
+    read_captions_file $root_gallery ;
+    fill_entries $root_gallery ;
+    indprint "Found ". (scalar @{$root_gallery->{entries}}) ." files in the captions file.\n" ;
+} else {
+    # generate the gallery without captions file
+    get_entries_from_directory $root_gallery ;
+    fill_entries $root_gallery ;
+    indprint "Found ". (scalar @{$root_gallery->{entries}}) ." files in $destination_string\n" ;
+}
+
+extract_listed_entries $root_gallery
+    if $opts->{list_links} ;
+
+finalize_entries $root_gallery ;
+
+add_headers_footers $root_gallery ;
+
+if ($opts->{make_no_slides}) {
+    indprint "Linking thumbnails directly to image files...  Making no html slides.\n" ;
+} else {
+    generate_slides $root_gallery ;
+}
+
+generate_index $root_gallery ;
+
+get_files ;
+
+make_www_rights $root_gallery
+    if $opts->{www_access_rights} ;
+
+call_recursive $root_gallery
+    if $make_recursive ;
+
+generate_config $generate_config
+    if defined $generate_config ;
