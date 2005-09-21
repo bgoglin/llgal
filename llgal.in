@@ -351,7 +351,7 @@ Layout Options:
     --sort <s>         sort files with criteria <s>
     -t <n>             height of the film tiled image ($opts->{tile_height})
     --templates <dir>  use templates in <dir>
-    --title <s>        string to substitute for TITLE in index template
+    --title <s>        title of the index of the gallery ($opts->{index_title})
     -u                 write captions under thumbnails on index page
     -w <n>             rows in thumbnail index are at most <n> images wide ($opts->{thumbnails_per_row})
     --www              make all llgal files world-readable
