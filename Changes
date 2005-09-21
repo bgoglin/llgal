@@ -5,6 +5,7 @@
   extension configuration.
   The -i option (index_filename) thus now takes a filename without
   extension.
+* -R now implies -S (suggested by Brian Donlan's Debian Bug #329168):
 * When called with -d, llgal only read the llgalrc configuration file
   in the destination directory since the local one may be easily added
   through --config.

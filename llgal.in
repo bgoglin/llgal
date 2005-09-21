@@ -1722,7 +1722,7 @@ sub get_entries_from_directory {
 	my $filename = @filenames[$i] ;
 	if (-d "$destination_dir$filename") {
 	    # directory
-	    if ($opts->{add_subdirs}) {
+	    if ($opts->{add_subdirs} or $make_recursive) {
 		my $entry = create_file_entry ($TYPE_DIR, $filename, undef, undef) ;
 		push @entries, $entry
 		    if defined $entry ;

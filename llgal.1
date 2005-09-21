@@ -180,16 +180,19 @@ may be used several times on the same command line.
 Enable recursive mode.
 .B llgal
 will be run inside subdirectories.
-The list of subdirectories has to be either detected by
-.B -S
-(which is not implied by
-.B -R
-) or defined in the captions file with
-.B DIR:
-entries.
 This option might be used either to generate galleries
 in all subdirectories, or their captions files, or to
 clean recursively, etc.
+
+When generating a gallery, this option implies
+.B -S
+that means
+.B llgal
+will use all existing subdirectories in no captions
+file is defined.
+If a captions file is defined, only the
+.BI DIR:
+entries will be entered recursively.
 
 Note that recursive cleaning (
 .BI -R
