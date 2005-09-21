@@ -319,8 +319,12 @@ Additional Behavior Options:
     --gencfg <file>    generate the configuration file <file>
     --option <s>       pass an additional option as in configuration files
     -R                 run recursively in subdirectories
-Layout Options:
+Selecting files:
     -A                 add all non-image non-video files to the list of slides
+    --exclude <s>      exclude matching files
+    --include <s>      include matching files that were excluded
+    -S                 add subdirectories to the list of slides
+Layout Options:
     -a                 write image sizes under thumbnails on index page
     --ad               like -a, but write only the image dimensions
     --as               like -a, but write only the file size (in kbytes)
@@ -332,9 +336,7 @@ Layout Options:
     --ct               use image timestamps as captions
     --ctf <s>          timestamp format in captions (strftime format)
     --con <s>          options to pass to convert (e.g. -quality N)
-    --exclude <s>      exclude matching files
     -i <file>          name of the main thumbnail index file ($opts->{index_filename})
-    --include <s>      include matching files that were excluded
     -k                 use the image captions for the HTML slide titles
     -L                 list links outside of the table
     --li               use images for links in slides
@@ -345,7 +347,6 @@ Layout Options:
     --php              use php extension for generated webpages
     -r                 omit the film effect altogether
     --Rl               add links between subgalleries
-    -S                 add subdirectories to the list of slides
     -s                 make no HTML slides, link thumbnails to images
     --sort <s>         sort files with criteria <s>
     -t <n>             height of the film tiled image ($opts->{tile_height})

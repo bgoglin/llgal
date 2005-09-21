@@ -45,6 +45,28 @@ several fields (See
 .SM
 .B TEMPLATES
 ).
+The layout might be configured through the list of options
+that are given in
+.SM
+.B LAYOUT \fR.
+
+.IR llgal
+uses all images and videos it finds in the current directory.
+See
+.SM
+.B SELECTING FILES
+to include directories or other files and excludes some filenames.
+
+Note that all command line options (except those from
+.SM
+.B BEHAVIOR OPTIONS
+), and even more, might be stored in a configuration file
+to help generation of multiple galleries with the same
+layout.
+See
+.SM
+.B CONFIGURATION
+for details.
 
 
 .SH BEHAVIOR OPTIONS
@@ -209,8 +231,7 @@ check whether a subdirectory is in the captions file.
 All not-dot-begining subdirectories will be cleaned.
 
 
-
-.SH LAYOUT OPTIONS
+.SH SELECTING FILES
 
 .TP
 .B -A
@@ -221,6 +242,36 @@ reverted as simple files instead.
 See
 .B -S
 for details about adding slides for subdirectories.
+
+.TP
+.BI --exclude " <s>"
+Exclude files whose name matches \fBs\fR.
+
+.TP
+.BI --include " <s>"
+Include files whose name matches \fBs\fR and where previously excluded.
+
+.TP
+.BI -S
+Each subdirectory will get a dedicated slide.
+If a captions file exists, only the subdirectories that
+it defines will be processed.
+If no captions file exists,
+.B llgal
+will process all subdirectories but those whose name begins
+with a dot.
+
+Contrary to
+.B -R
+this option will not make
+.B llgal
+run recursively in subdirectories.
+.B -S
+does only define the list of subdirectories that appear
+in the current gallery.
+
+
+.SH LAYOUT OPTIONS
 
 .TP
 .B -a
@@ -343,10 +394,6 @@ or go crazy with
 may be used several times on the same command line.
 
 .TP
-.BI --exclude " <s>"
-Exclude files whose name matches \fBs\fR.
-
-.TP
 .BI -i " <file>"
 Name of the main thumbnail index file.  The default is
 .IR index ,
@@ -358,10 +405,6 @@ and might be changed with
 or the
 .I www_extension
 configuration option.
-
-.TP
-.BI --include " <s>"
-Include files whose name matches \fBs\fR and where previously excluded.
 
 .TP
 .BI -k
@@ -456,25 +499,6 @@ index page background with the tile background-color option in the
 .TP
 .BI --Rl
 Add links between subgalleries.
-
-.TP
-.BI -S
-Each subdirectory will get a dedicated slide.
-If a captions file exists, only the subdirectories that
-it defines will be processed.
-If no captions file exists,
-.B llgal
-will process all subdirectories but those whose name begins
-with a dot.
-
-Contrary to
-.B -R
-this option will not make
-.B llgal
-run recursively in subdirectories.
-.B -S
-does only define the list of subdirectories that appear
-in the current gallery.
 
 .TP
 .B -s
