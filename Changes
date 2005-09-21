@@ -23,6 +23,8 @@
   'selecting files' sections.
 * Add TEMPLATES section in the manpage to document the replacement
   of fields when generating webpages from the templates.
+* Update all contact addresses and URLs since the project is
+  now hosted by Gna!.
 
 
 llgal (0.11.1)
