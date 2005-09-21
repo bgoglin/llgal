@@ -194,15 +194,18 @@ If a captions file is defined, only the
 .BI DIR:
 entries will be entered recursively.
 
-Note that recursive cleaning (
+Note that recursive behavior does only use the contents
+of the captions file to choose which subgalleries to
+enter when generating the gallery or the captions file.
+All other behaviors, including recursive cleaning (
 .BI -R
 used together with
 .BI --clean
 or
 .BI --cleanall
-) will
+), will
 .B not
-check that a subdirectory is in the captions file.
+check whether a subdirectory is in the captions file.
 All not-dot-begining subdirectories will be cleaned.
 
 
