@@ -62,7 +62,7 @@
 # local_llgal_dir = ".llgal"
 
 # Name of the generated index file [-i <s>]
-# index_filename = "index.html"
+# index_filename = "index"
 
 # Prefix of generated HTML slide filenames
 # slide_filenameprefix = ""
@@ -191,6 +191,12 @@
 # Change text in links to parent directory.
 # parent_gallery_link_text = "Back to parent gallery"
 
+# Change text in links to previous gallery.
+# prev_gallery_link_text = "Previous gallery "
+
+# Change text in links to next directory.
+# next_gallery_link_text = "Next gallery "
+
 # Label of the link from a slide to the index
 # index_link_text = "Index"
 
@@ -280,11 +286,13 @@
 # Add links to the parent directory [--parent-gal]
 # parent_gallery_link = 0
 
-# Add links to the previous subgalleries [--prev-gal <url>]
-# prev_gallery_link = ""
+# Add links to the previous subgallery [--prev-gal <url>]
+# prev_gallery_link = 0
+# prev_gallery_link_target = ""
 
-# Add links to the next subgalleries [--next-gal <url>]
-# next_gallery_link = ""
+# Add links to the next subgallery [--next-gal <url>]
+# next_gallery_link = 0
+# next_gallery_link_target = ""
 
 ##### Various #####
 
@@ -297,8 +305,14 @@
 # scaled_convert_options = ""
 # thumbnail_convert_options = ""
 
+# Force regeneration of thumbnails and scaled images [-f].
+# force_image_regeneration = 0
+
 # Give access rights for www access [--www]
 # www_access_rights = 0
+
+# Extension of generate webpages [--php]
+# www_extension = "www"
 
 # Additional configuration file [--config <s>]
 # This option may be used multiple times.
