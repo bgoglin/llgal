@@ -1,11 +1,11 @@
-llgal (0.11.1-1) unstable; urgency=low
+llgal (0.11.2-1) unstable; urgency=low
 
   * New upstream release.
   * Add preinst/postinst to move /etc/llgalrc to /etc/llgal/llgalrc
     without losing user changes.
   * Update rules according to new upstream Makefile.
 
- -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Wed, 14 Sep 2005 09:47:09 +0200
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Thu, 22 Sep 2005 10:06:07 +0200
 
 llgal (0.11-1) unstable; urgency=low
 
