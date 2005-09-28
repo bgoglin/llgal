@@ -1,147 +1,147 @@
 
-* Add a VERSION file.
+  * Add a VERSION file.
 
 
 llgal (0.11.2)
 
-* Add --php to generate webpages with the php extension instead of html
-  (requested by David Baelde). Templates are still named with the html
-  extensions. The www_extension configuration option also enables
-  extension configuration.
-  The -i option (index_filename) thus now takes a filename without
-  extension.
-* -R now implies -S (suggested by Brian Donlan's Debian Bug #329168):
-* When called with -d, llgal only reads the llgalrc configuration file
-  in the destination directory since the local one may be easily added
-  through --config.
-* Add recursive --gt (give templates to all subdirectories).
-* Slides without file now have they slide_filename numbered with the
-  number of the slide for make_slide_filename_from_filename (-n)
-  instead of starting from 1.
-* Add prev_gallery_link_target to split enabling and target. Add missing
-  documentation for prev/next_gallery_link[_text]/link_subgalleries and
-  fix option processing.
-* Add force_image_regeneration configuration option for -f.
-* Rework the internal code to easy multiple gallery generation
-  in the same process.
-* Reorganize usage and manpage with an 'additional behavior' and
-  'selecting files' sections.
-* Add TEMPLATES section in the manpage to document the replacement
-  of fields when generating webpages from the templates.
-* Update all contact addresses and URLs since the project is
-  now hosted by Gna!.
+  * Add --php to generate webpages with the php extension instead of html
+    (requested by David Baelde). Templates are still named with the html
+    extensions. The www_extension configuration option also enables
+    extension configuration.
+    The -i option (index_filename) thus now takes a filename without
+    extension.
+  * -R now implies -S (suggested by Brian Donlan's Debian Bug #329168):
+  * When called with -d, llgal only reads the llgalrc configuration file
+    in the destination directory since the local one may be easily added
+    through --config.
+  * Add recursive --gt (give templates to all subdirectories).
+  * Slides without file now have they slide_filename numbered with the
+    number of the slide for make_slide_filename_from_filename (-n)
+    instead of starting from 1.
+  * Add prev_gallery_link_target to split enabling and target. Add missing
+    documentation for prev/next_gallery_link[_text]/link_subgalleries and
+    fix option processing.
+  * Add force_image_regeneration configuration option for -f.
+  * Rework the internal code to easy multiple gallery generation
+    in the same process.
+  * Reorganize usage and manpage with an 'additional behavior' and
+    'selecting files' sections.
+  * Add TEMPLATES section in the manpage to document the replacement
+    of fields when generating webpages from the templates.
+  * Update all contact addresses and URLs since the project is
+    now hosted by Gna!.
 
  -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Thu, 22 Sep 2005 10:00:00 +0200
 
 llgal (0.11.1)
 
-* Rename /etc/llgalrc to /etc/llgal/llgalrc. Also read ~/.llgal/llgalrc
-  and .llgal/llgalrc.
-  + Warn if an old file is found, and skip it.
-* Add --li and --lt options to replace link labels in slides with
-  image (requested by Cyrill Helg):
-  + index.png, prev.png and next.png are added to show arrows for --li.
-  + A thumbnail is shown to preview prev/next slide (if IMG) for --lt.
-  + slidetemplate is a little bit modified.
-    - The Index link is now _betwee_ Prev and Next.
-  + The css template is a little bit extended.
-  + Add configurable text that is shown when the mouse pointer
-    is over these links.
-* Allow to change the label of links to index/prev/next in slides
-  with prev/next_slide/index_link_text.
-* Add --Rl to add links between subgalleries.
-  + Add --next/prev-gal internal options to set links to prev/next
-    galleries.
-* Write the title and parent/prev/next gallery in the captions file when
-  generating. Update them when appending (without removing the previous
-  definition if it exists).
-  + Add PARENT/PREV/NEXT captions line for gallery links.
-* Rename parent_link* to parent_gallery_link*. Replace --parent with
-  --parent-gal and undocument in --help (keep in manpage).
-* Rename _linktext options to _link_text.
-* Remove no_default_link_text since link text values might be
-  modified at runtime, and also after captions generation.
-* Rename MVI/FIL/DIR_default_link_text to MVI/FIL/DIR_link_text.
-* Remove --sp and --tp command line options, keeping their configuration
-  options (scaled_image_filenameprefix and thumbnail_image_filenameprefix).
-* One more reorganization of options in llgalrc and generated config files.
-  Hope this one will be fine.
-* Fix compilation and installation when DESTDIR is overriden.
-* Fix and cleanup documentation and Makefile.
+  * Rename /etc/llgalrc to /etc/llgal/llgalrc. Also read ~/.llgal/llgalrc
+    and .llgal/llgalrc.
+    + Warn if an old file is found, and skip it.
+  * Add --li and --lt options to replace link labels in slides with
+    image (requested by Cyrill Helg):
+    + index.png, prev.png and next.png are added to show arrows for --li.
+    + A thumbnail is shown to preview prev/next slide (if IMG) for --lt.
+    + slidetemplate is a little bit modified.
+      - The Index link is now _betwee_ Prev and Next.
+    + The css template is a little bit extended.
+    + Add configurable text that is shown when the mouse pointer
+      is over these links.
+  * Allow to change the label of links to index/prev/next in slides
+    with prev/next_slide/index_link_text.
+  * Add --Rl to add links between subgalleries.
+    + Add --next/prev-gal internal options to set links to prev/next
+      galleries.
+  * Write the title and parent/prev/next gallery in the captions file when
+    generating. Update them when appending (without removing the previous
+    definition if it exists).
+    + Add PARENT/PREV/NEXT captions line for gallery links.
+  * Rename parent_link* to parent_gallery_link*. Replace --parent with
+    --parent-gal and undocument in --help (keep in manpage).
+  * Rename _linktext options to _link_text.
+  * Remove no_default_link_text since link text values might be
+    modified at runtime, and also after captions generation.
+  * Rename MVI/FIL/DIR_default_link_text to MVI/FIL/DIR_link_text.
+  * Remove --sp and --tp command line options, keeping their configuration
+    options (scaled_image_filenameprefix and thumbnail_image_filenameprefix).
+  * One more reorganization of options in llgalrc and generated config files.
+    Hope this one will be fine.
+  * Fix compilation and installation when DESTDIR is overriden.
+  * Fix and cleanup documentation and Makefile.
 
  -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Wed, 14 Sep 2005 09:43:55 +0200
 
 llgal (0.11)
 
-* The local llgal directory is now .llgal instead of .llgal.files.
-  + A warning is shown if .llgal.files exists.
-* Add -L and list_links to list links after the gallery index instead of
-  creating slides and thumbnails (requested by David Baelde).
-* All links in the index directly open the target instead of the slide,
-  not only MVI and FIL (requested by Samuel Thibault).
-* The captions file is now automatically used if it exists
-  (-c option got removed).
-* Improved usage of image comments for captions:
-  + use JFIF/GIF comment by default
-    (closes Wolfram Quester's Debian bug #324478).
-  + support array of strings in JFIF comment.
-  + remove \000 in JFIF comment.
-  + make_caption_from_image_comment is now a string option of comma
-    separated fields:
-    - std and exif are supported.
-    - each type is tried until one returns a non-empty value.
-    - basic types maybe combined with a plus to concat their values.
-  + update --cc option behavior:
-    - no argument means default (std before exif).
-    - 0 means no caption from comment.
-    - any other string defines make_caption_from_image_comment.
-* Cleanup title of image, alternatives, ...
-  + Add over_scaled/thumbnail_text configuration options to change texts
-    that are shown when the mouse pointer is over images.
-    - Add "Click to enlarge" default prefix for thumbnails.
-  + Add alt_scaled/thumbnail/full_text configuration options to change
-    alternatives prefix, and add defaults.
-  + Show dimensions and filesize in alt and title.
-  + Add title to links in the index and in slides.
-  + Remove colon between image title prefix and image.
-  + Use same basis for image alternative and title.
-  + Don't use basename anymore, always use the whole filename instead.
-  + When possible, the HTML title parameter is in href instead of img.
-* Cleanup location and copying of special llgal files
-  (requested by Loïs Taulelle) :
-  + index/slidetemplate.html are not copied to .llgal anymore.
-  + The user might put a special revision of index/slidetemplate.html
-    in .llgal, llgal will use it.
-  + Add --gt option to copy templates in the local, user or any
-    other template directory.
-  + Add --templates option (add template_dir configuration option)
-    to add a custom template directory.
-* Move several text configuration options to a common Text section in
-  llgalrc and in the manpage.
-  + Add a LANGUAGE section in the manpage for changing text options.
-* Add iname and size sort options, add rev prefix to reverse the order.
-* Remove destination_dir configuration option.
-* caption_removal_line config option is now captions_removal_line.
-* Warning if it seems llgal is running inside .llgal.
-* Add all default values of configuration options in the manpage.
-* Add captions.header file which contains what's inserted at the begining of
-  generated captions files.
-* Allow empty gallery.
-* Spaces are now supported in convert options.
-* Check for -h or -v earlier.
-* Add .tif[f] and .mov to default image and movie extensions
-  (requested by Cyrill Helg).
-* Don't use file operators to check file permissions
-  (closes Marcus Better's Debian bug #325171).
-* Remove "in "at the end of DIR_default_linktext.
-* Fix completely broken -R processing (reported by Cyrill Helg).
-* Fix chmod'ing for --www.
-* Fix bogus output of configuration file for MVI/FIL/DIR_default_linktext
-  and no_default_linktext.
-* Fix string config option that might be empty or not.
-* Fix bogus parsing of additional_configuration_file option.
-* Update contact address to gna.org and add it to README.
-* Lots of cleanups and typos.
+  * The local llgal directory is now .llgal instead of .llgal.files.
+    + A warning is shown if .llgal.files exists.
+  * Add -L and list_links to list links after the gallery index instead of
+    creating slides and thumbnails (requested by David Baelde).
+  * All links in the index directly open the target instead of the slide,
+    not only MVI and FIL (requested by Samuel Thibault).
+  * The captions file is now automatically used if it exists
+    (-c option got removed).
+  * Improved usage of image comments for captions:
+    + use JFIF/GIF comment by default
+      (closes Wolfram Quester's Debian bug #324478).
+    + support array of strings in JFIF comment.
+    + remove \000 in JFIF comment.
+    + make_caption_from_image_comment is now a string option of comma
+      separated fields:
+      - std and exif are supported.
+      - each type is tried until one returns a non-empty value.
+      - basic types maybe combined with a plus to concat their values.
+    + update --cc option behavior:
+      - no argument means default (std before exif).
+      - 0 means no caption from comment.
+      - any other string defines make_caption_from_image_comment.
+  * Cleanup title of image, alternatives, ...
+    + Add over_scaled/thumbnail_text configuration options to change texts
+      that are shown when the mouse pointer is over images.
+      - Add "Click to enlarge" default prefix for thumbnails.
+    + Add alt_scaled/thumbnail/full_text configuration options to change
+      alternatives prefix, and add defaults.
+    + Show dimensions and filesize in alt and title.
+    + Add title to links in the index and in slides.
+    + Remove colon between image title prefix and image.
+    + Use same basis for image alternative and title.
+    + Don't use basename anymore, always use the whole filename instead.
+    + When possible, the HTML title parameter is in href instead of img.
+  * Cleanup location and copying of special llgal files
+    (requested by Loïs Taulelle) :
+    + index/slidetemplate.html are not copied to .llgal anymore.
+    + The user might put a special revision of index/slidetemplate.html
+      in .llgal, llgal will use it.
+    + Add --gt option to copy templates in the local, user or any
+      other template directory.
+    + Add --templates option (add template_dir configuration option)
+      to add a custom template directory.
+  * Move several text configuration options to a common Text section in
+    llgalrc and in the manpage.
+    + Add a LANGUAGE section in the manpage for changing text options.
+  * Add iname and size sort options, add rev prefix to reverse the order.
+  * Remove destination_dir configuration option.
+  * caption_removal_line config option is now captions_removal_line.
+  * Warning if it seems llgal is running inside .llgal.
+  * Add all default values of configuration options in the manpage.
+  * Add captions.header file which contains what's inserted at the begining of
+    generated captions files.
+  * Allow empty gallery.
+  * Spaces are now supported in convert options.
+  * Check for -h or -v earlier.
+  * Add .tif[f] and .mov to default image and movie extensions
+    (requested by Cyrill Helg).
+  * Don't use file operators to check file permissions
+    (closes Marcus Better's Debian bug #325171).
+  * Remove "in "at the end of DIR_default_linktext.
+  * Fix completely broken -R processing (reported by Cyrill Helg).
+  * Fix chmod'ing for --www.
+  * Fix bogus output of configuration file for MVI/FIL/DIR_default_linktext
+    and no_default_linktext.
+  * Fix string config option that might be empty or not.
+  * Fix bogus parsing of additional_configuration_file option.
+  * Update contact address to gna.org and add it to README.
+  * Lots of cleanups and typos.
 
  -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Sat,  7 Sep 2005 23:30:55 +0200
 
