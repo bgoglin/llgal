@@ -1,5 +1,9 @@
 NAME	=	llgal
-VERSION	=	$(shell cat VERSION)
+ifeq ($(shell [ -d .svn ] && echo 1),1)
+	VERSION	=	$(shell cat VERSION)+svn
+else
+	VERSION	=	$(shell cat VERSION)
+endif
 
 .PHONY: llgal clean install uninstall tarball
 

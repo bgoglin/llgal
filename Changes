@@ -1,4 +1,5 @@
 
+  * When compiling from SVN, add a +svn suffix to the version.
   * Add a VERSION file.
 
 
