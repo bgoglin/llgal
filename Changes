@@ -1,4 +1,5 @@
 
+  * Fix percentage printing by showing both entry listing and preparing.
   * When compiling from SVN, add a +svn suffix to the version.
   * Add a VERSION file.
 

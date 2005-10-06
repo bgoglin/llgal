@@ -1627,6 +1627,10 @@ sub fill_entries {
     my @entries = @{$gallery->{entries}} ;
     my @final_entries = () ;
 
+    indprint "Preparing entries: " ;
+    init_percentage () ;
+
+    my $i = 0 ;
     for my $entry (@entries) {
 	my $type = $entry->{type} ;
 	my $final_entry ;
@@ -1637,7 +1641,11 @@ sub fill_entries {
 	}
 	push @final_entries, $final_entry
 	    if defined $final_entry ;
-    } 
+	print_percentage (($i++)+1, scalar @entries) ;
+    }
+    end_percentage () ;
+    show_warnings ;
+
     @{$gallery->{entries}} = @final_entries ;
 }
 
@@ -1716,7 +1724,7 @@ sub get_entries_from_directory {
 	die "Unknown sort criteria '$opts->{sort_criteria}'.\n" ;
     }
 
-    indprint "Preparing entries: " ;
+    indprint "Listing entries: " ;
     init_percentage () ;
 
     for(my $i = 0; $i < @filenames; $i++) {
