@@ -2,6 +2,11 @@
   * Fix missing update of sanity checks, numerical options processing,
     and various other options that were broken since previous release
     (reported by Hanus Adler in Debian Bug #337380).
+  * Do not parse behavior options at the begining since there's no more
+    any reason. Command line options are thus processed after all
+    configuration files. This makes -f work if a config file contains
+    force_image_regeneration = 0
+    (reported by Hanus Adler in Debian Bug #337380).
   * Fix percentage printing by showing both entry listing and preparing.
   * When compiling from SVN, add a +svn suffix to the version.
   * Add a VERSION file.
