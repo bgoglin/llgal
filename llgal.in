@@ -848,214 +848,212 @@ sub make_safe_url {
     return $safe ;
 }
 
+######################################################################
+# sanity check
+
+sub sanity_checks {
+    my $opts = shift ;
+
+    # cannot have --bigy/xy and -s
+    die "Please choose between --bigy/xy and -s\n"
+	if ($opts->{slide_height_max} or $opts->{slide_width_max}) && $opts->{make_no_slides} ;
+    
+    # check a few string that have to be non-empty
+    die "Please give a non-empty llgal share directory\n"
+	if $opts->{llgal_share_dir} eq "" ;
+    die "Please give a non-empty user share directory\n"
+	if $opts->{user_share_dir} eq "" ;
+    die "Please give a non-empty CSS filename\n"
+	if $opts->{css_filename} eq "" ;
+    die "Please give a non-empty film tile filename\n"
+	if $opts->{filmtile_filename} eq "" ;
+    die "Please give a non-empty index link image filename\n"
+	if $opts->{index_link_image_filename} eq "" ;
+    die "Please give a non-empty previous slide link image filename\n"
+	if $opts->{prev_slide_link_image_filename} eq "" ;
+    die "Please give a non-empty next slide link image filename\n"
+	if $opts->{next_slide_link_image_filename} eq "" ;
+    die "Please give a non-empty index template filename\n"
+	if $opts->{indextemplate_filename} eq "" ;
+    die "Please give a non-empty slide template filename\n"
+	if $opts->{slidetemplate_filename} eq "" ;
+    die "Please give a non-empty local llgal directory\n"
+	if $opts->{local_llgal_dir} eq "" ;
+    die "Please give a non-empty slide filename prefix\n"
+	if $opts->{scaled_image_filenameprefix} eq "" ;
+    die "Please give a non-empty thumbnail filename prefix\n"
+	if $opts->{thumbnail_image_filenameprefix} eq "" ;
+    die "Please give a non-empty index filename\n"
+	if $opts->{index_filename} eq "" ;
+    die "Please give a non-empty caption filename\n"
+	if $opts->{captions_filename} eq "" ;
+    die "Please give a non-empty caption removal line\n"
+	if $opts->{captions_removal_line} eq "" ;
+}
 
 ######################################################################
-# sanity checks and restore defaults of numerical options
+# check and prepare numerical options
 
-# Are we in .llgal ? just check the last part of the path by concatening
-# pwd and destination_dir even if destination_dir is an absolute path
-my $path = getcwd."/".$destination_dir ;
-if ($path =~ m@/*(?:[^/]+/+)*([^/]+)/+$@) {
-    if ($1 eq $opts->{local_llgal_dir}) {
-	immediate_warning "!! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !!" ;
-	immediate_warning "Your working directory looks like a .llgal directory. !!" ;
-	immediate_warning "This might not be what you really want to do.         !!" ;
-	immediate_warning "!! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !!" ;
+sub prepare_numerical_options {
+    my $opts = shift ;
+
+    # thumbnail_width_max must be > 0 or 0 for unlimited
+    die "Please give an integer value for thumbnail width max\n"
+	unless is_integer ($opts->{thumbnail_width_max}) ;
+    if ($opts->{thumbnail_width_max} < 0) {
+	indprint "Thumbnail width max value < 0, restoring to default (".
+	    ($thumbnail_width_max_default?$thumbnail_width_max_default:"unlimited") .")\n" ;
+	$opts->{thumbnail_width_max} = $thumbnail_width_max_default ;
     }
+    die "Please give a positive thumbnail width max value (or 0 for unlimited)\n"
+	unless $opts->{thumbnail_width_max} >= 0 ;
+
+    # thumbnail_height_max must be > 0
+    die "Please give an integer value for thumbnail height max\n"
+	unless is_integer ($opts->{thumbnail_height_max}) ;
+    if ($opts->{thumbnail_height_max} < 0) {
+	indprint "Thumbnail height max value < 0, restoring to default ($thumbnail_height_max_default)\n" ;
+	$opts->{thumbnail_height_max} = $thumbnail_height_max_default ;
+    }
+    die "Please give a positive thumbnail height max value\n"
+	unless $opts->{thumbnail_height_max} > 0 ;
+
+    # thumbnails_per_row must be > 0 or 0 for unlimited
+    die "Please give an integer value for thumbnails per row\n"
+	unless is_integer ($opts->{thumbnails_per_row}) ;
+    if ($opts->{thumbnails_per_row} < 0) {
+	indprint "Thumbnails per row value < 0, restoring to default (".
+	    ($thumbnails_per_row_default?$thumbnails_per_row_default:"unlimited") .")\n" ;
+	$opts->{thumbnails_per_row} = $thumbnails_per_row_default ;
+    }
+    die "Please give a positive thumbnails per row value (or 0 for unlimited)\n"
+	unless $opts->{thumbnails_per_row} >= 0 ;
+
+    # pixels_per_row must be > 0 or 0 for unlimited
+    die "Please give an integer value for pixels per row\n"
+	unless is_integer ($opts->{pixels_per_row}) ;
+    if ($opts->{pixels_per_row} < 0) {
+	indprint "Pixels per row value < 0, restoring to default (".
+	    ($pixels_per_row_default?$pixels_per_row_default:"unlimited") .")\n" ;
+	$opts->{pixels_per_row} = $pixels_per_row_default ;
+    }
+    die "Please give a positive pixels per row value (or 0 for unlimited)\n"
+	unless $opts->{pixels_per_row} >= 0 ;
+
+    # index_cellpadding must be >= 0
+    die "Please give an integer value for index cellpadding\n"
+	unless is_integer ($opts->{index_cellpadding}) ;
+    if ($opts->{index_cellpadding} < 0) {
+	indprint "Index cellpadding value < 0, restoring to default ($index_cellpadding_default)\n" ;
+	$opts->{index_cellpadding} = $index_cellpadding_default ;
+    }
+    die "Please give a positive or null index cellpadding value\n"
+	unless $opts->{index_cellpadding} >= 0 ;
+
+    # tile_height must be >= 0
+    die "Please give an integer value for tile height\n"
+	unless is_integer ($opts->{tile_height}) ;
+    if ($opts->{tile_height} < 0) {
+	indprint "Tile height value < 0, restoring to default value ($tile_height_default)\n" ;
+	$opts->{tile_height} = $tile_height_default ;
+    }
+    die "Please give a positive or null tile height value\n"
+	unless $opts->{tile_height} >= 0 ;
+
+    # text_slide_width must be > 0
+    die "Please give an integer value for text slide width\n"
+	unless is_integer ($opts->{text_slide_width}) ;
+    if ($opts->{text_slide_width} < 0) {
+	indprint "Text slide width value < 0, restoring to default ($text_slide_width_default)\n" ;
+	$opts->{text_slide_width} = $text_slide_width_default ;
+    }
+    die "Please give a positive text slide width value\n"
+	unless $opts->{text_slide_width} > 0 ;
+
+    # text_slide_height must be > 0
+    die "Please give an integer value for text slide height\n"
+	unless is_integer ($opts->{text_slide_height}) ;
+    if ($opts->{text_slide_height} < 0) {
+	indprint "Text slide height value < 0, restoring to default ($text_slide_height_default)\n" ;
+	$opts->{text_slide_height} = $text_slide_height_default ;
+    }
+    die "Please give a positive text slide height value\n"
+	unless $opts->{text_slide_height} > 0 ;
+
+    # slide_width_max must be > 0, 0 for unlimited
+    die "Please give an integer value for slide width max\n"
+	unless is_integer ($opts->{slide_width_max}) ;
+    if ($opts->{slide_width_max} < 0) {
+	indprint "Slide width max value < 0, restoring to default (".
+	    ($slide_width_max_default?$slide_width_max_default:"unlimited") .")\n" ;
+	$opts->{slide_width_max} = $slide_width_max_default ;
+    }
+    die "Please give a positive slide width max value (or 0 for unlimited)\n"
+	unless $opts->{slide_width_max} >= 0 ;
+
+    # slide_height_max must be > 0, 0 for unlimited
+    die "Please give an integer value for slide height max\n"
+	unless is_integer ($opts->{slide_height_max}) ;
+    if ($opts->{slide_height_max} < 0) {
+	indprint "Slide height max value < 0, restoring to default (".
+	    ($slide_height_max_default?$slide_height_max_default:"unlimited") .")\n" ;
+	$opts->{slide_height_max} = $slide_height_max_default ;
+    }
+    die "Please give a positive slide height max value (or 0 for unlimited)\n"
+	unless $opts->{slide_height_max} >= 0 ;
+
+    # either pixels or thumbnails per row must be limited
+    die "Please limit pixels or thumbnails per row\n"
+	unless $opts->{pixels_per_row} > 0 or $opts->{thumbnails_per_row} > 0 ;
 }
-
-# thumbnail_width_max must be > 0 or 0 for unlimited
-die "Please give an integer value for thumbnail width max\n"
-    unless is_integer ($opts->{thumbnail_width_max}) ;
-if ($opts->{thumbnail_width_max} < 0) {
-    indprint "Thumbnail width max value < 0, restoring to default (".
-	($thumbnail_width_max_default?$thumbnail_width_max_default:"unlimited") .")\n" ;
-    $opts->{thumbnail_width_max} = $thumbnail_width_max_default ;
-}
-die "Please give a positive thumbnail width max value (or 0 for unlimited)\n"
-    unless $opts->{thumbnail_width_max} >= 0 ;
-
-# thumbnail_height_max must be > 0
-die "Please give an integer value for thumbnail height max\n"
-    unless is_integer ($opts->{thumbnail_height_max}) ;
-if ($opts->{thumbnail_height_max} < 0) {
-    indprint "Thumbnail height max value < 0, restoring to default ($thumbnail_height_max_default)\n" ;
-    $opts->{thumbnail_height_max} = $thumbnail_height_max_default ;
-}
-die "Please give a positive thumbnail height max value\n"
-    unless $opts->{thumbnail_height_max} > 0 ;
-
-# thumbnails_per_row must be > 0 or 0 for unlimited
-die "Please give an integer value for thumbnails per row\n"
-    unless is_integer ($opts->{thumbnails_per_row}) ;
-if ($opts->{thumbnails_per_row} < 0) {
-    indprint "Thumbnails per row value < 0, restoring to default (".
-	($thumbnails_per_row_default?$thumbnails_per_row_default:"unlimited") .")\n" ;
-    $opts->{thumbnails_per_row} = $thumbnails_per_row_default ;
-}
-die "Please give a positive thumbnails per row value (or 0 for unlimited)\n"
-    unless $opts->{thumbnails_per_row} >= 0 ;
-
-# pixels_per_row must be > 0 or 0 for unlimited
-die "Please give an integer value for pixels per row\n"
-    unless is_integer ($opts->{pixels_per_row}) ;
-if ($opts->{pixels_per_row} < 0) {
-    indprint "Pixels per row value < 0, restoring to default (".
-	($pixels_per_row_default?$pixels_per_row_default:"unlimited") .")\n" ;
-    $opts->{pixels_per_row} = $pixels_per_row_default ;
-}
-die "Please give a positive pixels per row value (or 0 for unlimited)\n"
-    unless $opts->{pixels_per_row} >= 0 ;
-
-# index_cellpadding must be >= 0
-die "Please give an integer value for index cellpadding\n"
-    unless is_integer ($opts->{index_cellpadding}) ;
-if ($opts->{index_cellpadding} < 0) {
-    indprint "Index cellpadding value < 0, restoring to default ($index_cellpadding_default)\n" ;
-    $opts->{index_cellpadding} = $index_cellpadding_default ;
-}
-die "Please give a positive or null index cellpadding value\n"
-    unless $opts->{index_cellpadding} >= 0 ;
-
-# tile_height must be >= 0
-die "Please give an integer value for tile height\n"
-    unless is_integer ($opts->{tile_height}) ;
-if ($opts->{tile_height} < 0) {
-    indprint "Tile height value < 0, restoring to default value ($tile_height_default)\n" ;
-    $opts->{tile_height} = $tile_height_default ;
-}
-die "Please give a positive or null tile height value\n"
-    unless $opts->{tile_height} >= 0 ;
-
-# text_slide_width must be > 0
-die "Please give an integer value for text slide width\n"
-    unless is_integer ($opts->{text_slide_width}) ;
-if ($opts->{text_slide_width} < 0) {
-    indprint "Text slide width value < 0, restoring to default ($text_slide_width_default)\n" ;
-    $opts->{text_slide_width} = $text_slide_width_default ;
-}
-die "Please give a positive text slide width value\n"
-    unless $opts->{text_slide_width} > 0 ;
-
-# text_slide_height must be > 0
-die "Please give an integer value for text slide height\n"
-    unless is_integer ($opts->{text_slide_height}) ;
-if ($opts->{text_slide_height} < 0) {
-    indprint "Text slide height value < 0, restoring to default ($text_slide_height_default)\n" ;
-    $opts->{text_slide_height} = $text_slide_height_default ;
-}
-die "Please give a positive text slide height value\n"
-    unless $opts->{text_slide_height} > 0 ;
-
-# slide_width_max must be > 0, 0 for unlimited
-die "Please give an integer value for slide width max\n"
-    unless is_integer ($opts->{slide_width_max}) ;
-if ($opts->{slide_width_max} < 0) {
-    indprint "Slide width max value < 0, restoring to default (".
-	($slide_width_max_default?$slide_width_max_default:"unlimited") .")\n" ;
-    $opts->{slide_width_max} = $slide_width_max_default ;
-}
-die "Please give a positive slide width max value (or 0 for unlimited)\n"
-    unless $opts->{slide_width_max} >= 0 ;
-
-# slide_height_max must be > 0, 0 for unlimited
-die "Please give an integer value for slide height max\n"
-    unless is_integer ($opts->{slide_height_max}) ;
-if ($opts->{slide_height_max} < 0) {
-    indprint "Slide height max value < 0, restoring to default (".
-	($slide_height_max_default?$slide_height_max_default:"unlimited") .")\n" ;
-    $opts->{slide_height_max} = $slide_height_max_default ;
-}
-die "Please give a positive slide height max value (or 0 for unlimited)\n"
-    unless $opts->{slide_height_max} >= 0 ;
-
-# either pixels or thumbnails per row must be limited
-die "Please limit pixels or thumbnails per row\n"
-    unless $opts->{pixels_per_row} > 0 or $opts->{thumbnails_per_row} > 0 ;
-
-######################################################################
-# other sanity check
-
-# cannot have --bigy/xy and -s
-die "Please choose between --bigy/xy and -s\n"
-    if ($opts->{slide_height_max} or $opts->{slide_width_max}) && $opts->{make_no_slides} ;
-
-# check a few string that have to be non-empty
-die "Please give a non-empty llgal share directory\n"
-    if $opts->{llgal_share_dir} eq "" ;
-die "Please give a non-empty user share directory\n"
-    if $opts->{user_share_dir} eq "" ;
-die "Please give a non-empty CSS filename\n"
-    if $opts->{css_filename} eq "" ;
-die "Please give a non-empty film tile filename\n"
-    if $opts->{filmtile_filename} eq "" ;
-die "Please give a non-empty index link image filename\n"
-    if $opts->{index_link_image_filename} eq "" ;
-die "Please give a non-empty previous slide link image filename\n"
-    if $opts->{prev_slide_link_image_filename} eq "" ;
-die "Please give a non-empty next slide link image filename\n"
-    if $opts->{next_slide_link_image_filename} eq "" ;
-die "Please give a non-empty index template filename\n"
-    if $opts->{indextemplate_filename} eq "" ;
-die "Please give a non-empty slide template filename\n"
-    if $opts->{slidetemplate_filename} eq "" ;
-die "Please give a non-empty local llgal directory\n"
-    if $opts->{local_llgal_dir} eq "" ;
-die "Please give a non-empty slide filename prefix\n"
-    if $opts->{scaled_image_filenameprefix} eq "" ;
-die "Please give a non-empty thumbnail filename prefix\n"
-    if $opts->{thumbnail_image_filenameprefix} eq "" ;
-die "Please give a non-empty index filename\n"
-    if $opts->{index_filename} eq "" ;
-die "Please give a non-empty caption filename\n"
-    if $opts->{captions_filename} eq "" ;
-die "Please give a non-empty caption removal line\n"
-    if $opts->{captions_removal_line} eq "" ;
 
 ######################################################################
 # prepare a few globals for later
 
-# adapt text slide width and height in case of --bigxy or --bigy
-if ($opts->{slide_height_max} > 0) {
-    $opts->{text_slide_width} = $opts->{text_slide_width} / $opts->{text_slide_height} * $opts->{slide_height_max} ;
-    $opts->{text_slide_height} = $opts->{slide_height_max} ;
-}
-if ($opts->{slide_width_max} > 0 and $opts->{text_slide_width} > $opts->{slide_width_max}) {
-    $opts->{text_slide_height} = $opts->{text_slide_height} / $opts->{text_slide_width} * $opts->{slide_width_max} ;
-    $opts->{text_slide_width} = $opts->{slide_width_max} ;
-}
+sub prepare_globals {
+    my $opts = shift ;
 
-# thumbnail default size (for text and link slide especially)
-my ($default_thumb_xdim, $default_thumb_ydim) ;
-if ($opts->{thumbnail_width_max} > 0) {
-    ($default_thumb_xdim, $default_thumb_ydim) = ($opts->{thumbnail_width_max}, $opts->{thumbnail_height_max}) ;
-} else {
-    ($default_thumb_xdim, $default_thumb_ydim) = ($opts->{thumbnail_height_max} * 4/3, $opts->{thumbnail_height_max}) ;
-}
-
-# convert options for thumbnails
-my @thumbnail_scale_options ;
-if ($opts->{thumbnail_width_max} > 0) {
-    @thumbnail_scale_options = ("-scale", $opts->{thumbnail_width_max}."x".$opts->{thumbnail_height_max}.">") ;
-} else {
-    @thumbnail_scale_options = ("-scale", "x".$opts->{thumbnail_height_max}) ;
-}
-my @thumbnail_create_command = ("convert", "+profile", "*", @{$opts->{convert_options}}, @{$opts->{thumbnail_convert_options}}, @thumbnail_scale_options) ;
-
-# convert options for slides
-my @slide_create_command = ("convert", "+profile", "*", @{$opts->{convert_options}}, @{$opts->{scaled_convert_options}} ) ;
-if ($opts->{slide_height_max} > 0) {
-    if ($opts->{slide_width_max} > 0) {
-	push (@slide_create_command, ("-scale", "$opts->{slide_width_max}x$opts->{slide_height_max}")) ;
+    # adapt text slide width and height in case of --bigxy or --bigy
+    if ($opts->{slide_height_max} > 0) {
+	$opts->{text_slide_width} = $opts->{text_slide_width} / $opts->{text_slide_height} * $opts->{slide_height_max} ;
+	$opts->{text_slide_height} = $opts->{slide_height_max} ;
+    }
+    if ($opts->{slide_width_max} > 0 and $opts->{text_slide_width} > $opts->{slide_width_max}) {
+	$opts->{text_slide_height} = $opts->{text_slide_height} / $opts->{text_slide_width} * $opts->{slide_width_max} ;
+	$opts->{text_slide_width} = $opts->{slide_width_max} ;
+    }
+    
+    # thumbnail default size (for text and link slide especially)
+    if ($opts->{thumbnail_width_max} > 0) {
+	($opts->{default_thumb_xdim}, $opts->{default_thumb_ydim}) = ($opts->{thumbnail_width_max}, $opts->{thumbnail_height_max}) ;
     } else {
-	push (@slide_create_command, ("-scale", "x$opts->{slide_height_max}")) ;
+	($opts->{default_thumb_xdim}, $opts->{default_thumb_ydim}) = ($opts->{thumbnail_height_max} * 4/3, $opts->{thumbnail_height_max}) ;
     }
-} else {
-    if ($opts->{slide_width_max} > 0) {
-	push (@slide_create_command, ("-scale", "$opts->{slide_width_max}x")) ;
+
+    # convert options for thumbnails
+    my @thumbnail_scale_options ;
+    if ($opts->{thumbnail_width_max} > 0) {
+	@thumbnail_scale_options = ("-scale", $opts->{thumbnail_width_max}."x".$opts->{thumbnail_height_max}.">") ;
+    } else {
+	@thumbnail_scale_options = ("-scale", "x".$opts->{thumbnail_height_max}) ;
     }
+    @{$opts->{thumbnail_create_command}} = ("convert", "+profile", "*", @{$opts->{convert_options}}, @{$opts->{thumbnail_convert_options}}, @thumbnail_scale_options) ;
+    
+    # convert options for slides
+    @{$opts->{slide_create_command}} = ("convert", "+profile", "*", @{$opts->{convert_options}}, @{$opts->{scaled_convert_options}} ) ;
+    if ($opts->{slide_height_max} > 0) {
+	if ($opts->{slide_width_max} > 0) {
+	    push (@{$opts->{slide_create_command}}, ("-scale", "$opts->{slide_width_max}x$opts->{slide_height_max}")) ;
+	} else {
+	    push (@{$opts->{slide_create_command}}, ("-scale", "x$opts->{slide_height_max}")) ;
+	}
+    } else {
+	if ($opts->{slide_width_max} > 0) {
+	    push (@{$opts->{slide_create_command}}, ("-scale", "$opts->{slide_width_max}x")) ;
+	}
+    }
+    @{$opts->{slide_copy_command}} = ("cp", "-f") ;
 }
-my @slide_copy_command = ("cp", "-f") ;
 
 ######################################################################
 # --clean and --cleanall option
@@ -1485,7 +1483,7 @@ sub fill_file_entry {
 	if ((! -e "$real_thumb_filename") or $force_image_regeneration) {
 	    my ($status, @output) = system_with_output
 		( "create '$real_filename' thumbnail",
-		  @thumbnail_create_command, "$real_filename", "$real_thumb_filename" ) ;
+		  @{$opts->{thumbnail_create_command}}, "$real_filename", "$real_thumb_filename" ) ;
 	    if ($status == -1) {
 		immediate_external_warnings @output ;
 		die "Failed to create '$real_filename' thumbnail\n" ;
@@ -1506,8 +1504,8 @@ sub fill_file_entry {
 
     } else {
 	# default thumbnail dimensions
-	$entry->{thumb_xdim} = $default_thumb_xdim ;
-	$entry->{thumb_ydim} = $default_thumb_ydim ;
+	$entry->{thumb_xdim} = $opts->{default_thumb_xdim} ;
+	$entry->{thumb_ydim} = $opts->{default_thumb_ydim} ;
 
 	# dimstring is empty
         $entry->{thumb_dimstring} = "" ;
@@ -1531,11 +1529,11 @@ sub fill_file_entry {
 		if ($x <= $opts->{slide_width_max} and $y <= $opts->{slide_height_max}) {
 		    ($status, @output) = system_with_output
 			( "copy '$real_filename' scaled image",
-			  @slide_copy_command, "$real_filename", "$real_scaled_filename" ) ;
+			  @{$opts->{slide_copy_command}}, "$real_filename", "$real_scaled_filename" ) ;
 		} else {
 		    ($status, @output) = system_with_output
 			( "create '$real_filename' scaled image",
-			  @slide_create_command, "$real_filename", "$real_scaled_filename" ) ;
+			  @{$opts->{slide_create_command}}, "$real_filename", "$real_scaled_filename" ) ;
 		}
 		if ($status == -1) {
 		    immediate_external_warnings @output ;
@@ -1607,8 +1605,8 @@ sub fill_nofile_entry {
     $entry->{dimstring} = "" ;
 
     # default thumbnail dimensions
-    $entry->{thumb_xdim} = $default_thumb_xdim ;
-    $entry->{thumb_ydim} = $default_thumb_ydim ;
+    $entry->{thumb_xdim} = $opts->{default_thumb_xdim} ;
+    $entry->{thumb_ydim} = $opts->{default_thumb_ydim} ;
 
     # dimstring is empty
     $entry->{thumb_dimstring} = "" ;
@@ -1793,6 +1791,18 @@ sub check_destination {
 	if ! -e "./$destination_dir" ; # destination is empty for './'
     die "Destination $destination_string is not a directory.\n"
 	if ! -d "./$destination_dir" ; # destination is empty for './'
+
+    # Are we in .llgal ? just check the last part of the path by concatening
+    # pwd and destination_dir even if destination_dir is an absolute path
+    my $path = getcwd."/".$destination_dir ;
+    if ($path =~ m@/*(?:[^/]+/+)*([^/]+)/+$@) {
+	if ($1 eq $opts->{local_llgal_dir}) {
+	    immediate_warning "!! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !!" ;
+	    immediate_warning "Your working directory looks like a .llgal directory. !!" ;
+	    immediate_warning "This might not be what you really want to do.         !!" ;
+	    immediate_warning "!! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !!" ;
+	}
+    }
 
     # Create the url of the local llgal directory
     $local_llgal_url = make_safe_url_nowarn ($opts->{local_llgal_dir}) ;
@@ -2783,6 +2793,10 @@ if ($give_templates) {
 }
 
 # main gallery creation
+
+sanity_checks $opts ;
+prepare_numerical_options $opts ;
+prepare_globals $opts ;
 
 my $root_gallery = init_gallery () ;
 
