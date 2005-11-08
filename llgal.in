@@ -89,7 +89,7 @@ my $make_recursive = 0 ;
 
 my $index_cellpadding_default = 3 ;
 my $pixels_per_row_default = 0 ; # unlimited
-my $tile_height_default = 21 ;
+my $filmtile_height_default = 21 ;
 my $thumbnail_width_max_default = 0 ; # unlimited
 my $thumbnail_height_max_default = 75 ;
 my $thumbnails_per_row_default = 5 ;
@@ -152,7 +152,7 @@ my $opts = {
 # omit the film effect altogether (-r)
     show_no_film_effect => 0,
 # height of the tile.png tiled image (-t)
-    tile_height => $tile_height_default,
+    filmtile_height => $filmtile_height_default,
 
 # Slides
 # make no slides, just thumbnail links to images (-s)
@@ -328,7 +328,7 @@ Layout Options:
     --Rl               add links between subgalleries
     -s                 make no HTML slides, link thumbnails to images
     --sort <s>         sort files with criteria <s>
-    -t <n>             height of the film tiled image ($opts->{tile_height})
+    -t <n>             height of the film tiled image ($opts->{filmtile_height})
     --templates <dir>  use templates in <dir>
     --title <s>        title of the index of the gallery ($opts->{index_title})
     -u                 write captions under thumbnails on index page
@@ -408,8 +408,8 @@ sub process_option {
 	$opts->{show_caption_under_thumbnails} = $1 ;
     } elsif (/^show_no_film_effect\s*=\s*(.+)$/) {
 	$opts->{show_no_film_effect} = $1 ;
-    } elsif (/^tile_height\s*=\s*(.+)$/) { # >= 0, -1 for default
-	$opts->{tile_height} = $1 ;
+    } elsif (/^filmtile_height\s*=\s*(.+)$/) { # >= 0, -1 for default
+	$opts->{filmtile_height} = $1 ;
 # Slides
     } elsif (/^make_no_slides\s*=\s*(.+)$/) {
 	$opts->{make_no_slides} = $1 ;
@@ -631,7 +631,7 @@ GetOptions(
 	'S'		=> \$opts->{add_subdirs},
 	's'		=> \$opts->{make_no_slides},
 	'sort=s'	=> \$opts->{sort_criteria},
-	't=i'		=> \$opts->{tile_height},
+	't=i'		=> \$opts->{filmtile_height},
 	'templates=s'	=> \@{$opts->{template_dirs}},
 	'title=s'	=> \$opts->{index_title},
 	'u'		=> \$opts->{show_caption_under_thumbnails},
@@ -945,15 +945,15 @@ sub prepare_numerical_options {
     die "Please give a positive or null index cellpadding value\n"
 	unless $opts->{index_cellpadding} >= 0 ;
 
-    # tile_height must be >= 0
-    die "Please give an integer value for tile height\n"
-	unless is_integer ($opts->{tile_height}) ;
-    if ($opts->{tile_height} < 0) {
-	indprint "Tile height value < 0, restoring to default value ($tile_height_default)\n" ;
-	$opts->{tile_height} = $tile_height_default ;
+    # filmtile_height must be >= 0
+    die "Please give an integer value for film tile height\n"
+	unless is_integer ($opts->{filmtile_height}) ;
+    if ($opts->{filmtile_height} < 0) {
+	indprint "Film tile height value < 0, restoring to default value ($filmtile_height_default)\n" ;
+	$opts->{filmtile_height} = $filmtile_height_default ;
     }
-    die "Please give a positive or null tile height value\n"
-	unless $opts->{tile_height} >= 0 ;
+    die "Please give a positive or null film tile height value\n"
+	unless $opts->{filmtile_height} >= 0 ;
 
     # text_slide_width must be > 0
     die "Please give an integer value for text slide width\n"
@@ -1003,7 +1003,7 @@ sub prepare_numerical_options {
 }
 
 ######################################################################
-# prepare a few globals for later
+# prepare a few variables for later
 
 sub prepare_globals {
     my $opts = shift ;
@@ -1048,6 +1048,7 @@ sub prepare_globals {
 	}
     }
     @{$opts->{slide_copy_command}} = ("cp", "-f") ;
+
 }
 
 ######################################################################
@@ -2438,11 +2439,11 @@ sub get_files {
     } else {
 	get_template_file ($opts->{filmtile_filename}) ;
 	# rescale the tiled image if needed
-	my $tileh = (imgsize ("$destination_dir$opts->{local_llgal_dir}/$opts->{filmtile_filename}"))[1] ;
-	if ($opts->{tile_height} != $tileh) {
+	my $filmtileh = (imgsize ("$destination_dir$opts->{local_llgal_dir}/$opts->{filmtile_filename}"))[1] ;
+	if ($opts->{filmtile_height} != $filmtileh) {
 	    my ($status, @output) = system_with_output
 		( "reduce film tile",
-		  "mogrify", "-scale", "x$opts->{tile_height}", "$destination_dir$opts->{local_llgal_dir}/$opts->{filmtile_filename}" ) ;
+		  "mogrify", "-scale", "x$opts->{filmtile_height}", "$destination_dir$opts->{local_llgal_dir}/$opts->{filmtile_filename}" ) ;
 	    if ($status) {
 		# die on whatever error
 		immediate_external_warnings @output ;
@@ -2598,7 +2599,7 @@ sub generate_config {
     print NEWCFG "thumbnail_height_max = $opts->{thumbnail_height_max}\n" ;
     print NEWCFG "show_caption_under_thumbnails = $opts->{show_caption_under_thumbnails}\n" ;
     print NEWCFG "show_no_film_effect = $opts->{show_no_film_effect}\n" ;
-    print NEWCFG "tile_height = $opts->{tile_height}\n" ;
+    print NEWCFG "filmtile_height = $opts->{filmtile_height}\n" ;
     print NEWCFG "\n" ;
     print NEWCFG "# Slides:\n" ;
     print NEWCFG "make_no_slides = $opts->{make_no_slides}\n" ;
