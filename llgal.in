@@ -902,35 +902,35 @@ sub sanity_checks {
     die "Please choose between --bigy/xy and -s\n"
 	if ($opts->{slide_height_max} or $opts->{slide_width_max}) && $opts->{make_no_slides} ;
     
-    # check a few string that have to be non-empty
+    # check a few string that have to be non-empty and may need to be single file without path
     die "Please give a non-empty llgal share directory\n"
 	if $opts->{llgal_share_dir} eq "" ;
     die "Please give a non-empty user share directory\n"
 	if $opts->{user_share_dir} eq "" ;
-    die "Please give a non-empty CSS filename\n"
-	if $opts->{css_filename} eq "" ;
-    die "Please give a non-empty film tile filename\n"
-	if $opts->{filmtile_filename} eq "" ;
-    die "Please give a non-empty index link image filename\n"
-	if $opts->{index_link_image_filename} eq "" ;
-    die "Please give a non-empty previous slide link image filename\n"
-	if $opts->{prev_slide_link_image_filename} eq "" ;
-    die "Please give a non-empty next slide link image filename\n"
-	if $opts->{next_slide_link_image_filename} eq "" ;
-    die "Please give a non-empty index template filename\n"
-	if $opts->{indextemplate_filename} eq "" ;
-    die "Please give a non-empty slide template filename\n"
-	if $opts->{slidetemplate_filename} eq "" ;
-    die "Please give a non-empty local llgal directory\n"
-	if $opts->{local_llgal_dir} eq "" ;
-    die "Please give a non-empty slide filename prefix\n"
-	if $opts->{scaled_image_filenameprefix} eq "" ;
-    die "Please give a non-empty thumbnail filename prefix\n"
-	if $opts->{thumbnail_image_filenameprefix} eq "" ;
-    die "Please give a non-empty index filename\n"
-	if $opts->{index_filename} eq "" ;
-    die "Please give a non-empty caption filename\n"
-	if $opts->{captions_filename} eq "" ;
+    die "Please give a non-empty filename without path as a CSS filename\n"
+	if $opts->{css_filename} eq "" or $opts->{css_filename} =~ /\// ;
+    die "Please give a non-empty filename without path as a film tile filename\n"
+	if $opts->{filmtile_filename} eq "" or $opts->{filmtile_filename} =~ /\// ;
+    die "Please give a non-empty filename without path as a index link image filename\n"
+	if $opts->{index_link_image_filename} eq "" or $opts->{index_link_image_filename} =~ /\// ;
+    die "Please give a non-empty filename without path as a previous slide link image filename\n"
+	if $opts->{prev_slide_link_image_filename} eq "" or $opts->{prev_slide_link_image_filename} =~ /\// ;
+    die "Please give a non-empty filename without path as a next slide link image filename\n"
+	if $opts->{next_slide_link_image_filename} eq "" or $opts->{next_slide_link_image_filename} =~ /\// ;
+    die "Please give a non-empty filename without path as a index template filename\n"
+	if $opts->{indextemplate_filename} eq "" or $opts->{indextemplate_filename} =~ /\// ;
+    die "Please give a non-empty filename without path as a slide template filename\n"
+	if $opts->{slidetemplate_filename} eq "" or $opts->{slidetemplate_filename} =~ /\// ;
+    die "Please give a non-empty directory name without path as a local llgal directory\n"
+	if $opts->{local_llgal_dir} eq "" or $opts->{local_llgal_dir} =~ /\// ;
+    die "Please give a non-empty string without path as a slide filename prefix\n"
+	if $opts->{scaled_image_filenameprefix} eq "" or $opts->{scaled_image_filenameprefix} =~ /\// ;
+    die "Please give a non-empty string without path as a thumbnail filename prefix\n"
+	if $opts->{thumbnail_image_filenameprefix} eq "" or $opts->{thumbnail_image_filenameprefix} =~ /\// ;
+    die "Please give a non-empty filename without path as a index filename\n"
+	if $opts->{index_filename} eq "" or $opts->{index_filename} =~ /\// ;
+    die "Please give a non-empty filename without path as a caption filename\n"
+	if $opts->{captions_filename} eq "" or $opts->{captions_filename} =~ /\// ;
     die "Please give a non-empty caption removal line\n"
 	if $opts->{captions_removal_line} eq "" ;
 }

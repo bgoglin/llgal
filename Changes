@@ -20,6 +20,8 @@
     (reported by Hanus Adler in Debian Bug #337380).
   * Rename tile_height with filmtile_height for consistency.
   * Fix percentage printing by showing both entry listing and preparing.
+  * Check that all filenames given in the configuration don't contain
+    a slash.
   * When compiling from SVN, add a +svn suffix to the version.
   * Add a VERSION file.
 
