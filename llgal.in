@@ -352,6 +352,24 @@ Report bugs to:  <llgal-users AT gna.org>
 END_OF_USAGE
 
 ######################################################################
+# die showing something else than usage
+
+my $die_without_GetOptions_usage = 0 ;
+sub die_without_GetOptions_usage {
+    $die_without_GetOptions_usage = 1 ;
+    die shift ;
+}
+
+sub GetOptions_failed {
+    if ($die_without_GetOptions_usage) {
+	# the error has already been displayed
+	exit -1 ;
+    } else {
+	die $usage ;
+    }
+}
+
+######################################################################
 # parse options in config files
 
 sub process_option {
@@ -566,7 +584,11 @@ sub process_option {
 	push (@{$opts->{additional_config_files}}, parse_convert_options ($1)) ;
 # Error
     } elsif (/^[^#]/ && !/^(\s*)$/) {
-	die "Unrecognized option line #$.: \"$_\"\n" ;
+	if (defined $.) {
+	    die "Unrecognized option line #$.: \"$_\"\n" ;
+	} else {
+	    die_without_GetOptions_usage "Unrecognized option: \"$_\"\n" ;
+	}
     }
 }
 
@@ -684,7 +706,7 @@ GetOptions(
 	'parent-gal'	=> \$opts->{parent_gallery_link},
 	'prev-gal=s'	=> sub { shift ; $opts->{prev_gallery_link_target} = shift ; $opts->{prev_gallery_link} = 1 ; },
 	'next-gal=s'	=> sub { shift ; $opts->{next_gallery_link_target} = shift ; $opts->{next_gallery_link} = 1 ; },
-	) or die $usage ;
+	) or GetOptions_failed ;
 
 die $usage
     if $help_asked ;
