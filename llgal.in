@@ -117,6 +117,12 @@ my $opts = {
     next_slide_link_image_filename => "next.png",
     indextemplate_filename => "indextemplate.html",
     slidetemplate_filename => "slidetemplate.html",
+# Location of llgal files if already on the web
+    css_location => "",
+    filmtile_location => "",
+    index_link_image_location => "",
+    prev_slide_link_image_location => "",
+    next_slide_link_image_location => "",
 
 # Location and name of generated files
 # local llgal directory
@@ -332,6 +338,8 @@ Layout Options:
     --templates <dir>  use templates in <dir>
     --title <s>        title of the index of the gallery ($opts->{index_title})
     -u                 write captions under thumbnails on index page
+    --uc <url>         use a CSS file that is already available on the web
+    --ui <url>         use filmtile and link images that are already available on the web
     -w <n>             rows in thumbnail index are at most <n> images wide ($opts->{thumbnails_per_row})
     --www              make all llgal files world-readable
     --wx <n>           rows in thumbnail index are at most <n> pixels wide
@@ -376,6 +384,18 @@ sub process_option {
 	$opts->{indextemplate_filename} = $1 ;
     } elsif (/^slidetemplate_filename\s*=\s*"(.+)"$/) {
 	$opts->{slidetemplate_filename} = $1 ;
+# location of generic llgal files that are available on the web
+    } elsif (/^css_location\s*=\s*"(.*)"$/) {
+	$opts->{css_location} = $1 ;
+    } elsif (/^filmtile_location\s*=\s*"(.*)"$/) {
+	$opts->{filmtile_location} = $1 ;
+    } elsif (/^index_link_image_location\s*=\s*"(.*)"$/) {
+	$opts->{index_link_image_location} = $1 ;
+    } elsif (/^prev_slide_link_image_location\s*=\s*"(.*)"$/) {
+	$opts->{prev_slide_link_image_location} = $1 ;
+    } elsif (/^next_slide_link_image_location\s*=\s*"(.*)"$/) {
+	$opts->{next_slide_link_image_location} = $1 ;
+
 # Location and name of generated files
     } elsif (/^local_llgal_dir\s*=\s*"(.+)"$/) {
 	$opts->{local_llgal_dir} = $1 ;
@@ -635,6 +655,13 @@ GetOptions(
 	'templates=s'	=> \@{$opts->{template_dirs}},
 	'title=s'	=> \$opts->{index_title},
 	'u'		=> \$opts->{show_caption_under_thumbnails},
+	'uc=s'          => \$opts->{css_location},
+	'ui=s'          => sub { shift ; my $url = shift ;
+				 $opts->{filmtile_location} = $url ;
+				 $opts->{index_link_image_location} = $url ;
+				 $opts->{prev_slide_link_image_location} = $url ;
+				 $opts->{next_slide_link_image_location} = $url ;
+			     },
 	'w=i'		=> \$opts->{thumbnails_per_row},
 	'www'		=> \$opts->{www_access_rights},
 	'wx=i'		=> \$opts->{pixels_per_row},
@@ -1049,6 +1076,24 @@ sub prepare_various_variables {
     }
     @{$opts->{slide_copy_command}} = ("cp", "-f") ;
 
+    # css location
+    if ($opts->{css_location} =~ /^(.*\/)$/) {
+	$opts->{css_location} .= $opts->{css_filename} ;
+    }
+
+    # images location
+    if ($opts->{filmtile_location} =~ /^(.*)\/$/) {
+	$opts->{filmtile_location} .= $opts->{filmtile_filename} ;
+    }
+    if ($opts->{index_link_image_location} =~ /^(.*\/)$/) {
+	$opts->{index_link_image_location} .= $opts->{index_link_image_filename} ;
+    }
+    if ($opts->{prev_slide_link_image_location} =~ /^(.*\/)$/) {
+	$opts->{prev_slide_link_image_location} .= $opts->{prev_slide_link_image_filename} ;
+    }
+    if ($opts->{next_slide_link_image_location} =~ /^(.*\/)$/) {
+	$opts->{next_slide_link_image_location} .= $opts->{next_slide_link_image_filename} ;
+    }
 }
 
 ######################################################################
@@ -2140,7 +2185,11 @@ sub generate_slides {
         for my $line (@slidetemplate_text_copy) {
 	    $line =~ s/<!--SLIDE-TITLE-->/$title/g ;
 	    $line =~ s/<!--TITLE-->/$opts->{index_title}/g ;
-	    $line =~ s/<!--CSS-->/$opts->{local_llgal_dir}\/$opts->{css_filename}/g ;
+	    if ($opts->{css_location}) {
+		$line =~ s/<!--CSS-->/$opts->{css_location}/g ;
+	    } else {
+		$line =~ s/<!--CSS-->/$opts->{local_llgal_dir}\/$opts->{css_filename}/g ;
+	    }
 
 	    # set the style
 	    if ($line =~ m/<!--THIS-SLIDE-STYLE-->/g) {
@@ -2190,9 +2239,15 @@ sub generate_slides {
 
 	    # process INDEX-FILE
 	    my $index_link = $opts->{index_link_text} ;
-	    $index_link = "<img src=\"$opts->{local_llgal_dir}/". (make_safe_url $opts->{index_link_image_filename})
-		."\" alt=\"$opts->{index_link_text}\" class=\"image-link\" />"
-		if $opts->{index_link_image} ;
+	    if ($opts->{index_link_image}) {
+		if ($opts->{index_link_image_location}) {
+		    $index_link = "<img src=\"". $opts->{index_link_image_location}
+			."\" alt=\"$opts->{index_link_text}\" class=\"image-link\" />" ;
+		} else {
+		    $index_link = "<img src=\"$opts->{local_llgal_dir}/". (make_safe_url $opts->{index_link_image_filename})
+			."\" alt=\"$opts->{index_link_text}\" class=\"image-link\" />" ;
+		}
+	    }
 	    $line =~ s/<!--INDEX-LINK-TEXT-->/$index_link/g ;
 
 	    $line =~ s/<!--INDEX-FILE-->/$opts->{index_filename}.$opts->{www_extension}\" title=\"$opts->{over_index_link_text}/g ;
@@ -2204,8 +2259,13 @@ sub generate_slides {
 	    if ($opts->{prev_slide_link_preview} and $prev->{type} == $TYPE_IMG) {
 		$prev_slide_link = "<img src=\"$prev->{thumb_url}\" alt=\"$opts->{prev_slide_link_text}\"/>" ;
 	    } elsif ($opts->{prev_slide_link_image}) {
-		$prev_slide_link = "<img src=\"$opts->{local_llgal_dir}/". (make_safe_url $opts->{prev_slide_link_image_filename})
-		    ."\" alt=\"$opts->{prev_slide_link_text}\" class=\"image-link\" />" ;
+		if ($opts->{prev_slide_link_image_location}) {
+		    $prev_slide_link = "<img src=\"". $opts->{prev_slide_link_image_location}
+			."\" alt=\"$opts->{prev_slide_link_text}\" class=\"image-link\" />" ;
+		} else {
+		    $prev_slide_link = "<img src=\"$opts->{local_llgal_dir}/". (make_safe_url $opts->{prev_slide_link_image_filename})
+			."\" alt=\"$opts->{prev_slide_link_text}\" class=\"image-link\" />" ;
+		}
 	    } else {
 		$prev_slide_link = $opts->{prev_slide_link_text} ;
 	    }
@@ -2219,9 +2279,14 @@ sub generate_slides {
 	    my $next_slide_link ;
 	    if ($opts->{next_slide_link_preview} and $next->{type} == $TYPE_IMG) {
 		$next_slide_link = "<img src=\"$next->{thumb_url}\" alt=\"$opts->{next_slide_link_text}\"/>" ;
-	    } elsif ($opts->{next_slide_link_image} ) {
-		$next_slide_link = "<img src=\"$opts->{local_llgal_dir}/". (make_safe_url $opts->{next_slide_link_image_filename})
-		    ."\" alt=\"$opts->{next_slide_link_text}\" class=\"image-link\" />" ;
+	    } elsif ($opts->{next_slide_link_image}) {
+		if ($opts->{next_slide_link_image_location}) {
+		    $next_slide_link = "<img src=\"". $opts->{next_slide_link_image_location}
+			."\" alt=\"$opts->{next_slide_link_text}\" class=\"image-link\" />" ;
+		} else {
+		    $next_slide_link = "<img src=\"$opts->{local_llgal_dir}/". (make_safe_url $opts->{next_slide_link_image_filename})
+			."\" alt=\"$opts->{next_slide_link_text}\" class=\"image-link\" />" ;
+		}
 	    } else {
 		$next_slide_link = $opts->{next_slide_link_text} ;
 	    }
@@ -2270,7 +2335,11 @@ sub generate_index {
 	} else {
 	    $line =~ s/LLGAL-OPTIONS/@llgal_options/g ;
 	    $line =~ s/<!--TITLE-->/$opts->{index_title}/g ;
-	    $line =~ s/<!--CSS-->/$opts->{local_llgal_dir}\/$opts->{css_filename}/g ;
+	    if ($opts->{css_location}) {
+		$line =~ s/<!--CSS-->/$opts->{css_location}/g ;
+	    } else {
+		$line =~ s/<!--CSS-->/$opts->{local_llgal_dir}\/$opts->{css_filename}/g ;
+	    }
 	    print IXW "$line" ;
 	    # stop at <!-- ********** -->
 	    last if $line =~ m/\*{10}/ ;
@@ -2436,6 +2505,8 @@ sub get_files {
     # Get the film tile for the index
     if ($opts->{show_no_film_effect}) {
 	indprint "Omitting film effect.\n" ;
+    } elsif ($opts->{filmtile_location}) {
+	indprint "Using the film tile that is available on $opts->{filmtile_location}.\n" ;
     } else {
 	get_template_file ($opts->{filmtile_filename}) ;
 	# rescale the tiled image if needed
@@ -2453,15 +2524,34 @@ sub get_files {
     }
 
     # Get link images
-    get_template_file ($opts->{index_link_image_filename})
-	if $opts->{index_link_image} ;
-    get_template_file ($opts->{prev_slide_link_image_filename})
-	if $opts->{prev_slide_link_image} and ! $opts->{prev_slide_link_preview} ;
-    get_template_file ($opts->{next_slide_link_image_filename})
-	if $opts->{next_slide_link_image} and ! $opts->{next_slide_link_preview} ;
+    if ($opts->{index_link_image}) {
+	if ($opts->{index_link_image_location}) {
+	    indprint "Using the index link image that is available on $opts->{index_link_image_location}.\n" ;
+	} else {
+	    get_template_file ($opts->{index_link_image_filename}) ;
+	}
+    }
+    if ($opts->{prev_slide_link_image} and ! $opts->{prev_slide_link_preview}) {
+	if ($opts->{prev_slide_link_image_location}) {
+	    indprint "Using the prev slide link image that is available on $opts->{prev_slide_link_image_location}.\n" ;
+	} else {
+	    get_template_file ($opts->{prev_slide_link_image_filename}) ;
+	}
+    }
+    if ($opts->{next_slide_link_image} and ! $opts->{next_slide_link_preview}) {
+	if ($opts->{next_slide_link_image_location}) {
+	    indprint "Using the next slide link image that is available on $opts->{next_slide_link_image_location}.\n" ;
+	} else {
+	    get_template_file ($opts->{next_slide_link_image_filename}) ;
+	}
+    }
 
     # Get the css
-    get_template_file ($opts->{css_filename}) ;
+    if ($opts->{css_location}) {
+	indprint "Using the CSS that is available on $opts->{css_location}.\n" ;
+    } else {
+	get_template_file ($opts->{css_filename}) ;
+    }
 }
 
 #######################################################################
