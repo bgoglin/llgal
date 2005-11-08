@@ -6,6 +6,7 @@
     + Add filmtile_location, index_link_image_location,
       prev_slide_link_image_location and next_slide_link_image_location
       for a per-image configuration.
+  * Fix -d with an absolute directory.
   * Fix --option which was broken since last release.
     + Do not show usage after the error message when a --option parameter
       could not be parsed.

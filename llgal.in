@@ -1195,7 +1195,7 @@ sub clean_files {
 	}
     }
 
-    opendir DIR, "./$destination_dir" ; # destination is empty for './'
+    opendir DIR, $destination_dir ? $destination_dir : "./" ; # destination is empty for './'
     while ($_ = readdir DIR ) {
 	if (/.$opts->{www_extension}$/) {
 	    unlink "$destination_dir$_" ;
@@ -1752,7 +1752,7 @@ sub get_entries_from_directory {
     my $gallery = shift ;
     my @entries = () ;
 
-    opendir DIR, "./$destination_dir" # destination is empty for './'
+    opendir DIR, $destination_dir ? $destination_dir : "./" # destination is empty for './'
 	or die "Can't open $destination_string ($!)\n" ;
     # get all files, except dot-starting ones and webpages
     my @filenames = grep ((!/\.$opts->{www_extension}$/i and !/^\./), readdir DIR) ;
@@ -1851,9 +1851,9 @@ sub check_destination {
 
     # check destination
     die "Destination $destination_string does not exist.\n"
-	if ! -e "./$destination_dir" ; # destination is empty for './'
+	if $destination_dir and ! -e $destination_dir ; # destination is empty for './'
     die "Destination $destination_string is not a directory.\n"
-	if ! -d "./$destination_dir" ; # destination is empty for './'
+	if $destination_dir and ! -d $destination_dir ; # destination is empty for './'
 
     # Are we in .llgal ? just check the last part of the path by concatening
     # pwd and destination_dir even if destination_dir is an absolute path
@@ -2853,7 +2853,7 @@ if ($clean_asked or $cleanall_asked) {
     show_warnings ;
 
     if ($make_recursive) {
-	opendir DIR, "./$destination_dir" ; # destination is empty for './'
+	opendir DIR, $destination_dir ? $destination_dir : "./" ; # destination is empty for './'
 	while (my $dir = readdir DIR) {
 	    if ($dir =~ /^[^.]/ && -d "$destination_dir$dir") {
 		print "\n" ;
@@ -2882,7 +2882,7 @@ if ($give_templates) {
     indprint "You may also remove any template that you do not want to modify.\n" ;
 
     if ($make_recursive) {
-	opendir DIR, "./$destination_dir" ; # destination is empty for './'
+	opendir DIR, $destination_dir ? $destination_dir : "./" ; # destination is empty for './'
 	while (my $dir = readdir DIR) {
 	    if ($dir =~ /^[^.]/ && -d "$destination_dir$dir") {
 		print "\n" ;
