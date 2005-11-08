@@ -1005,7 +1005,7 @@ sub prepare_numerical_options {
 ######################################################################
 # prepare a few variables for later
 
-sub prepare_globals {
+sub prepare_various_variables {
     my $opts = shift ;
 
     # adapt text slide width and height in case of --bigxy or --bigy
@@ -2792,7 +2792,7 @@ if ($give_templates) {
 
 sanity_checks $opts ;
 prepare_numerical_options $opts ;
-prepare_globals $opts ;
+prepare_various_variables $opts ;
 
 my $root_gallery = init_gallery () ;
 
