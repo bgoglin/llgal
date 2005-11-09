@@ -14,7 +14,7 @@
 ###### llgal directories #####
 
 # Default installation path for generic llgal files after
-# installation (index and slide templates, tile image and CSS file).
+# installation (index and slide templates, film tile image and CSS file).
 # llgal_share_dir = "/usr/share/llgal" (for a standard installation)
 
 # Default per-user generic llgal files.
@@ -38,6 +38,7 @@
 
 # Name of the film tile image.
 # Such a file will be stored under $local_llgal_dir.
+# Note that this filename must match the one that is used in the CSS file.
 # filmtile_filename = "tile.png"
 
 # Name for image link to the index, previous or next slide
@@ -52,6 +53,20 @@
 # Name of the slide template.
 # Such a template file will be used during gallery generation.
 # slidetemplate_filename = "slidetemplate.html"
+
+##### Location of llgal files if available on the web #####
+
+# Location of the CSS file if available on the web [--uc <url>].
+# If ending with '/', css_filename will be added.
+css_location = ""
+
+# Location of llgal image files if available on the web.
+# If ending with '/', their generic filename will be added.
+# These locations may be set alltogether with --ui <url>.
+filmtile_location = ""
+index_link_image_location = ""
+prev_slide_link_image_location = ""
+next_slide_link_image_location = ""
 
 ##### Location and name of generated files #####
 
@@ -117,7 +132,7 @@
 
 # Film tile height [-t <n>]
 # Must be >= 0, setting to < 0 resets to default
-# tile_height = 21
+# filmtile_height = 21
 
 ##### Slides #####
 

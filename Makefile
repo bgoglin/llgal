@@ -1,5 +1,9 @@
 NAME	=	llgal
-VERSION	=	0.11.2
+ifeq ($(shell [ -d .svn ] && echo 1),1)
+	VERSION	=	$(shell cat VERSION)+svn
+else
+	VERSION	=	$(shell cat VERSION)
+endif
 
 .PHONY: llgal clean install uninstall tarball
 
@@ -46,6 +50,7 @@ tarball::
 	cp COPYING /tmp/$(TARBALL)
 	cp Changes /tmp/$(TARBALL)
 	cp UPGRADE /tmp/$(TARBALL)
+	cp VERSION /tmp/$(TARBALL)
 	cd /tmp && tar cfz $(DEBIAN_TARBALL).tar.gz $(TARBALL)
 	cd /tmp && tar cfj $(TARBALL).tar.bz2 $(TARBALL)
 	mv /tmp/$(DEBIAN_TARBALL).tar.gz /tmp/$(TARBALL).tar.bz2 ..

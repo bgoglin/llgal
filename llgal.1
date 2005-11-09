@@ -541,6 +541,26 @@ If you have a
 file, then the captions are read from there.
 
 .TP
+.BI --uc " <url>"
+Assume the CSS file is available on
+.I <url>
+and thus do not use a local one.
+If ending with a slash, the CSS filename will be appended.
+
+.TP
+.BI --ui " <url>"
+Assume that the filmtile image and index/prev/next slide link images
+are available on
+.I <url>
+and thus do not use local ones.
+Their filename will be appended to the given location.
+Each image location may be also changed independently
+(See
+.SM
+.B CONFIGURATION
+).
+
+.TP
 .BI -w " <n>"
 Set the thumbnail rows to be
 .I <n>
@@ -733,6 +753,7 @@ Default is \fBllgal.css\fR.
 .RS
 Name of the film tile image.
 Default is \fBtile.png\fR.
+Note that it must match the one that is used in the CSS file.
 .RE
 .I index_link_image_filename = \fI"filename"
 .RS
@@ -758,6 +779,34 @@ Default is \fBindextemplate.html\fR.
 .RS
 Name of the HTML slide template.
 Default is \fBslidetemplate.html\fR.
+.RE
+
+.B Location of llgal files if available on the web
+
+.I css_location = \fI"url"
+.RS
+The location of the CSS on the web instead of a local one.
+If ending with a slash, css_filename will be appended.
+.RE
+.I filmtile_location = \fI"url"
+.RS
+The location of the filmtile image on the web instead of a local one.
+If ending with a slash, filmtile_filename will be appended.
+.RE
+.I index_link_image_location = \fI"url"
+.RS
+The location of the index link image on the web instead of a local one.
+If ending with a slash, index_link_image_filename will be appended.
+.RE
+.I prev_slide_link_image_location = \fI"url"
+.RS
+The location of the prev slide link image on the web instead of a local one.
+If ending with a slash, prev_slide_link_image_filename will be appended.
+.RE
+.I next_slide_link_image_location = \fI"url"
+.RS
+The location of the next slide link image on the web instead of a local one.
+If ending with a slash, next_slide_link_image_filename will be appended.
 .RE
 
 .B Location and name of generated files:
@@ -843,7 +892,7 @@ Default is \fB0\fR (disabled).
 Omit film effect [-r].
 Default is \fB1\fR (enabled).
 .RE
-.I tile_height = <pixels>
+.I filmtile_height = <pixels>
 .RS
 Film tile height [-t <n>].
 Default is \fB21\fR.

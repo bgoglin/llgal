@@ -1,3 +1,12 @@
+llgal (0.11.3-1) unstable; urgency=low
+
+  * New upstream release.
+  * Fix the order of command line and configuration file options 
+    processing, and of sanity checks, closes: #337380.
+  * Fix the copyright.
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Wed,  9 Nov 2005 00:44:26 -0500
+
 llgal (0.11.2-1) unstable; urgency=low
 
   * New upstream release.
