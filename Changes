@@ -21,6 +21,7 @@ llgal (0.11.3)
     (reported by Hanus Adler in Debian Bug #337380).
   * Rename tile_height with filmtile_height for consistency.
   * Fix percentage printing by showing both entry listing and preparing.
+  * Fix slidetemplate to use images for link on the bottom as on the top.
   * Check that all filenames given in the configuration don't contain
     a slash.
   * When compiling from SVN, add a +svn suffix to the version.
