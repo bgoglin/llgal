@@ -583,7 +583,7 @@ sub process_option {
     } elsif (/^additional_configuration_file\s*=\s*"(.+)"$/) {
 	push (@{$opts->{additional_config_files}}, parse_convert_options ($1)) ;
 # Error
-    } elsif (/^[^#]/ && !/^(\s*)$/) {
+    } elsif (/^[^#]/ and !/^(\s*)$/) {
 	if (defined $.) {
 	    die "Unrecognized option line #$.: \"$_\"\n" ;
 	} else {
@@ -622,7 +622,8 @@ sub parse_additional_config_file {
 ######################################################################
 # process command-line arguments (overriding defaults above)
 
-GetOptions(
+sub parse_cmdline_options {
+    GetOptions(
 # behaviors
 	'clean'		=> \$clean_asked,
 	'cleanall'	=> \$cleanall_asked,
@@ -707,11 +708,7 @@ GetOptions(
 	'prev-gal=s'	=> sub { shift ; $opts->{prev_gallery_link_target} = shift ; $opts->{prev_gallery_link} = 1 ; },
 	'next-gal=s'	=> sub { shift ; $opts->{next_gallery_link_target} = shift ; $opts->{next_gallery_link} = 1 ; },
 	) or GetOptions_failed ;
-
-die $usage
-    if $help_asked ;
-die "This is llgal version $version.\n"
-    if $version_asked ;
+}
 
 ######################################################################
 # a few routines
@@ -844,7 +841,7 @@ sub find_generic_template_file {
     return $opts->{user_share_dir}
 	if -e "$opts->{user_share_dir}/$filename" ;
     die "File '$opts->{llgal_share_dir}/$filename' does not exist.\nPlease install llgal properly.\n"
-	unless -e "$opts->{llgal_share_dir}/$filename" || !$check ;
+	unless -e "$opts->{llgal_share_dir}/$filename" or !$check ;
     return $opts->{llgal_share_dir} ;
 }
 
@@ -900,8 +897,8 @@ sub sanity_checks {
 
     # cannot have --bigy/xy and -s
     die "Please choose between --bigy/xy and -s\n"
-	if ($opts->{slide_height_max} or $opts->{slide_width_max}) && $opts->{make_no_slides} ;
-    
+	if ($opts->{slide_height_max} or $opts->{slide_width_max}) and $opts->{make_no_slides} ;
+
     # check a few string that have to be non-empty and may need to be single file without path
     die "Please give a non-empty llgal share directory\n"
 	if $opts->{llgal_share_dir} eq "" ;
@@ -1066,7 +1063,7 @@ sub prepare_various_variables {
 	$opts->{text_slide_height} = $opts->{text_slide_height} / $opts->{text_slide_width} * $opts->{slide_width_max} ;
 	$opts->{text_slide_width} = $opts->{slide_width_max} ;
     }
-    
+
     # thumbnail default size (for text and link slide especially)
     if ($opts->{thumbnail_width_max} > 0) {
 	($opts->{default_thumb_xdim}, $opts->{default_thumb_ydim}) = ($opts->{thumbnail_width_max}, $opts->{thumbnail_height_max}) ;
@@ -1082,7 +1079,7 @@ sub prepare_various_variables {
 	@thumbnail_scale_options = ("-scale", "x".$opts->{thumbnail_height_max}) ;
     }
     @{$opts->{thumbnail_create_command}} = ("convert", "+profile", "*", @{$opts->{convert_options}}, @{$opts->{thumbnail_convert_options}}, @thumbnail_scale_options) ;
-    
+
     # convert options for slides
     @{$opts->{slide_create_command}} = ("convert", "+profile", "*", @{$opts->{convert_options}}, @{$opts->{scaled_convert_options}} ) ;
     if ($opts->{slide_height_max} > 0) {
@@ -1189,7 +1186,7 @@ sub clean_files {
 	}
     }
     closedir DIR ;
-    if ($notdeleted <= 2 && $cleanall) {
+    if ($notdeleted <= 2 and $cleanall) {
 	if (!rmdir "$destination_dir$opts->{local_llgal_dir}"  and ! $!{ENOENT}) {
 	    add_warning "Failed to remove directory '$destination_dir$opts->{local_llgal_dir}' ($!)." ;
 	}
@@ -1478,7 +1475,7 @@ sub create_file_entry {
     my $title = $filename ;
     $title =~ s/&/&amp;/g ;
 #    $title =~ s/"/&\#34;/g ;
-    
+
     # add caption to the title if asked
     $title .= ": ". $caption
 	if $opts->{make_slide_title_from_caption} ;
@@ -1515,7 +1512,7 @@ sub fill_file_entry {
 
     # dimstring
     if ($type == $TYPE_IMG) {
-	if ($opts->{show_dimensions} && $opts->{show_size}) {
+	if ($opts->{show_dimensions} and $opts->{show_size}) {
 	    $entry->{dimstring} = "($entry->{xdim}x$entry->{ydim}, $entry->{kbytes}$opts->{show_size_unit})" ;
 	} elsif ($opts->{show_size}) {
 	    $entry->{dimstring} = "($entry->{kbytes}$opts->{show_size_unit})" ;
@@ -1613,7 +1610,7 @@ sub fill_file_entry {
 	    $entry->{scaled_kbytes} = (-s "$real_scaled_filename") >> 10 ;
 
 	    # dimstring
-	    if ($opts->{show_dimensions} && $opts->{show_size}) {
+	    if ($opts->{show_dimensions} and $opts->{show_size}) {
 		$entry->{scaled_dimstring} = "($entry->{scaled_xdim}x$entry->{scaled_ydim}, $entry->{scaled_kbytes}$opts->{show_size_unit})" ;
 	    } elsif ($opts->{show_size}) {
 		$entry->{scaled_dimstring} = "($entry->{scaled_kbytes}$opts->{show_size_unit})" ;
@@ -2040,7 +2037,7 @@ sub read_captions_file {
 	$line =~ s/^\s*// ;
 	$line =~ s/\s\(\s*\)$/\1/ ;
 	# only lines that don't start with # and are not empty
-	if (!($line =~ m/^\#/) && !($line =~ /^$/)) {
+	if (!($line =~ m/^\#/) and !($line =~ /^$/)) {
 	    if ($line =~ m/^TITLE:\s*(.*)\s*/) {
 		# title
 		$opts->{index_title} = $1 ;
@@ -2114,7 +2111,7 @@ sub read_captions_file {
     close CAP ;
     end_percentage () ;
     show_warnings ;
-    
+
     @{$gallery->{entries}} = @entries ;
     @{$gallery->{headers}} = @headers ;
     @{$gallery->{footers}} = @footers ;
@@ -2149,7 +2146,7 @@ sub add_headers_footers {
     my $gallery = shift ;
     my @headers = @{$gallery->{headers}} ;
     my @footers = @{$gallery->{footers}} ;
-    
+
     # parent, prev and next, in reverse order
     unshift @headers, "<div style=\"text-align: right;\"><a href=\"$opts->{next_gallery_link_target}\">$opts->{next_gallery_link_text}$opts->{next_gallery_link_target}</a></div>"
 	if $opts->{next_gallery_link} ;
@@ -2157,7 +2154,7 @@ sub add_headers_footers {
 	if $opts->{prev_gallery_link} ;
     unshift @headers, "<a href=\"..\">$opts->{parent_gallery_link_text}</a>"
 	if $opts->{parent_gallery_link} ;
-    
+
     # prev, next and parent
     push @footers, "<a href=\"$opts->{prev_gallery_link_target}\">$opts->{prev_gallery_link_text}$opts->{prev_gallery_link_target}</a>"
 	if $opts->{prev_gallery_link} ;
@@ -2334,7 +2331,7 @@ sub generate_index {
     my @entries = @{$gallery->{entries}} ;
     my @listed_entries = @{$gallery->{listed_entries}} ;
     my @headers = @{$gallery->{headers}} ;
-    my @footers = @{$gallery->{footers}} ;    
+    my @footers = @{$gallery->{footers}} ;
 
     # find the indextemplate
     my $indextemplate = find_template_file ($opts->{indextemplate_filename}, 1) . "/$opts->{indextemplate_filename}" ;
@@ -2374,18 +2371,18 @@ sub generate_index {
     init_percentage () ;
     for (my $i = 0; $i < @entries; $i += $num) {
 	$num = 0 ;
-	
+
 	# figure out how many to put in next row.
 	my $width = 0 ;
 	while ( ($i+$num < @entries)
-		&& (!$opts->{thumbnails_per_row} or $num < $opts->{thumbnails_per_row})
-		&& (!$opts->{pixels_per_row} or $width < $opts->{pixels_per_row}) ) {
+		and (!$opts->{thumbnails_per_row} or $num < $opts->{thumbnails_per_row})
+		and (!$opts->{pixels_per_row} or $width < $opts->{pixels_per_row}) ) {
 	    $width += $entries[$num+$i]->{thumb_xdim} ;
 	    $num++ ;
 	    # add cellpadding
 	    $width += $opts->{index_cellpadding} ;
 	}
-	if ($opts->{pixels_per_row} > 0 && $width > $opts->{pixels_per_row}) {
+	if ($opts->{pixels_per_row} > 0 and $width > $opts->{pixels_per_row}) {
 	    if ($num >= 2) {
 		$num-- ;
 	    } else {
@@ -2413,7 +2410,7 @@ sub generate_index {
 	    my $type = $entry->{type} ;
 	    my $width = $entry->{thumb_xdim} ;
 	    my $height = $entry->{thumb_ydim} ;
-	    
+
 	    if ($type == $TYPE_TXT or $type == $TYPE_LNK or $type == $TYPE_MVI or $type == $TYPE_FIL or $type == $TYPE_DIR) {
 		print IXW "    <td class=\"text-thumb\" style=\"width: ", $width, "px; height: ", $height, "px;\">\n" ;
 		print IXW "      " ;
@@ -2473,11 +2470,11 @@ sub generate_index {
 	    }
 	    print IXW "  </tr>\n" ;
 	}
-	
+
 	# Table footer
 	print IXW "</table>\n<br />\n" ;
     }
-    
+
     # list links
     if ($opts->{list_links}) {
 	foreach my $entry (@listed_entries) {
@@ -2497,7 +2494,7 @@ sub generate_index {
     while (defined($line = <IXR>)) {
 	last if $line =~ m/\*{10}/ ;
     }
-    
+
     # footers
     while (defined ($line = <IXR>)) {
 	if ($line =~ m/<!--FOOTERS-->/) {
@@ -2514,7 +2511,7 @@ sub generate_index {
 
     end_percentage () ;
     show_warnings ;
-    
+
     immediate_warning "Row width max ($opts->{pixels_per_row}) too low for one single thumbnail. "
 	. "Forced $forced_width_warning time". ($forced_width_warning>1?"s":"") ."."
 	if $forced_width_warning ;
@@ -2585,7 +2582,7 @@ sub make_readable {
 						"chmod", "a+r", $file) ;
     add_external_warnings @output
 	if $status ;
-}   
+}
 
 sub make_readable_and_traversable {
     my $file = shift ;
@@ -2593,7 +2590,7 @@ sub make_readable_and_traversable {
 						"chmod", "a+rx", $file) ;
     add_external_warnings @output
 	if $status ;
-}   
+}
 
 # If --www was invoked make all files world-readable at the END
 sub make_www_rights {
@@ -2602,7 +2599,7 @@ sub make_www_rights {
     my @listed_entries = @{$gallery->{listed_entries}} ;
 
     indprint "Making all llgal files world-readable for WWW publishing.\n" ;
-    
+
     # index
     make_readable "$destination_dir$opts->{index_filename}.$opts->{www_extension}" ;
     # .llgal
@@ -2621,11 +2618,11 @@ sub make_www_rights {
     # next slide link image
     make_readable "$destination_dir$opts->{local_llgal_dir}/$opts->{next_slide_link_image_filename}"
  	if $opts->{next_slide_link_image} and ! $opts->{next_slide_link_preview} ;
-    
+
     # entries that have a slide
     foreach my $entry (@entries) {
 	my $type = $entry->{type} ;
-	
+
 	# target
 	my $file = "$destination_dir$entry->{filename}" ;
 	if ($type == $TYPE_DIR) {
@@ -2633,11 +2630,11 @@ sub make_www_rights {
 	} else {
 	    make_readable $file ;
 	}
-	
+
 	# slide
 	make_readable "$destination_dir$entry->{slide_filename}"
 	    if ! $opts->{make_no_slides} ;
-	
+
 	if ($type == $TYPE_IMG) {
 	    # thumbnail
 	    make_readable "$destination_dir$entry->{thumb_filename}" ;
@@ -2645,22 +2642,22 @@ sub make_www_rights {
 	    make_readable "$destination_dir$entry->{scaled_filename}"
 		if ($opts->{slide_width_max} > 0 or $opts->{slide_height_max} > 0) and !$opts->{make_no_slides} ;
 	}
-	
+
     }
 
     # entries that are just listed
     foreach my $entry (@listed_entries) {
 	my $type = $entry->{type} ;
-	
+
 	# target
 	my $file = "$destination_dir$entry->{filename}" ;
 	if ($type == $TYPE_DIR) {
 	    make_readable_and_traversable $file ;
 	} else {
 	    make_readable $file ;
-	}	
+	}
     }
-    
+
     show_warnings ;
 }
 
@@ -2797,7 +2794,7 @@ sub call_recursive {
     my $gallery = shift ;
     my @entries = @{$gallery->{entries}} ;
     my @listed_entries = @{$gallery->{listed_entries}} ;
-    
+
     for (my $i = 0; $i < @entries; $i++) {
 	my $entry = @entries[$i] ;
 	next if $entry->{type} != $TYPE_DIR ;
@@ -2845,6 +2842,13 @@ foreach my $conf (@additional_config_files) {
     parse_additional_config_file $conf ;
 }
 
+parse_cmdline_options ();
+
+die $usage
+    if $help_asked ;
+die "This is llgal version $version.\n"
+    if $version_asked ;
+
 # special behaviors
 
 if ($clean_asked or $cleanall_asked) {
@@ -2855,7 +2859,7 @@ if ($clean_asked or $cleanall_asked) {
     if ($make_recursive) {
 	opendir DIR, $destination_dir ? $destination_dir : "./" ; # destination is empty for './'
 	while (my $dir = readdir DIR) {
-	    if ($dir =~ /^[^.]/ && -d "$destination_dir$dir") {
+	    if ($dir =~ /^[^.]/ and -d "$destination_dir$dir") {
 		print "\n" ;
 		indprint "Entering subdirectory '$dir'...\n" ;
 		system ( $0, @llgal_options, "-d", "$destination_dir$dir", "--indent", $opts->{indent}."  " ) ;
@@ -2884,7 +2888,7 @@ if ($give_templates) {
     if ($make_recursive) {
 	opendir DIR, $destination_dir ? $destination_dir : "./" ; # destination is empty for './'
 	while (my $dir = readdir DIR) {
-	    if ($dir =~ /^[^.]/ && -d "$destination_dir$dir") {
+	    if ($dir =~ /^[^.]/ and -d "$destination_dir$dir") {
 		print "\n" ;
 		indprint "Entering subdirectory '$dir'...\n" ;
 		system ( $0, @llgal_options, "-d", "$destination_dir$dir", "--indent", $opts->{indent}."  " ) ;
