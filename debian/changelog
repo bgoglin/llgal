@@ -1,7 +1,7 @@
 llgal (0.11.4-1) unstable; urgency=low
 
   * New upstream release.
-  * Parse command-line options after configuration files, closes #340315.
+  * Parse command-line options after configuration files, closes: #340315.
 
  -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Tue, 22 Nov 2005 13:21:59 -0500
 
