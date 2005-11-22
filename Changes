@@ -1,8 +1,10 @@
+llgal (0.11.4)
 
   * Really parse command-line options after configuration files
     (thanks to Dave Holland in Debian Bug #340315).
   * Trailing spaces and other small cleanups.
 
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Tue, 22 Nov 2005 13:18:26 -0500
 
 llgal (0.11.3)
 
