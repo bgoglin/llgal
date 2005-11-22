@@ -622,7 +622,8 @@ sub parse_additional_config_file {
 ######################################################################
 # process command-line arguments (overriding defaults above)
 
-GetOptions(
+sub parse_cmdline_options {
+    GetOptions(
 # behaviors
 	'clean'		=> \$clean_asked,
 	'cleanall'	=> \$cleanall_asked,
@@ -707,11 +708,7 @@ GetOptions(
 	'prev-gal=s'	=> sub { shift ; $opts->{prev_gallery_link_target} = shift ; $opts->{prev_gallery_link} = 1 ; },
 	'next-gal=s'	=> sub { shift ; $opts->{next_gallery_link_target} = shift ; $opts->{next_gallery_link} = 1 ; },
 	) or GetOptions_failed ;
-
-die $usage
-    if $help_asked ;
-die "This is llgal version $version.\n"
-    if $version_asked ;
+}
 
 ######################################################################
 # a few routines
@@ -2844,6 +2841,13 @@ parse_generic_config_file "${destination_dir}$destination_config_file" ;
 foreach my $conf (@additional_config_files) {
     parse_additional_config_file $conf ;
 }
+
+parse_cmdline_options ();
+
+die $usage
+    if $help_asked ;
+die "This is llgal version $version.\n"
+    if $version_asked ;
 
 # special behaviors
 

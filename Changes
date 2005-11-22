@@ -1,3 +1,8 @@
+
+  * Really parse command-line options after configuration files
+    (thanks to Dave Holland in Debian Bug #340315).
+
+
 llgal (0.11.3)
 
   * Add --uc and css_location to use a CSS style-sheet that is already
