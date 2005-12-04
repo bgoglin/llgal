@@ -25,7 +25,7 @@ all:: llgal
 
 llgal:: update-po
 	sed -e 's!@DATADIR@!$(DESTDIR)$(DATADIR)!g' -e 's!@SYSCONFDIR@!$(DESTDIR)$(SYSCONFDIR)!g' \
-		-e 's!@LOCALEDIR@!(DESTDIR)$(LOCALEDIR)!' -e 's!@VERSION@!$(VERSION)!g' \
+		-e 's!@LOCALEDIR@!$(DESTDIR)$(LOCALEDIR)!' -e 's!@VERSION@!$(VERSION)!g' \
 		< llgal.in > llgal
 
 clean:: clean-po
