@@ -16,7 +16,8 @@ By default, everything is installed in /usr/local/.
 Most directories might be replaced by overriding their default values
 on the command line.
 For instance, a traditional installation might be achieved with
- make install PREFIX=/usr SYSCONFDIR=/etc MANDIR=/usr/share/man
+ make install PREFIX=/usr SYSCONFDIR=/etc MANDIR=/usr/share/man \
+	LOCALEDIR=/usr/share/locale
 
 Note that 'make uninstall' (with same options) allows to uninstall.
 
@@ -24,10 +25,12 @@ llgal requirements
 ==================
 
 llgal requires perl and imagemagick packages.
-The following perl libraries are also needed:
+The following perl libraries are also needed (these are their Debian names):
 * libimage-info-perl
 * libimage-size-perl
 * liburi-perl
+* liblocale-gettext-perl
+* libintl-perl
 These dependencies are automatically installed when installing
 Debian or Gentoo prepackaged versions.
 
@@ -36,8 +39,10 @@ tarballs in Debian source archives (for instance):
 ftp://ftp.debian.org/debian/pool/main/libi/libimage-info-perl/libimage-info-perl_*.orig.tar.gz
 ftp://ftp.debian.org/debian/pool/main/i/image-size/image-size_*.orig.tar.gz
 ftp://ftp.debian.org/debian/pool/main/libu/liburi-perl/liburi-perl_*.orig.tar.gz
+ftp://ftp.debian.org/debian/pool/main/libi/libintl-perl/libintl-perl_*.orig.tar.gz
+ftp://ftp.debian.org/debian/pool/main/libl/liblocale-gettext-perl/liblocale-gettext-perl_*.orig.tar.gz
 Replace * with the last version that you'll find.
-llgal currently works with versions 1.16/2.992/1.35.
+llgal is known to work with versions 1.16/2.992/1.35/1.05/1.11.
 
 
 If you experience any problem,

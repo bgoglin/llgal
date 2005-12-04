@@ -9,6 +9,8 @@ use Time::Local ;
 use URI::Escape ;
 use Text::ParseWords ;
 use Cwd ;
+use Locale::Messages qw (:locale_h :libintl_h) ;
+use POSIX qw (setlocale) ;
 
 use strict ;
 no strict "refs" ;
@@ -57,6 +59,23 @@ GetOptions(
 
 # restore default behavior: process all options and warn on error
 Getopt::Long::Configure('nopassthrough') ;
+
+######################################################################
+# Gettext initialization
+
+setlocale (LC_MESSAGES, '') ;
+
+textdomain ('llgal') ;
+bindtextdomain ('llgal' => "@LOCALEDIR@") ;
+
+my $lang = "" ; # use environment variables by default
+
+sub llgal_gettext {
+    my $id = shift ;
+    my $string = gettext ($id) ;
+    $string =~ s/^[^|]+\|// ;
+    return $string ;
+}
 
 ######################################################################
 # general command-line options
@@ -204,43 +223,43 @@ my $opts = {
 
 # Text
 # title of the gallery (--title)
-    index_title => "Index of pictures",
+    index_title => llgal_gettext ("index_title|Index of pictures"),
 # label of link to the parent gallery
-    parent_gallery_link_text => "Back to parent gallery",
+    parent_gallery_link_text => llgal_gettext ("parent_gallery_link_text|Back to parent gallery"),
 # label of link to previous gallery
-    prev_gallery_link_text => "Previous gallery ",
+    prev_gallery_link_text => llgal_gettext ("prev_gallery_link_text|Previous gallery "),
 # label of link to previous gallery
-    next_gallery_link_text => "Next gallery ",
+    next_gallery_link_text => llgal_gettext ("next_gallery_link_text|Next gallery "),
 # label of link from slides to index
-    index_link_text => "Index",
+    index_link_text => llgal_gettext ("index_link_text|Index"),
 # label of link from a slide to the previous one
-    prev_slide_link_text => "&lt;&lt;Prev",
+    prev_slide_link_text => llgal_gettext ("prev_slide_link_text|&lt;&lt;Prev"),
 # label of link from a slide to the next one
-    next_slide_link_text => "Next&gt;&gt;",
+    next_slide_link_text => llgal_gettext ("next_slide_link_text|Next&gt;&gt;"),
 # text prefixing the link text
-    MVI_link_text => "Open movie ",
-    FIL_link_text => "Download file ",
-    DIR_link_text => "Open subgallery ",
+    MVI_link_text => llgal_gettext ("MVI_link_text|Open movie "),
+    FIL_link_text => llgal_gettext ("FIL_link_text|Download file "),
+    DIR_link_text => llgal_gettext ("DIR_link_text|Open subgallery "),
 # alternative text for full-size images in slides
-    alt_full_text => "",
+    alt_full_text => llgal_gettext ("alt_full_text|"),
 # alternative text for scaled images in slides
-    alt_scaled_text => "Scaled image ",
+    alt_scaled_text => llgal_gettext ("alt_scaled_text|Scaled image "),
 # alternative text for thumbnails in the index
-    alt_thumbnail_text => "Thumbnail ",
+    alt_thumbnail_text => llgal_gettext ("alt_thumbnail_text|Thumbnail "),
 # text shown when the mouse pointer is over a scaled image in a slide
-    over_scaled_text => "Click to see full size ",
+    over_scaled_text => llgal_gettext ("over_scaled_text|Click to see full size "),
 # text shown when the mouse pointer is over a thumbnail
-    over_thumbnail_text => "Click to enlarge ",
+    over_thumbnail_text => llgal_gettext ("over_thumbnail_text|Click to enlarge "),
 # text shown when the mouse pointer is over a link to the index
-    over_index_link_text => "Return to the index",
+    over_index_link_text => llgal_gettext ("over_index_link_text|Return to the index"),
 # text shown when the mouse pointer is over a link to the previous slide
-    over_prev_slide_link_text => "Previous slide ",
+    over_prev_slide_link_text => llgal_gettext ("over_prev_slide_link_text|Previous slide "),
 # text shown when the mouse pointer is over a link to the next slide
-    over_next_slide_link_text => "Next slide ",
+    over_next_slide_link_text => llgal_gettext ("over_next_slide_link_text|Next slide "),
 # change kB to another unit (--asu)
-    show_size_unit => "kB",
+    show_size_unit => llgal_gettext ("show_size_unit|kB"),
 # format of the timestamp in captions (--ctf)
-    timestamp_format_in_caption => "%Y-%m-%d %H:%M:%S",
+    timestamp_format_in_caption => llgal_gettext ("timestamp_format_in_caption|%y-%m-%d %H:%M:%S"),
 
 # Recursion
 # add links between subgalleries

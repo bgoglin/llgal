@@ -1,0 +1,61 @@
+domain "llgal"
+
+msgid "index_title|Index of pictures"
+msgstr "index_title|Index des images"
+
+msgid "parent_gallery_link_text|Back to parent gallery"
+msgstr "parent_gallery_link_text|Retour à la galerie supérieure"
+
+msgid "prev_gallery_link_text|Previous gallery "
+msgstr "prev_gallery_link_text|Galerie précédente "
+
+msgid "next_gallery_link_text|Next gallery "
+msgstr "next_gallery_link_text|Galerie suivante "
+
+msgid "index_link_text|Index"
+msgstr "index_link_text|Index"
+
+msgid "prev_slide_link_text|&lt;&lt;Prev"
+msgstr "prev_slide_link_text|&lt;&lt;Précédent"
+
+msgid "next_slide_link_text|Next&gt;&gt;"
+msgstr "next_slide_link_text|Suivant&gt;&gt;"
+
+msgid "MVI_link_text|Open movie "
+msgstr "MVI_link_text|Ouvrir le film "
+
+msgid "FIL_link_text|Download file "
+msgstr "FIL_link_text|Télécharger le fichier "
+
+msgid "DIR_link_text|Open subgallery "
+msgstr "DIR_link_text|Ouvrir la sous-galerie "
+
+msgid "alt_full_text|"
+msgstr "alt_full_text|"
+
+msgid "alt_scaled_text|Scaled image "
+msgstr "alt_scaled_text|Diapositive "
+
+msgid "alt_thumbnail_text|Thumbnail "
+msgstr "alt_thumbnail_text|Vignette "
+
+msgid "over_scaled_text|Click to see full size "
+msgstr "over_scaled_text|Cliquer pour voir en taille originale "
+
+msgid "over_thumbnail_text|Click to enlarge "
+msgstr "over_thumbnail_text|Cliquer pour agrandir "
+
+msgid "over_index_link_text|Return to the index"
+msgstr "over_index_link_text|Retour à l'index"
+
+msgid "over_prev_slide_link_text|Previous slide "
+msgstr "over_prev_slide_link_text|Diapositive précédente "
+
+msgid "over_next_slide_link_text|Next slide "
+msgstr "over_next_slide_link_text|Diapositive suivante "
+
+msgid "show_size_unit|kB"
+msgstr "show_size_unit|ko"
+
+msgid "timestamp_format_in_caption|%y-%m-%d %H:%M:%S"
+msgstr "timestamp_format_in_caption|%Y/%m/%d %H:%M:%S"
