@@ -731,6 +731,11 @@ sub parse_cmdline_options {
 }
 
 ######################################################################
+# various temporary globals
+my $destination_string ;
+my $local_llgal_url ;
+
+######################################################################
 # a few routines
 
 # Print messages with indentation according to recursion level
@@ -1142,9 +1147,9 @@ sub clean_files {
     my $cleanall = shift ;
     my $notdeleted = 0 ;
     if ($cleanall) {
-	indprint "Cleaning all in directory $destination_dir...\n" ;
+	indprint "Cleaning all in $destination_string\n" ;
     } else {
-	indprint "Cleaning in directory $destination_dir...\n" ;
+	indprint "Cleaning in $destination_string\n" ;
     }
 
     opendir DIR, "$destination_dir$opts->{local_llgal_dir}"
@@ -1165,17 +1170,17 @@ sub clean_files {
 		     "cmp", "-s", "$destination_dir$opts->{local_llgal_dir}/$_", "$original") ;
 		if ($diff == -1) {
 		    immediate_external_warnings @output ;
-		    die "Failed to execute 'cmp' to check whether '$destination_dir$opts->{local_llgal_dir}/$_' has been modified ($!).\n" ;
+		    die "Failed to execute 'cmp' to check whether $destination_dir$opts->{local_llgal_dir}/$_ has been modified ($!).\n" ;
 		}
 		add_external_warnings @output ;
 		# on other errors, assume files are different ($diff != 0)
 	    }
 	    if ($diff) {
-		add_warning "Preserved '$destination_dir$opts->{local_llgal_dir}/$_' since it seems to be modified." ;
+		add_warning "Preserved $destination_dir$opts->{local_llgal_dir}/$_ since it seems to be modified." ;
 		$notdeleted++ ;
 	    } else {
 		if (!unlink "$destination_dir$opts->{local_llgal_dir}/$_" and ! $!{ENOENT}) {
-		    add_warning "Failed to remove file '$destination_dir$opts->{local_llgal_dir}/$_'." ;
+		    add_warning "Failed to remove file $destination_dir$opts->{local_llgal_dir}/$_ ($!)." ;
 		}
 	    }
 	} elsif (/^$opts->{captions_filename}$/) {
@@ -1188,17 +1193,17 @@ sub clean_files {
 		     "grep", "-q", "$opts->{captions_removal_line}", "$destination_dir$opts->{local_llgal_dir}/$_") ;
 		if ($grep == -1) {
 		    immediate_external_warnings @output ;
-		    die "Failed to execute 'grep' to check whether '$destination_dir$opts->{local_llgal_dir}/$_' has been modified ($!).\n" ;
+		    die "Failed to execute 'grep' to check whether $destination_dir$opts->{local_llgal_dir}/$_ has been modified ($!).\n" ;
 		}
 		add_external_warnings @output ;
 		# on other errors, assume file doesn't contain the caption removal line ($grep != 0)
 	    }
 	    if ($grep) {
-		add_warning "Preserved '$destination_dir$opts->{local_llgal_dir}/$_' since it seems to be modified." ;
+		add_warning "Preserved $destination_dir$opts->{local_llgal_dir}/$_ since it seems to be modified." ;
 		$notdeleted++ ;
 	    } else {
 		if (!unlink "$destination_dir$opts->{local_llgal_dir}/$_" and ! $!{ENOENT}) {
-		    add_warning "Failed to remove file '$destination_dir$opts->{local_llgal_dir}/$_'." ;
+		    add_warning "Failed to remove file $destination_dir$opts->{local_llgal_dir}/$_." ;
 		}
 	    }
 	} else {
@@ -1208,7 +1213,7 @@ sub clean_files {
     closedir DIR ;
     if ($notdeleted <= 2 and $cleanall) {
 	if (!rmdir "$destination_dir$opts->{local_llgal_dir}"  and ! $!{ENOENT}) {
-	    add_warning "Failed to remove directory '$destination_dir$opts->{local_llgal_dir}' ($!)." ;
+	    add_warning "Failed to remove directory $destination_dir$opts->{local_llgal_dir} ($!)." ;
 	}
     }
 
@@ -1294,10 +1299,6 @@ my $TYPE_IMG = 2 ;
 my $TYPE_MVI = 3 ;
 my $TYPE_FIL = 4 ;
 my $TYPE_DIR = 5 ;
-
-# various temporary globals
-my $destination_string ;
-my $local_llgal_url ;
 
 ###################################################################################
 # checking files
@@ -1864,7 +1865,7 @@ sub check_destination {
     # remove starting ./
     $destination_dir =~ s/^(\.\/+)+// ;
     # factorization
-    $destination_string = ($destination_dir ? "directory '$destination_dir'" : "current directory") ;
+    $destination_string = ($destination_dir ? "directory $destination_dir" : "current directory") ;
 
     # check destination
     die "Destination $destination_string does not exist.\n"
@@ -1899,7 +1900,7 @@ sub check_destination {
 	mkdir "$destination_dir$opts->{local_llgal_dir}"
 	    or die "Failed to create $destination_dir$opts->{local_llgal_dir} directory ($!)" ;
     }
-    die "Local llgal '$destination_dir$opts->{local_llgal_dir}' is not a directory.\n"
+    die "Local llgal $destination_dir$opts->{local_llgal_dir} is not a directory.\n"
 	if ! -d "$destination_dir$opts->{local_llgal_dir}" ;
 }
 

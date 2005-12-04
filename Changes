@@ -3,6 +3,7 @@
     embedded in the HTML pages. See LANGUAGE in the manpage for details.
   * Add french translation.
   * Add credits_text option and replace CREDITS in the templates.
+  * Cleanup destination directory name printing.
   * Minor fix in the README.
 
 
