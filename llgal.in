@@ -9,7 +9,7 @@ use Time::Local ;
 use URI::Escape ;
 use Text::ParseWords ;
 use Cwd ;
-use Locale::Messages qw (:locale_h :libintl_h) ;
+use Locale::gettext ;
 use POSIX qw (setlocale) ;
 
 use strict ;
@@ -61,14 +61,11 @@ GetOptions(
 Getopt::Long::Configure('nopassthrough') ;
 
 ######################################################################
-# Gettext initialization
+# gettext strings are prefixed to distinguish between identical strings
 
-setlocale (LC_MESSAGES, '') ;
-
-textdomain ('llgal') ;
-bindtextdomain ('llgal' => "@LOCALEDIR@") ;
-
-my $lang = "" ; # use environment variables by default
+setlocale (LC_MESSAGES, "") ;
+bindtextdomain ("llgal", "@LOCALEDIR@") ;
+textdomain ("llgal") ;
 
 sub llgal_gettext {
     my $id = shift ;
