@@ -263,6 +263,9 @@ next_slide_link_image_location = ""
 # Set timestamp format in captions using strftime format [--ctf]
 # timestamp_format_in_caption = "%Y-%m-%d %H:%M:%S"
 
+# Credits line at the bottom of the index
+# credits_text = "created with <a href=\"http://home.gna.org/llgal\">llgal</a>"
+
 ##### What files to insert in the gallery #####
 
 # Extensions that are matched when searching images

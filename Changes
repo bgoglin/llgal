@@ -2,6 +2,7 @@
   * Add internationalization support for the text that is automatically
     embedded in the HTML pages. See LANGUAGE in the manpage for details.
   * Add french translation.
+  * Add credits_text option and replace CREDITS in the templates.
   * Minor fix in the README.
 
 

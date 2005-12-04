@@ -64,8 +64,8 @@ Getopt::Long::Configure('nopassthrough') ;
 # gettext strings are prefixed to distinguish between identical strings
 
 setlocale (LC_MESSAGES, "") ;
-bindtextdomain ("llgal", "@LOCALEDIR@") ;
 textdomain ("llgal") ;
+bindtextdomain ("llgal", "@LOCALEDIR@") ;
 
 sub llgal_gettext {
     my $id = shift ;
@@ -257,6 +257,8 @@ my $opts = {
     show_size_unit => llgal_gettext ("show_size_unit|kB"),
 # format of the timestamp in captions (--ctf)
     timestamp_format_in_caption => llgal_gettext ("timestamp_format_in_caption|%y-%m-%d %H:%M:%S"),
+# credits line at the bottom of the index
+    credits_text => llgal_gettext ("credits_text|created with <a href=\"http://home.gna.org/llgal\">llgal</a>"),
 
 # Recursion
 # add links between subgalleries
@@ -547,6 +549,8 @@ sub process_option {
 	$opts->{show_size_unit} = $1 ;
     } elsif (/^timestamp_format_in_caption\s*=\s*"(.+)"$/) {
 	$opts->{timestamp_format_in_caption} = $1 ;
+    } elsif (/^credits_text\s*=\s*"(.*)"$/) {
+	$opts->{credits_text} = $1 ;
 # Recursion
     } elsif (/^make_recursive\s*=\s*(.+)$/) {
 	$make_recursive = $1 ;
@@ -2329,6 +2333,8 @@ sub generate_slides {
 
 	    $line =~ s/<!--NEXT-SLIDE-->/$next->{slide_url}\" title=\"$opts->{over_next_slide_link_text}$next->{title}/g ;
 
+	    $line =~ s/<!--CREDITS-->/$opts->{credits_text}/g ;
+
 	    # output the line
 	    print SW "$line" ;
 	}
@@ -2519,6 +2525,7 @@ sub generate_index {
 	    }
 	} else {
 	    $line =~ s/<!--TITLE-->/$opts->{index_title}/g ;
+	    $line =~ s/<!--CREDITS-->/$opts->{credits_text}/g ;
 	    print IXW "$line" ;
 	}
     }
@@ -2771,6 +2778,7 @@ sub generate_config {
     print NEWCFG "over_next_slide_link_text = \"$opts->{over_next_slide_link_text}\"\n" ;
     print NEWCFG "show_size_unit = \"$opts->{show_size_unit}\"\n" ;
     print NEWCFG "timestamp_format_in_caption = \"$opts->{timestamp_format_in_caption}\"\n" ;
+    print NEWCFG "credits_text = \"$opts->{credits_text}\"\n" ;
     print NEWCFG "\n" ;
     print NEWCFG "# Recursion:\n" ;
     print NEWCFG "make_recursive = $make_recursive\n" ;
