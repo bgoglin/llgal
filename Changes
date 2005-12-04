@@ -1,6 +1,6 @@
 
   * Add internationalization support for the text that is automatically
-    embedded in the HTML pages.
+    embedded in the HTML pages. See LANGUAGE in the manpage for details.
   * Add french translation.
   * Minor fix in the README.
 

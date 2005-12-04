@@ -1302,16 +1302,24 @@ The caption of the slide.
 
 
 .SH LANGUAGE
-All configuration options produce english text by default.
-If you wish to create your gallery in another language, you should
-create an additional configuration file (or modify the system-wide
-one) to update all configuration options of the
+The language that
+.BI llgal
+uses to generate text in HTML pages is chosen from the localization
+configuration.
+If the chosen language is available in
+.BI llgal
+translations, it will be used instead of the default english.
+
+As usual with \fIgettext\fR, it is possible to override the
+localisation configuration by changing \fBLANG\fR, \fBLC_MESSAGES\fR
+or \fBLANGUAGE\fR environment variables.
+
+If the desired language is not available in \fIllgal\fR translations,
+or if the user wishes to change the text values, he might create an
+additional configuration file (or modify the system-wide one) to
+update all configuration options of the
 .B Text
 section.
-
-Additionally, you might have to modify several static strings in
-the templates (\fBindextemplate.html\fR and \fBslidetemplate.html\fR),
-for instance \fBIndex\fR, \fBPrev\fR and \fBNext\fR.
 
 
 .SH CHARACTER ENCODING
