@@ -14,6 +14,7 @@
   * image_extensions and movie_extensions are now explicitely a |-separated
     list without regexp inside.
   * Cleanup destination directory name printing.
+  * Major cleanup of the manpage.
   * Minor fix in the README.
 
 
