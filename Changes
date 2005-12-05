@@ -3,6 +3,10 @@
     embedded in the HTML pages. See LANGUAGE in the manpage for details.
   * Add french translation.
   * Add credits_text option and replace CREDITS in the templates.
+  * Add bmp to default image extenstions and ogm and wmv to movie when
+    scanning the working directory.
+  * image_extensions and movie_extensions are now explicitely a |-separated
+    list without regexp inside.
   * Cleanup destination directory name printing.
   * Minor fix in the README.
 

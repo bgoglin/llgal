@@ -19,7 +19,7 @@ just one command-line. It generates a pretty good-looking set of static HTML
 slides even with its default settings.  To try it out just run 
 .B llgal 
 in a directory with
-.IR jpg ", " tif ", " gif ", " png ", " mpg ", " mov " or " avi
+.IR jpg ", " png ", " mpg ", " avi ", etc
 files and check the output in a web browser.  You can adjust the
 appearance of the image gallery with the many options listed below or
 (if you know a bit of HTML) by modifying the
@@ -1158,12 +1158,12 @@ Target of the link to the next subgallery [--next-gal <url>].
 .I image_extensions = \fI"|-separated strings"
 .RS
 Extensions that are matched when searching images
-Default is \fB"jpe?g|tiff?|png|gif"\fR.
+Default is \fB"jpg|jpeg|png|gif|tif|tiff|bmp"\fR.
 .RE
 .I movie_extensions = \fI"|-separated strings"
 .RS
 Extensions that are matched when searching movies
-Default is \fB"mpe?g|mov|avi"\fR.
+Default is \fB"mpg|mpeg|avi|mov|ogm|wmv"\fR.
 .RE
 .I add_all_files = <0/1>
 .RS
