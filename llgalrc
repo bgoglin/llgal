@@ -58,15 +58,15 @@
 
 # Location of the CSS file if available on the web [--uc <url>].
 # If ending with '/', css_filename will be added.
-css_location = ""
+# css_location = ""
 
 # Location of llgal image files if available on the web.
 # If ending with '/', their generic filename will be added.
 # These locations may be set alltogether with --ui <url>.
-filmtile_location = ""
-index_link_image_location = ""
-prev_slide_link_image_location = ""
-next_slide_link_image_location = ""
+# filmtile_location = ""
+# index_link_image_location = ""
+# prev_slide_link_image_location = ""
+# next_slide_link_image_location = ""
 
 ##### Location and name of generated files #####
 
