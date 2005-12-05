@@ -155,6 +155,10 @@ my $opts = {
     thumbnail_image_filenameprefix => "thumb_",
 # captions filename
     captions_filename => "captions",
+# additional prefix of user-provided scaled images
+    user_scaled_image_filenameprefix => "my",
+# additional prefix of user-provided thumbnails
+    user_thumbnail_image_filenameprefix => "my",
 
 # Index
 # cellpadding value for the thumbnail index tables (-p)
@@ -431,7 +435,6 @@ sub process_option {
 	$opts->{prev_slide_link_image_location} = $1 ;
     } elsif (/^next_slide_link_image_location\s*=\s*"(.*)"$/) {
 	$opts->{next_slide_link_image_location} = $1 ;
-
 # Location and name of generated files
     } elsif (/^local_llgal_dir\s*=\s*"(.+)"$/) {
 	$opts->{local_llgal_dir} = $1 ;
@@ -447,6 +450,10 @@ sub process_option {
 	$opts->{thumbnail_image_filenameprefix} = $1 ;
     } elsif (/^captions_filename\s*=\s*"(.+)"$/) {
 	$opts->{captions_filename} = $1 ;
+    } elsif (/^user_scaled_image_filenameprefix\s*=\s*"(.+)"$/) {
+	$opts->{user_scaled_image_filenameprefix} = $1 ;
+    } elsif (/^user_thumbnail_image_filenameprefix\s*=\s*"(.+)"$/) {
+	$opts->{user_thumbnail_image_filenameprefix} = $1 ;
 # Index
     } elsif (/^index_cellpadding\s*=\s*(.+)$/) { # >= 0, -1 for default
 	$opts->{index_cellpadding} = $1 ;
@@ -953,6 +960,10 @@ sub sanity_checks {
 	if $opts->{index_filename} eq "" or $opts->{index_filename} =~ /\// ;
     die "Please give a non-empty filename without path as a caption filename\n"
 	if $opts->{captions_filename} eq "" or $opts->{captions_filename} =~ /\// ;
+    die "Please give a non-empty string without path as a user-given scaled image prefix\n"
+	if $opts->{user_scaled_image_filenameprefix} eq "" or $opts->{user_scaled_image_filenameprefix} =~ /\// ;
+    die "Please give a non-empty string without path as a user-given thumbnail image prefix\n"
+	if $opts->{user_thumbnail_image_filenameprefix} eq "" or $opts->{user_thumbnail_image_filenameprefix} =~ /\// ;
     die "Please give a non-empty caption removal line\n"
 	if $opts->{captions_removal_line} eq "" ;
 }
@@ -1346,6 +1357,50 @@ sub check_movie {
 }
 
 ###################################################################################
+# returns a filename that the user provided in the llgal directory
+# to be used as a thumbnail or scaled image
+
+sub find_user_thumbnail {
+    my $entry = shift ;
+    my $type = $entry->{type} ;
+    my $filename = $entry->{filename} ;
+    my $user_thumbnail_filename = "$opts->{user_thumbnail_image_filenameprefix}$opts->{thumbnail_image_filenameprefix}$filename" ;
+
+    if ($type == $TYPE_IMG) {
+	if (-f "$opts->{local_llgal_dir}/$user_thumbnail_filename") {
+	    return $user_thumbnail_filename ;
+	}
+    } else {
+	foreach my $ext (split (/\|/, $opts->{image_extensions})) {
+	    if (-f "$opts->{local_llgal_dir}/$user_thumbnail_filename.$ext") {
+		return "$user_thumbnail_filename.$ext" ;
+	    }
+	}
+    }
+    return "" ;
+}
+
+sub find_user_scaled {
+    my $entry = shift ;
+    my $type = $entry->{type} ;
+    my $filename = $entry->{filename} ;
+    my $user_scaled_filename = "$opts->{user_scaled_image_filenameprefix}$opts->{scaled_image_filenameprefix}$filename" ;
+
+    if ($type == $TYPE_IMG) {
+	if (-f "$opts->{local_llgal_dir}/$user_scaled_filename") {
+	    return $user_scaled_filename ;
+	}
+    } else {
+	foreach my $ext (split (/\|/, $opts->{image_extensions})) {
+	    if (-f "$opts->{local_llgal_dir}/$user_scaled_filename.$ext") {
+		return "$user_scaled_filename.$ext" ;
+	    }
+	}
+    }
+    return "" ;
+}
+
+###################################################################################
 # extract caption from image infos
 
 # Standard comment such as JFIF or GIF
@@ -1553,11 +1608,40 @@ sub fill_file_entry {
     }
 
     # thumbnail, its url and dimensions
-    if ($type == $TYPE_IMG) {
+    my $thumb_filename = find_user_thumbnail ($entry) ;
+    if ($thumb_filename) {
+	# there's a user provided thumbnail, just use it
+
+	$entry->{thumb_filename} = "$opts->{local_llgal_dir}/$thumb_filename" ;
+	$entry->{thumb_url} = "$local_llgal_url/". make_safe_url_nowarn ($thumb_filename) ;
+
+	# thumbnails dimensions
+	my ($x, $y) = imgsize ("$opts->{local_llgal_dir}/$thumb_filename") ;
+	if ($y > $opts->{thumbnail_height_max}) {
+	    $x = $x * ($opts->{thumbnail_height_max} / $y) ;
+	    $y = $opts->{thumbnail_height_max} ;
+	}
+	if ($opts->{thumbnail_width_max} > 0 and $x > $opts->{thumbnail_width_max}) {
+	    $y = $y * ($opts->{thumbnail_width_max} / $x) ;
+	    $x = $opts->{thumbnail_width_max} ;
+	}
+
+	($entry->{thumb_xdim},$entry->{thumb_ydim}) = ($x, $y) ;
+
+	# dimstring
+	if ($opts->{show_dimensions}) {
+	    $entry->{thumb_dimstring} = "(${x}x${y})" ;
+	} else {
+	    $entry->{thumb_dimstring} = "" ;
+	}
+
+    } elsif ($type == $TYPE_IMG) {
+	# no user provided thumbnail, generate one
+
 	# filename and url
-	my $thumbnail_filename = "$opts->{thumbnail_image_filenameprefix}$filename" ;
-	$entry->{thumb_filename} = "$opts->{local_llgal_dir}/$thumbnail_filename" ;
-	$entry->{thumb_url} = "$local_llgal_url/". make_safe_url_nowarn ($thumbnail_filename) ;
+	$thumb_filename = "$opts->{thumbnail_image_filenameprefix}$filename" ;
+	$entry->{thumb_filename} = "$opts->{local_llgal_dir}/$thumb_filename" ;
+	$entry->{thumb_url} = "$local_llgal_url/". make_safe_url_nowarn ($thumb_filename) ;
 
 	# thumbnails dimensions
 	my $real_thumb_filename = "$destination_dir$entry->{thumb_filename}" ;
@@ -1594,9 +1678,44 @@ sub fill_file_entry {
 
     if (!$opts->{make_no_slides}) {
 	# scaled image, its url and dimensions
-	if ($type == $TYPE_IMG and ($opts->{slide_width_max} > 0 or $opts->{slide_height_max} > 0)) {
+
+	my $scaled_filename = find_user_scaled ($entry) ;
+	if ($scaled_filename and ($opts->{slide_width_max} > 0 or $opts->{slide_height_max} > 0)) {
+	    # there's a user provided scaled, just use it
+
+	    $entry->{scaled_filename} = "$opts->{local_llgal_dir}/$scaled_filename" ;
+	    $entry->{scaled_url} = "$local_llgal_url/". make_safe_url_nowarn ($scaled_filename) ;
+
+	    # thumbnails dimensions
+	    my ($x, $y) = imgsize ("$opts->{local_llgal_dir}/$scaled_filename") ;
+	    if ($y > $opts->{slide_height_max} and $y > $opts->{slide_height_max}) {
+		$x = $x * ($opts->{slide_height_max} / $y) ;
+		$y = $opts->{slide_height_max} ;
+	    }
+	    if ($opts->{slide_width_max} > 0 and $x > $opts->{slide_width_max}) {
+		$y = $y * ($opts->{slide_width_max} / $x) ;
+		$x = $opts->{slide_width_max} ;
+	    }
+
+	    ($entry->{scaled_xdim},$entry->{scaled_ydim}) = ($x, $y) ;
+	    $entry->{scaled_kbytes} = (-s "$opts->{local_llgal_dir}/$scaled_filename") >> 10 ;
+
+	    # dimstring
+	    if ($opts->{show_dimensions} and $opts->{show_size}) {
+		$entry->{scaled_dimstring} = "($entry->{scaled_xdim}x$entry->{scaled_ydim}, $entry->{scaled_kbytes}$opts->{show_size_unit})" ;
+	    } elsif ($opts->{show_size}) {
+		$entry->{scaled_dimstring} = "($entry->{scaled_kbytes}$opts->{show_size_unit})" ;
+	    } elsif ($opts->{show_dimensions}) {
+		$entry->{scaled_dimstring} = "($entry->{scaled_xdim}x$entry->{scaled_ydim})" ;
+	    } else {
+		$entry->{scaled_dimstring} = "" ;
+	    }
+
+	} elsif ($type == $TYPE_IMG and ($opts->{slide_width_max} > 0 or $opts->{slide_height_max} > 0)) {
+	    # no user provided scaled, generate one
+
 	    # filename and url
-	    my $scaled_filename = "$opts->{scaled_image_filenameprefix}$filename" ;
+	    $scaled_filename = "$opts->{scaled_image_filenameprefix}$filename" ;
 	    $entry->{scaled_filename} = "$opts->{local_llgal_dir}/$scaled_filename" ;
 	    $entry->{scaled_url} = "$local_llgal_url/". make_safe_url_nowarn ($scaled_filename) ;
 
@@ -1625,9 +1744,7 @@ sub fill_file_entry {
 		    return undef ;
 		}
 	    }
-	    ($x,$y) = imgsize ("$real_scaled_filename") ;
-	    $entry->{scaled_xdim} = $x ;
-	    $entry->{scaled_ydim} = $y ;
+	    ($entry->{scaled_xdim},$entry->{scaled_ydim}) = imgsize ("$real_scaled_filename") ;
 	    $entry->{scaled_kbytes} = (-s "$real_scaled_filename") >> 10 ;
 
 	    # dimstring
@@ -2233,7 +2350,7 @@ sub generate_slides {
 
 	    # set the style
 	    if ($line =~ m/<!--THIS-SLIDE-STYLE-->/g) {
-		if ($type == $TYPE_IMG) {
+		if ($entry->{scaled_url}) {
 		    $line =~ s/<!--THIS-SLIDE-STYLE-->/image-slide/ ;
 		} else {
 		    $line =~ s/<!--THIS-SLIDE-STYLE-->/text-slide" style="width: $opts->{text_slide_width}px; height: $opts->{text_slide_height}px;/ ;
@@ -2242,25 +2359,54 @@ sub generate_slides {
 
 	    # fill the main part
 	    if ($line =~ m/<!--THIS-SLIDE-->/g) {
+		my $content ;
 		if ($type == $TYPE_IMG) {
 		    # image slide
 
 		    if (defined $entry->{scaled_filename}) {
 			# scaled image with link to the real image
-			$line =~ s/<!--THIS-SLIDE-->/<a href="$entry->{url}" title="$opts->{over_scaled_text}$title $entry->{dimstring}"><img src="$entry->{scaled_url}" alt="$opts->{alt_scaled_text}$title $entry->{scaled_dimstring}" \/><\/a>/ ;
+			$content = "<a href=\"$entry->{url}\" "
+			    ."title=\"$opts->{over_scaled_text}$title $entry->{dimstring}\">" ;
+			$content .= "<img src=\"$entry->{scaled_url}\" "
+			    ."style=\"width: $entry->{scaled_xdim}px; height: $entry->{scaled_ydim}px;\" "
+			    ."alt=\"$opts->{alt_scaled_text}$title $entry->{scaled_dimstring}\" />" ;
+			$content .= "</a>" ;
 
 		    } else {
 			# real image
-			$line =~ s/<!--THIS-SLIDE-->/<img src="$entry->{url}" alt="$opts->{alt_full_text}$title $entry->{dimstring}" title="$title $entry->{dimstring}" \/>/g ;
+			$content = "<img src=\"$entry->{url}\" "
+			    ."style=\"width: $entry->{scaled_xdim}px; height: $entry->{scaled_ydim}px;\" "
+			    ."alt=\"$opts->{alt_full_text}$title $entry->{dimstring}\" "
+			    ."title=\"$title $entry->{dimstring}\" />" ;
 
+		    }
+		} elsif ($entry->{scaled_url}) {
+		    # another type, with a user-given scaled image
+		    if ($type == $TYPE_TXT) {
+			# text with scaled image ? ok...
+			$content = "<img src=\"$entry->{scaled_url}\" "
+			    ."style=\"width: $entry->{scaled_xdim}px; height: $entry->{scaled_ydim}px;\" "
+			    ."title=\"$title $entry->{dimstring}\" "
+			    ."alt=\"$entry->{linktext} $entry->{scaled_dimstring}\" />" ;
+		    } else {
+			# another type with scaled image linking to the target
+			$content = "<a href=\"$entry->{url}\" "
+			    ."title=\"$title $entry->{dimstring}\">" ;
+			$content .= "<img src=\"$entry->{scaled_url}\" "
+			    ."style=\"width: $entry->{scaled_xdim}px; height: $entry->{scaled_ydim}px;\" "
+			    ."alt=\"$entry->{linktext} $entry->{scaled_dimstring}\" />" ;
+			$content .= "</a>" ;
 		    }
 		} elsif ($type == $TYPE_TXT) {
 		    # text slide
-		    $line =~ s/<!--THIS-SLIDE-->/$entry->{linktext}/ ;
+		    $content = $entry->{linktext} ;
 		} else {
 		    # link-style slide
-		    $line =~ s/<!--THIS-SLIDE-->/<a href="$entry->{url}" title="$title $entry->{dimstring}">$entry->{linktext}<\/a>/ ;
+		    $content = "<a href=\"$entry->{url}\" title=\"$title $entry->{dimstring}\">$entry->{linktext}</a>" ;
 		}
+
+		# finally replace <!--THIS-SLIDE-->
+		$line =~ s/<!--THIS-SLIDE-->/$content/ ;
 	    }
 
 	    # add the caption, with the image counter unless --nc is specified
@@ -2281,57 +2427,59 @@ sub generate_slides {
 	    my $index_link = $opts->{index_link_text} ;
 	    if ($opts->{index_link_image}) {
 		if ($opts->{index_link_image_location}) {
-		    $index_link = "<img src=\"". $opts->{index_link_image_location}
-			."\" alt=\"$opts->{index_link_text}\" class=\"image-link\" />" ;
+		    $index_link = "<img src=\"$opts->{index_link_image_location}\" "
+			."alt=\"$opts->{index_link_text}\" "
+			."class=\"image-link\" />" ;
 		} else {
-		    $index_link = "<img src=\"$opts->{local_llgal_dir}/". (make_safe_url $opts->{index_link_image_filename})
-			."\" alt=\"$opts->{index_link_text}\" class=\"image-link\" />" ;
+		    $index_link = "<img src=\"$opts->{local_llgal_dir}/". (make_safe_url $opts->{index_link_image_filename}) ."\" "
+			."alt=\"$opts->{index_link_text}\" class=\"image-link\" />" ;
 		}
 	    }
 	    $line =~ s/<!--INDEX-LINK-TEXT-->/$index_link/g ;
-
 	    $line =~ s/<!--INDEX-FILE-->/$opts->{index_filename}.$opts->{www_extension}\" title=\"$opts->{over_index_link_text}/g ;
 
 	    # process PREV-SLIDE
 	    my $prev = $entries[$i-1] ;
 
 	    my $prev_slide_link ;
-	    if ($opts->{prev_slide_link_preview} and $prev->{type} == $TYPE_IMG) {
-		$prev_slide_link = "<img src=\"$prev->{thumb_url}\" alt=\"$opts->{prev_slide_link_text}\"/>" ;
+	    if ($opts->{prev_slide_link_preview} and $prev->{thumb_url}) {
+		$prev_slide_link = "<img src=\"$prev->{thumb_url}\" "
+		    ."style=\"width: $prev->{thumb_xdim}px; height: $prev->{thumb_ydim}px;\" "
+		    ."alt=\"$opts->{prev_slide_link_text}\" />" ;
 	    } elsif ($opts->{prev_slide_link_image}) {
 		if ($opts->{prev_slide_link_image_location}) {
-		    $prev_slide_link = "<img src=\"". $opts->{prev_slide_link_image_location}
-			."\" alt=\"$opts->{prev_slide_link_text}\" class=\"image-link\" />" ;
+		    $prev_slide_link = "<img src=\"$opts->{prev_slide_link_image_location}\" "
+			."alt=\"$opts->{prev_slide_link_text}\" class=\"image-link\" />" ;
 		} else {
-		    $prev_slide_link = "<img src=\"$opts->{local_llgal_dir}/". (make_safe_url $opts->{prev_slide_link_image_filename})
-			."\" alt=\"$opts->{prev_slide_link_text}\" class=\"image-link\" />" ;
+		    $prev_slide_link = "<img src=\"$opts->{local_llgal_dir}/". (make_safe_url $opts->{prev_slide_link_image_filename}) ."\" "
+			."alt=\"$opts->{prev_slide_link_text}\" class=\"image-link\" />" ;
 		}
 	    } else {
 		$prev_slide_link = $opts->{prev_slide_link_text} ;
 	    }
 	    $line =~ s/<!--PREV-SLIDE-LINK-TEXT-->/$prev_slide_link/g ;
-
 	    $line =~ s/<!--PREV-SLIDE-->/$prev->{slide_url}\" title=\"$opts->{over_prev_slide_link_text}$prev->{title}/g ;
 
 	    # process NEXT-SLIDE
 	    my $next = $entries[$i==@entries-1 ? 0 : $i+1] ;
 
 	    my $next_slide_link ;
-	    if ($opts->{next_slide_link_preview} and $next->{type} == $TYPE_IMG) {
-		$next_slide_link = "<img src=\"$next->{thumb_url}\" alt=\"$opts->{next_slide_link_text}\"/>" ;
+	    if ($opts->{next_slide_link_preview} and $next->{thumb_url}) {
+		$next_slide_link = "<img src=\"$next->{thumb_url}\" "
+		    ."style=\"width: $next->{thumb_xdim}px; height: $next->{thumb_ydim}px;\" "
+		    ."alt=\"$opts->{next_slide_link_text}\" />" ;
 	    } elsif ($opts->{next_slide_link_image}) {
 		if ($opts->{next_slide_link_image_location}) {
-		    $next_slide_link = "<img src=\"". $opts->{next_slide_link_image_location}
-			."\" alt=\"$opts->{next_slide_link_text}\" class=\"image-link\" />" ;
+		    $next_slide_link = "<img src=\"". $opts->{next_slide_link_image_location} ."\" "
+			."alt=\"$opts->{next_slide_link_text}\" class=\"image-link\" />" ;
 		} else {
-		    $next_slide_link = "<img src=\"$opts->{local_llgal_dir}/". (make_safe_url $opts->{next_slide_link_image_filename})
-			."\" alt=\"$opts->{next_slide_link_text}\" class=\"image-link\" />" ;
+		    $next_slide_link = "<img src=\"$opts->{local_llgal_dir}/". (make_safe_url $opts->{next_slide_link_image_filename}) ."\" "
+			."alt=\"$opts->{next_slide_link_text}\" class=\"image-link\" />" ;
 		}
 	    } else {
 		$next_slide_link = $opts->{next_slide_link_text} ;
 	    }
 	    $line =~ s/<!--NEXT-SLIDE-LINK-TEXT-->/$next_slide_link/g ;
-
 	    $line =~ s/<!--NEXT-SLIDE-->/$next->{slide_url}\" title=\"$opts->{over_next_slide_link_text}$next->{title}/g ;
 
 	    $line =~ s/<!--CREDITS-->/$opts->{credits_text}/g ;
@@ -2370,6 +2518,10 @@ sub generate_index {
     # headers
     my $line ;
     while (defined($line = <IXR>)) {
+
+	# stop at <!-- ********** -->
+	last if $line =~ m/\*{10}/ ;
+
 	if ($line =~ m/<!--HEADERS-->/) {
 	    foreach my $header (@headers) {
 		print IXW "    <div class=\"header\">" . $header . "</div>\n" ;
@@ -2383,10 +2535,9 @@ sub generate_index {
 		$line =~ s/<!--CSS-->/$opts->{local_llgal_dir}\/$opts->{css_filename}/g ;
 	    }
 	    print IXW "$line" ;
-	    # stop at <!-- ********** -->
-	    last if $line =~ m/\*{10}/ ;
 	}
     }
+    print IXW "\n" ;
 
     # for each row
     my $num ;
@@ -2431,32 +2582,69 @@ sub generate_index {
 	for (my $j = 0; $j < $num; $j++) {
 	    my $entry = $entries[$i+$j] ;
 	    my $type = $entry->{type} ;
+	    my $title = $entry->{title} ;
 	    my $width = $entry->{thumb_xdim} ;
 	    my $height = $entry->{thumb_ydim} ;
 
-	    if ($type == $TYPE_TXT or $type == $TYPE_LNK or $type == $TYPE_MVI or $type == $TYPE_FIL or $type == $TYPE_DIR) {
-		print IXW "    <td class=\"text-thumb\" style=\"width: ", $width, "px; height: ", $height, "px;\">\n" ;
-		print IXW "      " ;
-		if ($type == $TYPE_TXT) {
-		    print IXW "<a href=\"$entry->{slide_url}\" title=\"$entry->{title}\">$entry->{linktext}</a>" ;
-		} else {
-		    # directly open links from the index
-		    print IXW "<a href=\"$entry->{url}\" title=\"$entry->{title} $entry->{dimstring}\">$entry->{linktext}</a>" ;
-		}
-		print IXW "</td>\n" ;
-	    } elsif ($type == $TYPE_IMG) {
-		my $altname = $entry->{title} ;
+	    if ($type == $TYPE_IMG) {
+		# IMG thumbnail
+
 		print IXW "    <td class=\"thumb\" style=\"width: ${width}px; height: ${height}px;\">\n" ;
 		if ($opts->{make_no_slides}) {
 		    print IXW "      <a href=\"$entry->{url}\"" ;
 		} else {
 		    print IXW "      <a href=\"$entry->{slide_url}\"" ;
 		}
-		print IXW " title=\"$opts->{over_thumbnail_text}$altname $entry->{scaled_dimstring}\">" ;
-		print IXW "<img src=\"$entry->{thumb_url}\" alt=\"$opts->{alt_thumbnail_text}$altname $entry->{thumb_dimstring}\" />" ;
-		print IXW "</a></td>\n" ;
+		print IXW " title=\"$opts->{over_thumbnail_text}$title $entry->{scaled_dimstring}\">\n" ;
+		print IXW "        <img src=\"$entry->{thumb_url}\" "
+			."style=\"width: $entry->{thumb_xdim}px; height: $entry->{thumb_ydim}px;\" "
+			."alt=\"$opts->{alt_thumbnail_text}$title $entry->{thumb_dimstring}\" />\n" ;
+		print IXW "      </a>\n" ;
+		print IXW "    </td>\n" ;
+
+	    } elsif ($entry->{thumb_url}) {
+		# not IMG, but with a user-given thumbnail
+
+		print IXW "    <td class=\"thumb\" style=\"width: ${width}px; height: ${height}px;\">\n" ;
+		if ($type == $TYPE_TXT) {
+		    # TXT with a thumbnail ? ok...
+		    if ($opts->{make_no_slides}) {
+			# thumbnail linking to the TXT slide
+			print IXW "      <a href=\"$entry->{slide_url}\" "
+				."title=\"$title $entry->{scaled_dimstring}\">\n" ;
+			print IXW "        <img src=\"$entry->{thumb_url}\" "
+				."style=\"width: $entry->{thumb_xdim}px; height: $entry->{thumb_ydim}px;\" "
+				."alt=\"$entry->{linktext} $entry->{thumb_dimstring}\" />\n" ;
+			print IXW "      </a>" ;
+
+		    } else {
+			# thumbnail without any link
+			print IXW "      <img src=\"$entry->{thumb_url}\" "
+				."title=\"$title $entry->{scaled_dimstring}\" "
+				."style=\"width: $entry->{thumb_xdim}px; height: $entry->{thumb_ydim}px;\" "
+				."alt=\"$entry->{linktext} $entry->{thumb_dimstring}\" />\n" ;
+		    }
+		} else {
+		    # other types directly link to the target instead of the slide
+		    print IXW "      <a href=\"$entry->{url}\" "
+		    	."title=\"$title $entry->{scaled_dimstring}\">\n" ;
+		    print IXW "        <img src=\"$entry->{thumb_url}\" "
+			."style=\"width: $entry->{thumb_xdim}px; height: $entry->{thumb_ydim}px;\" "
+			."alt=\"$entry->{linktext} $entry->{thumb_dimstring}\" />\n" ;
+		    print IXW "      </a>\n" ;
+		}
+		print IXW "    </td>\n" ;
 	    } else {
-		die "Unknown type $type.\n" ;
+		# not IMG, without thumbnail
+		print IXW "    <td class=\"text-thumb\" style=\"width: ", $width, "px; height: ", $height, "px;\">\n" ;
+		if ($type == $TYPE_TXT) {
+		    # thumbnail linking to the slide
+		    print IXW "      <a href=\"$entry->{slide_url}\" title=\"$title\">$entry->{linktext}</a>\n" ;
+		} else {
+		    # thumbnail directly linking to the target
+		    print IXW "      <a href=\"$entry->{url}\" title=\"$title $entry->{dimstring}\">$entry->{linktext}</a>\n" ;
+		}
+		print IXW "    </td>\n" ;
 	    }
 	    print_percentage ($i+$j+1, scalar @entries) ;
 	}
@@ -2517,6 +2705,7 @@ sub generate_index {
     while (defined($line = <IXR>)) {
 	last if $line =~ m/\*{10}/ ;
     }
+    print IXW "\n";
 
     # footers
     while (defined ($line = <IXR>)) {
@@ -2722,6 +2911,8 @@ sub generate_config {
     print NEWCFG "scaled_image_filenameprefix = \"$opts->{scaled_image_filenameprefix}\"\n" ;
     print NEWCFG "thumbnail_image_filenameprefix = \"$opts->{thumbnail_image_filenameprefix}\"\n" ;
     print NEWCFG "captions_filename = \"$opts->{captions_filename}\"\n" ;
+    print NEWCFG "user_scaled_image_filenameprefix = \"$opts->{user_scaled_image_filenameprefix}\"\n" ;
+    print NEWCFG "user_thumbnail_image_filenameprefix = \"$opts->{user_thumbnail_image_filenameprefix}\"\n" ;
     print NEWCFG "\n" ;
     print NEWCFG "# Index:\n" ;
     print NEWCFG "index_cellpadding = $opts->{index_cellpadding}\n" ;

@@ -8,7 +8,7 @@ llgal \- On-line gallery generator
 
 
 .SH SYNOPSIS
-.B llgal 
+.B llgal
 .I [-option1 -option2 ...]
 
 
@@ -16,8 +16,8 @@ llgal \- On-line gallery generator
 .B llgal
 is a quick and easy program for placing your images and movies online with
 just one command-line. It generates a pretty good-looking set of static HTML
-slides even with its default settings.  To try it out just run 
-.B llgal 
+slides even with its default settings.  To try it out just run
+.B llgal
 in a directory with
 .IR jpg ", " png ", " mpg ", " avi ", etc
 files and check the output in a web browser.  You can adjust the
@@ -33,7 +33,7 @@ files.
 also checks for the existence of a
 .I "$HOME/.llgal"
 directory where users can store their own templates, overriding
-the site-wide 
+the site-wide
 .IR "/usr/share/llgal" .
 See
 .SM
@@ -56,6 +56,26 @@ See
 .SM
 .B SELECTING FILES
 to include directories or other files and excludes some filenames.
+
+The index includes thumbnails that
+.B llgal
+generates from original images.
+It is possible to provide custom thumbnails by placing them in the
+.I .llgal
+directory with the
+.BI mythumb_
+prefix.
+Custom thumbnails for movies have to be suffixed with an image-type
+extension.
+
+The slide pages may include a scaled image in the
+.I --bigxy
+or
+.I --bigxy
+option is passed.
+It is also possible to define custom scaled images with the
+.Bi myscaled_
+prefix.
 
 Note that all command line options (except those from
 .SM
@@ -87,8 +107,8 @@ may have created earlier and that user did not modify since.
 .BI --cleanall
 Remove all files
 .B llgal
-may have created earlier. This includes thumbnails, scaled down slides, all 
-HTML files, captions file, film effect picture, indextemplate and slidetemplate 
+may have created earlier. This includes thumbnails, scaled down slides, all
+HTML files, captions file, film effect picture, indextemplate and slidetemplate
 and the style-sheet file.
 
 .TP
@@ -174,7 +194,7 @@ is given.  Otherwise
 will not regenerate these files if they already exist, and you may
 end up with stale copies.  Definitely use
 .BI -f
-between two runs where you've changed the value of 
+between two runs where you've changed the value of
 .BR --bigxy, --bigy " or " --con "."
 
 .TP
@@ -304,8 +324,8 @@ Like
 but operates on the image slides, not the thumbnails.  Scales image
 slides to some medium width and height (e.g.
 .IR 400 "),"
-adjusting their other dimension accordingly.  Useful if your digital 
-camera spits out large images, like 1600x1200.  The originals aren't 
+adjusting their other dimension accordingly.  Useful if your digital
+camera spits out large images, like 1600x1200.  The originals aren't
 affected, but scaled copies of your images are generated
 and thumbnails link to these copies.  Clicking on the scaled
 copies in the HTML slides lets users see the full unscaled images.
@@ -430,7 +450,7 @@ a thumbnail to preview previous/next slide.
 If passed together with
 .BI --li \fR,
 thumbnail preview is used for links to previous/next slide
-while the image is for the link to the index is kept. 
+while the image is for the link to the index is kept.
 
 .TP
 .BI -n
@@ -502,7 +522,7 @@ Add links between subgalleries.
 
 .TP
 .B -s
-For the simplest setup, omit all HTML slides.  Clicking the thumbnails on 
+For the simplest setup, omit all HTML slides.  Clicking the thumbnails on
 the main page will just take users to the plain image files.
 
 .TP
@@ -529,7 +549,7 @@ Add a directory to the list of template locations.
 
 .TP
 .BI --title " <s>"
-Substitutes the string 
+Substitutes the string
 .I <s>
 for "<!--TITLE-->" in the index. The default is "Index of Pictures".
 
@@ -574,7 +594,7 @@ files world-readable.
 
 .TP
 .BI --wx " <n>"
-Set the thumbnail rows to be 
+Set the thumbnail rows to be
 .I <n>
 pixels wide at maximum. The number of thumbnails per row, given in
 .BI -w
@@ -594,7 +614,7 @@ images.
 
 .TP
 .BI -y " <n>"
-Scale all thumbnails to the same height of 
+Scale all thumbnails to the same height of
 .IR <n> " pixels."
 The default is 75 pixels.
 
@@ -848,6 +868,16 @@ Default is \fBthumb_\fR.
 Name of the caption file that will be generated when llgal is called with --gc,
 or will be automatically used if it exists to generate slide captions.
 Default is \fBcaptions\fR.
+.RE
+.I user_scaled_image_filenameprefix = \fI"filename prefix"
+.RS
+Additional prefix of user-provided scaled images.
+Default is \fBmy\fR.
+.RE
+.I user_thumbnail_image_filenameprefix = \fI"filename prefix"
+.RS
+Additional prefix of user-provided thumbnails.
+Default is \fBmy\fR.
 .RE
 
 .B Index:
@@ -1436,7 +1466,7 @@ or in the user template directory.
 .SH EXAMPLES
 Run
 .B llgal
-in a directory with 
+in a directory with
 .IR jpg ", " gif ", " png ", " mpg " or " avi
 files to see what it does.  Then
 play with the options described above and use

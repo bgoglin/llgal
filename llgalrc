@@ -99,6 +99,12 @@
 # with --gc. This file will be stored under $local_llgal_dir.
 # captions_filename = "captions"
 
+# Additional prefix of user-provided scaled images
+# user_scaled_image_filenameprefix = "my"
+
+# Additional prefix of user-provided thumbnails
+# user_thumbnail_image_filenameprefix = "my"
+
 ##### Index #####
 
 # Cellpadding in the index table [-p <n>]
