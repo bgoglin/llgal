@@ -1,3 +1,4 @@
+llgal (0.12)
 
   * Add internationalization support for the text that is automatically
     embedded in the HTML pages. See LANGUAGE in the manpage for details.
@@ -23,6 +24,7 @@
   * Minor fix in the README.
   * Typos in the Changes.
 
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Thu, 15 Dec 2005 12:47:26 -0500
 
 llgal (0.11.4)
 
