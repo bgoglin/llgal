@@ -1,14 +1,14 @@
 .\" Process this file with
 .\" groff -man -Tascii foo.1
 .\"
-.TH LLGAL 1 "FEBRUARY 2005"
+.TH LLGAL 1 "DECEMBER 2005"
 
 .SH NAME
 llgal \- On-line gallery generator
 
 
 .SH SYNOPSIS
-.B llgal 
+.B llgal
 .I [-option1 -option2 ...]
 
 
@@ -16,95 +16,100 @@ llgal \- On-line gallery generator
 .B llgal
 is a quick and easy program for placing your images and movies online with
 just one command-line. It generates a pretty good-looking set of static HTML
-slides even with its default settings.  To try it out just run 
-.B llgal 
+slides even with its default settings.  To try it out just run
+.B llgal
 in a directory with
-.IR jpg ", " tif ", " gif ", " png ", " mpg ", " mov " or " avi
+.BR "jpg" ", " "png" ", " "mpg" ", etc"
 files and check the output in a web browser.  You can adjust the
 appearance of the image gallery with the many options listed below or
 (if you know a bit of HTML) by modifying the
-.IR llgal.css
+.I llgal.css
 files in the
-.IR .llgal/ " subdirectory that appeared in your"
-image directory, or by defining
-.IR indextemplate.html " or " slidetemplate.html
-files.
-.B llgal
-also checks for the existence of a
-.I "$HOME/.llgal"
-directory where users can store their own templates, overriding
-the site-wide 
-.IR "/usr/share/llgal" .
-See
-.SM
+.I .llgal/
+subdirectory that appeared in your image directory, or
+by defining
+.IR "indextemplate.html" " or " "slidetemplate.html" " files."
+
+llgal also checks for the existence of a
+.I $HOME/.llgal/
+directory where users can store their own templates, overriding the
+site-wide
+.IR "/usr/share/llgal" "."
+(See
 .B FILES
-for details.
+for details).
 
 The HTML webpages are generated from the templates by replacing
-several fields (See
-.SM
-.B TEMPLATES
-).
+several fields
+(See
+.BR TEMPLATES ).
 The layout might be configured through the list of options
 that are given in
-.SM
-.B LAYOUT \fR.
+.BR "LAYOUT" "."
 
-.IR llgal
-uses all images and videos it finds in the current directory.
+llgal uses all images and videos it finds in the current directory.
 See
-.SM
 .B SELECTING FILES
 to include directories or other files and excludes some filenames.
 
+The index includes thumbnails that llgal generates from original
+images.
+It is possible to provide custom thumbnails by placing them in the
+.I .llgal/
+directory with the
+.I mythumb_
+prefix.
+Custom thumbnails for movies have to be suffixed with an image-type
+extension.
+
+The slide pages may include a scaled image in the
+.B --bigxy
+or
+.B --bigxy
+option is passed.
+It is also possible to define custom scaled images with the
+.I myscaled_
+prefix.
+
 Note that all command line options (except those from
-.SM
-.B BEHAVIOR OPTIONS
-), and even more, might be stored in a configuration file
+.BR "BEHAVIOR OPTIONS" ),
+and even more, might be stored in a configuration file
 to help generation of multiple galleries with the same
 layout.
 See
-.SM
 .B CONFIGURATION
 for details.
 
 
 .SH BEHAVIOR OPTIONS
 
-By default,
-.B llgal
-generates a gallery.
+By default, llgal generates a gallery.
 If one of the following option is passed,
 it will process it and exit immediately.
 
 .TP
-.BI --clean
-Remove all files
-.B llgal
-may have created earlier and that user did not modify since.
+.B --clean
+Remove all files that llgal may have created earlier and that user did
+not modify since.
 
 .TP
-.BI --cleanall
-Remove all files
-.B llgal
-may have created earlier. This includes thumbnails, scaled down slides, all 
-HTML files, captions file, film effect picture, indextemplate and slidetemplate 
-and the style-sheet file.
+.B --cleanall
+Remove all files that llgal may have created earlier. This includes
+thumbnails, scaled down slides, all HTML files, captions file, film
+effect picture, indextemplate and slidetemplate and the style-sheet
+file.
 
 .TP
-.BI --gc
+.B --gc
 Generate slide captions in
-.IR ".llgal/captions"
+.I .llgal/captions
 file that you may edit.  The format of this file is very simple.
-See
-.SM
-.B CAPTIONS
-for details.
+.RB "See " CAPTIONS " for details."
 These captions may then be modified by the user.
 The file will be automatically used next time
 .B llgal
 is invoked.
-.BI --gc
+.B --gc
 might also be used to update the
 .I captions
 file when new files were added to the working directory.
@@ -113,38 +118,35 @@ file when new files were added to the working directory.
 .BI --gt " [<dir>]"
 Copy template files to the directory.
 The special value
-.IR local
+.I local
 might be used for the local
-.I .llgal
+.I .llgal/
 directory, while
-.IR user
+.I user
 might be used for the user
 template directory
-.I $HOME/.llgal \fR.
+.IR $HOME/.llgal/ .
 Any other directory is acceptable.
-.I llgal
-will create the target directory if it does not exist.
+llgal will create the target directory if it does not exist.
 The argument is optional.
 Its default value is
-.IR local \fR.
+.BR local .
 See
-.SM
 .B FILES
 for details about template files.
 
 .TP
-.BI "-h, --help"
+.B -h, --help
 Display brief help.
 
 .TP
-.BI "-v, --version"
+.B -v, --version
 Display llgal version.
 
 
 .SH ADDITIONAL BEHAVIOR OPTIONS
 
-.B llgal
-behavior may be modified with the following options,
+llgal behavior may be modified with the following options,
 either when generating a gallery or not.
 
 .TP
@@ -153,9 +155,10 @@ Read the file
 .I file
 as a configuration.
 See
-.SM
 .B CONFIGURATION
-.BI --config
+for details.
+Note that
+.B --config
 may be used several times on the same command line.
 
 .TP
@@ -166,66 +169,64 @@ which is also where the HTML and thumbnail files will be generated.
 The default is the current directory.
 
 .TP
-.BI -f
+.B -f
 Force thumbnail regeneration.  Also forces medium-slide regeneration if
-.BI --bigxy or --bigy
-is given.  Otherwise
-.B llgal
-will not regenerate these files if they already exist, and you may
-end up with stale copies.  Definitely use
-.BI -f
-between two runs where you've changed the value of 
-.BR --bigxy, --bigy " or " --con "."
+.BR --bigxy " or " --bigy
+is given.  Otherwise llgal will not regenerate these files if they
+already exist, and you may end up with stale copies.  Definitely use
+.B -f
+between two runs where you've changed the value of
+.BR --bigxy ", " --bigy " or " --con "."
 
 .TP
 .BI --gencfg " <file>"
 Output configuration in
-.IR file
+.I file
 for a futur reutilization through
-.BI --config
+.BR --config "."
 See
-.SM
 .B CONFIGURATION
-.BI --config
+for details.
 
 .TP
 .BI --option " 'variable = value'"
 Modify llgal configuration.
 See
-.SM
 .B CONFIGURATION
-.BI --option
+for details.
+Note that
+.B --option
 may be used several times on the same command line.
 
 .TP
-.BI -R
+.B -R
 Enable recursive mode.
-.B llgal
-will be run inside subdirectories.
+llgal will be run inside subdirectories.
 This option might be used either to generate galleries
 in all subdirectories, or their captions files, or to
 clean recursively, etc.
 
 When generating a gallery, this option implies
 .B -S
-that means
-.B llgal
-will use all existing subdirectories in no captions
+that means llgal will use all existing subdirectories in no captions
 file is defined.
 If a captions file is defined, only the
-.BI DIR:
+.B DIR:
 entries will be entered recursively.
+See
+.B CAPTIONS
+for details abour
 
 Note that recursive behavior does only use the contents
 of the captions file to choose which subgalleries to
 enter when generating the gallery or the captions file.
 All other behaviors, including recursive cleaning (
-.BI -R
+.B -R
 used together with
-.BI --clean
+.B --clean
 or
-.BI --cleanall
-), will
+.BR --cleanall ),
+will
 .B not
 check whether a subdirectory is in the captions file.
 All not-dot-begining subdirectories will be cleaned.
@@ -245,27 +246,26 @@ for details about adding slides for subdirectories.
 
 .TP
 .BI --exclude " <s>"
-Exclude files whose name matches \fBs\fR.
+Exclude files whose name matches
+.IR <s> .
 
 .TP
 .BI --include " <s>"
-Include files whose name matches \fBs\fR and where previously excluded.
+Include files whose name matches
+.I <s>
+and where previously excluded.
 
 .TP
-.BI -S
+.B -S
 Each subdirectory will get a dedicated slide.
 If a captions file exists, only the subdirectories that
 it defines will be processed.
-If no captions file exists,
-.B llgal
-will process all subdirectories but those whose name begins
-with a dot.
+If no captions file exists, llgal will process all subdirectories but
+those whose name begins with a dot.
 
 Contrary to
 .B -R
-this option will not make
-.B llgal
-run recursively in subdirectories.
+this option will not make llgal run recursively in subdirectories.
 .B -S
 does only define the list of subdirectories that appear
 in the current gallery.
@@ -276,9 +276,12 @@ in the current gallery.
 .TP
 .B -a
 Write image dimensions and sizes under each thumbnail on the index page,
-and under each slide if --bigy or --bigxy was passed.
+and under each slide if
+.BR --bigy " or " --bigxy
+was passed.
 This only works if the ImageMagick command
-.BR identify " is present."
+.B identify
+is present.
 
 .TP
 .B --ad
@@ -293,9 +296,9 @@ Like
 but write only the image sizes.
 
 .TP
-.B --asu " <s>"
-Allow to define the unit used to show file sizes. Default is
-.IR kB "."
+.BI --asu " <s>"
+Allow to define the unit used to show file sizes.
+Default is \fB"kB"\fR.
 
 .TP
 .BI --bigxy " <n>"
@@ -303,16 +306,16 @@ Like
 .B --xy
 but operates on the image slides, not the thumbnails.  Scales image
 slides to some medium width and height (e.g.
-.IR 400 "),"
-adjusting their other dimension accordingly.  Useful if your digital 
-camera spits out large images, like 1600x1200.  The originals aren't 
+.IR 400 ),
+adjusting their other dimension accordingly.  Useful if your digital
+camera spits out large images, like 1600x1200.  The originals aren't
 affected, but scaled copies of your images are generated
 and thumbnails link to these copies.  Clicking on the scaled
 copies in the HTML slides lets users see the full unscaled images.
 You must use
 .B -f
 between two consecutive runs when you've changed the value of
-.BR "--bigxy" .
+.BR --bigxy .
 
 .TP
 .BI --bigy " <n>"
@@ -336,10 +339,9 @@ between two consecutive runs when you've changed the value of
 Generates
 .I captions
 from image comment tag.
-If no argument is given,
-.B llgal
-first tries the standard comment (for instance JFIF or GIF), and then
-tries Exif comments if the previous one is empty.
+If no argument is given, llgal first tries the standard comment (for
+instance JFIF or GIF), and then tries Exif comments if the previous
+one is empty.
 
 An argument such as
 .I std
@@ -350,132 +352,135 @@ or only Exif comment.
 
 An argument such as
 .I exif,std
-will make
-.B llgal
-try Exif comment first.
+will make llgal try Exif comment first.
 
 An argument such as
 .I std+exif
 will use the combination of standard and Exif comments.
 
 Passing
-.I --cc
+.B --cc
 without argument is thus equivalent to passing
-.I --cc std,exif\fR.
+.B --cc
+.IR std,exif .
 
 .TP
-.BI --cf
+.B --cf
 Generates
 .I captions
 from file names (strips suffix).
 
 .TP
-.BI --ct
+.B --ct
 Add image timestamp tag to the generated captions.
 
 .TP
 .BI --ctf " strftime_format"
-Change timestamp in captions using a strftime format.
+Change timestamp in captions using a
+.B strftime
+format.
 
 .TP
 .BI --con " options"
 Command line options to pass on to
-.BR convert
+.B convert
 internally (see its man page).  This affects all thumbnails
 and, if
-.BI --bigxy or --bigy
+.BR --bigxy " or " --bigy
 is given, the medium-size slides too.  You can set the
-.I -quality
+.B -quality
 or go crazy with
-.IR -negate ", " -noise ", etc."
+.BR -negate ", " -noise ", etc."
 (the last two only work with
 .BR convert " if " ImageMagick " is installed)."
-.BI --con
+.B --con
 may be used several times on the same command line.
 
 .TP
 .BI -i " <file>"
 Name of the main thumbnail index file.  The default is
-.IR index ,
+.BR index ,
 as desirable for most web servers.
 The default extension is
-.IR html
+.B html
 and might be changed with
-.I --php
+.B --php
 or the
 .I www_extension
 configuration option.
 
 .TP
-.BI -k
+.B -k
 Use the image captions for the HTML slide titles.
 The default behavior is to use the image names.
 
 .TP
-.BI -L
+.B -L
 Do not create slides and thumbnails for links (including video, file and url),
 but list them after the main gallery index.
 Might be used when the directory only contains subgalleries and thus does
 not need any slide or thumbnail.
 
 .TP
-.BI --li
-Replace link labels in slides (usually \fBIndex\fR, \fBPrev\fR and \fBNext\fR)
-with images (usually \fBindex.png\fR, \fBprev.png\fR and \fBnext.png\fR).
+.B --li
+Replace link labels in slides (usually
+.BR Index ", " Prev " and " Next )
+with images (usually
+.IR index.png ", " prev.png " and " next.png ).
 
 .TP
-.BI --lt
-Replace link labels in slides (usually \fBPrev\fR and \fBNext\fR) with
-a thumbnail to preview previous/next slide.
+.B --lt
+Replace link labels in slides (usually
+.BR Prev " and " Next )
+with a thumbnail to preview previous/next slide.
 If passed together with
-.BI --li \fR,
+.BR --li ,
 thumbnail preview is used for links to previous/next slide
-while the image is for the link to the index is kept. 
+while the image is for the link to the index is kept.
 
 .TP
-.BI -n
+.B -n
 Use the image file names for the HTML slide files.  Otherwise
 the default behavior is to simply name your slides
 .IR 1.html ", " 2.html ", "
 and so on.
 
 .TP
-.BI --nc
+.B --nc
 Omit the image count from the captions.
 
 .TP
 .BI --next-gal " <url>"
 Add links to the previous gallery located by
-.IR <url> \fR.
+.IR <url> .
 This option is used internally for recursive galleries, and
 thus not documented in
-.BI --help \fR.
+.BR --help .
 
 .TP
 .BI -p " <n>"
 The cellpadding value of the thumbnail index tables.
-The default is 3.
+The default is
+.BR 3 .
 
 .TP
-.BI --php
+.B --php
 Change the default extension of generated webpages from
-.IR html
+.I html
 to
-.IR php \fR.
+.IR php .
 Note that template names are not modified and keep their
-.IR html
+.I html
 extension even if they contain some PHP code.
-Note that
-.B llgal
-will only remove existing webpages corresponding to this
-extension when generating a new gallery or cleaning.
+Note that llgal will only remove existing webpages corresponding to
+this extension when generating a new gallery or cleaning.
 
 .TP
-.BI --parent-gal
+.B --parent-gal
 Add links to the parent directory.
 This option is used internally for recursive galleries, and
 thus not documented in
-.BI --help \fR.
+.BR --help .
 These links are stored as a header and a footer for the index.
 The text in the links might be changed through the
 .B parent_gallery_link_text
@@ -484,42 +489,45 @@ configuration option.
 .TP
 .BI --prev-gal " <url>"
 Add links to the previous gallery located by
-.IR <url> \fR.
+.IR <url> .
 This option is used internally for recursive galleries, and
 thus not documented in
-.BI --help \fR.
+.BR --help .
 
 .TP
-.BI -r
+.B -r
 Omit the film effect altogether.  For a simpler look you
 can also set the thumbnail background to be the same as the main
 index page background with the tile background-color option in the
 .IR llgal.css " file."
 
 .TP
-.BI --Rl
+.B --Rl
 Add links between subgalleries.
 
 .TP
 .B -s
-For the simplest setup, omit all HTML slides.  Clicking the thumbnails on 
+For the simplest setup, omit all HTML slides.  Clicking the thumbnails on
 the main page will just take users to the plain image files.
 
 .TP
 .BI --sort " [rev]<name|iname|size|time|none>"
 Change sort criteria when scanning files in the working directory.
-Default is \fBname\fR.
-Setting to the empty string means \fBnone\fR.
-\fBiname\fR is case insensitive sort by names.
-\fBdate\fR means \fBtime\fR.
-\fBrev\fR might be added for reverse sort.
+Default is \fB"name"\fR.
+Setting to the empty string means
+.BR none .
+.BR iname " is case insensitive sort by names."
+.BR date " means " time .
+.BR rev " might be added for reverse sort."
 
 .TP
 .BI -t " <n>"
 Height (in pixels) of the tiled image used to simulate the top
 and bottom film effect on the thumbnail index page.  This
-is 21 for the default
-.I .tile.png
+is
+.B 21
+for the default
+.I tile.png
 image used, but you should set it otherwise if you replace that
 file with your own design.
 
@@ -529,12 +537,16 @@ Add a directory to the list of template locations.
 
 .TP
 .BI --title " <s>"
-Substitutes the string 
+Substitutes the string
 .I <s>
-for "<!--TITLE-->" in the index. The default is "Index of Pictures".
+for
+.B <!--TITLE-->
+in the index.
+The default is
+.BR "Index of Pictures" .
 
 .TP
-.BI -u
+.B -u
 Write image captions under each thumbnail on the index page.
 If you have a
 .I captions
@@ -556,76 +568,69 @@ and thus do not use local ones.
 Their filename will be appended to the given location.
 Each image location may be also changed independently
 (See
-.SM
 .B CONFIGURATION
-).
+for the list of configuration options).
 
 .TP
 .BI -w " <n>"
 Set the thumbnail rows to be
 .I <n>
-images wide in the main index file.  Default is 5.
+images wide in the main index file.
+Default is
+.BR 5 .
 
 .TP
-.BI --www
-Make all
-.B llgal
-files world-readable.
+.B --www
+Make all generated files world-readable.
 
 .TP
 .BI --wx " <n>"
-Set the thumbnail rows to be 
+Set the thumbnail rows to be
 .I <n>
 pixels wide at maximum. The number of thumbnails per row, given in
-.BI -w
+.B -w
 is reduced if necessary. Default is to honor
-.BI -w
+.B -w
 without regard to the resulting row width.
 
 .TP
 .BI --xy " <n>"
 Scale thumbnails to
 .I <n>
-pixels along their longest dimension.  This value is passed to
-.B pnmscale
-and only works properly for
-.I jpg
-images.
+pixels along their longest dimension.
 
 .TP
 .BI -y " <n>"
-Scale all thumbnails to the same height of 
+Scale all thumbnails to the same height of
 .IR <n> " pixels."
-The default is 75 pixels.
+The default is
+.BR 75 .
 
 
 .SH CAPTIONS
 When called with
-.I --gc
-.B llgal
-generates (or updates if already existing) the
-.IR captions
+.B --gc
+llgal generates (or updates if already existing) the
+.I captions
 file in the
-.IR .llgal
+.I .llgal/
 subdirectory.
 
 When
-.I --gc
+.B --gc
 is not passed, if the
-.IR captions
-file exists,
-.B llgal
-will automatically use it to generate slide captions in the gallery.
+.I captions
+file exists, llgal will automatically use it to generate slide
+captions in the gallery.
 If
-.IR captions
-does not exist,
-.B llgal
-generates captions on the fly and use them in the gallery.
+.I captions
+does not exist, llgal generates captions on the fly and use them in
+the gallery.
 
 Generating the
-.IR captions
+.I captions
 file with
-.I --gc
+.B --gc
 before actually using it makes it possible to modify them
 (especially to add comments)
 or change the order of the slides in the gallery
@@ -674,11 +679,13 @@ defines the label of the link to the parent gallery.
 .RE
 .B PREV: <linktext> ---- <url>
 .RS
-defines the label of the link to the previous gallery located by <url>.
+defines the label of the link to the previous gallery located by
+.IR <url> .
 .RE
 .B NEXT: <linktext> ---- <url>
 .RS
-defines the label of the link to the next gallery located by <url>.
+defines the label of the link to the next gallery located by
+.IR <url> .
 .RE
 
 .TP
@@ -689,7 +696,7 @@ Line begining with a
 are ignored.
 
 When generating a captions file, the
-.BI captions.header
+.I captions.header
 file is inserted at the top of the file to detail
 the syntax.
 
@@ -698,41 +705,45 @@ the syntax.
 
 Before parsing command line options, llgal reads several configuration
 files. It starts with
-.IR /etc/llgal/llgalrc
+.I /etc/llgal/llgalrc
 then reads
-.IR $HOME/.llgal/llgalrc
-and finally the 
-.IR .llgal/llgalrc
+.I $HOME/.llgal/llgalrc
+and finally the
+.I .llgal/llgalrc
 file in the gallery directory.
 Additional configuration files may also be defined with the
-.I --config
+.B --config
 option.
 
 These files may change llgal configuration in the same way command
 line options do, and even more.
 All following options may also be used on the command line through
-.I "--option 'variable = value'"\fR.
+.B --option
+.IR "'variable = value'" .
 
 See also
-.IR /etc/llgal/llgalrc
+.I /etc/llgal/llgalrc
 for details about these options and their default values.
 
 .B llgal directories:
 
-.I llgal_share_dir = \fI"path"
+.I "llgal_share_dir = \fI"path"
 .RS
 The location of llgal share directory where template are stored.
-Usually \fB/usr/share/llgal\fR or \fB/usr/local/share/llgal\fR.
+Usually
+.BR /usr/share/llgal/ " or " /usr/local/share/llgal/ .
 .RE
 .I user_share_dir = \fI"path"
 .RS
 The location of the per-user share directory where template are stored.
 If they exists, these files are used instead of the system-wide files.
-Default is \fB$HOME/.llgal\fR.
+Default is
+.BR $HOME/.llgal/ .
 .RE
 .I template_dir = \fI"path"
 .RS
-Additional template directories [--templates].
+Additional template directories
+.RB [ --templates ].
 This option may be used multiple times.
 .RE
 
@@ -742,7 +753,8 @@ This option may be used multiple times.
 .RS
 Name of the captions header file that is inserted at the begining of
 generated captions files.
-Default is \fBcaptions.header\fR.
+Default is
+.BR captions.header .
 .RE
 .I css_filename = \fI"filename"
 .RS
@@ -758,17 +770,17 @@ Note that it must match the one that is used in the CSS file.
 .I index_link_image_filename = \fI"filename"
 .RS
 Change image name for link to the index.
-Default is \fB"index.png"\fR.
+Default is \fBindex.png\fR.
 .RE
 .I next_slide_link_image_filename = \fI"filename"
 .RS
 Change image name for link to the next slide.
-Default is \fB"next.png"\fR.
+Default is \fBnext.png\fR.
 .RE
 .I previous_slide_link_image_filename = \fI"filename"
 .RS
 Change image name for link to the previous slide.
-Default is \fB"prev.png"\fR.
+Default is \fBprev.png\fR.
 .RE
 .I indextemplate_filename = \fI"filename"
 .RS
@@ -786,27 +798,37 @@ Default is \fBslidetemplate.html\fR.
 .I css_location = \fI"url"
 .RS
 The location of the CSS on the web instead of a local one.
-If ending with a slash, css_filename will be appended.
+If ending with a slash,
+.I css_filename
+will be appended.
 .RE
 .I filmtile_location = \fI"url"
 .RS
 The location of the filmtile image on the web instead of a local one.
-If ending with a slash, filmtile_filename will be appended.
+If ending with a slash,
+.I filmtile_filename
+will be appended.
 .RE
 .I index_link_image_location = \fI"url"
 .RS
 The location of the index link image on the web instead of a local one.
-If ending with a slash, index_link_image_filename will be appended.
+If ending with a slash,
+.I index_link_image_filename
+will be appended.
 .RE
 .I prev_slide_link_image_location = \fI"url"
 .RS
 The location of the prev slide link image on the web instead of a local one.
-If ending with a slash, prev_slide_link_image_filename will be appended.
+If ending with a slash,
+.I prev_slide_link_image_filename
+will be appended.
 .RE
 .I next_slide_link_image_location = \fI"url"
 .RS
 The location of the next slide link image on the web instead of a local one.
-If ending with a slash, next_slide_link_image_filename will be appended.
+If ending with a slash,
+.I next_slide_link_image_filename
+will be appended.
 .RE
 
 .B Location and name of generated files:
@@ -814,12 +836,15 @@ If ending with a slash, next_slide_link_image_filename will be appended.
 .I local_llgal_dir = \fI"subdirectory name"
 .RS
 The name of the subdirectory where llgal generated files will be stored.
-Default is \fB.llgal\fR.
+Default is
+.BR .llgal/ .
 .RE
 .I index_filename = \fI"filename"
 .RS
-Name of the generated index file [-i <s>].
-Default is \fBindex\fR.
+Name of the generated index file
+.RI [ "-i <s>" ].
+Default is
+.BR index .
 .RE
 .I slide_filenameprefix = \fI"filename prefix"
 .RS
@@ -830,180 +855,252 @@ Default is \fB""\fR.
 .RS
 Prefix of slide filenames when generated from filename
 while there's no file associated (text, link, ...).
-Default is \fBNOFILE\fR.
+Default is \fB"NOFILE"\fR.
 .RE
 .I scaled_image_filenameprefix = \fI"filename prefix"
 .RS
 Prefix used to determine slide-image filenames from original images
-(in case of --bigxy or --bigy).
-Default is \fBscaled_\fR.
+(in case of
+.BR --bigxy " or " --bigy ).
+Default is \fB"scaled_"\fR.
 .RE
 .I thumbnail_image_filenameprefix = \fI"filename prefix"
 .RS
 Prefix used to determine thumbnail filenames from original images.
-Default is \fBthumb_\fR.
+Default is \fB"thumb_"\fR.
 .RE
 .I captions_filename = \fI"filename"
 .RS
-Name of the caption file that will be generated when llgal is called with --gc,
+Name of the caption file that will be generated when llgal is called
+with
+.BR --gc ,
 or will be automatically used if it exists to generate slide captions.
-Default is \fBcaptions\fR.
+Default is \fB"captions\fR.
+.RE
+.I user_scaled_image_filenameprefix = \fI"filename prefix"
+.RS
+Additional prefix of user-provided scaled images.
+Default is \fBmy\fR.
+.RE
+.I user_thumbnail_image_filenameprefix = \fI"filename prefix"
+.RS
+Additional prefix of user-provided thumbnails.
+Default is \fBmy\fR.
 .RE
 
 .B Index:
 
 .I index_cellpadding = <pixels>
 .RS
-Cellpadding in the index table [-p <n>].
-Default is \fB3\fR.
+Cellpadding in the index table
+.RB [ "-p <n>" ].
+Default is
+.BR 3 .
 .RE
 .I list_links = <0/1>
 .RS
-List links after the main gallery thumbnail index [-L].
-Default is \fB0\fR (disabled).
+List links after the main gallery thumbnail index
+.RB [ -L ].
+Default is
+.BR 0 " (" disabled ).
 .RE
 .I pixels_per_row = <pixels>
 .RS
-Pixels per row of thumbnails in index [-wx <n>].
-Default is \fB0\fR (unlimited).
+Pixels per row of thumbnails in index
+.RB [ "-wx <n>" ].
+Default is
+.BR 0 " (" unlimited ).
 .RE
 .I thumbnails_per_row = <pixels>
 .RS
-Thumbnails per row in index [-w <n>].
-Default is \fB5\fR.
+Thumbnails per row in index
+.RB [ "-w <n>" ].
+Default is
+.BR 5 .
 .RE
 .I thumbnail_height_max = <pixels>
 .RS
-Maximal height of thumbnails [-y <n>].
-Default is \fB75\fR.
+Maximal height of thumbnails
+.RB [ "-y <n>" ].
+Default is
+.BR 75 .
 .RE
 .I thumbnail_width_max = <pixels>
 .RS
-Maximal width of thumbnails [--xy <n>]
-Default is \fB0\fR (unlimited).
+Maximal width of thumbnails
+.RB [ "--xy <n> "].
+Default is
+.BR 0 " (" unlimited ).
 .RE
 .I show_caption_under_thumbnails = <0/1>
 .RS
-Write captions under thumbnails [-u].
-Default is \fB0\fR (disabled).
+Write captions under thumbnails
+.RB [ -u ].
+Default is
+.BR 0 " (" disabled ).
 .RE
 .I show_no_film_effect = <0/1>
 .RS
-Omit film effect [-r].
-Default is \fB1\fR (enabled).
+Omit film effect
+.RB [ -r ].
+Default is
+.BR 1 " (" enabled ).
 .RE
 .I filmtile_height = <pixels>
 .RS
 Film tile height [-t <n>].
-Default is \fB21\fR.
+Default is
+.BR 21 .
 .RE
 
 .B Slides:
 
 .I make_no_slides = <0/1>
 .RS
-Make no slides [-s].
-Default is \fB0\fR (make slides).
+Make no slides
+.RB [ -s ].
+Default is
+.BR 0 " (" "make slides" ).
 .RE
 .I make_slide_filename_from_filename = <0/1>
 .RS
-Use filenames as slide filenames [-n].
-Default is \fB0\fR (disabled).
+Use filenames as slide filenames
+.RB [ -n ].
+Default is
+.BR 0 " (" disabled ).
 .RE
 .I make_slide_filename_from_extension = <0/1>
 .RS
 Also use extension in slide filename when generated from filename.
-Default is \fB0\fR (disabled).
+Default is
+.BR 0 " (" disabled ).
 .RE
 .I slide_width_max = <pixels>
 .RS
-Maximal width of slides [--bigy <n>].
-Default is \fB0\fR (unlimited).
+Maximal width of slides
+.RB [ "--bigy <n>" ].
+Default is
+.BR 0 " (" unlimited ).
 .RE
 .I slide_height_max = <pixels>
 .RS
-Maximal height of slides [--bigxy <n>, --bigy <n>].
-Default is \fB0\fR (unlimited).
+Maximal height of slides
+.RB [ "--bigxy <n>" ", " "--bigy <n>" ].
+Default is
+.BR 0 " (" unlimited ).
 .RE
 .I text_slide_width = <pixels>
 .RS
 Default width of text slides.
-Default is \fB400\fR.
+Default is
+.BR 400 .
 .RE
 .I text_slide_height = <pixels>
 .RS
 Default height of text slides.
-Default is \fB300\fR.
+Default is
+.BR 300 .
 .RE
 .I index_link_image = <0/1>
 .RS
-Use an image instead of a text label for the link to the index [--li].
-Default is \fB0\fR (disabled).
+Use an image instead of a text label for the link to the index
+.RB [ --li ].
+Default is
+.BR 0 " (" disabled ).
 .RE
 .I prev_slide_link_image = <0/1>
 .RS
-Use an image instead of a text label for the link to the previous slide [--li].
-Default is \fB0\fR (disabled).
+Use an image instead of a text label for the link to the previous
+slide
+.RB [ --li ].
+Default is
+.BR 0 " (" disabled ).
 .RE
 .I next_slide_link_image = <0/1>
 .RS
-Use an image instead of a text label for the link to the next slide [--li].
-Default is \fB0\fR (disabled).
+Use an image instead of a text label for the link to the next slide
+.RB [ --li ].
+Default is
+.BR 0 " (" disabled ).
 .RE
 .I prev_slide_link_preview = <0/1>
 .RS
-Use a thumbnail preview instead of a text label for the link to the previous slide [--lt].
-Default is \fB0\fR (disabled).
+Use a thumbnail preview instead of a text label for the link to the
+previous slide
+.RB [ --lt ].
+Default is
+.BR 0 " (" disabled ).
 .RE
 .I next_slide_link_preview = <0/1>
 .RS
-Use a thumbnail preview instead of a text label for the link to the next slide [--lt].
-Default is \fB0\fR (disabled).
+Use a thumbnail preview instead of a text label for the link to the
+next slide
+.RB [ --lt ].
+Default is
+.BR 0 " (" disabled ).
 .RE
 .I make_slide_title_from_caption = <0/1>
 .RS
-Generate slide titles from captions [-k].
-Default is \fB0\fR (disabled).
+Generate slide titles from captions
+.RB [ -k ].
+Default is
+.BR 0 " (" disabled ).
 .RE
 
 .B Captions:
 
 .I captions_removal_line = \fI"string"
 .RS
-This line will be added to the caption file llgal will generate when called with --gc.
-If the user doesn't want igal to remove this caption file when called with --clean,
+This line will be added to the caption file llgal will generate when
+called with
+.BR --gc .
+If the user doesn't want igal to remove this caption file when called
+with
+.BR --clean ,
 he just needs to remove this line from the file.
 Default is \fB"REMOVE THIS LINE IF LLGAL SHOULD NOT REMOVE THIS FILE"\fR.
 .RE
 .I make_caption_from_filename = <0/1>
 .RS
-Generate captions from filenames [-C].
-Default is \fB0\fR (disabled).
+Generate captions from filenames
+.RB [ -C ].
+Default is
+.BR 0 " (" disabled ).
 .RE
 .I make_caption_from_image_comment = ",-separated strings of +-separated strings"
 .RS
-Generate captions from image comment tag [--cc].
-Default is \fB""\fR (disabled).
+Generate captions from image comment tag
+.RB [ --cc ].
+Default is \fB""\fR
+.RB ( disabled ).
 .RE
 .I make_caption_from_image_comment = <0/1>
 .RS
-Add image timestamp to generated captions [--ct].
-Default is \fB0\fR (disabled).
+Add image timestamp to generated captions
+.RB [ --ct ].
+Default is
+.BR 0 " (" disabled ).
 .RE
 .I show_dimensions = <0/1>
 .RS
-Show image dimensions [-a, -ad].
-Default is \fB0\fR (disabled).
+Show image dimensions
+.RB [ -a ", " -ad ].
+Default is
+.BR 0 " (" disabled ).
 .RE
 .I show_size = <0/1>
 .RS
-Show file sizes [-a, -as].
-Default is \fB0\fR (disabled).
+Show file sizes
+.RB [ -a ", " -as ].
+Default is
+.BR 0 " (" disabled ).
 .RE
 .I show_no_slide_counter = <0/1>
 .RS
-Do not show slide counter in captions [--nc].
-Default is \fB0\fR (show counter).
+Do not show slide counter in captions
+.RB [ --nc ].
+Default is
+.BR 0 " (" "show counter" ).
 .RE
 
 .B Text:
@@ -1079,7 +1176,7 @@ Default is \fB"Thumbnail "\fR.
 .I over_scaled_text = \fI"string"
 .RS
 Text shown when the mouse pointer is over a scaled image in a slide.
-Default is \fB"Click to see full size"\fR.
+Default is \fB"Click to see full size "\fR.
 .RE
 .I over_thumbnail_text = \fI"string"
 .RS
@@ -1103,49 +1200,68 @@ Default is \fB"Next slide "\fR.
 .RE
 .I show_size_unit = \fI"string"
 .RS
-Unit to be used when printing sizes [-asu <s>]
+Unit to be used when printing sizes
+.RB [ "--asu <s>" ]
 Default is \fB"kB"\fR.
 .RE
 .I timestamp_format_in_caption = "timestamp format"
 .RS
-Generate captions from image comment tag [--ctf <s>].
+Generate captions from image comment tag
+.RB [ "--ctf <s>" ].
 Default is \fB"%Y-%m-%d %H:%M:%S"\fR.
+.RE
+.I credits_text = \fI"string"
+.RS
+Credits text at the bottom of the index
+Default is \fB"created with <a href="http://home.gna.org/llgal">llgal</a>"\fR.
 .RE
 
 .B Recursion:
 
 .I make_recursive = <0/1>
 .RS
-Run recursively in subdirectories [-R].
-Default is \fB0\fR (disabled).
+Run recursively in subdirectories
+.RB [ -R ].
+Default is
+.BR 0 " (" disabled ).
 .RE
 .I link_subgalleries = <0/1>
 .RS
-Add links between subgalleries [--Rl].
-Default is \fB0\fR (disabled).
+Add links between subgalleries
+.RB [ --Rl ].
+Default is
+.BR 0 " (" disabled ).
 .RE
 .I parent_gallery_link = <0/1>
 .RS
-Add links to the parent directory [--parent].
-Default is \fB0\fR (disabled).
+Add links to the parent directory
+.RB [ --parent ].
+Default is
+.BR 0 " (" disabled ).
 .RE
 .I prev_gallery_link = <0/1>
 .RS
-Add links to the previous subgallery [--prev-gal <url>].
-Default is \fB0\fR (disabled).
+Add links to the previous subgallery
+.RB [ "--prev-gal <url>" ].
+Default is
+.BR 0 " (" disabled ).
 .RE
 .I prev_gallery_link_target = \fI"string"
 .RS
-Target of the link to the previous subgallery [--prev-gal <url>].
+Target of the link to the previous subgallery
+.RB [ "--prev-gal <url>" ].
 .RE
 .I next_gallery_link = <0/1>
 .RS
-Add links to the next subgallery [--next-gal <url>].
-Default is \fB0\fR (disabled).
+Add links to the next subgallery
+.RB [ "--next-gal <url>" ].
+Default is
+.BR 0 " (" disabled ).
 .RE
 .I next_gallery_link_target = \fI"string"
 .RS
-Target of the link to the next subgallery [--next-gal <url>].
+Target of the link to the next subgallery
+.RB [ "--next-gal <url>" ].
 .RE
 
 .B What files to insert in the gallery:
@@ -1153,46 +1269,53 @@ Target of the link to the next subgallery [--next-gal <url>].
 .I image_extensions = \fI"|-separated strings"
 .RS
 Extensions that are matched when searching images
-Default is \fB"jpe?g|tiff?|png|gif"\fR.
+Default is \fB"jpg|jpeg|png|gif|tif|tiff|bmp"\fR.
 .RE
 .I movie_extensions = \fI"|-separated strings"
 .RS
 Extensions that are matched when searching movies
-Default is \fB"mpe?g|mov|avi"\fR.
+Default is \fB"mpg|mpeg|avi|mov|ogm|wmv"\fR.
 .RE
 .I add_all_files = <0/1>
 .RS
-Add all files to the list of entries, not only images and movies [-A].
-Default is \fB0\fR (disabled).
+Add all files to the list of entries, not only images and movies
+.RB [ -A ].
+Default is
+.BR 0 " (" disabled ).
 .RE
 .I add_subdirs = <0/1>
 .RS
-Add subdirectories to the list of entries [-S].
-Default is \fB0\fR (disabled).
+Add subdirectories to the list of entries
+.RB [ -S ].
+Default is
+.BR 0 " (" disabled ).
 .RE
 .I exclude = \fI"string"
 .RS
-Exclude files whose name matches [--exclude <s>].
+Exclude files whose name matches
+.RB [ "--exclude <s>" ].
 This option may be used several times.
 Dot begining files and html files are excluded by default.
 .RE
 .I include = \fI"string"
 .RS
-Include files whose name matches and were previously excluded [--include <s>].
+Include files whose name matches and were previously excluded
+.RB [ "--include <s>" ].
 This option may be used several times.
 The order of includes and excludes is respected.
 .RE
 .I sort_criteria = \fI"string"
 .RS
 Sort criteria when scanning files in the working directory.
-Default is \fBname\fR.
+Default is \fB"name"\fR.
 .RE
 
 .B Various:
 
 .I convert_options = \fI"string"
 .RS
-Options to pass to convert [--con <s>].
+Options to pass to convert
+.RB [ "--con <s>" ].
 This option may be used several times.
 Default is \fB""\fR.
 .RE
@@ -1208,123 +1331,132 @@ Default is \fB""\fR.
 .RE
 .I force_image_regeneration = <0/1>
 .RS
-Force regeneration of thumbnails and scaled images [-f].
-Default is \fB0\fR.
+Force regeneration of thumbnails and scaled images
+.RB [ -f ].
+Default is
+.BR 0 .
 .RE
 .I www_access_rights = <0/1>
 .RS
-Make all generated files world readable [--www].
-Default is \fB0\fR (disabled).
+Make all generated files world readable
+.RB [ --www ].
+Default is
+.BR 0 " (" disabled ).
 .RE
 .I www_extension = \fI"string"
 .RS
-Extension of generated webpages [--php].
+Extension of generated webpages
+.RB [ --php ].
 Default is \fB"html"\fR.
 .RE
 .I config_file = <s>
 .RS
-Additional configuration file [--config <s>].
+Additional configuration file
+.RB [ "--config <s>" ].
 This option may be used several times.
 .RE
 
 
 .SH TEMPLATES
 
-When generating the index, the following fields will be replaced in
-.IR indextemplate.html
-by the associated value (that is computed by
-.B llgal
-).
+When generation web pages, the following fields will be replaced
+from the templates by the associated value (computed by llgal).
 
-.I <!--TITLE-->
-.RS
-The title of the index.
-.RE
-.I <!--CSS-->
+.B <!--CSS-->
 .RS
 The CSS style-sheet.
 .RE
-.I <!--HEADERS-->
+.B <!--CREDITS-->
+.RS
+The credits line given by
+.I credits_text
+configuration option.
+.RE
+
+When generating the index from template
+.IR indextemplate.html ,
+the following additional fields will also be replaced.
+
+.B <!--TITLE-->
+.RS
+The title of the index.
+.RE
+.B <!--HEADERS-->
 .RS
 The list of headers that are given in the captions file.
 .RE
-.I <!--FOOTERS-->
+.B <!--FOOTERS-->
 .RS
 The list of footers that are given in the captions file.
 .RE
 
-When generating slides, the following fields will be replaced in
-.IR slidetemplate.html
-by the associated value (that is computed by
-.B llgal
-).
+When generating slides from template
+.IR slidetemplate.html ,
+the following additional fields will also be replaced.
 
-.I <!--SLIDE-TITLE-->
+.B <!--SLIDE-TITLE-->
 .RS
 The title of the slide.
 .RE
-.I <!--CSS-->
-.RS
-The CSS style-sheet.
-.RE
-.I <!--INDEX-FILE-->
+.B <!--INDEX-FILE-->
 .RS
 The filename of the index.
 .RE
-.I <!--INDEX-LINK-TEXT-->
+.B <!--INDEX-LINK-TEXT-->
 .RS
 The label of the link to the index (might be an image).
 .RE
-.I <!--PREV-SLIDE-->
-and
-.I <!--NEXT-SLIDE-->
+.BR <!--PREV-SLIDE--> and <!--NEXT-SLIDE-->
 .RS
 The filename of the previous and next slides.
 .RE
-.I <!--NEXT-SLIDE-LINK-TEXT-->
-and
-.I <!--PREV-SLIDE-LINK-TEXT-->
+.BR <!--NEXT-SLIDE-LINK-TEXT--> and <!--PREV-SLIDE-LINK-TEXT-->
 .RS
 The label of the link to previous and next slides (might be an image).
 .RE
-.I <!--THIS-SLIDE-->
+.B <!--THIS-SLIDE-->
 .RS
 The actual contents of the slide (might be an image).
 .RE
-.I <!--THIS-SLIDE-STYLE-->
+.B <!--THIS-SLIDE-STYLE-->
 .RS
 The style of the slide contents (is defined in the CSS style-sheet).
 .RE
-.I <!--IMAGE-CAPTION-->
+.B <!--IMAGE-CAPTION-->
 .RS
 The caption of the slide.
 .RE
 
 
 .SH LANGUAGE
-All configuration options produce english text by default.
-If you wish to create your gallery in another language, you should
-create an additional configuration file (or modify the system-wide
-one) to update all configuration options of the
+The language that llgal uses to generate text in HTML pages is chosen
+from the localization configuration.
+If the chosen language is available in llgal translations, it will be
+used instead of the default english.
+
+As usual with
+.BR gettext ,
+it is possible to override the
+localisation configuration by changing
+.BR LANG ", " LC_MESSAGES " or " LANGUAGE
+environment variables.
+
+If the desired language is not available in llgal translations,
+or if the user wishes to change the text values, he might create an
+additional configuration file (or modify the system-wide one) to
+update all configuration options of the
 .B Text
 section.
-
-Additionally, you might have to modify several static strings in
-the templates (\fBindextemplate.html\fR and \fBslidetemplate.html\fR),
-for instance \fBIndex\fR, \fBPrev\fR and \fBNext\fR.
 
 
 .SH CHARACTER ENCODING
 If a filename contains non-ascii characters which are not safely
-representable in a URL,
-.BI llgal
-will escape them using the method RFC 2396 specifies.
+representable in a URL, llgal will escape them using the method RFC
+2396 specifies.
 This may raise problems if the web server has a different notion
-of character encoding than the machine
-.BI llgal
-runs on.
+of character encoding than the machine llgal runs on.
 See also
-.I http://www.w3.org/TR/html4/appendix/notes.html#h-B.2\n"
+.I http://www.w3.org/TR/html4/appendix/notes.html#h-B.2
 
 
 .SH NOTES
@@ -1334,12 +1466,9 @@ by setting them a negative value.
 
 .SH FILES
 .RE
-.I /etc/llgal/llgalrc
-.I $HOME/.llgal/llgalrc
-.I .llgal/llgalrc
+.IR /etc/llgal/llgalrc ", " $HOME/.llgal/llgalrc ", " .llgal/llgalrc
 .RS
 System-wide, per-user and local configuration files. See
-.SM
 .B CONFIGURATION
 for details.
 .RE
@@ -1347,7 +1476,6 @@ for details.
 .RS
 Captions syntax description file that is inserted at the top
 of generated captions file.
-
 .RE
 .I /usr/share/llgal/llgal.css
 .RS
@@ -1370,9 +1498,8 @@ The link image used for the previous slide.
 The link image used for the next slide.
 .RE
 All files are required on the website.
-.BR llgal
-will copy them to the local
-IR .llgal
+llgal will copy them to the local
+.I .llgal/
 file during gallery generation.
 
 .RE
@@ -1385,20 +1512,17 @@ The default index template file.
 The default file used to generate slides.
 .RE
 These files are not required on the website.
-But,
-.BR llgal
-will use them to generate HTML webpages of the gallery
-by replacing several fields with text or images
-(See
-.SM
+But, llgal will use them to generate HTML webpages of the gallery
+by replacing several fields with text or images.
+See
 .B TEMPLATES
-).
+for details.
 
 The user may change all these templates by storing files with
 the same name in its user template directory
-.IR $HOME/.llgal
+.I $HOME/.llgal/
 or in the local
-.IR .llgal
+.I .llgal/
 directory.
 The former defines user-specific templates that will be used
 each time the user generate a gallery.
@@ -1410,12 +1534,12 @@ Finally, system-wide templates are used if no local and user
 templates override them.
 
 It is also possible to add custom template directories (with
-.I --templates
-) that will be used to get templates before trying in the user
+.BR --templates )
+that will be used to get templates before trying in the user
 and in the system-wide template directories.
 
 The option
-.IR --gt
+.B --gt
 might be used to get copies of template files in the local
 or in the user template directory.
 
@@ -1423,7 +1547,7 @@ or in the user template directory.
 .SH EXAMPLES
 Run
 .B llgal
-in a directory with 
+in a directory with
 .IR jpg ", " gif ", " png ", " mpg " or " avi
 files to see what it does.  Then
 play with the options described above and use

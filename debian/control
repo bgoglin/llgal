@@ -7,7 +7,7 @@ Standards-Version: 3.6.2.1
 
 Package: llgal
 Architecture: all
-Depends: imagemagick, ${perl:Depends}, libimage-size-perl, libimage-info-perl, liburi-perl
+Depends: imagemagick, ${perl:Depends}, libimage-size-perl, libimage-info-perl, liburi-perl, liblocale-gettext-perl
 Description: Online gallery generator
  llgal is a HTML gallery generator for images, videos, text and links.
  It is based on igal and adds supports for various types of slides including

@@ -1,7 +1,35 @@
+llgal (0.12)
+
+  * Add internationalization support for the text that is automatically
+    embedded in the HTML pages. See LANGUAGE in the manpage for details.
+  * Add french translation.
+  * Support custom thumbnails for all file-based entries with the mythumb_
+    prefix (and an additional image extension for non-images) in the .llgal
+    directory.
+  * Support custom scaled images for all file-based entries with the myscaled_
+    prefix (and an additional image extension for non-images) in the .llgal
+    directory.
+  * Add credits_text option and replace CREDITS in the templates.
+  * Add bmp to default image extenstions and ogm and wmv to movie when
+    scanning the working directory.
+  * image_extensions and movie_extensions are now explicitely a |-separated
+    list without regexp inside.
+  * Fix -d and -R by checking the destination directory after -d has been
+    parsed (reported by Marcus Better in Debian bug #329168). This is done by
+    parsing -d very early, which is required since it changes the location of
+    the local configuration file (hopefully, it cannot be overriden in a
+    configuration file).
+  * Cleanup destination directory name printing.
+  * Major cleanup of the manpage.
+  * Minor fix in the README.
+  * Typos in the Changes.
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Thu, 15 Dec 2005 12:47:26 -0500
+
 llgal (0.11.4)
 
   * Really parse command-line options after configuration files
-    (thanks to Dave Holland in Debian Bug #340315).
+    (thanks to Dave Holland in Debian bug #340315).
   * Trailing spaces and other small cleanups.
 
  -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Tue, 22 Nov 2005 13:18:26 -0500
@@ -21,12 +49,12 @@ llgal (0.11.3)
       could not be parsed.
   * Fix missing update of sanity checks, numerical options processing,
     and various other options that were broken since previous release
-    (reported by Hanus Adler in Debian Bug #337380).
+    (reported by Hanus Adler in Debian bug #337380).
   * Do not parse behavior options at the begining since there's no more
     any reason. Command line options are thus processed after all
     configuration files. This makes -f work if a config file contains
     force_image_regeneration = 0
-    (reported by Hanus Adler in Debian Bug #337380).
+    (reported by Hanus Adler in Debian bug #337380).
   * Rename tile_height with filmtile_height for consistency.
   * Fix percentage printing by showing both entry listing and preparing.
   * Fix slidetemplate to use images for link on the bottom as on the top.
@@ -45,7 +73,7 @@ llgal (0.11.2)
     extension configuration.
     The -i option (index_filename) thus now takes a filename without
     extension.
-  * -R now implies -S (suggested by Brian Donlan's Debian Bug #329168):
+  * -R now implies -S (suggested by Brian Donlan's Debian bug #329168):
   * When called with -d, llgal only reads the llgalrc configuration file
     in the destination directory since the local one may be easily added
     through --config.
@@ -350,7 +378,7 @@ llgal (0.9)
     and make_caption_from_image_comment.
   * Add --ct and make_caption_from_image_timestamp to get timestamp
     for image tags (based on James R. Van Zandt's patch proposed
-    in igal's Debian Bug Report #162720).
+    in igal's Debian bug #162720).
   * Add --ctf and timestamp_format_in_caption to change timestamp
     format in caption.
   * Cleanup EXIF comment by removing end \0 and \n.

@@ -58,15 +58,15 @@
 
 # Location of the CSS file if available on the web [--uc <url>].
 # If ending with '/', css_filename will be added.
-css_location = ""
+# css_location = ""
 
 # Location of llgal image files if available on the web.
 # If ending with '/', their generic filename will be added.
 # These locations may be set alltogether with --ui <url>.
-filmtile_location = ""
-index_link_image_location = ""
-prev_slide_link_image_location = ""
-next_slide_link_image_location = ""
+# filmtile_location = ""
+# index_link_image_location = ""
+# prev_slide_link_image_location = ""
+# next_slide_link_image_location = ""
 
 ##### Location and name of generated files #####
 
@@ -98,6 +98,12 @@ next_slide_link_image_location = ""
 # Name of the captions file that will be generated when llgal is called
 # with --gc. This file will be stored under $local_llgal_dir.
 # captions_filename = "captions"
+
+# Additional prefix of user-provided scaled images
+# user_scaled_image_filenameprefix = "my"
+
+# Additional prefix of user-provided thumbnails
+# user_thumbnail_image_filenameprefix = "my"
 
 ##### Index #####
 
@@ -263,13 +269,16 @@ next_slide_link_image_location = ""
 # Set timestamp format in captions using strftime format [--ctf]
 # timestamp_format_in_caption = "%Y-%m-%d %H:%M:%S"
 
+# Credits line at the bottom of the index
+# credits_text = "created with <a href=\"http://home.gna.org/llgal\">llgal</a>"
+
 ##### What files to insert in the gallery #####
 
-# Extensions that are matched when searching images
-# image_extensions = "jpe?g|gif|png"
+# Extensions that are matched when searching images (|-separated list)
+# image_extensions = "jpg|jpeg|gif|png|tif|tiff|bmp"
 
-# Extensions that are matched when searching movies
-# movie_extensions = "mpe?g|avi"
+# Extensions that are matched when searching movies (|-separated list)
+# movie_extensions = "mpg|mpeg|avi|mov|ogm|wmv"
 
 # Add all files to the list of entries
 # not only images and movies [-A]
