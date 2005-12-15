@@ -13,6 +13,11 @@
     scanning the working directory.
   * image_extensions and movie_extensions are now explicitely a |-separated
     list without regexp inside.
+  * Fix -d and -R by checking the destination directory after -d has been
+    parsed (reported by Marcus Better in Debian bug #329168). This is done by
+    parsing -d very early, which is required since it changes the location of
+    the local configuration file (hopefully, it cannot be overriden in a
+    configuration file).
   * Cleanup destination directory name printing.
   * Major cleanup of the manpage.
   * Minor fix in the README.

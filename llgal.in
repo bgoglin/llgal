@@ -50,11 +50,18 @@ push (@generic_config_files, $ENV{HOME}."/.llgal/llgalrc") ;
 # destination configuration file
 my $destination_config_file = ".llgal/llgalrc" ;
 
+######################################################################
+# early configuration that have to be now
+
 # additional configuration files
 my @additional_config_files = () ;
+# look in current directory "."
+my $destination_dir = "." ;
+
 Getopt::Long::Configure('passthrough') ;
 GetOptions(
 	'config=s'	=> \@additional_config_files,
+	'd=s'	=> \$destination_dir,
 	) ;
 
 # restore default behavior: process all options and warn on error
@@ -77,8 +84,6 @@ sub llgal_gettext {
 ######################################################################
 # general command-line options
 
-# look in current directory "."
-my $destination_dir = "." ;
 # show version
 my $version_asked = 0 ;
 # displays brief usage message
@@ -662,7 +667,6 @@ sub parse_cmdline_options {
 				},
 	'h|help'	=> \$help_asked,
 	'v|version'	=> \$version_asked,
-	'd=s'		=> \$destination_dir,
 	'f'		=> \$force_image_regeneration,
 	'gencfg=s'	=> \$generate_config,
 	'R'		=> \$make_recursive,
@@ -3050,6 +3054,8 @@ sub call_recursive {
 
 check_destination ;
 
+parse_cmdline_options ();
+
 foreach my $conf (@generic_config_files) {
     parse_generic_config_file $conf ;
 }
@@ -3057,8 +3063,6 @@ parse_generic_config_file "${destination_dir}$destination_config_file" ;
 foreach my $conf (@additional_config_files) {
     parse_additional_config_file $conf ;
 }
-
-parse_cmdline_options ();
 
 die $usage
     if $help_asked ;
