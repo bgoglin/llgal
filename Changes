@@ -1,3 +1,10 @@
+
+  * Additional files passed with --config or additional_configuration_file
+    are parsed as soon as the option is met, before processing any of the
+    following options.
+  * Fix manpage additional_configuration_file name (instead of config_file).
+
+
 llgal (0.12.1)
 
   * Set HTML encoding header depending on the locale with the new LLGAL-CODESET

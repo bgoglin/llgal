@@ -711,11 +711,15 @@ then reads
 and finally the
 .I .llgal/llgalrc
 file in the gallery directory.
+
 Additional configuration files may also be defined with the
 .B --config
 option.
+These will be parsed during command-line parsing, when
+.B --config
+is met.
 
-These files may change llgal configuration in the same way command
+All these files may change llgal configuration in the same way command
 line options do, and even more.
 All following options may also be used on the command line through
 .B --option
@@ -1349,9 +1353,10 @@ Extension of generated webpages
 .RB [ --php ].
 Default is \fB"html"\fR.
 .RE
-.I config_file = <s>
+.I additional_configuration_file = <s>
 .RS
-Additional configuration file
+Additional configuration file that is parsed immediately
+(before processing the following lines)
 .RB [ "--config <s>" ].
 This option may be used several times.
 .RE

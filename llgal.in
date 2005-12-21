@@ -54,14 +54,11 @@ my $destination_config_file = ".llgal/llgalrc" ;
 ######################################################################
 # early configuration that have to be now
 
-# additional configuration files
-my @additional_config_files = () ;
 # look in current directory "."
 my $destination_dir = "." ;
 
 Getopt::Long::Configure('passthrough') ;
 GetOptions(
-	'config=s'	=> \@additional_config_files,
 	'd=s'	=> \$destination_dir,
 	) ;
 
@@ -405,6 +402,11 @@ sub GetOptions_failed {
 ######################################################################
 # parse options in config files
 
+# forward declaration
+sub parse_custom_config_file ;
+
+my $recursive_included_configuration_file = 0 ;
+
 sub process_option {
     my $opts = shift ;
     $_ = shift ;
@@ -619,7 +621,13 @@ sub process_option {
     } elsif (/^www_extension\s*=\s*"(.+)"$/) {
 	$opts->{www_extension} = $1 ;
     } elsif (/^additional_configuration_file\s*=\s*"(.+)"$/) {
-	push (@{$opts->{additional_config_files}}, parse_convert_options ($1)) ;
+	my $file = $1 ;
+	die_without_GetOptions_usage "Not opening '$file' since too much configuration files were recursively included, loop detected ?\n"
+	    if $recursive_included_configuration_file++ >= 10 ;
+	parse_custom_config_file ($opts, $file) ;
+	close CONF ;
+	$recursive_included_configuration_file-- ;
+
 # Error
     } elsif (/^[^#]/ and !/^(\s*)$/) {
 	if (defined $.) {
@@ -638,7 +646,7 @@ sub parse_generic_config_file {
     print "!! Obsolete configuration file $oldconffile skipped, should be moved to $file.\n"
 	if -e $oldconffile ;
 
-    # read conf
+    # generic configuration files may not exist
     if (open CONF, $file) {
 	while (<CONF>) {
 	    process_option $opts, $_ ;
@@ -647,14 +655,18 @@ sub parse_generic_config_file {
     }
 }
 
-sub parse_additional_config_file {
+sub parse_custom_config_file {
+    my $opts = shift ;
     my $file = shift ;
-    open CONF, $file
-	or die "Failed to open additional configuration file '$file' ($!).\n" ;
-    while (<CONF>) {
-	process_option $opts, $_ ;
+
+    # don't use a capitalized file handle since it would be shared across recursive calls
+    open my $conf, $file
+	# custom configuration files have to exist
+	or die_without_GetOptions_usage "Failed to open additional configuration file '$file' ($!).\n" ;
+    while (<$conf>) {
+	process_option ($opts, $_) ;
     }
-   close CONF ;
+    close $conf ;
 }
 
 ######################################################################
@@ -675,6 +687,7 @@ sub parse_cmdline_options {
 	'v|version'	=> \$version_asked,
 	'f'		=> \$force_image_regeneration,
 	'gencfg=s'	=> \$generate_config,
+	'config=s'	=> sub { shift ; parse_custom_config_file ($opts, shift) ; },
 	'R'		=> \$make_recursive,
 
 # layout
@@ -3067,9 +3080,6 @@ foreach my $conf (@generic_config_files) {
     parse_generic_config_file $conf ;
 }
 parse_generic_config_file "${destination_dir}$destination_config_file" ;
-foreach my $conf (@additional_config_files) {
-    parse_additional_config_file $conf ;
-}
 
 # DO NOT MOVE THIS LINE BEFORE CONFIG FILE PARSING
 parse_cmdline_options ();
