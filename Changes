@@ -1,8 +1,14 @@
+llgal (0.12.1)
 
+  * Set HTML encoding header depending on the locale with the new LLGAL-CODESET
+    replace pattern in the templates (reported by Marcus Better in Debian bug
+    #343546).
   * Really really parse command-line options after configuration files.
   * Pass -w to perl interpreter and fix several warnings.
   * Add a "requested by" in the Changes.
+  * Document LLGAL-OPTIONS replace pattern in the manpage.
 
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Wed, 21 Dec 2005 00:59:26 -0500
 
 llgal (0.12)
 

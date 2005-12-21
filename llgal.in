@@ -9,6 +9,7 @@ use Time::Local ;
 use URI::Escape ;
 use Text::ParseWords ;
 use Cwd ;
+use I18N::Langinfo qw(langinfo CODESET) ;
 use Locale::gettext ;
 use POSIX qw (setlocale) ;
 
@@ -80,6 +81,11 @@ sub llgal_gettext {
     $string =~ s/^[^|]+\|// ;
     return $string ;
 }
+
+######################################################################
+# codeset
+
+my $codeset = langinfo(CODESET()) ;
 
 ######################################################################
 # general command-line options
@@ -2345,6 +2351,7 @@ sub generate_slides {
 
 	my @slidetemplate_text_copy = @slidetemplate_text ; # don't touch the original template
         for my $line (@slidetemplate_text_copy) {
+	    $line =~ s/LLGAL-CODESET/$codeset/g ;
 	    $line =~ s/<!--SLIDE-TITLE-->/$title/g ;
 	    $line =~ s/<!--TITLE-->/$opts->{index_title}/g ;
 	    if ($opts->{css_location}) {
@@ -2532,6 +2539,7 @@ sub generate_index {
 		print IXW "    <div class=\"header\">" . $header . "</div>\n" ;
 	    }
 	} else {
+	    $line =~ s/LLGAL-CODESET/$codeset/g ;
 	    $line =~ s/LLGAL-OPTIONS/@llgal_options/g ;
 	    $line =~ s/<!--TITLE-->/$opts->{index_title}/g ;
 	    if ($opts->{css_location}) {
