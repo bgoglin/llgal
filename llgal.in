@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 
 use FileHandle ;
 use Getopt::Long ;
@@ -9,6 +9,7 @@ use Time::Local ;
 use URI::Escape ;
 use Text::ParseWords ;
 use Cwd ;
+use I18N::Langinfo qw(langinfo CODESET) ;
 use Locale::gettext ;
 use POSIX qw (setlocale) ;
 
@@ -35,7 +36,7 @@ sub parse_convert_options {
 
 # join with spaces, and protect spaces
 sub join_convert_options {
-    return join (' ', map { my $val = $_ ; $val =~ s/( +)/\'\1\'/g ; $val } @_) ;
+    return join (' ', map { my $val = $_ ; $val =~ s/( +)/\'$1\'/g ; $val } @_) ;
 }
 
 ######################################################################
@@ -80,6 +81,11 @@ sub llgal_gettext {
     $string =~ s/^[^|]+\|// ;
     return $string ;
 }
+
+######################################################################
+# codeset
+
+my $codeset = langinfo(CODESET()) ;
 
 ######################################################################
 # general command-line options
@@ -839,7 +845,7 @@ sub system_with_output {
 	open STDERR, ">&", $pipe_in ;
 	open STDOUT, ">&", $pipe_in ;
 	{ exec @_ } ;
-	print $pipe_in "Exec of @_[0] failed while trying to $descr\n" ;
+	print $pipe_in "Exec of $_[0] failed while trying to $descr\n" ;
 	close $pipe_in ;
 	exit -1 ;
     }
@@ -1525,6 +1531,7 @@ sub create_file_entry {
 
     # the link text (will be web-safe after caption file generation)
     if (not defined $linktext) {
+	$linktext = "" ;
 	if ($type == $TYPE_MVI) {
 	    $linktext = $opts->{MVI_link_text}.$filename ;
 	} elsif ($type == $TYPE_FIL) {
@@ -1928,7 +1935,7 @@ sub get_entries_from_directory {
     init_percentage () ;
 
     for(my $i = 0; $i < @filenames; $i++) {
-	my $filename = @filenames[$i] ;
+	my $filename = $filenames[$i] ;
 	if (-d "$destination_dir$filename") {
 	    # directory
 	    if ($opts->{add_subdirs} or $make_recursive) {
@@ -2177,7 +2184,7 @@ sub read_captions_file {
     while (defined ($line = <CAP>)) {
 	chomp $line ;
 	$line =~ s/^\s*// ;
-	$line =~ s/\s\(\s*\)$/\1/ ;
+	$line =~ s/\s\(\s*\)$/$1/ ;
 	# only lines that don't start with # and are not empty
 	if (!($line =~ m/^\#/) and !($line =~ /^$/)) {
 	    if ($line =~ m/^TITLE:\s*(.*)\s*/) {
@@ -2336,14 +2343,15 @@ sub generate_slides {
     indprint "Creating individual slides: " ;
     init_percentage () ;
     for (my $i = 0; $i < @entries; $i++) {
-	open(SW, ">$destination_dir$entries[$i]->{slide_filename}")
+	my $entry = $entries[$i] ;
+	open(SW, ">$destination_dir$entry->{slide_filename}")
 	    or die "Can't create slide file\n" ;
-	my $entry = @entries[$i] ;
 	my $type = $entry->{type} ;
 	my $title = $entry->{title} ;
 
 	my @slidetemplate_text_copy = @slidetemplate_text ; # don't touch the original template
         for my $line (@slidetemplate_text_copy) {
+	    $line =~ s/LLGAL-CODESET/$codeset/g ;
 	    $line =~ s/<!--SLIDE-TITLE-->/$title/g ;
 	    $line =~ s/<!--TITLE-->/$opts->{index_title}/g ;
 	    if ($opts->{css_location}) {
@@ -2531,6 +2539,7 @@ sub generate_index {
 		print IXW "    <div class=\"header\">" . $header . "</div>\n" ;
 	    }
 	} else {
+	    $line =~ s/LLGAL-CODESET/$codeset/g ;
 	    $line =~ s/LLGAL-OPTIONS/@llgal_options/g ;
 	    $line =~ s/<!--TITLE-->/$opts->{index_title}/g ;
 	    if ($opts->{css_location}) {
@@ -3016,7 +3025,7 @@ sub call_recursive {
     my @listed_entries = @{$gallery->{listed_entries}} ;
 
     for (my $i = 0; $i < @entries; $i++) {
-	my $entry = @entries[$i] ;
+	my $entry = $entries[$i] ;
 	next if $entry->{type} != $TYPE_DIR ;
 	my $dir = $entry->{filename} ;
 	my $revdir = back_path $dir ;
@@ -3054,8 +3063,6 @@ sub call_recursive {
 
 check_destination ;
 
-parse_cmdline_options ();
-
 foreach my $conf (@generic_config_files) {
     parse_generic_config_file $conf ;
 }
@@ -3063,6 +3070,9 @@ parse_generic_config_file "${destination_dir}$destination_config_file" ;
 foreach my $conf (@additional_config_files) {
     parse_additional_config_file $conf ;
 }
+
+# DO NOT MOVE THIS LINE BEFORE CONFIG FILE PARSING
+parse_cmdline_options ();
 
 die $usage
     if $help_asked ;
