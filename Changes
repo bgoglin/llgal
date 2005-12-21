@@ -1,4 +1,5 @@
 
+  * Really really parse command-line options after configuration files.
   * Pass -w to perl interpreter and fix several warnings.
   * Add a "requested by" in the Changes.
 

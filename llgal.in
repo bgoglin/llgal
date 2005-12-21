@@ -3055,8 +3055,6 @@ sub call_recursive {
 
 check_destination ;
 
-parse_cmdline_options ();
-
 foreach my $conf (@generic_config_files) {
     parse_generic_config_file $conf ;
 }
@@ -3064,6 +3062,9 @@ parse_generic_config_file "${destination_dir}$destination_config_file" ;
 foreach my $conf (@additional_config_files) {
     parse_additional_config_file $conf ;
 }
+
+# DO NOT MOVE THIS LINE BEFORE CONFIG FILE PARSING
+parse_cmdline_options ();
 
 die $usage
     if $help_asked ;
