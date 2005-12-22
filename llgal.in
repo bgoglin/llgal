@@ -20,6 +20,8 @@ Getopt::Long::Configure('noignorecase', 'noautoabbrev', 'bundling') ;
 STDOUT->autoflush("1") ;
 
 my $version = "@VERSION@" ;
+my $llgal_share_dir = "@DATADIR@/llgal" ;
+my $user_share_dir = $ENV{HOME}."/.llgal" ;
 
 ######################################################################
 # store command-line options upfront to write in the index <HEAD>
@@ -126,10 +128,6 @@ my $text_slide_height_default = 300 ;
 # all configuration variables
 
 my $opts = {
-# llgal directories
-    llgal_share_dir => "@DATADIR@/llgal",
-    user_share_dir => $ENV{HOME}."/.llgal",
-
 # Name of generic llgal files
     captions_header_filename => "captions.header",
     css_filename => "llgal.css",
@@ -411,15 +409,8 @@ sub process_option {
     my $opts = shift ;
     $_ = shift ;
     chomp $_ ;
-# llgal directories
-    if (/^llgal_share_dir\s*=\s*"(.+)"$/) {
-	$opts->{llgal_share_dir} = $1 ;
-    } elsif (/^user_share_dir\s*=\s*"(\/.+)"$/) {
-	$opts->{user_share_dir} = $1 ;
-    } elsif (/^user_share_dir\s*=\s*"(.+)"$/) {
-	$opts->{user_share_dir} = $ENV{HOME}."/".$1 ;
 # Name of generic llgal files
-    } elsif (/^captions_header_filename\s*=\s*"(.+)"$/) {
+    if (/^captions_header_filename\s*=\s*"(.+)"$/) {
 	$opts->{captions_header_filename} = $1 ;
     } elsif (/^css_filename\s*=\s*"(.+)"$/) {
 	$opts->{css_filename} = $1 ;
@@ -893,11 +884,11 @@ sub find_generic_template_file {
 	return $dir
 	    if -e "$dir/$filename" ;
     }
-    return $opts->{user_share_dir}
-	if -e "$opts->{user_share_dir}/$filename" ;
-    die "File '$opts->{llgal_share_dir}/$filename' does not exist.\nPlease install llgal properly.\n"
-	unless -e "$opts->{llgal_share_dir}/$filename" or !$check ;
-    return $opts->{llgal_share_dir} ;
+    return $user_share_dir
+	if -e "$user_share_dir/$filename" ;
+    die "File '$llgal_share_dir/$filename' does not exist.\nPlease install llgal properly.\n"
+	unless -e "$llgal_share_dir/$filename" or !$check ;
+    return $llgal_share_dir ;
 }
 
 # find path to the template, using the local one if it exists
@@ -955,10 +946,6 @@ sub sanity_checks {
 	if ($opts->{slide_height_max} or $opts->{slide_width_max}) and $opts->{make_no_slides} ;
 
     # check a few string that have to be non-empty and may need to be single file without path
-    die "Please give a non-empty llgal share directory\n"
-	if $opts->{llgal_share_dir} eq "" ;
-    die "Please give a non-empty user share directory\n"
-	if $opts->{user_share_dir} eq "" ;
     die "Please give a non-empty filename without path as a CSS filename\n"
 	if $opts->{css_filename} eq "" or $opts->{css_filename} =~ /\// ;
     die "Please give a non-empty filename without path as a film tile filename\n"
@@ -2110,7 +2097,7 @@ sub generate_captions_file {
 	    or die "Can't create $destination_dir$opts->{local_llgal_dir}/$opts->{captions_filename} file\n" ;
 
 	print CAP "# This is llgal's $opts->{captions_filename} file, first generated ", scalar localtime, ".\n" ;
-	if (open CAPHEADER, "$opts->{llgal_share_dir}/$opts->{captions_header_filename}") {
+	if (open CAPHEADER, "$llgal_share_dir/$opts->{captions_header_filename}") {
 	    while (my $line = <CAPHEADER>) { print CAP $line ; }
 	    close CAPHEADER ;
 	} else {
@@ -2914,10 +2901,6 @@ sub generate_config {
     print NEWCFG "# It was automatically generated.\n" ;
     print NEWCFG "# You may modify and reuse it as you want.\n" ;
     print NEWCFG "\n" ;
-    print NEWCFG "# llgal directories:\n" ;
-    print NEWCFG "llgal_share_dir = \"$opts->{llgal_share_dir}\"\n" ;
-    print NEWCFG "user_share_dir = \"$opts->{user_share_dir}\"\n" ;
-    print NEWCFG "\n" ;
     print NEWCFG "# Name of generic llgal files:\n" ;
     print NEWCFG "captions_header_filename = \"$opts->{captions_header_filename}\"\n" ;
     print NEWCFG "css_filename = \"$opts->{css_filename}\"\n" ;
@@ -3119,7 +3102,7 @@ if ($give_templates) {
     my $destdir = $give_templates ;
     $destdir = $opts->{local_llgal_dir}
 	if $destdir eq "local" ;
-    $destdir = $opts->{user_share_dir}
+    $destdir = $user_share_dir
 	if $destdir eq "user" ;
     give_templates $destdir ;
     indprint "You may now edit templates in $destdir and generate new galleries.\n" ;

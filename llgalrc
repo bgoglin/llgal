@@ -11,17 +11,6 @@
 # For now, only static values are supported.
 # Brackets indicate corresponding command line options.
 
-###### llgal directories #####
-
-# Default installation path for generic llgal files after
-# installation (index and slide templates, film tile image and CSS file).
-# llgal_share_dir = "/usr/share/llgal" (for a standard installation)
-
-# Default per-user generic llgal files.
-# This configuration option should probably not be changed in /etc/llgalrc
-# since dynamic values are not supported for now.
-# user_share_dir = $ENV{HOME}."/.llgal"
-
 ##### Name of generic llgal files #####
 
 # Name of the captions header file that is inserted at the begining

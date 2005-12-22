@@ -6,6 +6,13 @@
   * Hardcode default english values in usage to avoid messing the code.
   * Replace template_dir with additional_template_dir in configuration file
     and move it to various options together with additional_configuration_file.
+  * Remove llgal_share_dir configuration option since it is supposed to be set
+    during the installation, and additional_template_dir might help in case of
+    problem.
+  * Remove user_share_dir configuration option since there's no reason for
+    an administrator to change it, additional_template_dir might help in case
+    of problem, and it actually contains the user-wide configuration file which
+    messes the code if its location may change.
 
 
 llgal (0.12.1)
