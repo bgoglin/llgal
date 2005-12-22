@@ -129,8 +129,6 @@ my $opts = {
 # llgal directories
     llgal_share_dir => "@DATADIR@/llgal",
     user_share_dir => $ENV{HOME}."/.llgal",
-# user-added directories where templates might be found
-    template_dirs => [],
 
 # Name of generic llgal files
     captions_header_filename => "captions.header",
@@ -300,6 +298,8 @@ my $opts = {
     sort_criteria => "name",
 
 # Various
+# user-added directories where templates might be found
+    template_dirs => [],
 # options to be passed to convert (--con)
     convert_options => [],
     scaled_convert_options => [],
@@ -418,8 +418,6 @@ sub process_option {
 	$opts->{user_share_dir} = $1 ;
     } elsif (/^user_share_dir\s*=\s*"(.+)"$/) {
 	$opts->{user_share_dir} = $ENV{HOME}."/".$1 ;
-    } elsif (/^template_dir\s*=\s*"(.+)"$/) {
-	push (@{$opts->{template_dirs}}, $1) ;
 # Name of generic llgal files
     } elsif (/^captions_header_filename\s*=\s*"(.+)"$/) {
 	$opts->{captions_header_filename} = $1 ;
@@ -608,6 +606,15 @@ sub process_option {
     } elsif (/^sort_criteria\s*=\s*"(.+)"$/) {
 	$opts->{sort_criteria} = $1 ;
 # Various
+    } elsif (/^additional_configuration_file\s*=\s*"(.+)"$/) {
+	my $file = $1 ;
+	die_without_GetOptions_usage "Not opening '$file' since too much configuration files were recursively included, loop detected ?\n"
+	    if $recursive_included_configuration_file++ >= 10 ;
+	parse_custom_config_file ($opts, $file) ;
+	close CONF ;
+	$recursive_included_configuration_file-- ;
+    } elsif (/^additional_template_dir\s*=\s*"(.+)"$/) {
+	push (@{$opts->{template_dirs}}, $1) ;
     } elsif (/^convert_options\s*=\s*"(.*)"$/) {
 	push (@{$opts->{convert_options}}, parse_convert_options ($1)) ;
     } elsif (/^scaled_convert_options\s*=\s*"(.*)"$/) {
@@ -620,13 +627,6 @@ sub process_option {
 	$opts->{www_access_rights} = $1 ;
     } elsif (/^www_extension\s*=\s*"(.+)"$/) {
 	$opts->{www_extension} = $1 ;
-    } elsif (/^additional_configuration_file\s*=\s*"(.+)"$/) {
-	my $file = $1 ;
-	die_without_GetOptions_usage "Not opening '$file' since too much configuration files were recursively included, loop detected ?\n"
-	    if $recursive_included_configuration_file++ >= 10 ;
-	parse_custom_config_file ($opts, $file) ;
-	close CONF ;
-	$recursive_included_configuration_file-- ;
 
 # Error
     } elsif (/^[^#]/ and !/^(\s*)$/) {
@@ -2917,7 +2917,6 @@ sub generate_config {
     print NEWCFG "# llgal directories:\n" ;
     print NEWCFG "llgal_share_dir = \"$opts->{llgal_share_dir}\"\n" ;
     print NEWCFG "user_share_dir = \"$opts->{user_share_dir}\"\n" ;
-    map { print NEWCFG "template_dir = \"$_\"\n" ; } @{$opts->{template_dirs}} ;
     print NEWCFG "\n" ;
     print NEWCFG "# Name of generic llgal files:\n" ;
     print NEWCFG "captions_header_filename = \"$opts->{captions_header_filename}\"\n" ;
@@ -3018,6 +3017,7 @@ sub generate_config {
     print NEWCFG "sort_criteria = \"$opts->{sort_criteria}\"\n" ;
     print NEWCFG "\n" ;
     print NEWCFG "# Various:\n" ;
+    map { print NEWCFG "additional_template_dir = \"$_\"\n" ; } @{$opts->{template_dirs}} ;
     print NEWCFG "convert_options = \"". (join_convert_options (@{$opts->{convert_options}})) ."\"\n" ;
     print NEWCFG "scaled_convert_options = \"". (join_convert_options (@{$opts->{scaled_convert_options}})) ."\"\n" ;
     print NEWCFG "thumbnail_convert_options = \"". (join_convert_options (@{$opts->{thumbnail_convert_options}})) ."\"\n" ;

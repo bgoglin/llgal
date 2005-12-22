@@ -744,12 +744,6 @@ If they exists, these files are used instead of the system-wide files.
 Default is
 .BR $HOME/.llgal/ .
 .RE
-.I template_dir = \fI"path"
-.RS
-Additional template directories
-.RB [ --templates ].
-This option may be used multiple times.
-.RE
 
 .B Names of generic llgal files:
 
@@ -1316,6 +1310,19 @@ Default is \fB"name"\fR.
 
 .B Various:
 
+.I additional_configuration_file = <s>
+.RS
+Additional configuration file that is parsed immediately
+(before processing the following lines)
+.RB [ "--config <s>" ].
+This option may be used several times.
+.RE
+.I additional_template_dir = \fI"path"
+.RS
+Additional template directories
+.RB [ --templates ].
+This option may be used multiple times.
+.RE
 .I convert_options = \fI"string"
 .RS
 Options to pass to convert
@@ -1352,13 +1359,6 @@ Default is
 Extension of generated webpages
 .RB [ --php ].
 Default is \fB"html"\fR.
-.RE
-.I additional_configuration_file = <s>
-.RS
-Additional configuration file that is parsed immediately
-(before processing the following lines)
-.RB [ "--config <s>" ].
-This option may be used several times.
 .RE
 
 

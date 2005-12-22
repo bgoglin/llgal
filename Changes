@@ -4,6 +4,8 @@
     following options.
   * Fix manpage additional_configuration_file name (instead of config_file).
   * Hardcode default english values in usage to avoid messing the code.
+  * Replace template_dir with additional_template_dir in configuration file
+    and move it to various options together with additional_configuration_file.
 
 
 llgal (0.12.1)
