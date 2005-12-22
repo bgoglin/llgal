@@ -329,7 +329,7 @@ Additional Behavior Options:
   The behavior might also be modified with the following options,
   either when generating a gallery or not:
     --config <s>       pass an additional configuration files
-    -d <dir>           operate on files in directory <dir> ($destination_dir)
+    -d <dir>           operate on files in directory <dir> (current directory)
     -f                 force thumbnail and scaled slide regeneration
     --gencfg <file>    generate the configuration file <file>
     --option <s>       pass an additional option as in configuration files
@@ -342,39 +342,39 @@ Selecting files:
 Layout Options:
     -a                 write image sizes under thumbnails on index page
     --ad               like -a, but write only the image dimensions
-    --as               like -a, but write only the file size (in kbytes)
-    --asu <s>          change file size unit ($opts->{show_size_unit})
+    --as               like -a, but write only the file size
+    --asu <s>          change file size unit (kB)
     --bigxy <n>        like --xy, use it if you have very large image files
     --bigy <n>         like -y, use it if you have very large image files
     --cc [<s>]         use image comments as captions
     --cf               use file names as captions
     --ct               use image timestamps as captions
-    --ctf <s>          timestamp format in captions (strftime format)
+    --ctf <s>          timestamp format in captions
     --con <s>          options to pass to convert (e.g. -quality N)
-    -i <file>          name of the main thumbnail index file ($opts->{index_filename})
+    -i <file>          name of the main thumbnail index file (index)
     -k                 use the image captions for the HTML slide titles
     -L                 list links outside of the table
     --li               use images for links in slides
     --lt               use thumbnail preview for links in slides
     -n                 use image file names for the HTML slide files
     --nc               omit the image count from the captions
-    -p <n>             cellpadding value of thumbnail index tables ($opts->{index_cellpadding})
+    -p <n>             cellpadding value of thumbnail index tables (3)
     --php              use php extension for generated webpages
     -r                 omit the film effect altogether
     --Rl               add links between subgalleries
     -s                 make no HTML slides, link thumbnails to images
     --sort <s>         sort files with criteria <s>
-    -t <n>             height of the film tiled image ($opts->{filmtile_height})
+    -t <n>             height of the film tiled image (21)
     --templates <dir>  use templates in <dir>
-    --title <s>        title of the index of the gallery ($opts->{index_title})
+    --title <s>        title of the index of the gallery (Index of pictures)
     -u                 write captions under thumbnails on index page
     --uc <url>         use a CSS file that is already available on the web
     --ui <url>         use filmtile and link images that are already available on the web
-    -w <n>             rows in thumbnail index are at most <n> images wide ($opts->{thumbnails_per_row})
+    -w <n>             rows in thumbnail index are at most <n> images wide (5)
     --www              make all llgal files world-readable
     --wx <n>           rows in thumbnail index are at most <n> pixels wide
     --xy <n>           scale thumbs to <n> pixels in their longer dimension
-    -y <n>             scale all thumbnails to the same height <n> ($opts->{thumbnail_height_max})
+    -y <n>             scale all thumbnails to the same height <n> (75)
   Default values are given in parentheses (where applicable).
 Author:  Brice Goglin
 Homepage:  http://home.gna.org/llgal

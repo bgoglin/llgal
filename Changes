@@ -3,6 +3,7 @@
     are parsed as soon as the option is met, before processing any of the
     following options.
   * Fix manpage additional_configuration_file name (instead of config_file).
+  * Hardcode default english values in usage to avoid messing the code.
 
 
 llgal (0.12.1)
