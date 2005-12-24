@@ -13,6 +13,14 @@
     an administrator to change it, additional_template_dir might help in case
     of problem, and it actually contains the user-wide configuration file which
     messes the code if its location may change.
+  * When the local llgal directory name is changed (with local_llgal_directory)
+    the local configuration file is read from the corresponding directory, not
+    from .llgal/. 
+  * The local llgal directory name may now be changed only by the system-wide
+    (/etc/llgal/llgalrc) or the user-wide configuration file
+    ($HOME/.llgal/llgalrc) since it changes the location of the local
+    configuration file.
+  * Some cleanups.
 
 
 llgal (0.12.1)

@@ -19,9 +19,16 @@ no strict "refs" ;
 Getopt::Long::Configure('noignorecase', 'noautoabbrev', 'bundling') ;
 STDOUT->autoflush("1") ;
 
+# constants
 my $version = "@VERSION@" ;
 my $llgal_share_dir = "@DATADIR@/llgal" ;
 my $user_share_dir = $ENV{HOME}."/.llgal" ;
+# local llgal directory, may be modified during early configuration
+my $local_llgal_dir = ".llgal" ;
+
+# some variable may only be modified when by system
+# or user-wide configuration files only
+my $early_configuration = 1 ;
 
 ######################################################################
 # store command-line options upfront to write in the index <HEAD>
@@ -40,18 +47,6 @@ sub parse_convert_options {
 sub join_convert_options {
     return join (' ', map { my $val = $_ ; $val =~ s/( +)/\'$1\'/g ; $val } @_) ;
 }
-
-######################################################################
-# configuration files
-
-my @generic_config_files = () ;
-# system-wide configuration file
-push (@generic_config_files, "@SYSCONFDIR@/llgal/llgalrc") ;
-# user-wide configuration file
-push (@generic_config_files, $ENV{HOME}."/.llgal/llgalrc") ;
-
-# destination configuration file
-my $destination_config_file = ".llgal/llgalrc" ;
 
 ######################################################################
 # early configuration that have to be now
@@ -145,8 +140,6 @@ my $opts = {
     next_slide_link_image_location => "",
 
 # Location and name of generated files
-# local llgal directory
-    local_llgal_dir => ".llgal",
 # name of the index file (-i)
     index_filename => "index",
 # prefix of HTML slide filenames
@@ -439,7 +432,11 @@ sub process_option {
 	$opts->{next_slide_link_image_location} = $1 ;
 # Location and name of generated files
     } elsif (/^local_llgal_dir\s*=\s*"(.+)"$/) {
-	$opts->{local_llgal_dir} = $1 ;
+	# the local llgal directory name may only be changed
+	# during early configuration
+	die_without_GetOptions_usage "The name of the local llgal directory may only be changed by system- or user-wide configuration files.\n"
+	    if ! $early_configuration ;
+	$local_llgal_dir = $1 ;
     } elsif (/^index_filename\s*=\s*"(.+)"$/) {
 	$opts->{index_filename} = $1 ;
     } elsif (/^slide_filenameprefix\s*=\s*"(.*)"$/) {
@@ -633,6 +630,7 @@ sub parse_generic_config_file {
     my $file = shift ;
     # warn on obsolete file
     my $oldconffile = $file ;
+    $oldconffile =~ s/$local_llgal_dir\/llgalrc$/.llgalrc/ ;
     $oldconffile =~ s/llgal\/llgalrc$/llgalrc/ ;
     print "!! Obsolete configuration file $oldconffile skipped, should be moved to $file.\n"
 	if -e $oldconffile ;
@@ -894,20 +892,20 @@ sub find_generic_template_file {
 # find path to the template, using the local one if it exists
 sub find_template_file {
     my ($filename, $check) = (shift, shift) ;
-    return $opts->{local_llgal_dir}
-	if -e "$opts->{local_llgal_dir}/$filename" ;
+    return $local_llgal_dir
+	if -e "$local_llgal_dir/$filename" ;
     return find_generic_template_file ($filename, $check) ;
 }
 
 # get a template file from generic directories and save it to local directory
 sub get_template_file {
     my $filename = shift ;
-    if (-e "$destination_dir$opts->{local_llgal_dir}/$filename") {
-	indprint "Found $filename in $destination_dir$opts->{local_llgal_dir}/, using it.\n" ;
+    if (-e "$destination_dir$local_llgal_dir/$filename") {
+	indprint "Found $filename in $destination_dir$local_llgal_dir/, using it.\n" ;
     } else {
 	my $srcdir = find_generic_template_file ($filename, 1) ;
-	indprint "No $filename in $destination_dir$opts->{local_llgal_dir}/, getting a copy from $srcdir\n" ;
-	copy_file ($filename, $srcdir, "$destination_dir$opts->{local_llgal_dir}" ) ;
+	indprint "No $filename in $destination_dir$local_llgal_dir/, getting a copy from $srcdir\n" ;
+	copy_file ($filename, $srcdir, "$destination_dir$local_llgal_dir" ) ;
     }
 }
 
@@ -961,7 +959,7 @@ sub sanity_checks {
     die "Please give a non-empty filename without path as a slide template filename\n"
 	if $opts->{slidetemplate_filename} eq "" or $opts->{slidetemplate_filename} =~ /\// ;
     die "Please give a non-empty directory name without path as a local llgal directory\n"
-	if $opts->{local_llgal_dir} eq "" or $opts->{local_llgal_dir} =~ /\// ;
+	if $local_llgal_dir eq "" or $local_llgal_dir =~ /\// ;
     die "Please give a non-empty string without path as a slide filename prefix\n"
 	if $opts->{scaled_image_filenameprefix} eq "" or $opts->{scaled_image_filenameprefix} =~ /\// ;
     die "Please give a non-empty string without path as a thumbnail filename prefix\n"
@@ -1173,11 +1171,11 @@ sub clean_files {
 	indprint "Cleaning in $destination_string\n" ;
     }
 
-    opendir DIR, "$destination_dir$opts->{local_llgal_dir}"
-	or die "Can't open directory $destination_dir$opts->{local_llgal_dir} ($!)\n" ;
+    opendir DIR, "$destination_dir$local_llgal_dir"
+	or die "Can't open directory $destination_dir$local_llgal_dir ($!)\n" ;
     while ($_ = readdir DIR) {
 	if (/^$opts->{thumbnail_image_filenameprefix}/ or /^$opts->{scaled_image_filenameprefix}/) {
-	    unlink "$destination_dir$opts->{local_llgal_dir}/$_" ;
+	    unlink "$destination_dir$local_llgal_dir/$_" ;
 	} elsif (/^$opts->{filmtile_filename}$/ or /^$opts->{index_link_image_filename}$/
 		 or /^$opts->{prev_slide_link_image_filename}$/ or /^$opts->{next_slide_link_image_filename}$/
 		 or /^$opts->{css_filename}$/) {
@@ -1188,20 +1186,20 @@ sub clean_files {
 	    if (!$cleanall) {
 		($diff, @output) = system_with_output
 		    ("compare $_ with its original",
-		     "cmp", "-s", "$destination_dir$opts->{local_llgal_dir}/$_", "$original") ;
+		     "cmp", "-s", "$destination_dir$local_llgal_dir/$_", "$original") ;
 		if ($diff == -1) {
 		    immediate_external_warnings @output ;
-		    die "Failed to execute 'cmp' to check whether $destination_dir$opts->{local_llgal_dir}/$_ has been modified ($!).\n" ;
+		    die "Failed to execute 'cmp' to check whether $destination_dir$local_llgal_dir/$_ has been modified ($!).\n" ;
 		}
 		add_external_warnings @output ;
 		# on other errors, assume files are different ($diff != 0)
 	    }
 	    if ($diff) {
-		add_warning "Preserved $destination_dir$opts->{local_llgal_dir}/$_ since it seems to be modified." ;
+		add_warning "Preserved $destination_dir$local_llgal_dir/$_ since it seems to be modified." ;
 		$notdeleted++ ;
 	    } else {
-		if (!unlink "$destination_dir$opts->{local_llgal_dir}/$_" and ! $!{ENOENT}) {
-		    add_warning "Failed to remove file $destination_dir$opts->{local_llgal_dir}/$_ ($!)." ;
+		if (!unlink "$destination_dir$local_llgal_dir/$_" and ! $!{ENOENT}) {
+		    add_warning "Failed to remove file $destination_dir$local_llgal_dir/$_ ($!)." ;
 		}
 	    }
 	} elsif (/^$opts->{captions_filename}$/) {
@@ -1211,20 +1209,20 @@ sub clean_files {
 	    if (!$cleanall) {
 		($grep, @output) = system_with_output
 		    ("check for caption removal line",
-		     "grep", "-q", "$opts->{captions_removal_line}", "$destination_dir$opts->{local_llgal_dir}/$_") ;
+		     "grep", "-q", "$opts->{captions_removal_line}", "$destination_dir$local_llgal_dir/$_") ;
 		if ($grep == -1) {
 		    immediate_external_warnings @output ;
-		    die "Failed to execute 'grep' to check whether $destination_dir$opts->{local_llgal_dir}/$_ has been modified ($!).\n" ;
+		    die "Failed to execute 'grep' to check whether $destination_dir$local_llgal_dir/$_ has been modified ($!).\n" ;
 		}
 		add_external_warnings @output ;
 		# on other errors, assume file doesn't contain the caption removal line ($grep != 0)
 	    }
 	    if ($grep) {
-		add_warning "Preserved $destination_dir$opts->{local_llgal_dir}/$_ since it seems to be modified." ;
+		add_warning "Preserved $destination_dir$local_llgal_dir/$_ since it seems to be modified." ;
 		$notdeleted++ ;
 	    } else {
-		if (!unlink "$destination_dir$opts->{local_llgal_dir}/$_" and ! $!{ENOENT}) {
-		    add_warning "Failed to remove file $destination_dir$opts->{local_llgal_dir}/$_." ;
+		if (!unlink "$destination_dir$local_llgal_dir/$_" and ! $!{ENOENT}) {
+		    add_warning "Failed to remove file $destination_dir$local_llgal_dir/$_." ;
 		}
 	    }
 	} else {
@@ -1233,8 +1231,8 @@ sub clean_files {
     }
     closedir DIR ;
     if ($notdeleted <= 2 and $cleanall) {
-	if (!rmdir "$destination_dir$opts->{local_llgal_dir}"  and ! $!{ENOENT}) {
-	    add_warning "Failed to remove directory $destination_dir$opts->{local_llgal_dir} ($!)." ;
+	if (!rmdir "$destination_dir$local_llgal_dir"  and ! $!{ENOENT}) {
+	    add_warning "Failed to remove directory $destination_dir$local_llgal_dir ($!)." ;
 	}
     }
 
@@ -1377,12 +1375,12 @@ sub find_user_thumbnail {
     my $user_thumbnail_filename = "$opts->{user_thumbnail_image_filenameprefix}$opts->{thumbnail_image_filenameprefix}$filename" ;
 
     if ($type == $TYPE_IMG) {
-	if (-f "$opts->{local_llgal_dir}/$user_thumbnail_filename") {
+	if (-f "$local_llgal_dir/$user_thumbnail_filename") {
 	    return $user_thumbnail_filename ;
 	}
     } else {
 	foreach my $ext (split (/\|/, $opts->{image_extensions})) {
-	    if (-f "$opts->{local_llgal_dir}/$user_thumbnail_filename.$ext") {
+	    if (-f "$local_llgal_dir/$user_thumbnail_filename.$ext") {
 		return "$user_thumbnail_filename.$ext" ;
 	    }
 	}
@@ -1397,12 +1395,12 @@ sub find_user_scaled {
     my $user_scaled_filename = "$opts->{user_scaled_image_filenameprefix}$opts->{scaled_image_filenameprefix}$filename" ;
 
     if ($type == $TYPE_IMG) {
-	if (-f "$opts->{local_llgal_dir}/$user_scaled_filename") {
+	if (-f "$local_llgal_dir/$user_scaled_filename") {
 	    return $user_scaled_filename ;
 	}
     } else {
 	foreach my $ext (split (/\|/, $opts->{image_extensions})) {
-	    if (-f "$opts->{local_llgal_dir}/$user_scaled_filename.$ext") {
+	    if (-f "$local_llgal_dir/$user_scaled_filename.$ext") {
 		return "$user_scaled_filename.$ext" ;
 	    }
 	}
@@ -1623,11 +1621,11 @@ sub fill_file_entry {
     if ($thumb_filename) {
 	# there's a user provided thumbnail, just use it
 
-	$entry->{thumb_filename} = "$opts->{local_llgal_dir}/$thumb_filename" ;
+	$entry->{thumb_filename} = "$local_llgal_dir/$thumb_filename" ;
 	$entry->{thumb_url} = "$local_llgal_url/". make_safe_url_nowarn ($thumb_filename) ;
 
 	# thumbnails dimensions
-	my ($x, $y) = imgsize ("$opts->{local_llgal_dir}/$thumb_filename") ;
+	my ($x, $y) = imgsize ("$local_llgal_dir/$thumb_filename") ;
 	if ($y > $opts->{thumbnail_height_max}) {
 	    $x = $x * ($opts->{thumbnail_height_max} / $y) ;
 	    $y = $opts->{thumbnail_height_max} ;
@@ -1651,7 +1649,7 @@ sub fill_file_entry {
 
 	# filename and url
 	$thumb_filename = "$opts->{thumbnail_image_filenameprefix}$filename" ;
-	$entry->{thumb_filename} = "$opts->{local_llgal_dir}/$thumb_filename" ;
+	$entry->{thumb_filename} = "$local_llgal_dir/$thumb_filename" ;
 	$entry->{thumb_url} = "$local_llgal_url/". make_safe_url_nowarn ($thumb_filename) ;
 
 	# thumbnails dimensions
@@ -1694,11 +1692,11 @@ sub fill_file_entry {
 	if ($scaled_filename and ($opts->{slide_width_max} > 0 or $opts->{slide_height_max} > 0)) {
 	    # there's a user provided scaled, just use it
 
-	    $entry->{scaled_filename} = "$opts->{local_llgal_dir}/$scaled_filename" ;
+	    $entry->{scaled_filename} = "$local_llgal_dir/$scaled_filename" ;
 	    $entry->{scaled_url} = "$local_llgal_url/". make_safe_url_nowarn ($scaled_filename) ;
 
 	    # thumbnails dimensions
-	    my ($x, $y) = imgsize ("$opts->{local_llgal_dir}/$scaled_filename") ;
+	    my ($x, $y) = imgsize ("$local_llgal_dir/$scaled_filename") ;
 	    if ($y > $opts->{slide_height_max} and $y > $opts->{slide_height_max}) {
 		$x = $x * ($opts->{slide_height_max} / $y) ;
 		$y = $opts->{slide_height_max} ;
@@ -1709,7 +1707,7 @@ sub fill_file_entry {
 	    }
 
 	    ($entry->{scaled_xdim},$entry->{scaled_ydim}) = ($x, $y) ;
-	    $entry->{scaled_kbytes} = (-s "$opts->{local_llgal_dir}/$scaled_filename") >> 10 ;
+	    $entry->{scaled_kbytes} = (-s "$local_llgal_dir/$scaled_filename") >> 10 ;
 
 	    # dimstring
 	    if ($opts->{show_dimensions} and $opts->{show_size}) {
@@ -1727,7 +1725,7 @@ sub fill_file_entry {
 
 	    # filename and url
 	    $scaled_filename = "$opts->{scaled_image_filenameprefix}$filename" ;
-	    $entry->{scaled_filename} = "$opts->{local_llgal_dir}/$scaled_filename" ;
+	    $entry->{scaled_filename} = "$local_llgal_dir/$scaled_filename" ;
 	    $entry->{scaled_url} = "$local_llgal_url/". make_safe_url_nowarn ($scaled_filename) ;
 
 	    # scaled image dimensions
@@ -2005,7 +2003,7 @@ sub check_destination {
     # pwd and destination_dir even if destination_dir is an absolute path
     my $path = getcwd."/".$destination_dir ;
     if ($path =~ m@/*(?:[^/]+/+)*([^/]+)/+$@) {
-	if ($1 eq $opts->{local_llgal_dir}) {
+	if ($1 eq $local_llgal_dir) {
 	    immediate_warning "!! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !!" ;
 	    immediate_warning "Your working directory looks like a .llgal directory. !!" ;
 	    immediate_warning "This might not be what you really want to do.         !!" ;
@@ -2014,22 +2012,22 @@ sub check_destination {
     }
 
     # Create the url of the local llgal directory
-    $local_llgal_url = make_safe_url_nowarn ($opts->{local_llgal_dir}) ;
+    $local_llgal_url = make_safe_url_nowarn ($local_llgal_dir) ;
 
     # temporary check, to be removed soon
-    if ($opts->{local_llgal_dir} ne ".llgal.files" and -e "${destination_dir}.llgal.files") {
+    if ($local_llgal_dir ne ".llgal.files" and -e "${destination_dir}.llgal.files") {
 	immediate_warning "!! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !!" ;
 	immediate_warning "llgal now uses '.llgal' instead '.llgal.files'. !!" ;
 	immediate_warning "You should probably update it.                  !!" ;
 	immediate_warning "!! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !!" ;
     }
 
-    if (! -e "$destination_dir$opts->{local_llgal_dir}") {
-	mkdir "$destination_dir$opts->{local_llgal_dir}"
-	    or die "Failed to create $destination_dir$opts->{local_llgal_dir} directory ($!)" ;
+    if (! -e "$destination_dir$local_llgal_dir") {
+	mkdir "$destination_dir$local_llgal_dir"
+	    or die "Failed to create $destination_dir$local_llgal_dir directory ($!)" ;
     }
-    die "Local llgal $destination_dir$opts->{local_llgal_dir} is not a directory.\n"
-	if ! -d "$destination_dir$opts->{local_llgal_dir}" ;
+    die "Local llgal $destination_dir$local_llgal_dir is not a directory.\n"
+	if ! -d "$destination_dir$local_llgal_dir" ;
 }
 
 #######################################################################
@@ -2059,10 +2057,10 @@ sub generate_captions_file {
     my $old_next_gallery_link_target ;
     my $old_next_gallery_link_text ;
 
-    if (-e "$destination_dir$opts->{local_llgal_dir}/$opts->{captions_filename}") {
+    if (-e "$destination_dir$local_llgal_dir/$opts->{captions_filename}") {
 	indprint "Reading existing captions from $opts->{captions_filename}.\n" ;
-	open (CAP, "$destination_dir$opts->{local_llgal_dir}/$opts->{captions_filename}")
-	    or die "Can't open $destination_dir$opts->{local_llgal_dir}/$opts->{captions_filename} for reading\n" ;
+	open (CAP, "$destination_dir$local_llgal_dir/$opts->{captions_filename}")
+	    or die "Can't open $destination_dir$local_llgal_dir/$opts->{captions_filename} for reading\n" ;
 	@captions = <CAP> ;
 	close CAP ;
 
@@ -2085,16 +2083,16 @@ sub generate_captions_file {
 	}
 
 	indprint "Appending new captions to $opts->{captions_filename}: " ;
-	open (CAP, ">>$destination_dir$opts->{local_llgal_dir}/$opts->{captions_filename}")
-	    or die "Can't open $destination_dir$opts->{local_llgal_dir}/$opts->{captions_filename} file to append\n" ;
+	open (CAP, ">>$destination_dir$local_llgal_dir/$opts->{captions_filename}")
+	    or die "Can't open $destination_dir$local_llgal_dir/$opts->{captions_filename} file to append\n" ;
 
 	print CAP "\n" ;
 	print CAP "# Appended new captions (", scalar localtime, ").\n" ;
 	print CAP "\n" ;
     } else {
 	indprint "Creating the $opts->{captions_filename} file: " ;
-	open (CAP, ">$destination_dir$opts->{local_llgal_dir}/$opts->{captions_filename}")
-	    or die "Can't create $destination_dir$opts->{local_llgal_dir}/$opts->{captions_filename} file\n" ;
+	open (CAP, ">$destination_dir$local_llgal_dir/$opts->{captions_filename}")
+	    or die "Can't create $destination_dir$local_llgal_dir/$opts->{captions_filename} file\n" ;
 
 	print CAP "# This is llgal's $opts->{captions_filename} file, first generated ", scalar localtime, ".\n" ;
 	if (open CAPHEADER, "$llgal_share_dir/$opts->{captions_header_filename}") {
@@ -2176,8 +2174,8 @@ sub read_captions_file {
     indprint "Reading the $opts->{captions_filename} file and preparing entries: " ;
     init_percentage () ;
 
-    open(CAP,"$destination_dir$opts->{local_llgal_dir}/$opts->{captions_filename}")
-	or die "Can't open $destination_dir$opts->{local_llgal_dir}/$opts->{captions_filename} file\n" ;
+    open(CAP,"$destination_dir$local_llgal_dir/$opts->{captions_filename}")
+	or die "Can't open $destination_dir$local_llgal_dir/$opts->{captions_filename} file\n" ;
 
     my $size = (-s CAP) ;
     my $line ;
@@ -2357,7 +2355,7 @@ sub generate_slides {
 	    if ($opts->{css_location}) {
 		$line =~ s/<!--CSS-->/$opts->{css_location}/g ;
 	    } else {
-		$line =~ s/<!--CSS-->/$opts->{local_llgal_dir}\/$opts->{css_filename}/g ;
+		$line =~ s/<!--CSS-->/$local_llgal_dir\/$opts->{css_filename}/g ;
 	    }
 
 	    # set the style
@@ -2443,7 +2441,7 @@ sub generate_slides {
 			."alt=\"$opts->{index_link_text}\" "
 			."class=\"image-link\" />" ;
 		} else {
-		    $index_link = "<img src=\"$opts->{local_llgal_dir}/". (make_safe_url $opts->{index_link_image_filename}) ."\" "
+		    $index_link = "<img src=\"$local_llgal_dir/". (make_safe_url $opts->{index_link_image_filename}) ."\" "
 			."alt=\"$opts->{index_link_text}\" class=\"image-link\" />" ;
 		}
 	    }
@@ -2463,7 +2461,7 @@ sub generate_slides {
 		    $prev_slide_link = "<img src=\"$opts->{prev_slide_link_image_location}\" "
 			."alt=\"$opts->{prev_slide_link_text}\" class=\"image-link\" />" ;
 		} else {
-		    $prev_slide_link = "<img src=\"$opts->{local_llgal_dir}/". (make_safe_url $opts->{prev_slide_link_image_filename}) ."\" "
+		    $prev_slide_link = "<img src=\"$local_llgal_dir/". (make_safe_url $opts->{prev_slide_link_image_filename}) ."\" "
 			."alt=\"$opts->{prev_slide_link_text}\" class=\"image-link\" />" ;
 		}
 	    } else {
@@ -2485,7 +2483,7 @@ sub generate_slides {
 		    $next_slide_link = "<img src=\"". $opts->{next_slide_link_image_location} ."\" "
 			."alt=\"$opts->{next_slide_link_text}\" class=\"image-link\" />" ;
 		} else {
-		    $next_slide_link = "<img src=\"$opts->{local_llgal_dir}/". (make_safe_url $opts->{next_slide_link_image_filename}) ."\" "
+		    $next_slide_link = "<img src=\"$local_llgal_dir/". (make_safe_url $opts->{next_slide_link_image_filename}) ."\" "
 			."alt=\"$opts->{next_slide_link_text}\" class=\"image-link\" />" ;
 		}
 	    } else {
@@ -2545,7 +2543,7 @@ sub generate_index {
 	    if ($opts->{css_location}) {
 		$line =~ s/<!--CSS-->/$opts->{css_location}/g ;
 	    } else {
-		$line =~ s/<!--CSS-->/$opts->{local_llgal_dir}\/$opts->{css_filename}/g ;
+		$line =~ s/<!--CSS-->/$local_llgal_dir\/$opts->{css_filename}/g ;
 	    }
 	    print IXW "$line" ;
 	}
@@ -2755,11 +2753,11 @@ sub get_files {
     } else {
 	get_template_file ($opts->{filmtile_filename}) ;
 	# rescale the tiled image if needed
-	my $filmtileh = (imgsize ("$destination_dir$opts->{local_llgal_dir}/$opts->{filmtile_filename}"))[1] ;
+	my $filmtileh = (imgsize ("$destination_dir$local_llgal_dir/$opts->{filmtile_filename}"))[1] ;
 	if ($opts->{filmtile_height} != $filmtileh) {
 	    my ($status, @output) = system_with_output
 		( "reduce film tile",
-		  "mogrify", "-scale", "x$opts->{filmtile_height}", "$destination_dir$opts->{local_llgal_dir}/$opts->{filmtile_filename}" ) ;
+		  "mogrify", "-scale", "x$opts->{filmtile_height}", "$destination_dir$local_llgal_dir/$opts->{filmtile_filename}" ) ;
 	    if ($status) {
 		# die on whatever error
 		immediate_external_warnings @output ;
@@ -2829,20 +2827,20 @@ sub make_www_rights {
     # index
     make_readable "$destination_dir$opts->{index_filename}.$opts->{www_extension}" ;
     # .llgal
-    make_readable_and_traversable "$destination_dir$opts->{local_llgal_dir}" ;
+    make_readable_and_traversable "$destination_dir$local_llgal_dir" ;
     # css
-    make_readable "$destination_dir$opts->{local_llgal_dir}/$opts->{css_filename}" ;
+    make_readable "$destination_dir$local_llgal_dir/$opts->{css_filename}" ;
     # filmtile
-    make_readable "$destination_dir$opts->{local_llgal_dir}/$opts->{filmtile_filename}"
+    make_readable "$destination_dir$local_llgal_dir/$opts->{filmtile_filename}"
 	if ! $opts->{show_no_film_effect} ;
     # index link image
-    make_readable "$destination_dir$opts->{local_llgal_dir}/$opts->{index_link_image_filename}"
+    make_readable "$destination_dir$local_llgal_dir/$opts->{index_link_image_filename}"
  	if $opts->{index_link_image} ;
     # prev slide link image
-    make_readable "$destination_dir$opts->{local_llgal_dir}/$opts->{prev_slide_link_image_filename}"
+    make_readable "$destination_dir$local_llgal_dir/$opts->{prev_slide_link_image_filename}"
  	if $opts->{prev_slide_link_image} and ! $opts->{prev_slide_link_preview};
     # next slide link image
-    make_readable "$destination_dir$opts->{local_llgal_dir}/$opts->{next_slide_link_image_filename}"
+    make_readable "$destination_dir$local_llgal_dir/$opts->{next_slide_link_image_filename}"
  	if $opts->{next_slide_link_image} and ! $opts->{next_slide_link_preview} ;
 
     # entries that have a slide
@@ -2912,7 +2910,7 @@ sub generate_config {
     print NEWCFG "slidetemplate_filename = \"$opts->{slidetemplate_filename}\"\n" ;
     print NEWCFG "\n" ;
     print NEWCFG "# Location and name of generated files:\n" ;
-    print NEWCFG "local_llgal_dir = \"$opts->{local_llgal_dir}\"\n" ;
+    print NEWCFG "local_llgal_dir = \"$local_llgal_dir\"\n" ;
     print NEWCFG "index_filename = \"$opts->{index_filename}\"\n" ;
     print NEWCFG "slide_filenameprefix = \"$opts->{slide_filenameprefix}\"\n" ;
     print NEWCFG "slide_filenameprefix_nofile = \"$opts->{slide_filenameprefix_nofile}\"\n" ;
@@ -3057,22 +3055,35 @@ sub call_recursive {
 #######################################################################
 # Main code
 
+######################################################################
+# configuration files
+
+# system-wide configuration file
+parse_generic_config_file "@SYSCONFDIR@/llgal/llgalrc" ;
+# user-wide configuration file
+parse_generic_config_file $ENV{HOME}."/.llgal/llgalrc" ;
+
+# early configuration ends here
+$early_configuration = 0 ;
+
+# the local llgal directory name is now fixed
+# we may check and setup the destination directory
 check_destination ;
 
-foreach my $conf (@generic_config_files) {
-    parse_generic_config_file $conf ;
-}
-parse_generic_config_file "${destination_dir}$destination_config_file" ;
+# destination configuration file
+parse_generic_config_file "${destination_dir}${local_llgal_dir}/llgalrc" ;
 
 # DO NOT MOVE THIS LINE BEFORE CONFIG FILE PARSING
+# parse command line options
 parse_cmdline_options ();
+
+# special behaviors
 
 die $usage
     if $help_asked ;
+
 die "This is llgal version $version.\n"
     if $version_asked ;
-
-# special behaviors
 
 if ($clean_asked or $cleanall_asked) {
     my $cleanall = shift ;
@@ -3100,7 +3111,7 @@ if ($clean_asked or $cleanall_asked) {
 
 if ($give_templates) {
     my $destdir = $give_templates ;
-    $destdir = $opts->{local_llgal_dir}
+    $destdir = $local_llgal_dir
 	if $destdir eq "local" ;
     $destdir = $user_share_dir
 	if $destdir eq "user" ;
@@ -3137,7 +3148,7 @@ my $root_gallery = init_gallery () ;
 
 if ($generate_captions) {
     generate_captions_file $root_gallery ;
-    indprint "Now edit the $destination_dir$opts->{local_llgal_dir}/$opts->{captions_filename} file to your liking and run llgal\n" ;
+    indprint "Now edit the $destination_dir$local_llgal_dir/$opts->{captions_filename} file to your liking and run llgal\n" ;
 
     if ($make_recursive) {
 	my @dir_entries = grep { $_->{type} == $TYPE_DIR } @{$root_gallery->{entries}} ;
@@ -3158,7 +3169,7 @@ if ($generate_captions) {
     exit 0 ;
 }
 
-if (-e "$destination_dir$opts->{local_llgal_dir}/$opts->{captions_filename}") {
+if (-e "$destination_dir$local_llgal_dir/$opts->{captions_filename}") {
     read_captions_file $root_gallery ;
     fill_entries $root_gallery ;
     indprint "Found ". (scalar @{$root_gallery->{entries}}) ." files in the captions file.\n" ;

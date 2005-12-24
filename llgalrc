@@ -56,9 +56,12 @@
 ##### Location and name of generated files #####
 
 # Local subdirectory where llgal files generated files will be stored.
+# This option is only available in system- and user-wide configuration
+# files.
 # Note that HTML files are generated in place while captions and CSS
 # are kept in this subdirectory.
-# HTML templates might also be defined here.
+# Gallery specific HTML templates and llgalrc configuration file
+# might also be defined here.
 # local_llgal_dir = ".llgal"
 
 # Name of the generated index file [-i <s>]
