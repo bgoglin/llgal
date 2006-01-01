@@ -2910,7 +2910,7 @@ sub generate_config {
     print NEWCFG "slidetemplate_filename = \"$opts->{slidetemplate_filename}\"\n" ;
     print NEWCFG "\n" ;
     print NEWCFG "# Location and name of generated files:\n" ;
-    print NEWCFG "local_llgal_dir = \"$local_llgal_dir\"\n" ;
+    print NEWCFG "#local_llgal_dir = \"$local_llgal_dir\" # uncomment in user- or system- wide config file only\n" ;
     print NEWCFG "index_filename = \"$opts->{index_filename}\"\n" ;
     print NEWCFG "slide_filenameprefix = \"$opts->{slide_filenameprefix}\"\n" ;
     print NEWCFG "slide_filenameprefix_nofile = \"$opts->{slide_filenameprefix_nofile}\"\n" ;

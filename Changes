@@ -20,6 +20,8 @@
     (/etc/llgal/llgalrc) or the user-wide configuration file
     ($HOME/.llgal/llgalrc) since it changes the location of the local
     configuration file.
+  * local_llgal_dir is commented out in the generated configuration file so that
+    no error occurs if the user uses this file as a non-system/user-wide one.
   * Some cleanups.
 
 
