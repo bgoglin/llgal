@@ -82,6 +82,14 @@ sub llgal_gettext {
 my $codeset = langinfo(CODESET()) ;
 
 ######################################################################
+# various temporary globals
+my $destination_string ;
+my $local_llgal_url ;
+my $opts ;
+my $opts_without_defaults ;
+my $indent = "" ;
+
+######################################################################
 # general command-line options
 
 # show version
@@ -733,7 +741,7 @@ sub parse_cmdline_options {
 	'ctf=s'		=> \$opts->{timestamp_format_in_caption},
 	'con=s'		=> sub { shift ; push (@{$opts->{convert_options}}, parse_convert_options (shift)) ; },
 	'i=s'		=> \$opts->{index_filename},
-	'indent=s'	=> \$opts->{indent},
+	'indent=s'	=> \$indent,
 	'k'		=> \$opts->{make_slide_title_from_caption},
 	'L'		=> \$opts->{list_links},
 	'li'		=> sub { $opts->{index_link_image} = 1 ; $opts->{prev_slide_link_image} = 1 ; $opts->{next_slide_link_image} = 1 ; },
@@ -787,19 +795,12 @@ sub parse_cmdline_options {
 }
 
 ######################################################################
-# various temporary globals
-my $destination_string ;
-my $local_llgal_url ;
-my $opts ;
-my $opts_without_defaults ;
-
-######################################################################
 # a few routines
 
 # Print messages with indentation according to recursion level
 
 sub indprint {
-    print $opts->{indent} ;
+    print $indent ;
     print @_ ;
 }
 
@@ -3082,7 +3083,7 @@ sub call_recursive {
 	indprint "Entering subdirectory '$dir'...\n" ;
 	system ( $0, @llgal_options, "-d", "$destination_dir$dir",
 		 "--parent-gal", @prev_opts, @next_opts,
-		 "--indent", $opts->{indent}."  " ) ;
+		 "--indent", ${indent}."  " ) ;
 	die "Failed to call $0 for subdirectory $destination_dir$dir ($!).\n"
 	    if $? == -1 ;
 	immediate_warning "$0 failed for subdirectory $destination_dir$dir."
@@ -3140,7 +3141,7 @@ if ($clean_asked or $cleanall_asked) {
 	    if ($dir =~ /^[^.]/ and -d "$destination_dir$dir") {
 		print "\n" ;
 		indprint "Entering subdirectory '$dir'...\n" ;
-		system ( $0, @llgal_options, "-d", "$destination_dir$dir", "--indent", $opts->{indent}."  " ) ;
+		system ( $0, @llgal_options, "-d", "$destination_dir$dir", "--indent", ${indent}."  " ) ;
 		die "Failed to call $0 for subdirectory $destination_dir$dir ($!).\n"
 		    if $? == -1 ;
 		immediate_warning "$0 failed for subdirectory $destination_dir$dir."
@@ -3169,7 +3170,7 @@ if ($give_templates) {
 	    if ($dir =~ /^[^.]/ and -d "$destination_dir$dir") {
 		print "\n" ;
 		indprint "Entering subdirectory '$dir'...\n" ;
-		system ( $0, @llgal_options, "-d", "$destination_dir$dir", "--indent", $opts->{indent}."  " ) ;
+		system ( $0, @llgal_options, "-d", "$destination_dir$dir", "--indent", ${indent}."  " ) ;
 		die "Failed to call $0 for subdirectory $destination_dir$dir ($!).\n"
 		    if $? == -1 ;
 		immediate_warning "$0 failed for subdirectory $destination_dir$dir."
@@ -3201,7 +3202,7 @@ if ($generate_captions) {
 	foreach my $entry (@dir_entries) {
 	    my $dir = $entry->{filename} ;
 	    indprint "Entering subdirectory '$dir'...\n" ;
-	    system ( $0, @llgal_options, "-d", "$destination_dir$dir", "--indent", "  ".$opts->{indent} ) ;
+	    system ( $0, @llgal_options, "-d", "$destination_dir$dir", "--indent", "  ".${indent} ) ;
 	    die "Failed to call $0 for subdirectory $destination_dir$dir ($!).\n"
 		if $? == -1 ;
 	    immediate_warning "$0 failed for subdirectory $destination_dir$dir."
