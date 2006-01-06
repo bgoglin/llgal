@@ -120,187 +120,216 @@ my $text_slide_width_default = 400 ;
 my $text_slide_height_default = 300 ;
 
 ######################################################################
-# all configuration variables
+# manage configuration variables
 
-my $opts = {
+# overwrite current_opts (1st argument) with overwriting_opts (2nd)
+sub merge_opts {
+    my $current_opts = shift ;
+    my $overwriting_opts = shift ;
+    foreach my $key (keys %{$overwriting_opts}) {
+	$current_opts->{$key} = $overwriting_opts->{$key}
+	    if defined $overwriting_opts->{$key} ;
+    }
+}
+
+# overwrite current_opts with overwriting_opts in a new hash, without changing the originals
+sub merge_opts_into {
+    my $current_opts = shift ;
+    my $overwriting_opts = shift ;
+    my $new_opts = {} ;
+    merge_opts ($new_opts, $current_opts) ;
+    merge_opts ($new_opts, $overwriting_opts) ;
+    return $new_opts ;
+}
+
+# set default to all uninitialized options
+sub add_defaults {
+    my $current_opts = shift ;
+
+    my $default_opts = {
 # Name of generic llgal files
-    captions_header_filename => "captions.header",
-    css_filename => "llgal.css",
-    filmtile_filename => "tile.png",
-    index_link_image_filename => "index.png",
-    prev_slide_link_image_filename => "prev.png",
-    next_slide_link_image_filename => "next.png",
-    indextemplate_filename => "indextemplate.html",
-    slidetemplate_filename => "slidetemplate.html",
+	captions_header_filename => "captions.header",
+	css_filename => "llgal.css",
+	filmtile_filename => "tile.png",
+	index_link_image_filename => "index.png",
+	prev_slide_link_image_filename => "prev.png",
+	next_slide_link_image_filename => "next.png",
+	indextemplate_filename => "indextemplate.html",
+	slidetemplate_filename => "slidetemplate.html",
 # Location of llgal files if already on the web
-    css_location => "",
-    filmtile_location => "",
-    index_link_image_location => "",
-    prev_slide_link_image_location => "",
-    next_slide_link_image_location => "",
+	css_location => "",
+	filmtile_location => "",
+	index_link_image_location => "",
+	prev_slide_link_image_location => "",
+	next_slide_link_image_location => "",
 
 # Location and name of generated files
 # name of the index file (-i)
-    index_filename => "index",
+	index_filename => "index",
 # prefix of HTML slide filenames
-    slide_filenameprefix => "",
+	slide_filenameprefix => "",
 # prefix of HTML slide filenames when generated from filename
 # while there's no file associated (text, link, ...)
-    slide_filenameprefix_nofile => "NOFILE",
+	slide_filenameprefix_nofile => "NOFILE",
 # scaled and thumbnail image filename prefix
-    scaled_image_filenameprefix => "scaled_",
-    thumbnail_image_filenameprefix => "thumb_",
+	scaled_image_filenameprefix => "scaled_",
+	thumbnail_image_filenameprefix => "thumb_",
 # captions filename
-    captions_filename => "captions",
+	captions_filename => "captions",
 # additional prefix of user-provided scaled images
-    user_scaled_image_filenameprefix => "my",
+	user_scaled_image_filenameprefix => "my",
 # additional prefix of user-provided thumbnails
-    user_thumbnail_image_filenameprefix => "my",
+	user_thumbnail_image_filenameprefix => "my",
 
 # Index
 # cellpadding value for the thumbnail index tables (-p)
-    index_cellpadding => $index_cellpadding_default,
+	index_cellpadding => $index_cellpadding_default,
 # list links outside f the table (-L)
-    list_links => 0,
+	list_links => 0,
 # how many pixels per row at most in index (--wx)
-    pixels_per_row => $pixels_per_row_default,
+	pixels_per_row => $pixels_per_row_default,
 # how many thumbnails per row at most in index (-w)
-    thumbnails_per_row => $thumbnails_per_row_default,
+	thumbnails_per_row => $thumbnails_per_row_default,
 # max height of a thumbnail (--xy or -y)
-    thumbnail_height_max => $thumbnail_height_max_default,
+	thumbnail_height_max => $thumbnail_height_max_default,
 # scale thumb longer dimension (--xy)
-    thumbnail_width_max => $thumbnail_width_max_default,
+	thumbnail_width_max => $thumbnail_width_max_default,
 # write captions under thumbnails on index page (-u)
-    show_caption_under_thumbnails => 0,
+	show_caption_under_thumbnails => 0,
 # omit the film effect altogether (-r)
-    show_no_film_effect => 0,
+	show_no_film_effect => 0,
 # height of the tile.png tiled image (-t)
-    filmtile_height => $filmtile_height_default,
+	filmtile_height => $filmtile_height_default,
 
 # Slides
 # make no slides, just thumbnail links to images (-s)
-    make_no_slides => 0,
+	make_no_slides => 0,
 # use image names as slide names (-n)
-    make_slide_filename_from_filename => 0,
+	make_slide_filename_from_filename => 0,
 # also use image extension in the slide names
-    make_slide_filename_from_extension => 0,
+	make_slide_filename_from_extension => 0,
 # max width of the slides (--bigxy)
-    slide_width_max => $slide_width_max_default,
+	slide_width_max => $slide_width_max_default,
 # max height of the slides (--bigxy or --bigy)
-    slide_height_max => $slide_height_max_default,
+	slide_height_max => $slide_height_max_default,
 # default text slide width
-    text_slide_width => $text_slide_width_default,
+	text_slide_width => $text_slide_width_default,
 # default text slide height
-    text_slide_height => $text_slide_height_default,
+	text_slide_height => $text_slide_height_default,
 # use an image for link from a slide to the index, previous or next slide
-    index_link_image => 0,
-    prev_slide_link_image => 0,
-    next_slide_link_image => 0,
+	index_link_image => 0,
+	prev_slide_link_image => 0,
+	next_slide_link_image => 0,
 # use an image preview for link from a slide to the previous or next slide
-    prev_slide_link_preview => 0,
-    next_slide_link_preview => 0,
+	prev_slide_link_preview => 0,
+	next_slide_link_preview => 0,
 # use captions as slide titles (-k)
-    make_slide_title_from_caption => 0,
+	make_slide_title_from_caption => 0,
 
 # Captions
 # this line will be placed in caption generated file
 # the user may remove it to prevent llgal from removing the caption file with --clean
-    captions_removal_line => "REMOVE THIS LINE IF LLGAL SHOULD NOT REMOVE THIS FILE",
+	captions_removal_line => "REMOVE THIS LINE IF LLGAL SHOULD NOT REMOVE THIS FILE",
 # use image comment as captions (--cc)
-    make_caption_from_image_comment => 0,
+	make_caption_from_image_comment => 0,
 # use image timestamp as captions (--ct)
-    make_caption_from_image_timestamp => 0,
+	make_caption_from_image_timestamp => 0,
 # preserve image names as captions (--cf)
-    make_caption_from_filename => 0,
+	make_caption_from_filename => 0,
 # to write image dimensions (-a or --ad)
-    show_dimensions => 0,
+	show_dimensions => 0,
 # to write image size (-a or --as)
-    show_size => 0,
+	show_size => 0,
 # omit the image slide from the caption (--nc)
-    show_no_slide_counter => 0,
+	show_no_slide_counter => 0,
 
 # Text
 # title of the gallery (--title)
-    index_title => llgal_gettext ("index_title|Index of pictures"),
+	index_title => llgal_gettext ("index_title|Index of pictures"),
 # label of link to the parent gallery
-    parent_gallery_link_text => llgal_gettext ("parent_gallery_link_text|Back to parent gallery"),
+	parent_gallery_link_text => llgal_gettext ("parent_gallery_link_text|Back to parent gallery"),
 # label of link to previous gallery
-    prev_gallery_link_text => llgal_gettext ("prev_gallery_link_text|Previous gallery "),
+	prev_gallery_link_text => llgal_gettext ("prev_gallery_link_text|Previous gallery "),
 # label of link to previous gallery
-    next_gallery_link_text => llgal_gettext ("next_gallery_link_text|Next gallery "),
+	next_gallery_link_text => llgal_gettext ("next_gallery_link_text|Next gallery "),
 # label of link from slides to index
-    index_link_text => llgal_gettext ("index_link_text|Index"),
+	index_link_text => llgal_gettext ("index_link_text|Index"),
 # label of link from a slide to the previous one
-    prev_slide_link_text => llgal_gettext ("prev_slide_link_text|&lt;&lt;Prev"),
+	prev_slide_link_text => llgal_gettext ("prev_slide_link_text|&lt;&lt;Prev"),
 # label of link from a slide to the next one
-    next_slide_link_text => llgal_gettext ("next_slide_link_text|Next&gt;&gt;"),
+	next_slide_link_text => llgal_gettext ("next_slide_link_text|Next&gt;&gt;"),
 # text prefixing the link text
-    MVI_link_text => llgal_gettext ("MVI_link_text|Open movie "),
-    FIL_link_text => llgal_gettext ("FIL_link_text|Download file "),
-    DIR_link_text => llgal_gettext ("DIR_link_text|Open subgallery "),
+	MVI_link_text => llgal_gettext ("MVI_link_text|Open movie "),
+	FIL_link_text => llgal_gettext ("FIL_link_text|Download file "),
+	DIR_link_text => llgal_gettext ("DIR_link_text|Open subgallery "),
 # alternative text for full-size images in slides
-    alt_full_text => llgal_gettext ("alt_full_text|"),
+	alt_full_text => llgal_gettext ("alt_full_text|"),
 # alternative text for scaled images in slides
-    alt_scaled_text => llgal_gettext ("alt_scaled_text|Scaled image "),
+	alt_scaled_text => llgal_gettext ("alt_scaled_text|Scaled image "),
 # alternative text for thumbnails in the index
-    alt_thumbnail_text => llgal_gettext ("alt_thumbnail_text|Thumbnail "),
+	alt_thumbnail_text => llgal_gettext ("alt_thumbnail_text|Thumbnail "),
 # text shown when the mouse pointer is over a scaled image in a slide
-    over_scaled_text => llgal_gettext ("over_scaled_text|Click to see full size "),
+	over_scaled_text => llgal_gettext ("over_scaled_text|Click to see full size "),
 # text shown when the mouse pointer is over a thumbnail
-    over_thumbnail_text => llgal_gettext ("over_thumbnail_text|Click to enlarge "),
+	over_thumbnail_text => llgal_gettext ("over_thumbnail_text|Click to enlarge "),
 # text shown when the mouse pointer is over a link to the index
-    over_index_link_text => llgal_gettext ("over_index_link_text|Return to the index"),
+	over_index_link_text => llgal_gettext ("over_index_link_text|Return to the index"),
 # text shown when the mouse pointer is over a link to the previous slide
-    over_prev_slide_link_text => llgal_gettext ("over_prev_slide_link_text|Previous slide "),
+	over_prev_slide_link_text => llgal_gettext ("over_prev_slide_link_text|Previous slide "),
 # text shown when the mouse pointer is over a link to the next slide
-    over_next_slide_link_text => llgal_gettext ("over_next_slide_link_text|Next slide "),
+	over_next_slide_link_text => llgal_gettext ("over_next_slide_link_text|Next slide "),
 # change kB to another unit (--asu)
-    show_size_unit => llgal_gettext ("show_size_unit|kB"),
+	show_size_unit => llgal_gettext ("show_size_unit|kB"),
 # format of the timestamp in captions (--ctf)
-    timestamp_format_in_caption => llgal_gettext ("timestamp_format_in_caption|%y-%m-%d %H:%M:%S"),
+	timestamp_format_in_caption => llgal_gettext ("timestamp_format_in_caption|%y-%m-%d %H:%M:%S"),
 # credits line at the bottom of the index
-    credits_text => llgal_gettext ("credits_text|created with <a href=\"http://home.gna.org/llgal\">llgal</a>"),
+	credits_text => llgal_gettext ("credits_text|created with <a href=\"http://home.gna.org/llgal\">llgal</a>"),
 
 # Recursion
 # add links between subgalleries
-    link_subgalleries => 0,
+	link_subgalleries => 0,
 # generate header and footer for link to parent gallery
-    parent_gallery_link => 0,
+	parent_gallery_link => 0,
 # generate header and footer for link to previous subgallery
-    prev_gallery_link => 0,
-    prev_gallery_link_target => "",
+	prev_gallery_link => 0,
+	prev_gallery_link_target => "",
 # generate header and footer for link to next subgallery
-    next_gallery_link => 0,
-    next_gallery_link_target => "",
+	next_gallery_link => 0,
+	next_gallery_link_target => "",
 # add indentation to the begining of messages
-    indent => "",
+	indent => "",
 
 # What files to insert in the gallery
 # image and movie extensions
-    image_extensions => "jpg|jpeg|png|gif|tif|tiff|bmp",
-    movie_extensions => "mpg|mpeg|avi|mov|ogm|wmv",
+	image_extensions => "jpg|jpeg|png|gif|tif|tiff|bmp",
+	movie_extensions => "mpg|mpeg|avi|mov|ogm|wmv",
 # add all files, not only images and movies (-A)
-    add_all_files => 0,
+	add_all_files => 0,
 # add subdirectories to entry list (-S)
-    add_subdirs => 0,
+	add_subdirs => 0,
 # exclude/include
-    excludes => [],
+	excludes => [],
 # sort criteria
-    sort_criteria => "name",
+	sort_criteria => "name",
 
 # Various
 # user-added directories where templates might be found
-    template_dirs => [],
+	template_dirs => [],
 # options to be passed to convert (--con)
-    convert_options => [],
-    scaled_convert_options => [],
-    thumbnail_convert_options => [],
+	convert_options => [],
+	scaled_convert_options => [],
+	thumbnail_convert_options => [],
 # makes everything world-readable (--www)
-    www_access_rights => 0,
+	www_access_rights => 0,
 # extension of generate webpages (--php)
-    www_extension => "html",
+	www_extension => "html",
+    } ;
 
-} ;
+    # merge given options _into_ defaults
+    merge_opts ($default_opts, $current_opts) ;
+    return $default_opts ;
+}
+
 
 ######################################################################
 # Create usage now to use defaults values
@@ -624,9 +653,12 @@ sub process_option {
 	    die_without_GetOptions_usage "Unrecognized option: \"$_\"\n" ;
 	}
     }
+
+    return $opts ;
 }
 
 sub parse_generic_config_file {
+    my $opts = {} ;
     my $file = shift ;
     # warn on obsolete file
     my $oldconffile = $file ;
@@ -642,6 +674,7 @@ sub parse_generic_config_file {
 	}
 	close CONF ;
     }
+    return $opts ;
 }
 
 sub parse_custom_config_file {
@@ -662,6 +695,8 @@ sub parse_custom_config_file {
 # process command-line arguments (overriding defaults above)
 
 sub parse_cmdline_options {
+    my $opts = {} ;
+
     GetOptions(
 # behaviors
 	'clean'		=> \$clean_asked,
@@ -747,12 +782,16 @@ sub parse_cmdline_options {
 	'prev-gal=s'	=> sub { shift ; $opts->{prev_gallery_link_target} = shift ; $opts->{prev_gallery_link} = 1 ; },
 	'next-gal=s'	=> sub { shift ; $opts->{next_gallery_link_target} = shift ; $opts->{next_gallery_link} = 1 ; },
 	) or GetOptions_failed ;
+
+    return $opts ;
 }
 
 ######################################################################
 # various temporary globals
 my $destination_string ;
 my $local_llgal_url ;
+my $opts ;
+my $opts_without_defaults ;
 
 ######################################################################
 # a few routines
@@ -3058,10 +3097,12 @@ sub call_recursive {
 ######################################################################
 # configuration files
 
+# evaluate generic configuration files
+my $generic_opts = {} ;
 # system-wide configuration file
-parse_generic_config_file "@SYSCONFDIR@/llgal/llgalrc" ;
+merge_opts ($generic_opts, parse_generic_config_file "@SYSCONFDIR@/llgal/llgalrc") ;
 # user-wide configuration file
-parse_generic_config_file $ENV{HOME}."/.llgal/llgalrc" ;
+merge_opts ($generic_opts, parse_generic_config_file $ENV{HOME}."/.llgal/llgalrc") ;
 
 # early configuration ends here
 $early_configuration = 0 ;
@@ -3070,12 +3111,15 @@ $early_configuration = 0 ;
 # we may check and setup the destination directory
 check_destination ;
 
-# destination configuration file
-parse_generic_config_file "${destination_dir}${local_llgal_dir}/llgalrc" ;
+# evaluate gallery specific configuration, without modifying $generic_opts
+$opts_without_defaults = merge_opts_into ($generic_opts, parse_generic_config_file "${destination_dir}${local_llgal_dir}/llgalrc") ;
 
 # DO NOT MOVE THIS LINE BEFORE CONFIG FILE PARSING
 # parse command line options
-parse_cmdline_options ();
+merge_opts ($opts_without_defaults, parse_cmdline_options ());
+
+# set defaults values for all uninitialized values
+$opts = add_defaults $opts_without_defaults ;
 
 # special behaviors
 
