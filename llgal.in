@@ -471,9 +471,12 @@ sub process_option {
     } elsif (/^local_llgal_dir\s*=\s*"(.+)"$/) {
 	# the local llgal directory name may only be changed
 	# during early configuration
-	die_without_GetOptions_usage "The name of the local llgal directory may only be changed by system- or user-wide configuration files.\n"
-	    if ! $early_configuration ;
-	$local_llgal_dir = $1 ;
+	if ($early_configuration) {
+	    $local_llgal_dir = $1 ;
+	} else {
+	    print "!! Ignoring changes to the name of the local llgal directory outside of\n" ;
+	    print "!! system- and user-wide configuration files.\n" ;
+	}
     } elsif (/^index_filename\s*=\s*"(.+)"$/) {
 	$opts->{index_filename} = $1 ;
     } elsif (/^slide_filenameprefix\s*=\s*"(.*)"$/) {
@@ -2950,7 +2953,7 @@ sub generate_config {
     print NEWCFG "slidetemplate_filename = \"$opts->{slidetemplate_filename}\"\n" ;
     print NEWCFG "\n" ;
     print NEWCFG "# Location and name of generated files:\n" ;
-    print NEWCFG "#local_llgal_dir = \"$local_llgal_dir\" # uncomment in user- or system- wide config file only\n" ;
+    print NEWCFG "local_llgal_dir = \"$local_llgal_dir\"\n" ;
     print NEWCFG "index_filename = \"$opts->{index_filename}\"\n" ;
     print NEWCFG "slide_filenameprefix = \"$opts->{slide_filenameprefix}\"\n" ;
     print NEWCFG "slide_filenameprefix_nofile = \"$opts->{slide_filenameprefix_nofile}\"\n" ;
