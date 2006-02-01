@@ -2214,7 +2214,7 @@ sub read_captions_file {
     my @headers = () ;
     my @footers = () ;
 
-    indprint "Reading the $opts->{captions_filename} file and preparing entries: " ;
+    indprint "Reading entries in the $opts->{captions_filename} file: " ;
     init_percentage () ;
 
     open(CAP,"$destination_dir$local_llgal_dir/$opts->{captions_filename}")
