@@ -106,8 +106,6 @@ my $generate_captions = 0 ;
 my $give_templates = undef ;
 
 # Special behavior options
-# force thumbnails and scaled images regeneration
-my $force_image_regeneration = 0 ;
 # generate a config file
 my $generate_config = undef ;
 # do we run recursively in subdirectories ?
@@ -304,8 +302,6 @@ sub add_defaults {
 # generate header and footer for link to next subgallery
 	next_gallery_link => 0,
 	next_gallery_link_target => "",
-# add indentation to the begining of messages
-	indent => "",
 
 # What files to insert in the gallery
 # image and movie extensions
@@ -327,6 +323,8 @@ sub add_defaults {
 	convert_options => [],
 	scaled_convert_options => [],
 	thumbnail_convert_options => [],
+# force thumbnails and scaled images regeneration
+	force_image_regeneration => 0,
 # makes everything world-readable (--www)
 	www_access_rights => 0,
 # extension of generate webpages (--php)
@@ -342,8 +340,9 @@ sub add_defaults {
 my $OPT_NUMERIC = 0 ;
 my $OPT_STRING = 1 ;
 my $OPT_STRING_NONEMPTY = 2 ;
-my $OPT_STRING_SPECIAL = 3 ;
-my $OPT_STRING_NONEMPTY_SPECIAL = 4 ;
+my $OPT_NUMERIC_SPECIAL = 3 ;
+my $OPT_STRING_SPECIAL = 4 ;
+my $OPT_STRING_NONEMPTY_SPECIAL = 5 ;
 
 my $opts_type = {
 # Name of generic llgal files
@@ -426,7 +425,7 @@ my $opts_type = {
     timestamp_format_in_caption => $OPT_STRING_NONEMPTY,
     credits_text => $OPT_STRING,
 # Recursion
-    make_recursive => $OPT_NUMERIC,
+    make_recursive => $OPT_NUMERIC_SPECIAL,
     parent_gallery_link => $OPT_NUMERIC,
     prev_gallery_link => $OPT_NUMERIC,
     prev_gallery_link_target => $OPT_STRING,
@@ -562,10 +561,21 @@ sub process_option {
 	if (defined $type) {
 	    # use the options type to choose parsing
 
-	    if ($type == $OPT_NUMERIC) {
+	    if ($type == $OPT_NUMERIC or $type == $OPT_NUMERIC_SPECIAL) {
 		# any match is fine
 		if ($line =~ /^[^ ]+\s*=\s*(\d+)$/) {
-		    $opts->{$optname} = $1 ;
+
+		    if ($type == $OPT_NUMERIC_SPECIAL) {
+			# special option, with special processing
+
+			if ($optname eq "make_recursive") {
+			    $make_recursive = $1 ;
+			}
+
+		    } else {
+			# normal option
+			$opts->{$optname} = $1 ;
+		    }
 		} else {
 		    process_option_error "Configuration option <$optname> value must be numeric (in <$line>)" ;
 		}
@@ -717,7 +727,7 @@ sub parse_cmdline_options {
 				},
 	'h|help'	=> \$help_asked,
 	'v|version'	=> \$version_asked,
-	'f'		=> \$force_image_regeneration,
+	'f'		=> \$opts->{force_image_regeneration},
 	'gencfg=s'	=> \$generate_config,
 	'config=s'	=> sub { shift ; parse_custom_config_file ($opts, shift) ; },
 	'R'		=> \$make_recursive,
@@ -1702,7 +1712,7 @@ sub fill_file_entry {
 
 	# thumbnails dimensions
 	my $real_thumb_filename = "$destination_dir$entry->{thumb_filename}" ;
-	if ((! -e "$real_thumb_filename") or $force_image_regeneration) {
+	if ((! -e "$real_thumb_filename") or $opts->{force_image_regeneration}) {
 	    my ($status, @output) = system_with_output
 		( "create '$real_filename' thumbnail",
 		  @{$opts->{thumbnail_create_command}}, "$real_filename", "$real_thumb_filename" ) ;
@@ -1779,7 +1789,7 @@ sub fill_file_entry {
 	    # scaled image dimensions
 	    my $real_scaled_filename = "$destination_dir$entry->{scaled_filename}" ;
 	    my ($x,$y) ;
-	    if ((! -e "$real_scaled_filename") or $force_image_regeneration) {
+	    if ((! -e "$real_scaled_filename") or $opts->{force_image_regeneration}) {
 		# only scale down, never up.
 		($x,$y) = imgsize ("$real_filename") ;
 		my ($status, @output) ;
