@@ -543,20 +543,26 @@ sub GetOptions_failed {
 ######################################################################
 # parse options in config files
 
+# forward declaration
+sub parse_custom_config_file ;
+
+# option parsing global variables
+my $recursive_included_configuration_file = 0 ;
+my $current_configuration_file = undef ;
+
+# in case of option parsing error
 sub process_option_error {
     my $error = shift ;
-    if (defined $.) {
-	die "Line #$.: $error.\n" ;
+    if (defined $current_configuration_file) {
+	my $file = $current_configuration_file ;
+	$current_configuration_file = undef ; # reset here since we won't be able to reset anywhere else
+	die_without_GetOptions_usage "Line #$. of $file:\n  $error.\n" ;
     } else {
 	die_without_GetOptions_usage "$error.\n" ;
     }
 }
 
-# forward declaration
-sub parse_custom_config_file ;
-
-my $recursive_included_configuration_file = 0 ;
-
+# process one option line
 sub process_option {
     my $opts = shift ;
     my $line = shift ;
@@ -632,8 +638,9 @@ sub process_option {
 			    my $file = $1 ;
 			    die_without_GetOptions_usage "Not opening '$file' since too much configuration files were recursively included, loop detected ?\n"
 				if $recursive_included_configuration_file++ >= 10 ;
+			    my $saved_current_configuration_file = $current_configuration_file ;
 			    parse_custom_config_file ($opts, $file) ;
-			    close CONF ;
+			    $current_configuration_file = $saved_current_configuration_file ;
 			    $recursive_included_configuration_file-- ;
 
 			} elsif ($optname eq "additional_template_dir") {
@@ -671,10 +678,12 @@ sub parse_generic_config_file {
 
     # generic configuration files may not exist
     if (open CONF, $file) {
+	$current_configuration_file = $file ;
 	while (<CONF>) {
 	    process_option ($opts, $_)
 		if (/^[^#]/ and !/^(\s*)$/) ;
 	}
+	$current_configuration_file = undef ;
 	close CONF ;
     }
     return $opts ;
@@ -688,10 +697,13 @@ sub parse_custom_config_file {
     open my $conf, $file
 	# custom configuration files have to exist
 	or die_without_GetOptions_usage "Failed to open additional configuration file '$file' ($!).\n" ;
+
+    $current_configuration_file = $file ;
     while (<$conf>) {
 	process_option ($opts, $_)
 		if (/^[^#]/ and !/^(\s*)$/) ;
     }
+    $current_configuration_file = undef ;
     close $conf ;
 }
 
