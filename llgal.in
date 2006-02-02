@@ -337,12 +337,16 @@ sub add_defaults {
 }
 
 # variable characteristics
+# normal options, various types
 my $OPT_NUMERIC = 0 ;
 my $OPT_STRING = 1 ;
 my $OPT_STRING_NONEMPTY = 2 ;
+# normal options that need a special processing
 my $OPT_NUMERIC_SPECIAL = 3 ;
 my $OPT_STRING_SPECIAL = 4 ;
 my $OPT_STRING_NONEMPTY_SPECIAL = 5 ;
+# internal options that cannot be used in configuration files
+my $OPT_INTERNAL = 6 ;
 
 my $opts_type = {
 # Name of generic llgal files
@@ -439,6 +443,7 @@ my $opts_type = {
     add_subdirs => $OPT_NUMERIC,
     exclude => $OPT_STRING_NONEMPTY_SPECIAL,
     include => $OPT_STRING_NONEMPTY_SPECIAL,
+    excludes => $OPT_INTERNAL, # the internal array where include/exclude options is stored
     sort_criteria => $OPT_STRING_NONEMPTY,
 # Various
     additional_configuration_file => $OPT_STRING_NONEMPTY_SPECIAL,
@@ -449,6 +454,12 @@ my $opts_type = {
     force_image_regeneration => $OPT_NUMERIC,
     www_access_rights => $OPT_NUMERIC,
     www_extension => $OPT_STRING_NONEMPTY,
+# Internal options, not parseable, not exportable
+    default_thumb_ydim => $OPT_INTERNAL,
+    default_thumb_xdim => $OPT_INTERNAL,
+    thumbnail_create_command => $OPT_INTERNAL,
+    slide_create_command => $OPT_INTERNAL,
+    slide_copy_command => $OPT_INTERNAL,
 } ;
 
 ######################################################################
@@ -558,7 +569,7 @@ sub process_option {
     if ($line =~ /^([^ ]+)\s*=.+$/) {
 	my $optname = $1 ;
 	my $type = $opts_type->{$optname} ;
-	if (defined $type) {
+	if (defined $type and $type != $OPT_INTERNAL) {
 	    # use the options type to choose parsing
 
 	    if ($type == $OPT_NUMERIC or $type == $OPT_NUMERIC_SPECIAL) {
@@ -2960,29 +2971,49 @@ sub generate_config {
     print NEWCFG "# You may modify and reuse it as you want.\n" ;
     print NEWCFG "\n" ;
 
-    # simple options
     for my $optname (keys %{$opts}) {
 	my $type = $opts_type->{$optname} ;
 	if ($type == $OPT_NUMERIC) {
 	    print NEWCFG "$optname = $opts->{$optname}\n" ;
 	} elsif ($type == $OPT_STRING or $type == $OPT_STRING_NONEMPTY) {
 	    print NEWCFG "$optname = \"$opts->{$optname}\"\n" ;
-	} elsif ($optname eq "convert_options") {
-	    print NEWCFG "convert_options = \"". (join_convert_options (@{$opts->{convert_options}})) ."\"\n" ;
-	} elsif ($optname eq "scaled_convert_options") {
-	    print NEWCFG "scaled_convert_options = \"". (join_convert_options (@{$opts->{scaled_convert_options}})) ."\"\n" ;
-	} elsif ($optname eq "thumbnail_convert_options") {
-	    print NEWCFG "thumbnail_convert_options = \"". (join_convert_options (@{$opts->{thumbnail_convert_options}})) ."\"\n" ;
+	} else {
+	    # special variables that need special output
+	    if ($optname eq "convert_options") {
+		print NEWCFG "convert_options = \"". (join_convert_options (@{$opts->{convert_options}})) ."\"\n" ;
+
+	    } elsif ($optname eq "scaled_convert_options") {
+		print NEWCFG "scaled_convert_options = \"". (join_convert_options (@{$opts->{scaled_convert_options}})) ."\"\n" ;
+
+	    } elsif ($optname eq "thumbnail_convert_options") {
+		print NEWCFG "thumbnail_convert_options = \"". (join_convert_options (@{$opts->{thumbnail_convert_options}})) ."\"\n" ;
+
+	    } elsif ($optname eq "template_dirs") {
+		if (@{$opts->{template_dirs}}) {
+		    map {
+			print NEWCFG "additional_template_dir = \"$_\"\n" ;
+		    } @{$opts->{template_dirs}} ;
+		} else {
+		    print NEWCFG "#additional_template_dir = <none>\n" ;
+		}
+
+	    } elsif ($optname eq "excludes") {
+		if (@{$opts->{excludes}}) {
+		    map {
+			print NEWCFG ($_->{excluded} ? "exclude" : "include"). " = \"". $_->{filter} ."\"\n" ;
+		    } @{$opts->{excludes}} ;
+		} else {
+		    print NEWCFG "#exclude = <none>\n" ;
+		    print NEWCFG "#include = <none>\n" ;
+		}
+
+	    } else {
+		# other options are not available in configuration files (internal options)
+	    }
 	}
     }
 
     # multiple line options
-    map {
-	print NEWCFG ($_->{excluded} ? "exclude" : "include"). " = \"". $_->{filter} ."\"\n" ;
-    } @{$opts->{excludes}} ;
-    map {
-	print NEWCFG "additional_template_dir = \"$_\"\n" ;
-    } @{$opts->{template_dirs}} ;
 
     print NEWCFG "\n" ;
     close NEWCFG ;
@@ -3183,7 +3214,7 @@ get_files ;
 make_www_rights $root_gallery
     if $opts->{www_access_rights} ;
 
-generate_config ($generate_config, $opts_without_defaults)
+generate_config ($generate_config, $opts)
     if defined $generate_config ;
 
 call_recursive $root_gallery
