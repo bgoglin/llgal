@@ -338,6 +338,119 @@ sub add_defaults {
     return $default_opts ;
 }
 
+# variable characteristics
+my $OPT_NUMERIC = 0 ;
+my $OPT_STRING = 1 ;
+my $OPT_STRING_NONEMPTY = 2 ;
+my $OPT_STRING_SPECIAL = 3 ;
+my $OPT_STRING_NONEMPTY_SPECIAL = 4 ;
+
+my $opts_type = {
+# Name of generic llgal files
+    captions_header_filename => $OPT_STRING_NONEMPTY,
+    css_filename => $OPT_STRING_NONEMPTY,
+    filmtile_filename => $OPT_STRING_NONEMPTY,
+    index_link_image_filename => $OPT_STRING_NONEMPTY,
+    prev_slide_link_image_filename => $OPT_STRING_NONEMPTY,
+    next_slide_link_image_filename => $OPT_STRING_NONEMPTY,
+    indextemplate_filename => $OPT_STRING_NONEMPTY,
+    slidetemplate_filename => $OPT_STRING_NONEMPTY,
+# location of generic llgal files that are available on the web
+    local_llgal_dir => $OPT_STRING_NONEMPTY_SPECIAL,
+    css_location => $OPT_STRING,
+    filmtile_location => $OPT_STRING,
+    index_link_image_location => $OPT_STRING,
+    prev_slide_link_image_location => $OPT_STRING,
+    next_slide_link_image_location => $OPT_STRING,
+# Location and name of generated files
+    index_filename => $OPT_STRING_NONEMPTY,
+    slide_filenameprefix => $OPT_STRING,
+    slide_filenameprefix_nofile => $OPT_STRING_NONEMPTY,
+    scaled_image_filenameprefix => $OPT_STRING_NONEMPTY,
+    thumbnail_image_filenameprefix => $OPT_STRING_NONEMPTY,
+    captions_filename => $OPT_STRING_NONEMPTY,
+    user_scaled_image_filenameprefix => $OPT_STRING_NONEMPTY,
+    user_thumbnail_image_filenameprefix => $OPT_STRING_NONEMPTY,
+# Index
+    index_cellpadding => $OPT_NUMERIC, # >= 0, -1 for default
+    list_links => $OPT_NUMERIC,
+    pixels_per_row => $OPT_NUMERIC, # > 0, 0 for unlimited, -1 for default
+    thumbnails_per_row => $OPT_NUMERIC, # > 0, 0 for unlimited, -1 for default
+    thumbnail_height_max => $OPT_NUMERIC, # > 0, -1 for default
+    thumbnail_width_max => $OPT_NUMERIC, # > 0, 0 for unlimited, -1 for default
+    show_caption_under_thumbnails => $OPT_NUMERIC,
+    show_no_film_effect => $OPT_NUMERIC,
+    filmtile_height => $OPT_NUMERIC, # >= 0, -1 for default
+# Slides
+    make_no_slides => $OPT_NUMERIC,
+    make_slide_filename_from_filename => $OPT_NUMERIC,
+    make_slide_filename_from_extension => $OPT_NUMERIC,
+    slide_width_max => $OPT_NUMERIC, # > 0, 0 for unlimited, -1 for default
+    slide_height_max => $OPT_NUMERIC, # > 0, 0 for unlimited, -1 for default
+    text_slide_width => $OPT_NUMERIC, # > 0, -1 for default
+    text_slide_height => $OPT_NUMERIC, # > 0, -1 for default
+    index_link_image => $OPT_NUMERIC,
+    prev_slide_link_image => $OPT_NUMERIC,
+    next_slide_link_image => $OPT_NUMERIC,
+    prev_slide_link_preview => $OPT_NUMERIC,
+    next_slide_link_preview => $OPT_NUMERIC,
+    make_slide_title_from_caption => $OPT_NUMERIC,
+# Captions
+    captions_removal_line => $OPT_STRING_NONEMPTY,
+    make_caption_from_image_comment => $OPT_STRING,
+    make_caption_from_image_timestamp => $OPT_NUMERIC,
+    make_caption_from_filename => $OPT_NUMERIC,
+    show_dimensions => $OPT_NUMERIC,
+    show_size => $OPT_NUMERIC,
+    show_no_slide_counter => $OPT_NUMERIC,
+# Text
+    index_title => $OPT_STRING,
+    index_link_text => $OPT_STRING_NONEMPTY,
+    parent_gallery_link_text => $OPT_STRING_NONEMPTY,
+    prev_gallery_link_text => $OPT_STRING,
+    next_gallery_link_text => $OPT_STRING,
+    prev_slide_link_text => $OPT_STRING_NONEMPTY,
+    next_slide_link_text => $OPT_STRING_NONEMPTY,
+    MVI_link_text => $OPT_STRING,
+    FIL_link_text => $OPT_STRING,
+    DIR_link_text => $OPT_STRING,
+    alt_full_text => $OPT_STRING,
+    alt_scaled_text => $OPT_STRING,
+    alt_thumbnail_text => $OPT_STRING,
+    over_scaled_text => $OPT_STRING,
+    over_thumbnail_text => $OPT_STRING,
+    over_index_link_text => $OPT_STRING,
+    over_prev_slide_link_text => $OPT_STRING,
+    over_next_slide_link_text => $OPT_STRING,
+    show_size_unit => $OPT_STRING,
+    timestamp_format_in_caption => $OPT_STRING_NONEMPTY,
+    credits_text => $OPT_STRING,
+# Recursion
+    make_recursive => $OPT_NUMERIC,
+    parent_gallery_link => $OPT_NUMERIC,
+    prev_gallery_link => $OPT_NUMERIC,
+    prev_gallery_link_target => $OPT_STRING,
+    next_gallery_link => $OPT_NUMERIC,
+    next_gallery_link_target => $OPT_STRING,
+    link_subgalleries => $OPT_NUMERIC,
+# What files to insert
+    image_extensions => $OPT_STRING,
+    movie_extensions => $OPT_STRING,
+    add_all_files => $OPT_NUMERIC,
+    add_subdirs => $OPT_NUMERIC,
+    exclude => $OPT_STRING_NONEMPTY_SPECIAL,
+    include => $OPT_STRING_NONEMPTY_SPECIAL,
+    sort_criteria => $OPT_STRING_NONEMPTY,
+# Various
+    additional_configuration_file => $OPT_STRING_NONEMPTY_SPECIAL,
+    additional_template_dir => $OPT_STRING_NONEMPTY_SPECIAL,
+    convert_options => $OPT_STRING_SPECIAL,
+    scaled_convert_options => $OPT_STRING_SPECIAL,
+    thumbnail_convert_options => $OPT_STRING_SPECIAL,
+    force_image_regeneration => $OPT_NUMERIC,
+    www_access_rights => $OPT_NUMERIC,
+    www_extension => $OPT_STRING_NONEMPTY,
+} ;
 
 ######################################################################
 # Create usage now to use defaults values
@@ -430,6 +543,15 @@ sub GetOptions_failed {
 ######################################################################
 # parse options in config files
 
+sub process_option_error {
+    my $error = shift ;
+    if (defined $.) {
+	die "Line #$.: $error.\n" ;
+    } else {
+	die_without_GetOptions_usage "$error.\n" ;
+    }
+}
+
 # forward declaration
 sub parse_custom_config_file ;
 
@@ -437,232 +559,101 @@ my $recursive_included_configuration_file = 0 ;
 
 sub process_option {
     my $opts = shift ;
-    $_ = shift ;
-    chomp $_ ;
-# Name of generic llgal files
-    if (/^captions_header_filename\s*=\s*"(.+)"$/) {
-	$opts->{captions_header_filename} = $1 ;
-    } elsif (/^css_filename\s*=\s*"(.+)"$/) {
-	$opts->{css_filename} = $1 ;
-    } elsif (/^filmtile_filename\s*=\s*"(.+)"$/) {
-	$opts->{filmtile_filename} = $1 ;
-    } elsif (/^index_link_image_filename\s*=\s*"(.+)"$/) {
-	$opts->{index_link_image_filename} = $1 ;
-    } elsif (/^prev_slide_link_image_filename\s*=\s*"(.+)"$/) {
-	$opts->{prev_slide_link_image_filename} = $1 ;
-    } elsif (/^next_slide_link_image_filename\s*=\s*"(.+)"$/) {
-	$opts->{next_slide_link_image_filename} = $1 ;
-    } elsif (/^indextemplate_filename\s*=\s*"(.+)"$/) {
-	$opts->{indextemplate_filename} = $1 ;
-    } elsif (/^slidetemplate_filename\s*=\s*"(.+)"$/) {
-	$opts->{slidetemplate_filename} = $1 ;
-# location of generic llgal files that are available on the web
-    } elsif (/^css_location\s*=\s*"(.*)"$/) {
-	$opts->{css_location} = $1 ;
-    } elsif (/^filmtile_location\s*=\s*"(.*)"$/) {
-	$opts->{filmtile_location} = $1 ;
-    } elsif (/^index_link_image_location\s*=\s*"(.*)"$/) {
-	$opts->{index_link_image_location} = $1 ;
-    } elsif (/^prev_slide_link_image_location\s*=\s*"(.*)"$/) {
-	$opts->{prev_slide_link_image_location} = $1 ;
-    } elsif (/^next_slide_link_image_location\s*=\s*"(.*)"$/) {
-	$opts->{next_slide_link_image_location} = $1 ;
-# Location and name of generated files
-    } elsif (/^local_llgal_dir\s*=\s*"(.+)"$/) {
-	# the local llgal directory name may only be changed
-	# during early configuration
-	if ($early_configuration) {
-	    $local_llgal_dir = $1 ;
-	} else {
-	    print "!! Ignoring changes to the name of the local llgal directory outside of\n" ;
-	    print "!! system- and user-wide configuration files.\n" ;
-	}
-    } elsif (/^index_filename\s*=\s*"(.+)"$/) {
-	$opts->{index_filename} = $1 ;
-    } elsif (/^slide_filenameprefix\s*=\s*"(.*)"$/) {
-	$opts->{slide_filenameprefix} = $1 ;
-    } elsif (/^slide_filenameprefix_nofile\s*=\s*"(.+)"$/) {
-	$opts->{slide_filenameprefix_nofile} = $1 ;
-    } elsif (/^scaled_image_filenameprefix\s*=\s*"(.+)"$/) {
-	$opts->{scaled_image_filenameprefix} = $1 ;
-    } elsif (/^thumbnail_image_filenameprefix\s*=\s*"(.+)"$/) {
-	$opts->{thumbnail_image_filenameprefix} = $1 ;
-    } elsif (/^captions_filename\s*=\s*"(.+)"$/) {
-	$opts->{captions_filename} = $1 ;
-    } elsif (/^user_scaled_image_filenameprefix\s*=\s*"(.+)"$/) {
-	$opts->{user_scaled_image_filenameprefix} = $1 ;
-    } elsif (/^user_thumbnail_image_filenameprefix\s*=\s*"(.+)"$/) {
-	$opts->{user_thumbnail_image_filenameprefix} = $1 ;
-# Index
-    } elsif (/^index_cellpadding\s*=\s*(.+)$/) { # >= 0, -1 for default
-	$opts->{index_cellpadding} = $1 ;
-    } elsif (/^list_links\s*=\s*(.+)$/) {
-	$opts->{list_links} = $1 ;
-    } elsif (/^pixels_per_row\s*=\s*(.+)$/) { # > 0, 0 for unlimited, -1 for default
-	$opts->{pixels_per_row} = $1 ;
-    } elsif (/^thumbnails_per_row\s*=\s*(.+)$/) { # > 0, 0 for unlimited, -1 for default
-	$opts->{thumbnails_per_row} = $1 ;
-    } elsif (/^thumbnail_height_max\s*=\s*(.+)$/) { # > 0, -1 for default
-	$opts->{thumbnail_height_max} = $1 ;
-    } elsif (/^thumbnail_width_max\s*=\s*(.+)$/) { # > 0, 0 for unlimited, -1 for default
-	$opts->{thumbnail_width_max} = $1 ;
-    } elsif (/^show_caption_under_thumbnails\s*=\s*(.+)$/) {
-	$opts->{show_caption_under_thumbnails} = $1 ;
-    } elsif (/^show_no_film_effect\s*=\s*(.+)$/) {
-	$opts->{show_no_film_effect} = $1 ;
-    } elsif (/^filmtile_height\s*=\s*(.+)$/) { # >= 0, -1 for default
-	$opts->{filmtile_height} = $1 ;
-# Slides
-    } elsif (/^make_no_slides\s*=\s*(.+)$/) {
-	$opts->{make_no_slides} = $1 ;
-    } elsif (/^make_slide_filename_from_filename\s*=\s*(.+)$/) {
-	$opts->{make_slide_filename_from_filename} = $1 ;
-    } elsif (/^make_slide_filename_from_extension\s*=\s*(.+)$/) {
-	$opts->{make_slide_filename_from_extension} = $1 ;
-    } elsif (/^slide_width_max\s*=\s*(.+)$/) { # > 0, 0 for unlimited, -1 for default
-	$opts->{slide_width_max} = $1 ;
-    } elsif (/^slide_height_max\s*=\s*(.+)$/) { # > 0, 0 for unlimited, -1 for default
-	$opts->{slide_height_max} = $1 ;
-    } elsif (/^text_slide_width\s*=\s*(.+)$/) { # > 0, -1 for default
-	$opts->{text_slide_width} = $1 ;
-    } elsif (/^text_slide_height\s*=\s*(.+)$/) { # > 0, -1 for default
-	$opts->{text_slide_height} = $1 ;
-    } elsif (/^index_link_image\s*=\s*(.+)$/) {
-	$opts->{index_link_image} = $1 ;
-    } elsif (/^prev_slide_link_image\s*=\s*(.+)$/) {
-	$opts->{prev_slide_link_image} = $1 ;
-    } elsif (/^next_slide_link_image\s*=\s*(.+)$/) {
-	$opts->{next_slide_link_image} = $1 ;
-    } elsif (/^prev_slide_link_preview\s*=\s*(.+)$/) {
-	$opts->{prev_slide_link_preview} = $1 ;
-    } elsif (/^next_slide_link_preview\s*=\s*(.+)$/) {
-	$opts->{next_slide_link_preview} = $1 ;
-    } elsif (/^make_slide_title_from_caption\s*=\s*(.+)$/) {
-	$opts->{make_slide_title_from_caption} = $1 ;
-# Captions
-    } elsif (/^captions_removal_line\s*=\s*"(.+)"$/) {
-	$opts->{captions_removal_line} = $1 ;
-    } elsif (/^make_caption_from_image_comment\s*=\s*"(.*)"$/) {
-	$opts->{make_caption_from_image_comment} = $1 ;
-    } elsif (/^make_caption_from_image_timestamp\s*=\s*(.+)$/) {
-	$opts->{make_caption_from_image_timestamp} = $1 ;
-    } elsif (/^make_caption_from_filename\s*=\s*(.+)$/) {
-	$opts->{make_caption_from_filename} = $1 ;
-    } elsif (/^show_dimensions\s*=\s*(.+)$/) {
-	$opts->{show_dimensions} = $1 ;
-    } elsif (/^show_size\s*=\s*(.+)$/) {
-	$opts->{show_size} = $1 ;
-    } elsif (/^show_no_slide_counter\s*=\s*(.+)$/) {
-	$opts->{show_no_slide_counter} = $1 ;
-# Text
-    } elsif (/^index_title\s*=\s*"(.*)"$/) {
-	$opts->{index_title} = $1 ;
-    } elsif (/^index_link_text\s*=\s*"(.+)"$/) {
-	$opts->{index_link_text} = $1 ;
-    } elsif (/^parent_gallery_link_text\s*=\s*"(.+)"$/) {
-	$opts->{parent_gallery_link_text} = $1 ;
-    } elsif (/^prev_gallery_link_text\s*=\s*"(.*)"$/) {
-	$opts->{prev_gallery_link_text} = $1 ;
-    } elsif (/^next_gallery_link_text\s*=\s*"(.*)"$/) {
-	$opts->{next_gallery_link_text} = $1 ;
-    } elsif (/^prev_slide_link_text\s*=\s*"(.+)"$/) {
-	$opts->{prev_slide_link_text} = $1 ;
-    } elsif (/^next_slide_link_text\s*=\s*"(.+)"$/) {
-	$opts->{next_slide_link_text} = $1 ;
-    } elsif (/^MVI_link_text\s*=\s*"(.*)"$/) {
-	$opts->{MVI_link_text} = $1 ;
-    } elsif (/^FIL_link_text\s*=\s*"(.*)"$/) {
-	$opts->{FIL_link_text} = $1 ;
-    } elsif (/^DIR_link_text\s*=\s*"(.*)"$/) {
-	$opts->{DIR_link_text} = $1 ;
-    } elsif (/^alt_full_text\s*=\s*"(.*)"$/) {
-	$opts->{alt_full_text} = $1 ;
-    } elsif (/^alt_scaled_text\s*=\s*"(.*)"$/) {
-	$opts->{alt_scaled_text} = $1 ;
-    } elsif (/^alt_thumbnail_text\s*=\s*"(.*)"$/) {
-	$opts->{alt_thumbnail_text} = $1 ;
-    } elsif (/^over_scaled_text\s*=\s*"(.*)"$/) {
-	$opts->{over_scaled_text} = $1 ;
-    } elsif (/^over_thumbnail_text\s*=\s*"(.*)"$/) {
-	$opts->{over_thumbnail_text} = $1 ;
-    } elsif (/^over_index_link_text\s*=\s*"(.*)"$/) {
-	$opts->{over_index_link_text} = $1 ;
-    } elsif (/^over_prev_slide_link_text\s*=\s*"(.*)"$/) {
-	$opts->{over_prev_slide_link_text} = $1 ;
-    } elsif (/^over_next_slide_link_text\s*=\s*"(.*)"$/) {
-	$opts->{over_next_slide_link_text} = $1 ;
-    } elsif (/^show_size_unit\s*=\s*"(.*)"$/) {
-	$opts->{show_size_unit} = $1 ;
-    } elsif (/^timestamp_format_in_caption\s*=\s*"(.+)"$/) {
-	$opts->{timestamp_format_in_caption} = $1 ;
-    } elsif (/^credits_text\s*=\s*"(.*)"$/) {
-	$opts->{credits_text} = $1 ;
-# Recursion
-    } elsif (/^make_recursive\s*=\s*(.+)$/) {
-	$make_recursive = $1 ;
-    } elsif (/^parent_gallery_link\s*=\s*(.+)$/) {
-	$opts->{parent_gallery_link} = $1 ;
-    } elsif (/^prev_gallery_link\s*=\s*(.+)$/) {
-	$opts->{prev_gallery_link} = $1 ;
-    } elsif (/^prev_gallery_link_target\s*=\s*"(.*)"$/) {
-	$opts->{prev_gallery_link_target} = $1 ;
-    } elsif (/^next_gallery_link\s*=\s*(.+)$/) {
-	$opts->{next_gallery_link} = $1 ;
-    } elsif (/^next_gallery_link_target\s*=\s*"(.*)"$/) {
-	$opts->{next_gallery_link_target} = $1 ;
-    } elsif (/^link_subgalleries\s*=\s*(.+)$/) {
-	$opts->{link_subgalleries} = $1 ;
-# What files to insert
-    } elsif (/^image_extensions\s*=\s*"(.*)"$/) {
-	$opts->{image_extensions} = $1 ;
-    } elsif (/^movie_extensions\s*=\s*"(.*)"$/) {
-	$opts->{movie_extensions} = $1 ;
-    } elsif (/^add_all_files\s*=\s*(.+)$/) {
-	$opts->{add_all_files} = $1 ;
-    } elsif (/^add_subdirs\s*=\s*(.+)$/) {
-	$opts->{add_subdirs} = $1 ;
-    } elsif (/^exclude\s*=\s*"(.+)"$/) {
-	my $entry = () ;
-	$entry->{excluded} = 1 ;
-	$entry->{filter} = $1 ;
-	push (@{$opts->{excludes}}, $entry) ;
-    } elsif (/^include\s*=\s*"(.+)"$/) {
-	my $entry = () ;
-	$entry->{excluded} = 0 ;
-	$entry->{filter} = $1 ;
-	push (@{$opts->{excludes}}, $entry) ;
-    } elsif (/^sort_criteria\s*=\s*"(.+)"$/) {
-	$opts->{sort_criteria} = $1 ;
-# Various
-    } elsif (/^additional_configuration_file\s*=\s*"(.+)"$/) {
-	my $file = $1 ;
-	die_without_GetOptions_usage "Not opening '$file' since too much configuration files were recursively included, loop detected ?\n"
-	    if $recursive_included_configuration_file++ >= 10 ;
-	parse_custom_config_file ($opts, $file) ;
-	close CONF ;
-	$recursive_included_configuration_file-- ;
-    } elsif (/^additional_template_dir\s*=\s*"(.+)"$/) {
-	push (@{$opts->{template_dirs}}, $1) ;
-    } elsif (/^convert_options\s*=\s*"(.*)"$/) {
-	push (@{$opts->{convert_options}}, parse_convert_options ($1)) ;
-    } elsif (/^scaled_convert_options\s*=\s*"(.*)"$/) {
-	push (@{$opts->{scaled_convert_options}}, parse_convert_options ($1)) ;
-    } elsif (/^thumbnail_convert_options\s*=\s*"(.*)"$/) {
-	push (@{$opts->{thumbnail_convert_options}}, $1) ;
-    } elsif (/^force_image_regeneration\s*=\s*(.*)$/) {
-	$force_image_regeneration = $1 ;
-    } elsif (/^www_access_rights\s*=\s*(.+)$/) {
-	$opts->{www_access_rights} = $1 ;
-    } elsif (/^www_extension\s*=\s*"(.+)"$/) {
-	$opts->{www_extension} = $1 ;
+    my $line = shift ;
+    chomp $line ;
 
-# Error
-    } elsif (/^[^#]/ and !/^(\s*)$/) {
-	if (defined $.) {
-	    die "Unrecognized option line #$.: \"$_\"\n" ;
+    if ($line =~ /^([^ ]+)\s*=.+$/) {
+	my $optname = $1 ;
+	my $type = $opts_type->{$optname} ;
+	if (defined $type) {
+	    # use the options type to choose parsing
+
+	    if ($type == $OPT_NUMERIC) {
+		# any match is fine
+		if ($line =~ /^[^ ]+\s*=\s*(\d+)$/) {
+		    $opts->{$optname} = $1 ;
+		} else {
+		    process_option_error "<$optname> value must be numeric (in <$line>)" ;
+		}
+
+	    } elsif ($type == $OPT_STRING or $type == $OPT_STRING_SPECIAL) {
+		# value must be quoted
+		if ($line =~ /^[^ ]+\s*=\s*"(.*)"$/) {
+
+		    if ($type == $OPT_STRING_SPECIAL) {
+			# special option, with special processing
+
+			if ($optname eq "convert_options") {
+			    push (@{$opts->{convert_options}}, parse_convert_options ($1)) ;
+			} elsif ($optname eq "scaled_convert_options") {
+			    push (@{$opts->{scaled_convert_options}}, parse_convert_options ($1)) ;
+			} elsif ($optname eq "thumbnail_convert_options") {
+			    push (@{$opts->{thumbnail_convert_options}}, $1) ;
+			}
+
+		    } else  {
+			# normal option
+			$opts->{$optname} = $1 ;
+		    }
+		} else {
+		    process_option_error "<$optname> value must be a string (in <$line>)" ;
+		}
+
+	    } elsif ($type == $OPT_STRING_NONEMPTY or $type == $OPT_STRING_NONEMPTY_SPECIAL) {
+		# value must be quoted and non-empty
+		if ($line =~ /^[^ ]+\s*=\s*"(.+)"$/) {
+
+		    if ($type == $OPT_STRING_NONEMPTY_SPECIAL) {
+			# special option, with special processing
+
+			if ($optname eq "local_llgal_dir") {
+			    # the local llgal directory name may only be changed
+			    # during early configuration
+			    if ($early_configuration) {
+				$local_llgal_dir = $1 ;
+			    } else {
+				print "!! Ignoring changes to the name of the local llgal directory outside of\n" ;
+				print "!! system- and user-wide configuration files.\n" ;
+			    }
+
+			} elsif ($optname eq "exclude") {
+			    my $entry = () ;
+			    $entry->{excluded} = 1 ;
+			    $entry->{filter} = $1 ;
+			    push (@{$opts->{excludes}}, $entry) ;
+
+			} elsif ($optname eq "include") {
+			    my $entry = () ;
+			    $entry->{excluded} = 0 ;
+			    $entry->{filter} = $1 ;
+			    push (@{$opts->{excludes}}, $entry) ;
+
+			} elsif ($optname eq "additional_configuration_file") {
+			    my $file = $1 ;
+			    die_without_GetOptions_usage "Not opening '$file' since too much configuration files were recursively included, loop detected ?\n"
+				if $recursive_included_configuration_file++ >= 10 ;
+			    parse_custom_config_file ($opts, $file) ;
+			    close CONF ;
+			    $recursive_included_configuration_file-- ;
+
+			} elsif ($optname eq "additional_template_dir") {
+			    push (@{$opts->{template_dirs}}, $1) ;
+			}
+
+		    } else {
+			# normal option
+			$opts->{$optname} = $1 ;
+		    }
+		} else {
+		    process_option_error "<$optname> value must be a non-empty string (in <$line>)" ;
+		}
+
+	    }
 	} else {
-	    die_without_GetOptions_usage "Unrecognized option: \"$_\"\n" ;
+	    process_option_error "Unknown option <$optname>" ;
 	}
+    } else {
+	process_option_error "Option must be given <opt> = <value> (was $line)" ;
     }
 
     return $opts ;
@@ -681,7 +672,8 @@ sub parse_generic_config_file {
     # generic configuration files may not exist
     if (open CONF, $file) {
 	while (<CONF>) {
-	    process_option $opts, $_ ;
+	    process_option ($opts, $_)
+		if (/^[^#]/ and !/^(\s*)$/) ;
 	}
 	close CONF ;
     }
@@ -697,7 +689,8 @@ sub parse_custom_config_file {
 	# custom configuration files have to exist
 	or die_without_GetOptions_usage "Failed to open additional configuration file '$file' ($!).\n" ;
     while (<$conf>) {
-	process_option ($opts, $_) ;
+	process_option ($opts, $_)
+		if (/^[^#]/ and !/^(\s*)$/) ;
     }
     close $conf ;
 }
