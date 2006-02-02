@@ -5,6 +5,7 @@
   * Fix manpage additional_configuration_file name (instead of config_file).
   * Cleanup and improve option checking, with better error reporting:
     + Options that are not a string must now be numeric.
+  * Cleanup and improve configuration file generation.
   * Hardcode default english values in usage to avoid messing the code.
   * Replace template_dir with additional_template_dir in configuration file
     and move it to various options together with additional_configuration_file.

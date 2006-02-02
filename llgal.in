@@ -443,7 +443,7 @@ my $opts_type = {
     sort_criteria => $OPT_STRING_NONEMPTY,
 # Various
     additional_configuration_file => $OPT_STRING_NONEMPTY_SPECIAL,
-    additional_template_dir => $OPT_STRING_NONEMPTY_SPECIAL,
+    template_dirs => $OPT_STRING_NONEMPTY_SPECIAL,
     convert_options => $OPT_STRING_SPECIAL,
     scaled_convert_options => $OPT_STRING_SPECIAL,
     thumbnail_convert_options => $OPT_STRING_SPECIAL,
@@ -2938,6 +2938,8 @@ sub make_www_rights {
 
 sub generate_config {
     my $file = shift ;
+    my $opts = shift ;
+
     die "Cannot generate $generate_config which already exists."
 	if -e "$file" ;
     open NEWCFG, ">$file"
@@ -2947,114 +2949,32 @@ sub generate_config {
     print NEWCFG "# It was automatically generated.\n" ;
     print NEWCFG "# You may modify and reuse it as you want.\n" ;
     print NEWCFG "\n" ;
-    print NEWCFG "# Name of generic llgal files:\n" ;
-    print NEWCFG "captions_header_filename = \"$opts->{captions_header_filename}\"\n" ;
-    print NEWCFG "css_filename = \"$opts->{css_filename}\"\n" ;
-    print NEWCFG "filmtile_filename = \"$opts->{filmtile_filename}\"\n" ;
-    print NEWCFG "index_link_image_filename = \"$opts->{index_link_image_filename}\"\n" ;
-    print NEWCFG "prev_slide_link_image_filename = \"$opts->{prev_slide_link_image_filename}\"\n" ;
-    print NEWCFG "next_slide_link_image_filename = \"$opts->{next_slide_link_image_filename}\"\n" ;
-    print NEWCFG "indextemplate_filename = \"$opts->{indextemplate_filename}\"\n" ;
-    print NEWCFG "slidetemplate_filename = \"$opts->{slidetemplate_filename}\"\n" ;
-    print NEWCFG "\n" ;
-    print NEWCFG "# Location and name of generated files:\n" ;
-    print NEWCFG "local_llgal_dir = \"$local_llgal_dir\"\n" ;
-    print NEWCFG "index_filename = \"$opts->{index_filename}\"\n" ;
-    print NEWCFG "slide_filenameprefix = \"$opts->{slide_filenameprefix}\"\n" ;
-    print NEWCFG "slide_filenameprefix_nofile = \"$opts->{slide_filenameprefix_nofile}\"\n" ;
-    print NEWCFG "scaled_image_filenameprefix = \"$opts->{scaled_image_filenameprefix}\"\n" ;
-    print NEWCFG "thumbnail_image_filenameprefix = \"$opts->{thumbnail_image_filenameprefix}\"\n" ;
-    print NEWCFG "captions_filename = \"$opts->{captions_filename}\"\n" ;
-    print NEWCFG "user_scaled_image_filenameprefix = \"$opts->{user_scaled_image_filenameprefix}\"\n" ;
-    print NEWCFG "user_thumbnail_image_filenameprefix = \"$opts->{user_thumbnail_image_filenameprefix}\"\n" ;
-    print NEWCFG "\n" ;
-    print NEWCFG "# Index:\n" ;
-    print NEWCFG "index_cellpadding = $opts->{index_cellpadding}\n" ;
-    print NEWCFG "list_links = $opts->{list_links}\n" ;
-    print NEWCFG "pixels_per_row = $opts->{pixels_per_row}\n" ;
-    print NEWCFG "thumbnails_per_row = $opts->{thumbnails_per_row}\n" ;
-    print NEWCFG "thumbnail_width_max = $opts->{thumbnail_width_max}\n" ;
-    print NEWCFG "thumbnail_height_max = $opts->{thumbnail_height_max}\n" ;
-    print NEWCFG "show_caption_under_thumbnails = $opts->{show_caption_under_thumbnails}\n" ;
-    print NEWCFG "show_no_film_effect = $opts->{show_no_film_effect}\n" ;
-    print NEWCFG "filmtile_height = $opts->{filmtile_height}\n" ;
-    print NEWCFG "\n" ;
-    print NEWCFG "# Slides:\n" ;
-    print NEWCFG "make_no_slides = $opts->{make_no_slides}\n" ;
-    print NEWCFG "make_slide_filename_from_filename = $opts->{make_slide_filename_from_filename}\n" ;
-    print NEWCFG "make_slide_filename_from_extension = $opts->{make_slide_filename_from_extension}\n" ;
-    print NEWCFG "slide_width_max = $opts->{slide_width_max}\n" ;
-    print NEWCFG "slide_height_max = $opts->{slide_height_max}\n" ;
-    print NEWCFG "text_slide_width = $opts->{text_slide_width}\n" ;
-    print NEWCFG "text_slide_height = $opts->{text_slide_height}\n" ;
-    print NEWCFG "index_link_image = $opts->{index_link_image}\n" ;
-    print NEWCFG "prev_slide_link_image = $opts->{prev_slide_link_image}\n" ;
-    print NEWCFG "next_slide_link_image = $opts->{next_slide_link_image}\n" ;
-    print NEWCFG "prev_slide_link_preview = $opts->{prev_slide_link_preview}\n" ;
-    print NEWCFG "next_slide_link_preview = $opts->{next_slide_link_preview}\n" ;
-    print NEWCFG "make_slide_title_from_caption = $opts->{make_slide_title_from_caption}\n" ;
-    print NEWCFG "\n" ;
-    print NEWCFG "# Captions:\n" ;
-    print NEWCFG "captions_removal_line = \"$opts->{captions_removal_line}\"\n" ;
-    print NEWCFG "make_caption_from_image_comment = \"$opts->{make_caption_from_image_comment}\"\n" ;
-    print NEWCFG "make_caption_from_image_timestamp = $opts->{make_caption_from_image_timestamp}\n" ;
-    print NEWCFG "make_caption_from_filename = $opts->{make_caption_from_filename}\n" ;
-    print NEWCFG "show_dimensions = $opts->{show_dimensions}\n" ;
-    print NEWCFG "show_size = $opts->{show_size}\n" ;
-    print NEWCFG "show_no_slide_counter = $opts->{show_no_slide_counter}\n" ;
-    print NEWCFG "\n" ;
-    print NEWCFG "# Text:\n" ;
-    print NEWCFG "index_title = \"$opts->{index_title}\"\n" ;
-    print NEWCFG "index_link_text = \"$opts->{index_link_text}\"\n" ;
-    print NEWCFG "parent_gallery_link_text = \"$opts->{parent_gallery_link_text}\"\n" ;
-    print NEWCFG "prev_gallery_link_text = \"$opts->{prev_gallery_link_text}\"\n" ;
-    print NEWCFG "next_gallery_link_text = \"$opts->{next_gallery_link_text}\"\n" ;
-    print NEWCFG "prev_slide_link_text = \"$opts->{prev_slide_link_text}\"\n" ;
-    print NEWCFG "next_slide_link_text = \"$opts->{next_slide_link_text}\"\n" ;
-    print NEWCFG "MVI_link_text = \"$opts->{MVI_link_text}\"\n" ;
-    print NEWCFG "FIL_link_text = \"$opts->{FIL_link_text}\"\n" ;
-    print NEWCFG "DIR_link_text = \"$opts->{DIR_link_text}\"\n" ;
-    print NEWCFG "alt_full_text = \"$opts->{alt_full_text}\"\n" ;
-    print NEWCFG "alt_scaled_text = \"$opts->{alt_scaled_text}\"\n" ;
-    print NEWCFG "alt_thumbnail_text = \"$opts->{alt_thumbnail_text}\"\n" ;
-    print NEWCFG "over_scaled_text = \"$opts->{over_scaled_text}\"\n" ;
-    print NEWCFG "over_thumbnail_text = \"$opts->{over_thumbnail_text}\"\n" ;
-    print NEWCFG "over_index_link_text = \"$opts->{over_index_link_text}\"\n" ;
-    print NEWCFG "over_prev_slide_link_text = \"$opts->{over_prev_slide_link_text}\"\n" ;
-    print NEWCFG "over_next_slide_link_text = \"$opts->{over_next_slide_link_text}\"\n" ;
-    print NEWCFG "show_size_unit = \"$opts->{show_size_unit}\"\n" ;
-    print NEWCFG "timestamp_format_in_caption = \"$opts->{timestamp_format_in_caption}\"\n" ;
-    print NEWCFG "credits_text = \"$opts->{credits_text}\"\n" ;
-    print NEWCFG "\n" ;
-    print NEWCFG "# Recursion:\n" ;
-    print NEWCFG "make_recursive = $make_recursive\n" ;
-    print NEWCFG "link_subgalleries = $opts->{link_subgalleries}\n" ;
-    print NEWCFG "parent_gallery_link = $opts->{parent_gallery_link}\n" ;
-    print NEWCFG "prev_gallery_link = $opts->{prev_gallery_link}\n" ;
-    print NEWCFG "prev_gallery_link_target = \"$opts->{prev_gallery_link_target}\"\n" ;
-    print NEWCFG "next_gallery_link = $opts->{next_gallery_link}\n" ;
-    print NEWCFG "next_gallery_link_target = \"$opts->{next_gallery_link_target}\"\n" ;
-    print NEWCFG "\n" ;
-    print NEWCFG "# What files to insert in the gallery:\n" ;
-    print NEWCFG "image_extensions = \"$opts->{image_extensions}\"\n" ;
-    print NEWCFG "movie_extensions = \"$opts->{movie_extensions}\"\n" ;
-    print NEWCFG "add_all_files = $opts->{add_all_files}\n" ;
-    print NEWCFG "add_subdirs = $opts->{add_subdirs}\n" ;
+
+    # simple options
+    for my $optname (keys %{$opts}) {
+	my $type = $opts_type->{$optname} ;
+	if ($type == $OPT_NUMERIC) {
+	    print NEWCFG "$optname = $opts->{$optname}\n" ;
+	} elsif ($type == $OPT_STRING or $type == $OPT_STRING_NONEMPTY) {
+	    print NEWCFG "$optname = \"$opts->{$optname}\"\n" ;
+	} elsif ($optname eq "convert_options") {
+	    print NEWCFG "convert_options = \"". (join_convert_options (@{$opts->{convert_options}})) ."\"\n" ;
+	} elsif ($optname eq "scaled_convert_options") {
+	    print NEWCFG "scaled_convert_options = \"". (join_convert_options (@{$opts->{scaled_convert_options}})) ."\"\n" ;
+	} elsif ($optname eq "thumbnail_convert_options") {
+	    print NEWCFG "thumbnail_convert_options = \"". (join_convert_options (@{$opts->{thumbnail_convert_options}})) ."\"\n" ;
+	}
+    }
+
+    # multiple line options
     map {
 	print NEWCFG ($_->{excluded} ? "exclude" : "include"). " = \"". $_->{filter} ."\"\n" ;
     } @{$opts->{excludes}} ;
-    print NEWCFG "sort_criteria = \"$opts->{sort_criteria}\"\n" ;
-    print NEWCFG "\n" ;
-    print NEWCFG "# Various:\n" ;
-    map { print NEWCFG "additional_template_dir = \"$_\"\n" ; } @{$opts->{template_dirs}} ;
-    print NEWCFG "convert_options = \"". (join_convert_options (@{$opts->{convert_options}})) ."\"\n" ;
-    print NEWCFG "scaled_convert_options = \"". (join_convert_options (@{$opts->{scaled_convert_options}})) ."\"\n" ;
-    print NEWCFG "thumbnail_convert_options = \"". (join_convert_options (@{$opts->{thumbnail_convert_options}})) ."\"\n" ;
-    print NEWCFG "force_image_regeneration = $force_image_regeneration\n" ;
-    print NEWCFG "www_access_rights = $opts->{www_access_rights}\n" ;
-    print NEWCFG "www_extension = \"$opts->{www_extension}\"\n" ;
-    print NEWCFG "\n" ;
+    map {
+	print NEWCFG "additional_template_dir = \"$_\"\n" ;
+    } @{$opts->{template_dirs}} ;
 
+    print NEWCFG "\n" ;
     close NEWCFG ;
 }
 
@@ -3253,7 +3173,7 @@ get_files ;
 make_www_rights $root_gallery
     if $opts->{www_access_rights} ;
 
-generate_config $generate_config
+generate_config ($generate_config, $opts_without_defaults)
     if defined $generate_config ;
 
 call_recursive $root_gallery
