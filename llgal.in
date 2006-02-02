@@ -523,22 +523,9 @@ Report bugs to:  <llgal-users AT gna.org>
 END_OF_USAGE
 
 ######################################################################
-# die showing something else than usage
+# do not show usage when dying from inside Getoptions
 
-my $die_without_GetOptions_usage = 0 ;
-sub die_without_GetOptions_usage {
-    $die_without_GetOptions_usage = 1 ;
-    die shift ;
-}
-
-sub GetOptions_failed {
-    if ($die_without_GetOptions_usage) {
-	# the error has already been displayed
-	exit -1 ;
-    } else {
-	die $usage ;
-    }
-}
+my $no_usage_on_getoptions_error = 0 ;
 
 ######################################################################
 # parse options in config files
@@ -553,12 +540,13 @@ my $current_configuration_file = undef ;
 # in case of option parsing error
 sub process_option_error {
     my $error = shift ;
+    $no_usage_on_getoptions_error = 1 ;
     if (defined $current_configuration_file) {
 	my $file = $current_configuration_file ;
 	$current_configuration_file = undef ; # reset here since we won't be able to reset anywhere else
-	die_without_GetOptions_usage "Line #$. of $file:\n  $error.\n" ;
+	die "Line #$. of $file:\n  $error.\n" ;
     } else {
-	die_without_GetOptions_usage "$error.\n" ;
+	die "$error.\n" ;
     }
 }
 
@@ -579,7 +567,7 @@ sub process_option {
 		if ($line =~ /^[^ ]+\s*=\s*(\d+)$/) {
 		    $opts->{$optname} = $1 ;
 		} else {
-		    process_option_error "<$optname> value must be numeric (in <$line>)" ;
+		    process_option_error "Configuration option <$optname> value must be numeric (in <$line>)" ;
 		}
 
 	    } elsif ($type == $OPT_STRING or $type == $OPT_STRING_SPECIAL) {
@@ -602,7 +590,7 @@ sub process_option {
 			$opts->{$optname} = $1 ;
 		    }
 		} else {
-		    process_option_error "<$optname> value must be a string (in <$line>)" ;
+		    process_option_error "Configuration option <$optname> value must be a string (in <$line>)" ;
 		}
 
 	    } elsif ($type == $OPT_STRING_NONEMPTY or $type == $OPT_STRING_NONEMPTY_SPECIAL) {
@@ -636,8 +624,10 @@ sub process_option {
 
 			} elsif ($optname eq "additional_configuration_file") {
 			    my $file = $1 ;
-			    die_without_GetOptions_usage "Not opening '$file' since too much configuration files were recursively included, loop detected ?\n"
-				if $recursive_included_configuration_file++ >= 10 ;
+			    if ($recursive_included_configuration_file++ >= 10) {
+				$no_usage_on_getoptions_error = 1 ;
+				die "Not opening '$file' since too much configuration files were recursively included, loop detected ?\n" ;
+			    }
 			    my $saved_current_configuration_file = $current_configuration_file ;
 			    parse_custom_config_file ($opts, $file) ;
 			    $current_configuration_file = $saved_current_configuration_file ;
@@ -652,15 +642,15 @@ sub process_option {
 			$opts->{$optname} = $1 ;
 		    }
 		} else {
-		    process_option_error "<$optname> value must be a non-empty string (in <$line>)" ;
+		    process_option_error "Configuration option <$optname> value must be a non-empty string (in <$line>)" ;
 		}
 
 	    }
 	} else {
-	    process_option_error "Unknown option <$optname>" ;
+	    process_option_error "Unknown configuration option <$optname>" ;
 	}
     } else {
-	process_option_error "Option must be given <opt> = <value> (was $line)" ;
+	process_option_error "Configuration must be given <opt> = <value> (was $line)" ;
     }
 
     return $opts ;
@@ -694,17 +684,19 @@ sub parse_custom_config_file {
     my $file = shift ;
 
     # don't use a capitalized file handle since it would be shared across recursive calls
-    open my $conf, $file
-	# custom configuration files have to exist
-	or die_without_GetOptions_usage "Failed to open additional configuration file '$file' ($!).\n" ;
-
-    $current_configuration_file = $file ;
-    while (<$conf>) {
-	process_option ($opts, $_)
+    if (open my $conf, $file) {
+	$current_configuration_file = $file ;
+	while (<$conf>) {
+	    process_option ($opts, $_)
 		if (/^[^#]/ and !/^(\s*)$/) ;
+	}
+	$current_configuration_file = undef ;
+	close $conf ;
+    } else {
+	# custom configuration files have to exist
+	$no_usage_on_getoptions_error = 1 ;
+	die "Failed to open additional configuration file '$file' ($!).\n" ;
     }
-    $current_configuration_file = undef ;
-    close $conf ;
 }
 
 ######################################################################
@@ -713,7 +705,7 @@ sub parse_custom_config_file {
 sub parse_cmdline_options {
     my $opts = {} ;
 
-    GetOptions(
+    if (!GetOptions(
 # behaviors
 	'clean'		=> \$clean_asked,
 	'cleanall'	=> \$cleanall_asked,
@@ -797,7 +789,15 @@ sub parse_cmdline_options {
 	'parent-gal'	=> \$opts->{parent_gallery_link},
 	'prev-gal=s'	=> sub { shift ; $opts->{prev_gallery_link_target} = shift ; $opts->{prev_gallery_link} = 1 ; },
 	'next-gal=s'	=> sub { shift ; $opts->{next_gallery_link_target} = shift ; $opts->{next_gallery_link} = 1 ; },
-	) or GetOptions_failed ;
+    )) {
+	# there has been an error during command line parsing
+	if ($no_usage_on_getoptions_error) {
+	    # the error has already been displayed
+	    exit -1 ;
+	} else {
+	    die $usage ;
+	}
+    }
 
     return $opts ;
 }
