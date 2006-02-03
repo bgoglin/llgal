@@ -2971,7 +2971,7 @@ sub generate_config {
     print NEWCFG "# You may modify and reuse it as you want.\n" ;
     print NEWCFG "\n" ;
 
-    for my $optname (keys %{$opts}) {
+    for my $optname (sort (keys %{$opts})) {
 	my $type = $opts_type->{$optname} ;
 	if ($type == $OPT_NUMERIC) {
 	    print NEWCFG "$optname = $opts->{$optname}\n" ;
