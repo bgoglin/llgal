@@ -126,6 +126,161 @@ my $text_slide_width_default = 400 ;
 my $text_slide_height_default = 300 ;
 
 ######################################################################
+# configuration variables characteristics
+
+# normal option characteristics
+my $OPT_IS_NUMERIC = 1 ;
+my $OPT_IS_STRING = 2 ;
+my $OPT_IS_NONEMPTY_STRING = 3 ;
+
+my $normal_opts_type = {
+# Name of generic llgal files
+    captions_header_filename => $OPT_IS_NONEMPTY_STRING,
+    css_filename => $OPT_IS_NONEMPTY_STRING,
+    filmtile_filename => $OPT_IS_NONEMPTY_STRING,
+    index_link_image_filename => $OPT_IS_NONEMPTY_STRING,
+    prev_slide_link_image_filename => $OPT_IS_NONEMPTY_STRING,
+    next_slide_link_image_filename => $OPT_IS_NONEMPTY_STRING,
+    indextemplate_filename => $OPT_IS_NONEMPTY_STRING,
+    slidetemplate_filename => $OPT_IS_NONEMPTY_STRING,
+# location of generic llgal files that are available on the web
+    css_location => $OPT_IS_STRING,
+    filmtile_location => $OPT_IS_STRING,
+    index_link_image_location => $OPT_IS_STRING,
+    prev_slide_link_image_location => $OPT_IS_STRING,
+    next_slide_link_image_location => $OPT_IS_STRING,
+# Location and name of generated files
+    index_filename => $OPT_IS_NONEMPTY_STRING,
+    slide_filenameprefix => $OPT_IS_STRING,
+    slide_filenameprefix_nofile => $OPT_IS_NONEMPTY_STRING,
+    scaled_image_filenameprefix => $OPT_IS_NONEMPTY_STRING,
+    thumbnail_image_filenameprefix => $OPT_IS_NONEMPTY_STRING,
+    captions_filename => $OPT_IS_NONEMPTY_STRING,
+    user_scaled_image_filenameprefix => $OPT_IS_NONEMPTY_STRING,
+    user_thumbnail_image_filenameprefix => $OPT_IS_NONEMPTY_STRING,
+# Index
+    index_cellpadding => $OPT_IS_NUMERIC, # >= 0, -1 for default
+    list_links => $OPT_IS_NUMERIC,
+    pixels_per_row => $OPT_IS_NUMERIC, # > 0, 0 for unlimited, -1 for default
+    thumbnails_per_row => $OPT_IS_NUMERIC, # > 0, 0 for unlimited, -1 for default
+    thumbnail_height_max => $OPT_IS_NUMERIC, # > 0, -1 for default
+    thumbnail_width_max => $OPT_IS_NUMERIC, # > 0, 0 for unlimited, -1 for default
+    show_caption_under_thumbnails => $OPT_IS_NUMERIC,
+    show_no_film_effect => $OPT_IS_NUMERIC,
+    filmtile_height => $OPT_IS_NUMERIC, # >= 0, -1 for default
+# Slides
+    make_no_slides => $OPT_IS_NUMERIC,
+    make_slide_filename_from_filename => $OPT_IS_NUMERIC,
+    make_slide_filename_from_extension => $OPT_IS_NUMERIC,
+    slide_width_max => $OPT_IS_NUMERIC, # > 0, 0 for unlimited, -1 for default
+    slide_height_max => $OPT_IS_NUMERIC, # > 0, 0 for unlimited, -1 for default
+    text_slide_width => $OPT_IS_NUMERIC, # > 0, -1 for default
+    text_slide_height => $OPT_IS_NUMERIC, # > 0, -1 for default
+    index_link_image => $OPT_IS_NUMERIC,
+    prev_slide_link_image => $OPT_IS_NUMERIC,
+    next_slide_link_image => $OPT_IS_NUMERIC,
+    prev_slide_link_preview => $OPT_IS_NUMERIC,
+    next_slide_link_preview => $OPT_IS_NUMERIC,
+    make_slide_title_from_caption => $OPT_IS_NUMERIC,
+# Captions
+    captions_removal_line => $OPT_IS_NONEMPTY_STRING,
+    make_caption_from_image_comment => $OPT_IS_STRING,
+    make_caption_from_image_timestamp => $OPT_IS_NUMERIC,
+    make_caption_from_filename => $OPT_IS_NUMERIC,
+    show_dimensions => $OPT_IS_NUMERIC,
+    show_size => $OPT_IS_NUMERIC,
+    show_no_slide_counter => $OPT_IS_NUMERIC,
+# Text
+    index_title => $OPT_IS_STRING,
+    index_link_text => $OPT_IS_NONEMPTY_STRING,
+    parent_gallery_link_text => $OPT_IS_NONEMPTY_STRING,
+    prev_gallery_link_text => $OPT_IS_STRING,
+    next_gallery_link_text => $OPT_IS_STRING,
+    prev_slide_link_text => $OPT_IS_NONEMPTY_STRING,
+    next_slide_link_text => $OPT_IS_NONEMPTY_STRING,
+    MVI_link_text => $OPT_IS_STRING,
+    FIL_link_text => $OPT_IS_STRING,
+    DIR_link_text => $OPT_IS_STRING,
+    alt_full_text => $OPT_IS_STRING,
+    alt_scaled_text => $OPT_IS_STRING,
+    alt_thumbnail_text => $OPT_IS_STRING,
+    over_scaled_text => $OPT_IS_STRING,
+    over_thumbnail_text => $OPT_IS_STRING,
+    over_index_link_text => $OPT_IS_STRING,
+    over_prev_slide_link_text => $OPT_IS_STRING,
+    over_next_slide_link_text => $OPT_IS_STRING,
+    show_size_unit => $OPT_IS_STRING,
+    timestamp_format_in_caption => $OPT_IS_NONEMPTY_STRING,
+    credits_text => $OPT_IS_STRING,
+# Recursion
+    parent_gallery_link => $OPT_IS_NUMERIC,
+    prev_gallery_link => $OPT_IS_NUMERIC,
+    prev_gallery_link_target => $OPT_IS_STRING,
+    next_gallery_link => $OPT_IS_NUMERIC,
+    next_gallery_link_target => $OPT_IS_STRING,
+    link_subgalleries => $OPT_IS_NUMERIC,
+# What files to insert
+    image_extensions => $OPT_IS_STRING,
+    movie_extensions => $OPT_IS_STRING,
+    add_all_files => $OPT_IS_NUMERIC,
+    add_subdirs => $OPT_IS_NUMERIC,
+    sort_criteria => $OPT_IS_NONEMPTY_STRING,
+# Various
+    force_image_regeneration => $OPT_IS_NUMERIC,
+    www_access_rights => $OPT_IS_NUMERIC,
+    www_extension => $OPT_IS_NONEMPTY_STRING,
+# Internal options, not parseable, not exportable
+} ;
+
+# options whose input or output is non-trivial:
+
+# options that have a special parsing routine
+my $special_opts_with_input = {
+    local_llgal_dir => 1,
+    make_recursive => 1,
+    exclude => 1,
+    include => 1,
+    additional_configuration_file => 1,
+    additional_template_dir => 1,
+    convert_options => 1,
+    scaled_convert_options => 1,
+    thumbnail_convert_options => 1,
+} ;
+
+# internal options that have a special outputting routine
+my $special_opts_with_output = {
+    excludes => 1,
+    template_dirs => 1,
+    convert_options => 1,
+    scaled_convert_options => 1,
+    thumbnail_convert_options => 1,
+} ;
+
+# stuff that is not stored in the option hash but need be outputted
+my $special_nonopts_with_output = {
+    local_llgal_dir => 1,
+    make_recursive => 1,
+} ;
+
+# internal options that are never output
+my $special_opts_without_output = {
+    default_thumb_xdim => 1,
+    default_thumb_ydim => 1,
+    thumbnail_create_command => 1,
+    slide_create_command => 1,
+    slide_copy_command => 1,
+} ;
+
+# options whose merging is done as array
+my $special_opts_merging_as_array = {
+    excludes => 1,
+    template_dirs => 1,
+    convert_options => 1,
+    scaled_convert_options => 1,
+    thumbnail_convert_options => 1,
+} ;
+
+######################################################################
 # manage configuration variables
 
 # overwrite current_opts (1st argument) with overwriting_opts (2nd)
@@ -133,8 +288,14 @@ sub merge_opts {
     my $current_opts = shift ;
     my $overwriting_opts = shift ;
     foreach my $key (keys %{$overwriting_opts}) {
-	$current_opts->{$key} = $overwriting_opts->{$key}
-	    if defined $overwriting_opts->{$key} ;
+	if (defined $overwriting_opts->{$key}) {
+	    if (defined $special_opts_merging_as_array->{$key}
+		and defined $current_opts->{$key}) {
+		$current_opts->{$key} = [@{$current_opts->{$key}}, @{$overwriting_opts->{$key}}] ;
+	    } else {
+		$current_opts->{$key} = $overwriting_opts->{$key}
+	    }
+	}
     }
 }
 
@@ -336,132 +497,6 @@ sub add_defaults {
     return $default_opts ;
 }
 
-# variable characteristics
-# normal options, various types
-my $OPT_NUMERIC = 0 ;
-my $OPT_STRING = 1 ;
-my $OPT_STRING_NONEMPTY = 2 ;
-# normal options that need a special processing
-my $OPT_NUMERIC_SPECIAL = 3 ;
-my $OPT_STRING_SPECIAL = 4 ;
-my $OPT_STRING_NONEMPTY_SPECIAL = 5 ;
-# internal options that cannot be used in configuration files
-my $OPT_INTERNAL = 6 ;
-
-my $opts_type = {
-# Name of generic llgal files
-    captions_header_filename => $OPT_STRING_NONEMPTY,
-    css_filename => $OPT_STRING_NONEMPTY,
-    filmtile_filename => $OPT_STRING_NONEMPTY,
-    index_link_image_filename => $OPT_STRING_NONEMPTY,
-    prev_slide_link_image_filename => $OPT_STRING_NONEMPTY,
-    next_slide_link_image_filename => $OPT_STRING_NONEMPTY,
-    indextemplate_filename => $OPT_STRING_NONEMPTY,
-    slidetemplate_filename => $OPT_STRING_NONEMPTY,
-# location of generic llgal files that are available on the web
-    local_llgal_dir => $OPT_STRING_NONEMPTY_SPECIAL,
-    css_location => $OPT_STRING,
-    filmtile_location => $OPT_STRING,
-    index_link_image_location => $OPT_STRING,
-    prev_slide_link_image_location => $OPT_STRING,
-    next_slide_link_image_location => $OPT_STRING,
-# Location and name of generated files
-    index_filename => $OPT_STRING_NONEMPTY,
-    slide_filenameprefix => $OPT_STRING,
-    slide_filenameprefix_nofile => $OPT_STRING_NONEMPTY,
-    scaled_image_filenameprefix => $OPT_STRING_NONEMPTY,
-    thumbnail_image_filenameprefix => $OPT_STRING_NONEMPTY,
-    captions_filename => $OPT_STRING_NONEMPTY,
-    user_scaled_image_filenameprefix => $OPT_STRING_NONEMPTY,
-    user_thumbnail_image_filenameprefix => $OPT_STRING_NONEMPTY,
-# Index
-    index_cellpadding => $OPT_NUMERIC, # >= 0, -1 for default
-    list_links => $OPT_NUMERIC,
-    pixels_per_row => $OPT_NUMERIC, # > 0, 0 for unlimited, -1 for default
-    thumbnails_per_row => $OPT_NUMERIC, # > 0, 0 for unlimited, -1 for default
-    thumbnail_height_max => $OPT_NUMERIC, # > 0, -1 for default
-    thumbnail_width_max => $OPT_NUMERIC, # > 0, 0 for unlimited, -1 for default
-    show_caption_under_thumbnails => $OPT_NUMERIC,
-    show_no_film_effect => $OPT_NUMERIC,
-    filmtile_height => $OPT_NUMERIC, # >= 0, -1 for default
-# Slides
-    make_no_slides => $OPT_NUMERIC,
-    make_slide_filename_from_filename => $OPT_NUMERIC,
-    make_slide_filename_from_extension => $OPT_NUMERIC,
-    slide_width_max => $OPT_NUMERIC, # > 0, 0 for unlimited, -1 for default
-    slide_height_max => $OPT_NUMERIC, # > 0, 0 for unlimited, -1 for default
-    text_slide_width => $OPT_NUMERIC, # > 0, -1 for default
-    text_slide_height => $OPT_NUMERIC, # > 0, -1 for default
-    index_link_image => $OPT_NUMERIC,
-    prev_slide_link_image => $OPT_NUMERIC,
-    next_slide_link_image => $OPT_NUMERIC,
-    prev_slide_link_preview => $OPT_NUMERIC,
-    next_slide_link_preview => $OPT_NUMERIC,
-    make_slide_title_from_caption => $OPT_NUMERIC,
-# Captions
-    captions_removal_line => $OPT_STRING_NONEMPTY,
-    make_caption_from_image_comment => $OPT_STRING,
-    make_caption_from_image_timestamp => $OPT_NUMERIC,
-    make_caption_from_filename => $OPT_NUMERIC,
-    show_dimensions => $OPT_NUMERIC,
-    show_size => $OPT_NUMERIC,
-    show_no_slide_counter => $OPT_NUMERIC,
-# Text
-    index_title => $OPT_STRING,
-    index_link_text => $OPT_STRING_NONEMPTY,
-    parent_gallery_link_text => $OPT_STRING_NONEMPTY,
-    prev_gallery_link_text => $OPT_STRING,
-    next_gallery_link_text => $OPT_STRING,
-    prev_slide_link_text => $OPT_STRING_NONEMPTY,
-    next_slide_link_text => $OPT_STRING_NONEMPTY,
-    MVI_link_text => $OPT_STRING,
-    FIL_link_text => $OPT_STRING,
-    DIR_link_text => $OPT_STRING,
-    alt_full_text => $OPT_STRING,
-    alt_scaled_text => $OPT_STRING,
-    alt_thumbnail_text => $OPT_STRING,
-    over_scaled_text => $OPT_STRING,
-    over_thumbnail_text => $OPT_STRING,
-    over_index_link_text => $OPT_STRING,
-    over_prev_slide_link_text => $OPT_STRING,
-    over_next_slide_link_text => $OPT_STRING,
-    show_size_unit => $OPT_STRING,
-    timestamp_format_in_caption => $OPT_STRING_NONEMPTY,
-    credits_text => $OPT_STRING,
-# Recursion
-    make_recursive => $OPT_NUMERIC_SPECIAL,
-    parent_gallery_link => $OPT_NUMERIC,
-    prev_gallery_link => $OPT_NUMERIC,
-    prev_gallery_link_target => $OPT_STRING,
-    next_gallery_link => $OPT_NUMERIC,
-    next_gallery_link_target => $OPT_STRING,
-    link_subgalleries => $OPT_NUMERIC,
-# What files to insert
-    image_extensions => $OPT_STRING,
-    movie_extensions => $OPT_STRING,
-    add_all_files => $OPT_NUMERIC,
-    add_subdirs => $OPT_NUMERIC,
-    exclude => $OPT_STRING_NONEMPTY_SPECIAL,
-    include => $OPT_STRING_NONEMPTY_SPECIAL,
-    excludes => $OPT_INTERNAL, # the internal array where include/exclude options is stored
-    sort_criteria => $OPT_STRING_NONEMPTY,
-# Various
-    additional_configuration_file => $OPT_STRING_NONEMPTY_SPECIAL,
-    template_dirs => $OPT_STRING_NONEMPTY_SPECIAL,
-    convert_options => $OPT_STRING_SPECIAL,
-    scaled_convert_options => $OPT_STRING_SPECIAL,
-    thumbnail_convert_options => $OPT_STRING_SPECIAL,
-    force_image_regeneration => $OPT_NUMERIC,
-    www_access_rights => $OPT_NUMERIC,
-    www_extension => $OPT_STRING_NONEMPTY,
-# Internal options, not parseable, not exportable
-    default_thumb_ydim => $OPT_INTERNAL,
-    default_thumb_xdim => $OPT_INTERNAL,
-    thumbnail_create_command => $OPT_INTERNAL,
-    slide_create_command => $OPT_INTERNAL,
-    slide_copy_command => $OPT_INTERNAL,
-} ;
-
 ######################################################################
 # Create usage now to use defaults values
 
@@ -568,105 +603,91 @@ sub process_option {
 
     if ($line =~ /^([^ ]+)\s*=.+$/) {
 	my $optname = $1 ;
-	my $type = $opts_type->{$optname} ;
-	if (defined $type and $type != $OPT_INTERNAL) {
+	my $type = $normal_opts_type->{$optname} ;
+	if (defined $type) {
 	    # use the options type to choose parsing
 
-	    if ($type == $OPT_NUMERIC or $type == $OPT_NUMERIC_SPECIAL) {
+	    if ($type == $OPT_IS_NUMERIC) {
 		# any match is fine
 		if ($line =~ /^[^ ]+\s*=\s*(\d+)$/) {
-
-		    if ($type == $OPT_NUMERIC_SPECIAL) {
-			# special option, with special processing
-
-			if ($optname eq "make_recursive") {
-			    $make_recursive = $1 ;
-			}
-
-		    } else {
-			# normal option
-			$opts->{$optname} = $1 ;
-		    }
+		    $opts->{$optname} = $1 ;
 		} else {
 		    process_option_error "Configuration option <$optname> value must be numeric (in <$line>)" ;
 		}
 
-	    } elsif ($type == $OPT_STRING or $type == $OPT_STRING_SPECIAL) {
+	    } elsif ($type == $OPT_IS_STRING) {
 		# value must be quoted
 		if ($line =~ /^[^ ]+\s*=\s*"(.*)"$/) {
-
-		    if ($type == $OPT_STRING_SPECIAL) {
-			# special option, with special processing
-
-			if ($optname eq "convert_options") {
-			    push (@{$opts->{convert_options}}, parse_convert_options ($1)) ;
-			} elsif ($optname eq "scaled_convert_options") {
-			    push (@{$opts->{scaled_convert_options}}, parse_convert_options ($1)) ;
-			} elsif ($optname eq "thumbnail_convert_options") {
-			    push (@{$opts->{thumbnail_convert_options}}, $1) ;
-			}
-
-		    } else  {
-			# normal option
-			$opts->{$optname} = $1 ;
-		    }
+		    $opts->{$optname} = $1 ;
 		} else {
 		    process_option_error "Configuration option <$optname> value must be a string (in <$line>)" ;
 		}
 
-	    } elsif ($type == $OPT_STRING_NONEMPTY or $type == $OPT_STRING_NONEMPTY_SPECIAL) {
+	    } elsif ($type == $OPT_IS_NONEMPTY_STRING) {
 		# value must be quoted and non-empty
 		if ($line =~ /^[^ ]+\s*=\s*"(.+)"$/) {
-
-		    if ($type == $OPT_STRING_NONEMPTY_SPECIAL) {
-			# special option, with special processing
-
-			if ($optname eq "local_llgal_dir") {
-			    # the local llgal directory name may only be changed
-			    # during early configuration
-			    if ($early_configuration) {
-				$local_llgal_dir = $1 ;
-			    } else {
-				print "!! Ignoring changes to the name of the local llgal directory outside of\n" ;
-				print "!! system- and user-wide configuration files.\n" ;
-			    }
-
-			} elsif ($optname eq "exclude") {
-			    my $entry = () ;
-			    $entry->{excluded} = 1 ;
-			    $entry->{filter} = $1 ;
-			    push (@{$opts->{excludes}}, $entry) ;
-
-			} elsif ($optname eq "include") {
-			    my $entry = () ;
-			    $entry->{excluded} = 0 ;
-			    $entry->{filter} = $1 ;
-			    push (@{$opts->{excludes}}, $entry) ;
-
-			} elsif ($optname eq "additional_configuration_file") {
-			    my $file = $1 ;
-			    if ($recursive_included_configuration_file++ >= 10) {
-				$no_usage_on_getoptions_error = 1 ;
-				die "Not opening '$file' since too much configuration files were recursively included, loop detected ?\n" ;
-			    }
-			    my $saved_current_configuration_file = $current_configuration_file ;
-			    parse_custom_config_file ($opts, $file) ;
-			    $current_configuration_file = $saved_current_configuration_file ;
-			    $recursive_included_configuration_file-- ;
-
-			} elsif ($optname eq "additional_template_dir") {
-			    push (@{$opts->{template_dirs}}, $1) ;
-			}
-
-		    } else {
-			# normal option
-			$opts->{$optname} = $1 ;
-		    }
+		    $opts->{$optname} = $1 ;
 		} else {
 		    process_option_error "Configuration option <$optname> value must be a non-empty string (in <$line>)" ;
 		}
 
 	    }
+
+	} elsif ($special_opts_with_input->{$optname}) {
+	    # not a normal option, must be special
+
+	    if ($line =~ /^local_llgal_dir\s*=\s*"(.*)"$/) {
+		# the local llgal directory name may only be changed
+		# during early configuration
+		if ($early_configuration) {
+		    $local_llgal_dir = $1 ;
+		} else {
+		    print "!! Ignoring changes to the name of the local llgal directory outside of\n" ;
+		    print "!! system- and user-wide configuration files.\n" ;
+		}
+
+	    } elsif ($line =~ /^exclude\s*=\s*"(.+)"$/) {
+		my $entry = () ;
+		$entry->{excluded} = 1 ;
+		$entry->{filter} = $1 ;
+		push (@{$opts->{excludes}}, $entry) ;
+
+	    } elsif ($line =~ /^exclude\s*=\s*"(.+)"$/) {
+		my $entry = () ;
+		$entry->{excluded} = 0 ;
+		$entry->{filter} = $1 ;
+		push (@{$opts->{excludes}}, $entry) ;
+
+	    } elsif ($line =~ /^additional_configuration_file\s*=\s*"(.+)"$/) {
+		my $file = $1 ;
+		if ($recursive_included_configuration_file++ >= 10) {
+		    $no_usage_on_getoptions_error = 1 ;
+		    die "Not opening '$file' since too much configuration files were recursively included, loop detected ?\n" ;
+		}
+		my $saved_current_configuration_file = $current_configuration_file ;
+		parse_custom_config_file ($opts, $file) ;
+		$current_configuration_file = $saved_current_configuration_file ;
+		$recursive_included_configuration_file-- ;
+
+	    } elsif ($line =~ /^additional_template_dir\s*=\s*"(.+)"$/) {
+		push (@{$opts->{template_dirs}}, $1) ;
+
+	    } elsif ($line =~ /^make_recursive\s*=\s*(\d+)$/) {
+		$make_recursive = $1 ;
+
+	    } elsif ($line =~ /^convert_options\s*=\s*"(.*)"$/) {
+		push (@{$opts->{convert_options}}, parse_convert_options ($1)) ;
+
+	    } elsif ($line =~ /^scaled_convert_options\s*=\s*"(.*)"$/) {
+		push (@{$opts->{scaled_convert_options}}, parse_convert_options ($1)) ;
+
+	    } elsif ($line =~ /^thumbnail_convert_options\s*=\s*"(.*)"$/) {
+		push (@{$opts->{thumbnail_convert_options}}, $1) ;
+
+	    } else {
+		die "Unknown special inconfig option $optname.\n" ;
+	    }
+
 	} else {
 	    process_option_error "Unknown configuration option <$optname>" ;
 	}
@@ -2971,14 +2992,24 @@ sub generate_config {
     print NEWCFG "# You may modify and reuse it as you want.\n" ;
     print NEWCFG "\n" ;
 
-    for my $optname (sort (keys %{$opts})) {
-	my $type = $opts_type->{$optname} ;
-	if ($type == $OPT_NUMERIC) {
-	    print NEWCFG "$optname = $opts->{$optname}\n" ;
-	} elsif ($type == $OPT_STRING or $type == $OPT_STRING_NONEMPTY) {
-	    print NEWCFG "$optname = \"$opts->{$optname}\"\n" ;
-	} else {
-	    # special variables that need special output
+    for my $optname (sort (keys %{$normal_opts_type}, keys %{$special_opts_with_output}, keys %{$special_nonopts_with_output})) {
+
+	if (defined $special_nonopts_with_output->{$optname}) {
+
+	    if ($optname eq "local_llgal_dir") {
+		print NEWCFG "local_llgal_dir = \"$local_llgal_dir\"\n" ;
+
+	    } elsif ($optname eq "make_recursive") {
+		print NEWCFG "make_recursive = $make_recursive\n" ;
+
+	    } else {
+		die "Unknown non-options $optname to output.\n" ;
+	    }
+
+	} elsif (defined $special_opts_with_output->{$optname}) {
+	    next if not defined $opts->{$optname} ;
+	    # special options that need special output
+
 	    if ($optname eq "convert_options") {
 		print NEWCFG "convert_options = \"". (join_convert_options (@{$opts->{convert_options}})) ."\"\n" ;
 
@@ -3008,12 +3039,29 @@ sub generate_config {
 		}
 
 	    } else {
-		# other options are not available in configuration files (internal options)
+		die "Unknown special internal option $optname to output.\n" ;
+	    }
+
+	} else {
+	    next if not defined $opts->{$optname} ;
+	    # normal options
+
+	    my $type = $normal_opts_type->{$optname} ;
+	    if (defined $type) {
+
+		if ($type == $OPT_IS_NUMERIC) {
+		    print NEWCFG "$optname = $opts->{$optname}\n" ;
+		} elsif ($type == $OPT_IS_STRING or $type == $OPT_IS_NONEMPTY_STRING) {
+		    print NEWCFG "$optname = \"$opts->{$optname}\"\n" ;
+		} else {
+		    die "Unknown normal option type $type.\n" ;
+		}
+
+	    } else {
+		die "Unknown option $optname to output.\n" ;
 	    }
 	}
     }
-
-    # multiple line options
 
     print NEWCFG "\n" ;
     close NEWCFG ;
