@@ -3024,8 +3024,6 @@ sub generate_config {
 		    map {
 			print NEWCFG "additional_template_dir = \"$_\"\n" ;
 		    } @{$opts->{template_dirs}} ;
-		} else {
-		    print NEWCFG "#additional_template_dir = <none>\n" ;
 		}
 
 	    } elsif ($optname eq "excludes") {
@@ -3033,9 +3031,6 @@ sub generate_config {
 		    map {
 			print NEWCFG ($_->{excluded} ? "exclude" : "include"). " = \"". $_->{filter} ."\"\n" ;
 		    } @{$opts->{excludes}} ;
-		} else {
-		    print NEWCFG "#exclude = <none>\n" ;
-		    print NEWCFG "#include = <none>\n" ;
 		}
 
 	    } else {
@@ -3058,7 +3053,7 @@ sub generate_config {
 		}
 
 	    } else {
-		die "Unknown option $optname to output.\n" ;
+		die "Unknown ge option $optname to output.\n" ;
 	    }
 	}
     }
@@ -3262,7 +3257,7 @@ get_files ;
 make_www_rights $root_gallery
     if $opts->{www_access_rights} ;
 
-generate_config ($generate_config, $opts)
+generate_config ($generate_config, $opts_without_defaults)
     if defined $generate_config ;
 
 call_recursive $root_gallery
