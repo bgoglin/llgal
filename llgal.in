@@ -2177,7 +2177,7 @@ sub generate_captions_file {
 	    or die "Can't open $destination_dir$local_llgal_dir/$opts->{captions_filename} file to append\n" ;
 
 	print CAP "\n" ;
-	print CAP "# Appended new captions (", scalar localtime, ").\n" ;
+	print CAP "# Appended new captions (". (scalar localtime) .").\n" ;
 	print CAP "\n" ;
     } else {
 	indprint "Creating the $opts->{captions_filename} file: " ;
@@ -2982,13 +2982,17 @@ sub generate_config {
     my $file = shift ;
     my $opts = shift ;
 
-    die "Cannot generate $generate_config which already exists."
-	if -e "$file" ;
+    if (-e "$file") {
+	my $old_file = "$file.save.". (strftime('%Y-%m-%d_%H:%M:%S' ,localtime)) ;
+	immediate_warning "Renaming old configuration file '$file' as '$old_file'" ;
+	rename "$file", "$old_file" ;
+    }
+
     open NEWCFG, ">$file"
 	or die "Cannot open $file ($!).\n" ;
 
     print NEWCFG "# This is a llgal configuration file.\n" ;
-    print NEWCFG "# It was automatically generated.\n" ;
+    print NEWCFG "# It was automatically generated on ". (scalar localtime) .".\n" ;
     print NEWCFG "# You may modify and reuse it as you want.\n" ;
     print NEWCFG "\n" ;
 
