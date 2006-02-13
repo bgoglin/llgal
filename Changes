@@ -2,6 +2,7 @@
   * Additional files passed with --config or additional_configuration_file
     are parsed as soon as the option is met, before processing any of the
     following options.
+  * make_recursive configuration option is now called recursive.
   * Fix manpage additional_configuration_file name (instead of config_file).
   * Cleanup and improve option checking, with better error reporting:
     + Options that are not a string must now be numeric.

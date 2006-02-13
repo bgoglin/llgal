@@ -290,7 +290,7 @@
 ##### Recursion #####
 
 # Run recursively in subdirectories [-R]
-# make_recursive = 0
+# recursive = 0
 
 # Add links between subgalleries [--Rl]
 # link_subgalleries = 0

@@ -108,8 +108,6 @@ my $give_templates = undef ;
 # Special behavior options
 # generate a config file
 my $generate_config = undef ;
-# do we run recursively in subdirectories ?
-my $make_recursive = 0 ;
 
 ######################################################################
 # default values that will be restored if the associated option is set to -1
@@ -124,6 +122,73 @@ my $slide_height_max_default = 0 ; # unlimited
 my $slide_width_max_default = 0 ; # unlimited
 my $text_slide_width_default = 400 ;
 my $text_slide_height_default = 300 ;
+
+######################################################################
+# a few routines
+
+# Print messages with indentation according to recursion level
+
+sub indprint {
+    print $indent ;
+    print @_ ;
+}
+
+# Warnings are shown after each step of processing to avoid
+# breaking precentage progressions and so
+
+my $tmp_warning = "" ;
+
+sub add_warning {
+    $tmp_warning .= "!! ".(shift)."\n" ;
+}
+
+sub add_external_warnings {
+    while (@_) {
+	my $line = shift ;
+	chomp $line ;
+	add_warning "# $line" ;
+    }
+}
+
+sub show_warnings {
+    print $tmp_warning ;
+    $tmp_warning = "" ;
+}
+
+sub immediate_warning {
+    print "!! ".(shift)."\n" ;
+}
+
+sub immediate_external_warnings {
+    while (@_) {
+	my $line = shift ;
+	chomp $line ;
+	immediate_warning "# $line" ;
+    }
+}
+
+# Print percentage
+
+sub init_percentage {
+    print "  0%" ;
+}
+
+sub print_percentage {
+    my ($i,$n) = (shift,shift) ;
+    my $val = int($i*100/$n) ;
+    print "\b\b\b\b" ;
+    if ($val == 100) {
+	print "100%" ;
+    } elsif ($val >= 10) {
+	print " ".$val."%" ;
+    } else {
+	print "  ".$val."%" ;
+    }
+}
+
+sub end_percentage {
+    print "\b\b\b\b100%\n" ;
+}
 
 ######################################################################
 # configuration variables characteristics
@@ -227,6 +292,7 @@ my $normal_opts_type = {
     sort_criteria => $OPT_IS_NONEMPTY_STRING,
 # Various
     force_image_regeneration => $OPT_IS_NUMERIC,
+    recursive => $OPT_IS_NUMERIC,
     www_access_rights => $OPT_IS_NUMERIC,
     www_extension => $OPT_IS_NONEMPTY_STRING,
 # Internal options, not parseable, not exportable
@@ -237,7 +303,6 @@ my $normal_opts_type = {
 # options that have a special parsing routine
 my $special_opts_with_input = {
     local_llgal_dir => 1,
-    make_recursive => 1,
     exclude => 1,
     include => 1,
     additional_configuration_file => 1,
@@ -259,7 +324,6 @@ my $special_opts_with_output = {
 # stuff that is not stored in the option hash but need be outputted
 my $special_nonopts_with_output = {
     local_llgal_dir => 1,
-    make_recursive => 1,
 } ;
 
 # internal options that are never output
@@ -672,9 +736,6 @@ sub process_option {
 	    } elsif ($line =~ /^additional_template_dir\s*=\s*"(.+)"$/) {
 		push (@{$opts->{template_dirs}}, $1) ;
 
-	    } elsif ($line =~ /^make_recursive\s*=\s*(\d+)$/) {
-		$make_recursive = $1 ;
-
 	    } elsif ($line =~ /^convert_options\s*=\s*"(.*)"$/) {
 		push (@{$opts->{convert_options}}, parse_convert_options ($1)) ;
 
@@ -762,7 +823,7 @@ sub parse_cmdline_options {
 	'f'		=> \$opts->{force_image_regeneration},
 	'gencfg=s'	=> \$generate_config,
 	'config=s'	=> sub { shift ; parse_custom_config_file ($opts, shift) ; },
-	'R'		=> \$make_recursive,
+	'R'		=> \$opts->{recursive},
 
 # layout
 	'A'		=> \$opts->{add_all_files},
@@ -846,70 +907,6 @@ sub parse_cmdline_options {
 
 ######################################################################
 # a few routines
-
-# Print messages with indentation according to recursion level
-
-sub indprint {
-    print $indent ;
-    print @_ ;
-}
-
-# Warnings are shown after each step of processing to avoid
-# breaking precentage progressions and so
-
-my $tmp_warning = "" ;
-
-sub add_warning {
-    $tmp_warning .= "!! ".(shift)."\n" ;
-}
-
-sub add_external_warnings {
-    while (@_) {
-	my $line = shift ;
-	chomp $line ;
-	add_warning "# $line" ;
-    }
-}
-
-sub show_warnings {
-    print $tmp_warning ;
-    $tmp_warning = "" ;
-}
-
-sub immediate_warning {
-    print "!! ".(shift)."\n" ;
-}
-
-sub immediate_external_warnings {
-    while (@_) {
-	my $line = shift ;
-	chomp $line ;
-	immediate_warning "# $line" ;
-    }
-}
-
-# Print percentage
-
-sub init_percentage {
-    print "  0%" ;
-}
-
-sub print_percentage {
-    my ($i,$n) = (shift,shift) ;
-    my $val = int($i*100/$n) ;
-    print "\b\b\b\b" ;
-    if ($val == 100) {
-	print "100%" ;
-    } elsif ($val >= 10) {
-	print " ".$val."%" ;
-    } else {
-	print "  ".$val."%" ;
-    }
-}
-
-sub end_percentage {
-    print "\b\b\b\b100%\n" ;
-}
 
 # system routine which:
 # - takes a description followed by cmdline arguments
@@ -2026,7 +2023,7 @@ sub get_entries_from_directory {
 	my $filename = $filenames[$i] ;
 	if (-d "$destination_dir$filename") {
 	    # directory
-	    if ($opts->{add_subdirs} or $make_recursive) {
+	    if ($opts->{add_subdirs} or $opts->{recursive}) {
 		my $entry = create_file_entry ($TYPE_DIR, $filename, undef, undef) ;
 		push @entries, $entry
 		    if defined $entry ;
@@ -3003,9 +3000,6 @@ sub generate_config {
 	    if ($optname eq "local_llgal_dir") {
 		print NEWCFG "local_llgal_dir = \"$local_llgal_dir\"\n" ;
 
-	    } elsif ($optname eq "make_recursive") {
-		print NEWCFG "make_recursive = $make_recursive\n" ;
-
 	    } else {
 		die "Unknown non-options $optname to output.\n" ;
 	    }
@@ -3151,7 +3145,7 @@ if ($clean_asked or $cleanall_asked) {
     clean_files $cleanall_asked ;
     show_warnings ;
 
-    if ($make_recursive) {
+    if ($opts->{recursive}) {
 	opendir DIR, $destination_dir ? $destination_dir : "./" ; # destination is empty for './'
 	while (my $dir = readdir DIR) {
 	    if ($dir =~ /^[^.]/ and -d "$destination_dir$dir") {
@@ -3180,7 +3174,7 @@ if ($give_templates) {
     indprint "You may now edit templates in $destdir and generate new galleries.\n" ;
     indprint "You may also remove any template that you do not want to modify.\n" ;
 
-    if ($make_recursive) {
+    if ($opts->{recursive}) {
 	opendir DIR, $destination_dir ? $destination_dir : "./" ; # destination is empty for './'
 	while (my $dir = readdir DIR) {
 	    if ($dir =~ /^[^.]/ and -d "$destination_dir$dir") {
@@ -3211,7 +3205,7 @@ if ($generate_captions) {
     generate_captions_file $root_gallery ;
     indprint "Now edit the $destination_dir$local_llgal_dir/$opts->{captions_filename} file to your liking and run llgal\n" ;
 
-    if ($make_recursive) {
+    if ($opts->{recursive}) {
 	my @dir_entries = grep { $_->{type} == $TYPE_DIR } @{$root_gallery->{entries}} ;
 	print "\n"
 	    if @dir_entries ;
@@ -3265,4 +3259,4 @@ generate_config ($generate_config, $opts_without_defaults)
     if defined $generate_config ;
 
 call_recursive $root_gallery
-    if $make_recursive ;
+    if $opts->{recursive} ;
