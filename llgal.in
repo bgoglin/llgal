@@ -21,8 +21,10 @@ STDOUT->autoflush("1") ;
 
 # constants
 my $version = "@VERSION@" ;
+my $llgal_config_dir = "@SYSCONFDIR@/llgal" ;
 my $llgal_share_dir = "@DATADIR@/llgal" ;
 my $user_share_dir = $ENV{HOME}."/.llgal" ;
+my $generic_configuration_filename = "llgalrc" ;
 # local llgal directory, may be modified during early configuration
 my $local_llgal_dir = ".llgal" ;
 
@@ -3111,9 +3113,9 @@ sub call_recursive {
 # evaluate generic configuration files
 my $generic_opts = {} ;
 # system-wide configuration file
-merge_opts ($generic_opts, parse_generic_config_file "@SYSCONFDIR@/llgal/llgalrc") ;
+merge_opts ($generic_opts, parse_generic_config_file "${llgal_config_dir}/${generic_configuration_filename}") ;
 # user-wide configuration file
-merge_opts ($generic_opts, parse_generic_config_file $ENV{HOME}."/.llgal/llgalrc") ;
+merge_opts ($generic_opts, parse_generic_config_file "${user_share_dir}/${generic_configuration_filename}") ;
 
 # early configuration ends here
 $early_configuration = 0 ;
@@ -3123,7 +3125,7 @@ $early_configuration = 0 ;
 check_destination ;
 
 # evaluate gallery specific configuration, without modifying $generic_opts
-$opts_without_defaults = merge_opts_into ($generic_opts, parse_generic_config_file "${destination_dir}${local_llgal_dir}/llgalrc") ;
+$opts_without_defaults = merge_opts_into ($generic_opts, parse_generic_config_file "${destination_dir}${local_llgal_dir}/${generic_configuration_filename}") ;
 
 # DO NOT MOVE THIS LINE BEFORE CONFIG FILE PARSING
 # parse command line options
@@ -3257,7 +3259,7 @@ make_www_rights $root_gallery
 
 if (defined $generate_config) {
     if ($generate_config eq "local") {
-	generate_config ("$destination_dir/$local_llgal_dir/llgalrc", $opts_without_defaults) ;
+	generate_config ("${destination_dir}/${local_llgal_dir}/${generic_configuration_filename}", $opts_without_defaults) ;
     } else {
 	generate_config ($generate_config, $opts_without_defaults) ;
     }
