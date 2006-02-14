@@ -764,6 +764,8 @@ sub process_option {
 sub parse_generic_config_file {
     my $opts = {} ;
     my $file = shift ;
+
+    # TODO: remove this one day (maybe on march 14th 2006, since it will be 6 month ?)
     # warn on obsolete file
     my $oldconffile = $file ;
     $oldconffile =~ s/$local_llgal_dir\/llgalrc$/.llgalrc/ ;
@@ -2103,6 +2105,7 @@ sub check_destination {
     # Create the url of the local llgal directory
     $local_llgal_url = make_safe_url_nowarn ($local_llgal_dir) ;
 
+    # TODO: remove this one day (maybe on march 7th 2006, since it will be 6 month ?)
     # temporary check, to be removed soon
     if ($local_llgal_dir ne ".llgal.files" and -e "${destination_dir}.llgal.files") {
 	immediate_warning "!! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !!" ;
