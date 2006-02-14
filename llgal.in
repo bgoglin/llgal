@@ -3274,7 +3274,7 @@ make_www_rights $root_gallery
 
 if (defined $generate_config) {
     if ($generate_config eq "local") {
-	generate_config ("${destination_dir}/${local_llgal_dir}/${generic_configuration_filename}", $opts_without_defaults) ;
+	generate_config ("${destination_dir}${local_llgal_dir}/${generic_configuration_filename}", $opts_without_defaults) ;
     } else {
 	generate_config ($generate_config, $opts_without_defaults) ;
     }
