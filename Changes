@@ -12,6 +12,8 @@
     + If the configuration file to create already exists, rename it with
       with the current timestamp and generate a new one.
     + Add the current timestamp to the generated configuration file.
+    + The special target "local" creates .llgal/llgalrc in the destination
+      directory.
   * Hardcode default english values in usage to avoid messing the code.
   * Replace template_dir with additional_template_dir in configuration file
     and move it to various options together with additional_configuration_file.
