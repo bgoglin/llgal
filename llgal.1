@@ -381,6 +381,10 @@ Change timestamp in captions using a
 format.
 
 .TP
+.BI --codeset " codeset"
+Change the encoding in the header of the generated HTML pages.
+By default, the encoding is got from the locale configuration.
+.TP
 .BI --con " options"
 Command line options to pass on to
 .B convert
@@ -420,6 +424,14 @@ Do not create slides and thumbnails for links (including video, file and url),
 but list them after the main gallery index.
 Might be used when the directory only contains subgalleries and thus does
 not need any slide or thumbnail.
+
+.TP
+.BI --lang " locale"
+Change the locale used to translate the text that is automatically
+generated in the HTML pages.
+Note that the
+.B LANGUAGE
+environment variable might prevent this option from working if set.
 
 .TP
 .B --li
@@ -1297,7 +1309,7 @@ Default is \fB"name"\fR.
 
 .B Various:
 
-.I additional_configuration_file = <s>
+.I additional_configuration_file = \fI"filename"
 .RS
 Additional configuration file that is parsed immediately
 (before processing the following lines)
@@ -1309,6 +1321,19 @@ This option may be used several times.
 Additional template directories
 .RB [ --templates ].
 This option may be used multiple times.
+.RE
+.I codeset = \fI"codeset"
+.RS
+Codeset to be set in HTML headers
+.RB [ "--codeset <s>" ].
+.RE
+.I language = \fI"locale"
+.RS
+Language to be used for generated text in HTML pages
+.RB [ "--lang <s>" ].
+If set, the
+.B LANGUAGE
+environment variable might prevent this option from working.
 .RE
 .I convert_options = \fI"string"
 .RS
@@ -1448,6 +1473,15 @@ update all configuration options of the
 .B Text
 section.
 
+The locale configuration might be overriden with the
+.B --lang
+option or
+.B language
+configuration option.
+But, the
+.B LANGUAGE
+environment variable appears to prevent this from working if set.
+
 
 .SH CHARACTER ENCODING
 If a filename contains non-ascii characters which are not safely
@@ -1457,6 +1491,14 @@ This may raise problems if the web server has a different notion
 of character encoding than the machine llgal runs on.
 See also
 .I http://www.w3.org/TR/html4/appendix/notes.html#h-B.2
+
+Character encoding is chosen from the locale configuration and set in
+the HTML headers.
+It may be overriden by using
+.B --codeset
+or the
+.B codeset
+configuration option.
 
 
 .SH NOTES

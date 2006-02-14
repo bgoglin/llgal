@@ -316,6 +316,13 @@
 # This option may be used multiple times.
 # additional_template_dir = "path"
 
+# Codeset to be set in HTML headers [--codeset <s>]
+# codeset = "codeset"
+
+# Language to be used for generated text in HTML pages [--lang <s>]
+# If set, the LANGUAGE environment variable might prevent this option from working.
+# language = "locale"
+
 # Options to pass to convert [--con <s>]
 # This option may be used multiple times.
 # convert_options = ""

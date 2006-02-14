@@ -67,7 +67,6 @@ Getopt::Long::Configure('nopassthrough') ;
 ######################################################################
 # gettext strings are prefixed to distinguish between identical strings
 
-setlocale (LC_MESSAGES, "") ;
 textdomain ("llgal") ;
 bindtextdomain ("llgal", "@LOCALEDIR@") ;
 
@@ -77,11 +76,6 @@ sub llgal_gettext {
     $string =~ s/^[^|]+\|// ;
     return $string ;
 }
-
-######################################################################
-# codeset
-
-my $codeset = langinfo(CODESET()) ;
 
 ######################################################################
 # various temporary globals
@@ -293,6 +287,8 @@ my $normal_opts_type = {
     add_subdirs => $OPT_IS_NUMERIC,
     sort_criteria => $OPT_IS_NONEMPTY_STRING,
 # Various
+    codeset => $OPT_IS_STRING,
+    language => $OPT_IS_STRING,
     force_image_regeneration => $OPT_IS_NUMERIC,
     recursive => $OPT_IS_NUMERIC,
     www_access_rights => $OPT_IS_NUMERIC,
@@ -544,6 +540,11 @@ sub add_defaults {
 	sort_criteria => "name",
 
 # Various
+# codeset to be set in HTML headers (--codeset)
+	codeset => langinfo (CODESET ()),
+# language to be used for generated text in HTML pages (--lang)
+# default is actually useless since we set it before reading the defaults
+	language => "",
 # user-added directories where templates might be found
 	template_dirs => [],
 # options to be passed to convert (--con)
@@ -602,10 +603,12 @@ Layout Options:
     --cf               use file names as captions
     --ct               use image timestamps as captions
     --ctf <s>          timestamp format in captions
+    --codeset <s>      change the codeset in HTML pages
     --con <s>          options to pass to convert (e.g. -quality N)
     -i <file>          name of the main thumbnail index file (index)
     -k                 use the image captions for the HTML slide titles
     -L                 list links outside of the table
+    --lang <s>         change the locale
     --li               use images for links in slides
     --lt               use thumbnail preview for links in slides
     -n                 use image file names for the HTML slide files
@@ -846,11 +849,13 @@ sub parse_cmdline_options {
 	'cf'		=> \$opts->{make_caption_from_filename},
 	'ct'		=> \$opts->{make_caption_from_image_timestamp},
 	'ctf=s'		=> \$opts->{timestamp_format_in_caption},
+	'codeset=s'     => \$opts->{codeset},
 	'con=s'		=> sub { shift ; push (@{$opts->{convert_options}}, parse_convert_options (shift)) ; },
 	'i=s'		=> \$opts->{index_filename},
 	'indent=s'	=> \$indent,
 	'k'		=> \$opts->{make_slide_title_from_caption},
 	'L'		=> \$opts->{list_links},
+	'lang=s'        => \$opts->{language},
 	'li'		=> sub { $opts->{index_link_image} = 1 ; $opts->{prev_slide_link_image} = 1 ; $opts->{next_slide_link_image} = 1 ; },
 	'lt'		=> sub { $opts->{prev_slide_link_preview} = 1 ; $opts->{next_slide_link_preview} = 1 ; },
 	'n'		=> \$opts->{make_slide_filename_from_filename},
@@ -2441,7 +2446,7 @@ sub generate_slides {
 
 	my @slidetemplate_text_copy = @slidetemplate_text ; # don't touch the original template
         for my $line (@slidetemplate_text_copy) {
-	    $line =~ s/LLGAL-CODESET/$codeset/g ;
+	    $line =~ s/LLGAL-CODESET/$opts->{codeset}/g ;
 	    $line =~ s/<!--SLIDE-TITLE-->/$title/g ;
 	    $line =~ s/<!--TITLE-->/$opts->{index_title}/g ;
 	    if ($opts->{css_location}) {
@@ -2629,7 +2634,7 @@ sub generate_index {
 		print IXW "    <div class=\"header\">" . $header . "</div>\n" ;
 	    }
 	} else {
-	    $line =~ s/LLGAL-CODESET/$codeset/g ;
+	    $line =~ s/LLGAL-CODESET/$opts->{codeset}/g ;
 	    $line =~ s/LLGAL-OPTIONS/@llgal_options/g ;
 	    $line =~ s/<!--TITLE-->/$opts->{index_title}/g ;
 	    if ($opts->{css_location}) {
@@ -3133,6 +3138,13 @@ $opts_without_defaults = merge_opts_into ($generic_opts, parse_generic_config_fi
 # DO NOT MOVE THIS LINE BEFORE CONFIG FILE PARSING
 # parse command line options
 merge_opts ($opts_without_defaults, parse_cmdline_options ());
+
+# set the locale before getting the defaults
+if (defined $opts_without_defaults->{language}) {
+    setlocale (LC_MESSAGES, $opts_without_defaults->{language}) ;
+} else {
+    setlocale (LC_MESSAGES, "") ;
+}
 
 # set defaults values for all uninitialized values
 $opts = add_defaults $opts_without_defaults ;

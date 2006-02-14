@@ -1,4 +1,7 @@
 
+  * Add --lang and --codeset to change the locale or encoding (and the
+    corresponding language and codeset configuration option). --lang
+    appears to not work if the LANGUAGE environment variable is set.
   * Additional files passed with --config or additional_configuration_file
     are parsed as soon as the option is met, before processing any of the
     following options.
