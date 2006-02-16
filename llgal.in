@@ -2080,20 +2080,18 @@ sub get_entries_from_directory {
 
 sub check_destination {
 
+    # check destination
+    die "Destination $destination_dir does not exist.\n"
+	if ! -e $destination_dir ;
+    die "Destination $destination_dir is not a directory.\n"
+	if ! -d $destination_dir ;
+
     # cleanup destination
     # add a final /
     $destination_dir .= "/"
 	unless $destination_dir =~ m@/$@ ;
     # remove starting ./
     $destination_dir =~ s/^(\.\/+)+// ;
-    # factorization
-    $destination_string = ($destination_dir ? "directory $destination_dir" : "current directory") ;
-
-    # check destination
-    die "Destination $destination_string does not exist.\n"
-	if $destination_dir and ! -e $destination_dir ; # destination is empty for './'
-    die "Destination $destination_string is not a directory.\n"
-	if $destination_dir and ! -d $destination_dir ; # destination is empty for './'
 
     # Are we in .llgal ? just check the last part of the path by concatening
     # pwd and destination_dir even if destination_dir is an absolute path
@@ -2107,9 +2105,6 @@ sub check_destination {
 	}
     }
 
-    # Create the url of the local llgal directory
-    $local_llgal_url = make_safe_url_nowarn ($local_llgal_dir) ;
-
     # TODO: remove this one day (maybe on march 7th 2006, since it will be 6 month ?)
     # temporary check, to be removed soon
     if ($local_llgal_dir ne ".llgal.files" and -e "${destination_dir}.llgal.files") {
@@ -2118,7 +2113,15 @@ sub check_destination {
 	immediate_warning "You should probably update it.                  !!" ;
 	immediate_warning "!! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !!" ;
     }
+}
 
+sub setup_destination {
+
+    # create globals to factorize later
+    $destination_string = ($destination_dir ? "directory $destination_dir" : "current directory") ;
+    $local_llgal_url = make_safe_url_nowarn ($local_llgal_dir) ;
+
+    # Create or check the local llgal directory
     if (! -e "$destination_dir$local_llgal_dir") {
 	mkdir "$destination_dir$local_llgal_dir"
 	    or die "Failed to create $destination_dir$local_llgal_dir directory ($!)" ;
@@ -3127,16 +3130,28 @@ merge_opts ($generic_opts, parse_generic_config_file "${user_share_dir}/${generi
 # early configuration ends here
 $early_configuration = 0 ;
 
+# parse cmdline now but DO NOT MERGE now
+my $cmdline_opts = parse_cmdline_options () ;
+
+# basic special behaviors may be done here
+die $usage
+    if $help_asked ;
+die "This is llgal version $version.\n"
+    if $version_asked ;
+
 # the local llgal directory name is now fixed
-# we may check and setup the destination directory
+# we may check the destination directory
 check_destination ;
+
+# setup the destination directory
+setup_destination ;
 
 # evaluate gallery specific configuration, without modifying $generic_opts
 $opts_without_defaults = merge_opts_into ($generic_opts, parse_generic_config_file "${destination_dir}${local_llgal_dir}/${generic_configuration_filename}") ;
 
 # DO NOT MOVE THIS LINE BEFORE CONFIG FILE PARSING
 # parse command line options
-merge_opts ($opts_without_defaults, parse_cmdline_options ());
+merge_opts ($opts_without_defaults, $cmdline_opts);
 
 # set the locale before getting the defaults
 if (defined $opts_without_defaults->{language}) {
@@ -3148,14 +3163,7 @@ if (defined $opts_without_defaults->{language}) {
 # set defaults values for all uninitialized values
 $opts = add_defaults $opts_without_defaults ;
 
-# special behaviors
-
-die $usage
-    if $help_asked ;
-
-die "This is llgal version $version.\n"
-    if $version_asked ;
-
+# complex special behaviors that need full configuration
 if ($clean_asked or $cleanall_asked) {
     my $cleanall = shift ;
     clean_files $cleanall_asked ;
