@@ -2176,7 +2176,6 @@ sub generate_captions_file {
 		$old_next_gallery_link_target = $2 ;
 		$old_next_gallery_link_text = $1 ;
 	    }
-	    print CAP $line ;
 	}
 
 	indprint "Appending new captions to $opts->{captions_filename}: " ;
