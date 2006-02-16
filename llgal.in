@@ -1274,6 +1274,7 @@ sub clean_files {
 	    unlink "$destination_dir$local_llgal_dir/$_" ;
 	} elsif (/^$opts->{filmtile_filename}$/ or /^$opts->{index_link_image_filename}$/
 		 or /^$opts->{prev_slide_link_image_filename}$/ or /^$opts->{next_slide_link_image_filename}$/
+		 or /^$opts->{indextemplate_filename}$/ or /^$opts->{slidetemplate_filename}$/
 		 or /^$opts->{css_filename}$/) {
 	    my $original = (find_generic_template_file $_, 0)."/".$_ ;
 	    my $diff = 0 ;

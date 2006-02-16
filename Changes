@@ -37,6 +37,8 @@
   * Cleanup the whole option and configuration file parsing by generating modular
     hashes of options for future reuse.
   * Remove useless buggy print in captions generation.
+  * Don't forget to remove the templates that might have been gotten in the
+    local llgal directory (with --gt) and not been modified.
   * Some cleanups.
 
 
