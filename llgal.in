@@ -2114,13 +2114,15 @@ sub check_destination {
 	immediate_warning "You should probably update it.                  !!" ;
 	immediate_warning "!! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !!" ;
     }
+
+    # create globals to factorize later
+    $local_llgal_url = make_safe_url_nowarn ($local_llgal_dir) ;
 }
 
 sub setup_destination {
 
     # create globals to factorize later
     $destination_string = ($destination_dir ? "directory $destination_dir" : "current directory") ;
-    $local_llgal_url = make_safe_url_nowarn ($local_llgal_dir) ;
 
     # Create or check the local llgal directory
     if (! -e "$destination_dir$local_llgal_dir") {
