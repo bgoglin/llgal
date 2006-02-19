@@ -43,6 +43,9 @@
   * Remove useless buggy print in captions generation.
   * Don't forget to remove the templates that might have been gotten in the
     local llgal directory (with --gt) and not been modified.
+  * Remove --indent internal option since recursion is now done in the same
+    process.
+    + Keep --parent/prev/next-gal in case the user wants to override them.
   * Some cleanups.
 
 

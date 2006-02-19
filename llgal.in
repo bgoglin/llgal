@@ -852,7 +852,6 @@ sub parse_cmdline_options {
 	'codeset=s'     => \$opts->{codeset},
 	'con=s'		=> sub { shift ; push (@{$opts->{convert_options}}, parse_convert_options (shift)) ; },
 	'i=s'		=> \$opts->{index_filename},
-	'indent=s'	=> \$indent,
 	'k'		=> \$opts->{make_slide_title_from_caption},
 	'L'		=> \$opts->{list_links},
 	'lang=s'        => \$opts->{language},
