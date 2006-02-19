@@ -21,6 +21,7 @@
       directory.
     + When recursive, "local" generates a configuration file in all subdirs
       while not "local" only generates in the working directory.
+    + Print a message when generating.
   * Hardcode default english values in usage to avoid messing the code.
   * Replace template_dir with additional_template_dir in configuration file
     and move it to various options together with additional_configuration_file.

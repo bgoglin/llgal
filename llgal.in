@@ -2993,6 +2993,7 @@ sub generate_config {
     my $file = shift ;
     my $opts = shift ;
 
+    indprint "Generating config file '$file'.\n" ;
     if (-e "$file") {
 	my $old_file = "$file.save.". (strftime('%Y-%m-%d_%H:%M:%S' ,localtime)) ;
 	immediate_warning "Renaming old configuration file '$file' as '$old_file'" ;
