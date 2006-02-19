@@ -182,8 +182,14 @@ between two runs where you've changed the value of
 .BI --gencfg " <file>"
 Output configuration in
 .I file
-for a futur reutilization through
+for future reutilization through
 .BR --config "."
+If
+.B local
+is passed as
+.IR file ", then the local"
+.B .llgal/llgalrc
+file is created in each gallery that is processed (in case of recursion).
 See
 .B CONFIGURATION
 for details.
