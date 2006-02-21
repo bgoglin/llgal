@@ -2938,6 +2938,7 @@ sub make_readable_and_traversable {
 # If --www was invoked make all files world-readable at the END
 sub make_www_rights {
     my $gallery = shift ;
+    my $opts = shift ;
     my @entries = @{$gallery->{entries}} ;
 
     indprint "Making all llgal files world-readable for WWW publishing.\n" ;
@@ -2966,25 +2967,24 @@ sub make_www_rights {
 	my $type = $entry->{type} ;
 
 	# target
-	my $file = "$destination_dir$entry->{filename}" ;
 	if ($type == $TYPE_DIR) {
-	    make_readable_and_traversable $file ;
-	} else {
-	    make_readable $file ;
+	    make_readable_and_traversable "$destination_dir$entry->{filename}" ;
+	} elsif ($type == $TYPE_MVI or $type == $TYPE_FIL) {
+	    make_readable "$destination_dir$entry->{filename}" ;
 	}
 
 	# slide
 	make_readable "$destination_dir$entry->{slide_filename}"
-	    if ! $opts->{make_no_slides} and ! defined $opts->{listed} ;
+	    if ! $opts->{make_no_slides} and ! defined $entry->{listed} ;
 
-	if ($type == $TYPE_IMG or !defined $opts->{listed}) {
-	    # thumbnail
-	    make_readable "$destination_dir$entry->{thumb_filename}" ;
-	    # scaled image
-	    make_readable "$destination_dir$entry->{scaled_filename}"
-		if ($opts->{slide_width_max} > 0 or $opts->{slide_height_max} > 0) and !$opts->{make_no_slides} ;
-	}
+	# thumbnail
+	make_readable "$destination_dir$entry->{thumb_filename}"
+	    if ($type == $TYPE_IMG or $entry->{thumb_url}) and !defined $entry->{listed} ;
 
+	# scaled image
+	make_readable "$destination_dir$entry->{scaled_filename}"
+	    if ($type == $TYPE_IMG or $entry->{scaled_url})
+	    and ($opts->{slide_width_max} > 0 or $opts->{slide_height_max} > 0) and !$opts->{make_no_slides} ;
     }
 
     show_warnings ;
@@ -3252,7 +3252,7 @@ sub main_process {
 
 	get_files ;
 
-	make_www_rights $gallery
+	make_www_rights $gallery, $opts
 	    if $opts->{www_access_rights} ;
 
 	# generate a local config for this gallery

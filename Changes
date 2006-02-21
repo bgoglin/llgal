@@ -50,6 +50,7 @@
   * Remove --indent internal option since recursion is now done in the same
     process.
     + Keep --parent/prev/next-gal in case the user wants to override them.
+  * Fix some special cases in --www.
   * Some cleanups.
 
 
