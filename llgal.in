@@ -2165,8 +2165,10 @@ sub setup_destination {
 # Generate captions file
 
 sub generate_captions_file {
-    my $gallery = shift ;
+    my $opts = shift ;
 
+    # use a temp gallery to pass the entries back to the caller
+    my $gallery = init_gallery () ;
     get_entries_from_directory $gallery ;
     my @entries = @{$gallery->{entries}} ;
 
@@ -2290,6 +2292,8 @@ sub generate_captions_file {
 
     close CAP ;
     show_warnings ;
+
+    return $gallery ;
 }
 
 #######################################################################
@@ -3201,12 +3205,8 @@ sub main_process {
 	# generate captions and recurse in entries only
 
 	sanity_checks $opts ;
-	prepare_numerical_options $opts ;
-	prepare_various_variables $opts ;
 
-	my $gallery = init_gallery () ;
-
-	generate_captions_file $gallery ;
+	my $gallery = generate_captions_file $opts ;
 	indprint "Now edit the $destination_dir$local_llgal_dir/$opts->{captions_filename} file to your liking and run llgal\n" ;
 
 	if ($opts->{recursive}) {
