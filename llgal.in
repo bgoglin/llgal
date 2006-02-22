@@ -2677,7 +2677,7 @@ sub generate_index {
 	    } else {
 		print IXW "<a href=\"$entry->{url}\" title=\"$entry->{title} $entry->{dimstring}\">$entry->{linktext}</a>" ;
 	    }
-	    print IXW "</div>\n<br>\n" ;
+	    print IXW "</div>\n" ;
 	    # next line, next entry
 	    print_percentage ($i+1, scalar @entries) ;
 	    $i++ ;
@@ -2826,7 +2826,7 @@ sub generate_index {
 	}
 
 	# Table footer
-	print IXW "</table>\n<br />\n" ;
+	print IXW "</table>\n" ;
 
 	$i += $num ;
     }
