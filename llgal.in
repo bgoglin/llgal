@@ -1784,7 +1784,7 @@ sub fill_file_entry {
 	# scaled image, its url and dimensions
 
 	my $scaled_filename = find_user_scaled ($entry) ;
-	if ($scaled_filename and ($opts->{slide_width_max} > 0 or $opts->{slide_height_max} > 0)) {
+	if ($scaled_filename) {
 	    # there's a user provided scaled, just use it
 
 	    $entry->{scaled_filename} = "$local_llgal_dir/$scaled_filename" ;
@@ -1792,7 +1792,7 @@ sub fill_file_entry {
 
 	    # thumbnails dimensions
 	    my ($x, $y) = imgsize ("$local_llgal_dir/$scaled_filename") ;
-	    if ($y > $opts->{slide_height_max} and $y > $opts->{slide_height_max}) {
+	    if ($opts->{slide_height_max} > 0 and $y > $opts->{slide_height_max}) {
 		$x = $x * ($opts->{slide_height_max} / $y) ;
 		$y = $opts->{slide_height_max} ;
 	    }

@@ -51,6 +51,9 @@
   * Remove --indent internal option since recursion is now done in the same
     process.
     + Keep --parent/prev/next-gal in case the user wants to override them.
+  * User-provided scaled images are also used in slides even if --bigy/--bigxy
+    was not passed (no scaled images).
+  * Fix slide_height_max processing.
   * Fix some special cases in --www.
   * Some cleanups.
 
