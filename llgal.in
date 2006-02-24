@@ -1406,6 +1406,8 @@ sub init_gallery {
 # - scaled_filename (name of the scaled image file)
 # - scaled_url (url of the scaled image file)
 
+# - gallery (the whole gallery in the subdirectory pointed by this entry)
+
 # types
 my $TYPE_TXT = 0 ;
 my $TYPE_LNK = 1 ;
@@ -3128,7 +3130,7 @@ sub subdir_process {
     @ARGV = @llgal_options ;
     $indent = "  ".$indent ;
     # recursive call
-    main_process $subdir_opts ;
+    my $subgallery = main_process $subdir_opts ;
     # restore context
     $destination_dir = $saved_destination_dir;
     $destination_string = $saved_destination_string;
@@ -3137,6 +3139,7 @@ sub subdir_process {
     $indent = $saved_indent ;
     indprint "Leaving subdirectory '$dir'.\n" ;
     print "\n" ;
+    return $subgallery ;
 }
 
 sub main_process {
@@ -3291,14 +3294,17 @@ sub main_process {
 		    }
 		}
 
-		subdir_process $dir, $subdir_opts ;
+		my $subgallery = subdir_process $dir, $subdir_opts ;
+		$entry->{gallery} = $subgallery ;
 	    }
 	}
+
+	return $gallery ;
     }
 }
 
 # generate main gallery
-main_process {} ;
+my $root_gallery = main_process {} ;
 
 # only generate a config once
 if (defined $generate_config and not $generate_config eq "local") {
