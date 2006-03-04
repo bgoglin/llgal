@@ -1415,6 +1415,7 @@ my $TYPE_IMG = 2 ;
 my $TYPE_MVI = 3 ;
 my $TYPE_FIL = 4 ;
 my $TYPE_DIR = 5 ;
+my $TYPE_LIN = 6 ;
 
 ###################################################################################
 # checking files
@@ -1881,6 +1882,12 @@ sub create_nofile_entry {
     # set the type
     $entry->{type} = $type ;
 
+    # horizontal lines need nothing
+    if ($type == $TYPE_LIN) {
+	$entry->{listed} = 1 ;
+	return $entry ;
+    }
+
     # make a safe url
     if (defined $url) {
 	$entry->{url} = make_safe_url ($url) ;
@@ -1936,7 +1943,9 @@ sub fill_entries {
     for my $entry (@entries) {
 	my $type = $entry->{type} ;
 	my $final_entry ;
-	if ($type == $TYPE_TXT or $type == $TYPE_LNK) {
+	if ($type == $TYPE_LIN) {
+	    $final_entry = $entry ; # nothing to do
+	} elsif ($type == $TYPE_TXT or $type == $TYPE_LNK) {
 	    $final_entry = fill_nofile_entry $entry ;
 	} else {
 	    $final_entry = fill_file_entry $entry ;
@@ -1980,7 +1989,7 @@ sub finalize_entries {
 	my $filename = $entry->{filename} ;
 
 	# HTML slide and its url
-	if (!$opts->{make_no_slides}) {
+	if (!$opts->{make_no_slides} and $type != $TYPE_LIN) {
 	    my $slide_filename ;
 	    if ($opts->{make_slide_filename_from_filename}) {
 		if ($type == $TYPE_TXT or $type == $TYPE_LNK) {
@@ -2375,6 +2384,10 @@ sub read_captions_file {
 		    # movie slide
 		    $entry = create_file_entry ($TYPE_FIL, $1, $2, $3) ;
 
+		} elsif ($line =~ m/^LINE/) {
+		    # horizontal line
+		    $entry = create_nofile_entry ($TYPE_LIN, undef, undef, undef) ;
+
 		} elsif ($line =~ m/^IMG:\s*(.+)\s+----\s*(?:\s(.*))?\s*$/
 			 or $line =~ m/^(.+)\s+----\s*(?:\s(.*))?\s*$/) {
 		    # image slide (default)
@@ -2673,12 +2686,21 @@ sub generate_index {
     init_percentage () ;
     while ($i < scalar @entries) {
 	my $entry = $entries[$i] ;
+	my $type = $entry->{type} ;
+
+	if ($type == $TYPE_LIN) {
+	    # output a horizontal line
+	    print IXW "<hr class=\"index\">" ;
+	    # next line, next entry
+	    print_percentage ($i+1, scalar @entries) ;
+	    $i++ ;
+	    next ;
+	}
 
 	if ($entry->{listed}) {
 	    # output a line with this text
-	    my $type = $entry->{type} ;
 	    print IXW "<div class=\"header\">" ;
- 	    if ($type == $TYPE_TXT) {
+	    if ($type == $TYPE_TXT) {
 		print IXW $entry->{linktext} ;
 	    } else {
 		print IXW "<a href=\"$entry->{url}\" title=\"$entry->{title} $entry->{dimstring}\">$entry->{linktext}</a>" ;

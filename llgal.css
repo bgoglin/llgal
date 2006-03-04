@@ -114,6 +114,12 @@ table.slide td.text-slide {
   font-style: italic;
 }
 
+hr.index {
+  width: 80%;
+  height: 0px;
+  border-width: 2px;
+}
+
 /* Headers and footers */
 
 .header {
