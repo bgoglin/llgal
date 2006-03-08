@@ -1519,7 +1519,7 @@ sub std_comment {
 	$comment = join(' ', @{$comment}) ;
     }
     # remove \000
-    $comment =~ s/\000//g ;
+    $comment =~ s/\000//g if $comment ;
     return $comment ;
 }
 
