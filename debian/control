@@ -11,10 +11,10 @@ Depends: imagemagick, ${perl:Depends}, libimage-size-perl, libimage-info-perl, l
 Description: Command-line online gallery generator
  llgal is a online gallery generator for images, videos, ...
  It is based on igal and adds multiple features including:
- - various types of slides (movies, text, links, downloads and subdirs);
- - addition of headers, footers, links and separators in generated HTML files;
- - automatic generation of captions from JFIF, GIF or EXIF tags;
- - highly configurable layout.
+  - various types of slides (movies, text, links, downloads and subdirs);
+  - addition of headers, footers, links and separators in generated HTML files;
+  - automatic generation of captions from JFIF, GIF or EXIF tags;
+  - highly configurable layout.
  llgal interface is command line only. Its purpose is to generates nice
  web-pages quickly, using very simple but standard XHTML/CSS code, without
  requiring anything like php or javascript.
