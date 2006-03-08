@@ -69,7 +69,7 @@ or
 option is passed.
 It is also possible to define custom scaled images with the
 .I myscaled_
-prefix.
+prefix to appear in the slides.
 
 Note that all command line options (except those from
 .BR "BEHAVIOR OPTIONS" ),
@@ -182,8 +182,14 @@ between two runs where you've changed the value of
 .BI --gencfg " <file>"
 Output configuration in
 .I file
-for a futur reutilization through
+for future reutilization through
 .BR --config "."
+If
+.B local
+is passed as
+.IR file ", then the local"
+.B .llgal/llgalrc
+file is created in each gallery that is processed (in case of recursion).
 See
 .B CONFIGURATION
 for details.
@@ -381,6 +387,10 @@ Change timestamp in captions using a
 format.
 
 .TP
+.BI --codeset " codeset"
+Change the encoding in the header of the generated HTML pages.
+By default, the encoding is got from the locale configuration.
+.TP
 .BI --con " options"
 Command line options to pass on to
 .B convert
@@ -420,6 +430,14 @@ Do not create slides and thumbnails for links (including video, file and url),
 but list them after the main gallery index.
 Might be used when the directory only contains subgalleries and thus does
 not need any slide or thumbnail.
+
+.TP
+.BI --lang " locale"
+Change the locale used to translate the text that is automatically
+generated in the HTML pages.
+Note that the
+.B LANGUAGE
+environment variable might prevent this option from working if set.
 
 .TP
 .B --li
@@ -661,6 +679,10 @@ defines a link to another file (typically neither an image nor a movie)
 .RS
 defines a subdirectory slide.
 .RE
+.B LINE
+.RS
+inserts a horizontal line.
+.RE
 .B TITLE: <title>
 .RS
 defines the title of the gallery.
@@ -711,11 +733,15 @@ then reads
 and finally the
 .I .llgal/llgalrc
 file in the gallery directory.
+
 Additional configuration files may also be defined with the
 .B --config
 option.
+These will be parsed during command-line parsing, when
+.B --config
+is met.
 
-These files may change llgal configuration in the same way command
+All these files may change llgal configuration in the same way command
 line options do, and even more.
 All following options may also be used on the command line through
 .B --option
@@ -724,28 +750,6 @@ All following options may also be used on the command line through
 See also
 .I /etc/llgal/llgalrc
 for details about these options and their default values.
-
-.B llgal directories:
-
-.I "llgal_share_dir = \fI"path"
-.RS
-The location of llgal share directory where template are stored.
-Usually
-.BR /usr/share/llgal/ " or " /usr/local/share/llgal/ .
-.RE
-.I user_share_dir = \fI"path"
-.RS
-The location of the per-user share directory where template are stored.
-If they exists, these files are used instead of the system-wide files.
-Default is
-.BR $HOME/.llgal/ .
-.RE
-.I template_dir = \fI"path"
-.RS
-Additional template directories
-.RB [ --templates ].
-This option may be used multiple times.
-.RE
 
 .B Names of generic llgal files:
 
@@ -835,7 +839,10 @@ will be appended.
 
 .I local_llgal_dir = \fI"subdirectory name"
 .RS
-The name of the subdirectory where llgal generated files will be stored.
+The name of the subdirectory where llgal generated files will be
+stored.
+This option is only available in system- and user-wide configuration
+files.
 Default is
 .BR .llgal/ .
 .RE
@@ -1218,7 +1225,7 @@ Default is \fB"created with <a href="http://home.gna.org/llgal">llgal</a>"\fR.
 
 .B Recursion:
 
-.I make_recursive = <0/1>
+.I recursive = <0/1>
 .RS
 Run recursively in subdirectories
 .RB [ -R ].
@@ -1312,6 +1319,32 @@ Default is \fB"name"\fR.
 
 .B Various:
 
+.I additional_configuration_file = \fI"filename"
+.RS
+Additional configuration file that is parsed immediately
+(before processing the following lines)
+.RB [ "--config <s>" ].
+This option may be used several times.
+.RE
+.I additional_template_dir = \fI"path"
+.RS
+Additional template directories
+.RB [ --templates ].
+This option may be used multiple times.
+.RE
+.I codeset = \fI"codeset"
+.RS
+Codeset to be set in HTML headers
+.RB [ "--codeset <s>" ].
+.RE
+.I language = \fI"locale"
+.RS
+Language to be used for generated text in HTML pages
+.RB [ "--lang <s>" ].
+If set, the
+.B LANGUAGE
+environment variable might prevent this option from working.
+.RE
 .I convert_options = \fI"string"
 .RS
 Options to pass to convert
@@ -1348,12 +1381,6 @@ Default is
 Extension of generated webpages
 .RB [ --php ].
 Default is \fB"html"\fR.
-.RE
-.I config_file = <s>
-.RS
-Additional configuration file
-.RB [ "--config <s>" ].
-This option may be used several times.
 .RE
 
 
@@ -1456,6 +1483,15 @@ update all configuration options of the
 .B Text
 section.
 
+The locale configuration might be overriden with the
+.B --lang
+option or
+.B language
+configuration option.
+But, the
+.B LANGUAGE
+environment variable appears to prevent this from working if set.
+
 
 .SH CHARACTER ENCODING
 If a filename contains non-ascii characters which are not safely
@@ -1465,6 +1501,14 @@ This may raise problems if the web server has a different notion
 of character encoding than the machine llgal runs on.
 See also
 .I http://www.w3.org/TR/html4/appendix/notes.html#h-B.2
+
+Character encoding is chosen from the locale configuration and set in
+the HTML headers.
+It may be overriden by using
+.B --codeset
+or the
+.B codeset
+configuration option.
 
 
 .SH NOTES

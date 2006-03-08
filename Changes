@@ -1,3 +1,61 @@
+llgal (0.12.2)
+
+  * Add --lang and --codeset to change the locale or encoding (and the
+    corresponding language and codeset configuration option). --lang
+    appears to not work if the LANGUAGE environment variable is set.
+  * -L now lists links between the thumbnail rows according to the order of
+    the entries. Listing at the end is still possible by moving the entries
+    at the end of the captions file.
+  * Add the LINE keyword to be used in captions file to generate a horizontal
+    line.
+  * Recursion is now processed in the same process, enabling future shared
+    information between galleries for improved links.
+    + Remove --indent internal option.
+    + Keep --parent/prev/next-gal in case the user wants to override them.
+  * Cleanup and improve configuration file generation:
+    + Do not export unmodified options since it would prevent a default
+      modification to be seen.
+    + If the configuration file to create already exists, rename it with
+      with the current timestamp and generate a new one.
+    + Add the current timestamp to the generated configuration file.
+    + The special target "local" creates .llgal/llgalrc in the destination
+      directory.
+    + When recursive, "local" generates a configuration file in all subdirs
+      while not "local" only generates in the working directory.
+    + Print a message when generating.
+  * Large rework of configuration parsing:
+    + Additional files passed with --config or additional_configuration_file
+      are parsed as soon as the option is met, before processing any of the
+      following options.
+    + Avoid parsing a configuration file multiple times in case of recursive
+      galleries.
+    + Cleanup and improve option checking, with better error reporting:
+      - Options that are not a string must now be numeric.
+  * make_recursive configuration option is now called recursive.
+  * Replace template_dir with additional_template_dir in configuration file
+    and move it to various options together with additional_configuration_file.
+  * Restrict directory configuration to cleanup the code:
+    + Remove llgal_share_dir and user_share_dir since additional_template_dir
+      is enough.
+    + The local llgal directory name may be changed only by the system-wide
+      (/etc/llgal/llgalrc) or the user-wide file ($HOME/.llgal/llgalrc).
+  * Replace <br> in the generated HTML with margins in the CSS.
+  * User-provided scaled images are also used in slides even if --bigy/--bigxy
+    was not passed (no scaled images).
+  * When the local llgal directory name is changed (with local_llgal_directory)
+    the local configuration file is read from the corresponding directory, not
+    from .llgal/.
+  * Hardcode default english values in usage to avoid messing the code.
+  * Don't forget to remove the templates that might have been gotten in the
+    local llgal directory (with --gt) and not been modified.
+  * Remove useless buggy print in captions generation.
+  * Fix manpage additional_configuration_file name (instead of config_file).
+  * Fix slide_height_max processing.
+  * Fix some special cases in --www.
+  * Some cleanups.
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Tue,  7 Mar 2006 22:44:00 -0500
+
 llgal (0.12.1)
 
   * Set HTML encoding header depending on the locale with the new LLGAL-CODESET

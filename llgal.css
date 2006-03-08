@@ -49,6 +49,8 @@ img.image-link {
 table.index {
   border: 0px;
   padding: 0px;
+  margin-top: 9px;
+  margin-bottom: 9px;
 }
 
 table.with-tile {
@@ -110,6 +112,12 @@ table.slide td.text-slide {
   vertical-align: middle;
   font-size: 200%;
   font-style: italic;
+}
+
+hr.index {
+  width: 80%;
+  height: 0px;
+  border-width: 2px;
 }
 
 /* Headers and footers */
