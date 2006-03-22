@@ -1,3 +1,7 @@
+  * Fix a warning about an uninitialized value being used when --ct without
+    any timestamp available (reported by Alexandre Buisse).
+
+
 llgal (0.12.2)
 
   * Add --lang and --codeset to change the locale or encoding (and the

@@ -1571,7 +1571,7 @@ sub generate_caption_from_image_timestamp {
     my $filename = shift ;
     my $infos = shift ;
     my $imagetime = $infos->{DateTimeOriginal} ;
-    if ($imagetime ne "") {
+    if ($imagetime) {
 	my @timearray = split (/[: ]/, $imagetime) ;
 	my @gmtime = ($timearray[5], $timearray[4], $timearray[3], $timearray[2], $timearray[1]-1, $timearray[0]-1900, 0, 0) ;
 	return strftime ($opts->{timestamp_format_in_caption}, @gmtime) ;
