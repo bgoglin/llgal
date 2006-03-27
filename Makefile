@@ -65,13 +65,13 @@ tarball::
 	rm -rf /tmp/$(TARBALL)
 
 update-po:
-	make -C $(PO_SUBDIR) update
+	$(MAKE) -C $(PO_SUBDIR) update
 
 clean-po:
-	make -C $(PO_SUBDIR) clean
+	$(MAKE) -C $(PO_SUBDIR) clean
 
 install-po:
-	make -C $(PO_SUBDIR) install LOCALEDIR=$(DESTDIR)$(LOCALEDIR)
+	$(MAKE) -C $(PO_SUBDIR) install LOCALEDIR=$(DESTDIR)$(LOCALEDIR)
 
 uninstall-po:
-	make -C $(PO_SUBDIR) uninstall LOCALEDIR=$(DESTDIR)$(LOCALEDIR)
+	$(MAKE) -C $(PO_SUBDIR) uninstall LOCALEDIR=$(DESTDIR)$(LOCALEDIR)

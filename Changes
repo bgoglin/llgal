@@ -1,5 +1,7 @@
   * Fix a warning about an uninitialized value being used when --ct without
     any timestamp available (reported by Alexandre Buisse).
+  * Use $(MAKE) instead of make (FreeBSD breakage reported by George Wood).
+
 
 
 llgal (0.12.2)
