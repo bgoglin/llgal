@@ -1,3 +1,5 @@
+  * Add the BREAK keyword to be used in captions file to force a line break
+    in a row of thumbnails (requested by Alexandre Buisse).
   * Fix a warning about an uninitialized value being used when --ct without
     any timestamp available (reported by Alexandre Buisse).
   * Use $(MAKE) instead of make (FreeBSD breakage reported by George Wood).

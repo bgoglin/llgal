@@ -1416,6 +1416,7 @@ my $TYPE_MVI = 3 ;
 my $TYPE_FIL = 4 ;
 my $TYPE_DIR = 5 ;
 my $TYPE_LIN = 6 ;
+my $TYPE_BRK = 7 ;
 
 ###################################################################################
 # checking files
@@ -1882,8 +1883,8 @@ sub create_nofile_entry {
     # set the type
     $entry->{type} = $type ;
 
-    # horizontal lines need nothing
-    if ($type == $TYPE_LIN) {
+    # row break and horizontal lines need nothing
+    if ($type == $TYPE_LIN or $type == $TYPE_BRK) {
 	$entry->{no_slide} = 1 ;
 	return $entry ;
     }
@@ -1943,7 +1944,7 @@ sub fill_entries {
     for my $entry (@entries) {
 	my $type = $entry->{type} ;
 	my $final_entry ;
-	if ($type == $TYPE_LIN) {
+	if ($type == $TYPE_LIN or $type == $TYPE_BRK) {
 	    $final_entry = $entry ; # nothing to do
 	} elsif ($type == $TYPE_TXT or $type == $TYPE_LNK) {
 	    $final_entry = fill_nofile_entry $entry ;
@@ -1989,7 +1990,7 @@ sub finalize_entries {
 	my $filename = $entry->{filename} ;
 
 	# HTML slide and its url
-	if (!$opts->{make_no_slides} and $type != $TYPE_LIN) {
+	if (!$opts->{make_no_slides} and $type != $TYPE_LIN and $type != $TYPE_BRK) {
 	    my $slide_filename ;
 	    if ($opts->{make_slide_filename_from_filename}) {
 		if ($type == $TYPE_TXT or $type == $TYPE_LNK) {
@@ -2388,6 +2389,10 @@ sub read_captions_file {
 		    # horizontal line
 		    $entry = create_nofile_entry ($TYPE_LIN, undef, undef, undef) ;
 
+		} elsif ($line =~ m/^BREAK/) {
+		    # thumbnail row break
+		    $entry = create_nofile_entry ($TYPE_BRK, undef, undef, undef) ;
+
 		} elsif ($line =~ m/^IMG:\s*(.+)\s+----\s*(?:\s(.*))?\s*$/
 			 or $line =~ m/^(.+)\s+----\s*(?:\s(.*))?\s*$/) {
 		    # image slide (default)
@@ -2687,9 +2692,11 @@ sub generate_index {
 	my $entry = $entries[$i] ;
 	my $type = $entry->{type} ;
 
-	if ($type == $TYPE_LIN) {
-	    # output a horizontal line
-	    print IXW "<hr class=\"index\">" ;
+	if ($type == $TYPE_LIN or $type == $TYPE_BRK) {
+	    if ($type == $TYPE_LIN) {
+		# output a horizontal line
+		print IXW "<hr class=\"index\">" ;
+	    }
 	    # next line, next entry
 	    print_percentage ($i+1, scalar @entries) ;
 	    $i++ ;
