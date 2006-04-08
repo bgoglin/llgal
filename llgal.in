@@ -1998,9 +1998,11 @@ sub finalize_entries {
 	$first = $i unless defined $first ;
     }
 
-    # link last to first
-    $entries[$prev]->{next} = $first ;
-    $entries[$first]->{prev} = $prev ;
+    if (defined $first) {
+	# link last to first
+	$entries[$prev]->{next} = $first ;
+	$entries[$first]->{prev} = $prev ;
+    }
 }
 
 #######################################################################

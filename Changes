@@ -3,6 +3,8 @@
   * Use Image::ExifTool instead of Image::Infos (thanks to Alexandre Buisse).
   * Fix a warning about an uninitialized value being used when --ct without
     any timestamp available (reported by Alexandre Buisse).
+  * Fix a warning about an uninitialized value being used when the gallery
+    is empty.
   * Use $(MAKE) instead of make (FreeBSD breakage reported by George Wood).
 
 
