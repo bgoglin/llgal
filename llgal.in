@@ -3,7 +3,7 @@
 use FileHandle ;
 use Getopt::Long ;
 use Image::Size ;
-use Image::Info qw(image_info) ;
+use Image::ExifTool ;
 use POSIX qw(strftime) ;
 use Time::Local ;
 use URI::Escape ;
@@ -76,6 +76,13 @@ sub llgal_gettext {
     $string =~ s/^[^|]+\|// ;
     return $string ;
 }
+
+######################################################################
+# ExifTool initialization, except what might be changed with llgal config
+my $exifTool = new Image::ExifTool;
+
+# Accept unknown tags, just in case...
+$exifTool->Options(Unknown => 1) ;
 
 ######################################################################
 # various temporary globals
@@ -1069,6 +1076,9 @@ sub sanity_checks {
 	if $opts->{user_thumbnail_image_filenameprefix} eq "" or $opts->{user_thumbnail_image_filenameprefix} =~ /\// ;
     die "Please give a non-empty caption removal line\n"
 	if $opts->{captions_removal_line} eq "" ;
+
+    # DateFormat should be initialized with whatever the user said to --ctf
+    $exifTool->Options(DateFormat => $opts->{timestamp_format_in_caption}) ;
 }
 
 ######################################################################
@@ -1510,36 +1520,6 @@ sub find_user_scaled {
 ###################################################################################
 # extract caption from image infos
 
-# Standard comment such as JFIF or GIF
-sub std_comment {
-    my $filename = shift ;
-    my $infos = shift ;
-    my $comment = $infos->{Comment} ;
-    if (ref($comment) eq 'ARRAY' ) {
-	# concat string array
-	$comment = join(' ', @{$comment}) ;
-    }
-    # remove \000
-    $comment =~ s/\000//g if $comment ;
-    return $comment ;
-}
-
-# Exif comment
-sub exif_comment {
-    my $filename = shift ;
-    my $infos = shift ;
-    my $comment = $infos->{UserComment} ;
-    # Remove trailing spaces
-    $comment =~ s/\s*$// ;
-    if ($comment =~ /^ASCII\0\0\0(.*)$/) {
-	# ASCII Exif Comment
-	return  $1 ;
-    } elsif (substr ($comment,0,8) ne "\0\0\0\0\0\0\0\0") {
-	add_warning "Unrecognized Exif UserComment '$comment' length ".(length $comment)." in image '$filename'\n" ;
-    }
-    return "" ;
-}
-
 # Image comment
 sub generate_caption_from_image_comment {
     my $filename = shift ;
@@ -1550,11 +1530,13 @@ sub generate_caption_from_image_comment {
 	# types is a + separated string of types
 	foreach my $type (split (/\+/, $types)) {
 	    if ($type =~ /^std$/i) {
-		my $comment = std_comment ($filename, $infos) ;
+		# Standard comment such as JFIF or GIF
+		my $comment = $infos->{Comment} ;
 		push (@texts, $comment)
 		    if $comment ;
 	    } elsif ($type =~ /^exif$/i) {
-		my $comment = exif_comment ($filename, $infos) ;
+		# Exif comment
+		my $comment = $infos->{UserComment} ;
 		push (@texts, $comment)
 		    if $comment ;
 	    } else {
@@ -1572,18 +1554,13 @@ sub generate_caption_from_image_timestamp {
     my $filename = shift ;
     my $infos = shift ;
     my $imagetime = $infos->{DateTimeOriginal} ;
-    if ($imagetime) {
-	my @timearray = split (/[: ]/, $imagetime) ;
-	my @gmtime = ($timearray[5], $timearray[4], $timearray[3], $timearray[2], $timearray[1]-1, $timearray[0]-1900, 0, 0) ;
-	return strftime ($opts->{timestamp_format_in_caption}, @gmtime) ;
-    }
-    return "" ;
+    return $imagetime;
 }
 
 # Image infos
 sub generate_caption_from_image_infos {
      my $filename = shift ;
-     my $infos = image_info ("$destination_dir$filename") ;
+     my $infos = $exifTool->ImageInfo ("$destination_dir$filename",'DateTimeOriginal', 'UserComment', 'Comment') ;
      my @texts = () ;
      if ($opts->{make_caption_from_image_comment}) {
 	 my @comments = generate_caption_from_image_comment ($filename, $infos) ;
