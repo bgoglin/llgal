@@ -18,8 +18,9 @@
       slides that have no file associated with them.
     + Add leading zeros to the number in the slide filename.
   * Fix slide numbering depending on LINE and BREAK entries.
-  * Do not remove all html files on --clean, only those matching the index
-    filename or slide filename prefix (requested by Alexandre Buisse).
+  * Do not remove all html files on --clean and when regenerating the gallery,
+    but only those files that match index filename or slide filename prefix
+    (requested by Alexandre Buisse).
   * Fix a warning about an uninitialized value being used when --ct without
     any timestamp available (reported by Alexandre Buisse).
   * Fix a warning about an uninitialized value being used when the gallery

@@ -2426,7 +2426,7 @@ sub generate_slides {
     my @entries = @{$gallery->{entries}} ;
 
     # remove old webpages
-    system ("rm -f ${destination_dir}*.$opts->{www_extension}") ;
+    system ("rm -f ${destination_dir}$opts->{slide_filenameprefix}*.$opts->{www_extension}") ;
     die "Failed to remove existing webpages.\n"
 	if $? ;
 
