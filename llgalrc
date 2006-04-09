@@ -70,10 +70,6 @@
 # Prefix of generated HTML slide filenames
 # slide_filenameprefix = "slide_"
 
-# Prefix of slide filenames when generated from filename
-# while there's no file associated (text, link, ...)
-# slide_filenameprefix_nofile = "NOFILE"
-
 # Prefix used to determine slide-image filenames from original images
 # (in case of --bigy).
 # These files will be stored under $local_llgal_dir.

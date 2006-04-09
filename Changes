@@ -14,6 +14,8 @@
     the film tile image without having llgal do it.
   * Improve slide filename:
     + Change default prefix to 'slide_'.
+    + Drop slide_filenameprefix_nofile and use slide_filename_prefix for
+      slides that have no file associated with them.
   * Fix a warning about an uninitialized value being used when --ct without
     any timestamp available (reported by Alexandre Buisse).
   * Fix a warning about an uninitialized value being used when the gallery

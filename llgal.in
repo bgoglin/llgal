@@ -219,7 +219,6 @@ my $normal_opts_type = {
 # Location and name of generated files
     index_filename => $OPT_IS_NONEMPTY_STRING,
     slide_filenameprefix => $OPT_IS_STRING,
-    slide_filenameprefix_nofile => $OPT_IS_NONEMPTY_STRING,
     scaled_image_filenameprefix => $OPT_IS_NONEMPTY_STRING,
     thumbnail_image_filenameprefix => $OPT_IS_NONEMPTY_STRING,
     captions_filename => $OPT_IS_NONEMPTY_STRING,
@@ -402,9 +401,6 @@ sub add_defaults {
 	index_filename => "index",
 # prefix of HTML slide filenames
 	slide_filenameprefix => "slide_",
-# prefix of HTML slide filenames when generated from filename
-# while there's no file associated (text, link, ...)
-	slide_filenameprefix_nofile => "NOFILE",
 # scaled and thumbnail image filename prefix
 	scaled_image_filenameprefix => "scaled_",
 	thumbnail_image_filenameprefix => "thumb_",
@@ -1955,7 +1951,7 @@ sub finalize_entries {
 	    my $slide_filename ;
 	    if ($opts->{make_slide_filename_from_filename}) {
 		if ($type == $TYPE_TXT or $type == $TYPE_LNK) {
-		    $slide_filename = "$opts->{slide_filenameprefix_nofile}$indix.$opts->{www_extension}" ;
+		    $slide_filename = "$opts->{slide_filenameprefix}$indix.$opts->{www_extension}" ;
 		} elsif ($opts->{make_slide_filename_from_extension}) {
 		    $slide_filename = "$filename.$opts->{www_extension}" ;
 		} else {
