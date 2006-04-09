@@ -1942,7 +1942,9 @@ sub finalize_entries {
 
 	# entries without a slide are not taken into account
 	next if defined $entry->{no_slide} ;
+
 	$indix++;
+	$entry->{indix} = $indix ;
 
 	my $type = $entry->{type} ;
 	my $filename = $entry->{filename} ;
@@ -2520,7 +2522,7 @@ sub generate_slides {
 
 	    # compute the slide counter
 	    my $slide_counter = $opts->{slide_counter_format} ;
-	    my $counter = $i+1 ;
+	    my $counter = $entry->{indix} ;
 	    my $counter_with_zeros = sprintf "%0${counter_length}d", $counter ;
 	    $slide_counter =~ s/%n/$counter/ ;
 	    $slide_counter =~ s/%0n/$counter_with_zeros/ ;
