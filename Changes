@@ -1,3 +1,8 @@
+  * Replace show_no_slide_counter in the configuration file with
+    slide_counter_format where %n, %0n and %t will be replaced dynamically.
+    The old show_no_slide_counter now corresponds to slide_counter_format="".
+    + By default, the slide counter gets leading zeros
+      (requested by Alexandre Buisse).
   * Add the BREAK keyword to be used in captions file to force a line break
     in a row of thumbnails (requested by Alexandre Buisse).
   * Use Image::ExifTool instead of Image::Infos (thanks to Alexandre Buisse).

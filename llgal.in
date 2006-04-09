@@ -255,7 +255,7 @@ my $normal_opts_type = {
     make_caption_from_filename => $OPT_IS_NUMERIC,
     show_dimensions => $OPT_IS_NUMERIC,
     show_size => $OPT_IS_NUMERIC,
-    show_no_slide_counter => $OPT_IS_NUMERIC,
+    slide_counter_format => $OPT_IS_STRING,
 # Text
     index_title => $OPT_IS_STRING,
     index_link_text => $OPT_IS_NONEMPTY_STRING,
@@ -473,7 +473,7 @@ sub add_defaults {
 # to write image size (-a or --as)
 	show_size => 0,
 # omit the image slide from the caption (--nc)
-	show_no_slide_counter => 0,
+	slide_counter_format => "&nbsp;&nbsp;&nbsp;(%0n/%t)",
 
 # Text
 # title of the gallery (--title)
@@ -860,7 +860,7 @@ sub parse_cmdline_options {
 	'li'		=> sub { $opts->{index_link_image} = 1 ; $opts->{prev_slide_link_image} = 1 ; $opts->{next_slide_link_image} = 1 ; },
 	'lt'		=> sub { $opts->{prev_slide_link_preview} = 1 ; $opts->{next_slide_link_preview} = 1 ; },
 	'n'		=> \$opts->{make_slide_filename_from_filename},
-	'nc'		=> \$opts->{show_no_slide_counter},
+	'nc'		=> sub { $opts->{slide_counter_format} = "" ; },
 	'option=s'	=> sub { shift ; process_option ($opts, shift) ; },
 	'p=i'		=> \$opts->{index_cellpadding},
 	'php'		=> sub { $opts->{www_extension} = "php" ; },
@@ -2432,6 +2432,10 @@ sub generate_slides {
     @slidetemplate_text = <SR> ;
     close SR ;
 
+    # a few globals
+    my $nentries = scalar @entries ;
+    my $counter_length = length $nentries ;
+
     # create slides
     indprint "Creating individual slides: " ;
     init_percentage () ;
@@ -2517,16 +2521,16 @@ sub generate_slides {
 		$line =~ s/<!--THIS-SLIDE-->/$content/ ;
 	    }
 
-	    # add the caption, with the image counter unless --nc is specified
-	    my $imagecaption ;
-	    if ($opts->{show_no_slide_counter}) {
-		$imagecaption = $entry->{caption} ;
-	    } else{
-		$imagecaption = $entry->{caption} . "&nbsp;&nbsp;&nbsp;(" . ($i+1) ."/". (scalar @entries) .")" ;
-	    }
+	    # compute the slide counter
+	    my $slide_counter = $opts->{slide_counter_format} ;
+	    my $counter = $i+1 ;
+	    my $counter_with_zeros = sprintf "%0${counter_length}d", $counter ;
+	    $slide_counter =~ s/%n/$counter/ ;
+	    $slide_counter =~ s/%0n/$counter_with_zeros/ ;
+	    $slide_counter =~ s/%t/$nentries/ ;
 
-	    # add dimensions and size to the caption
-	    $imagecaption .= "&nbsp;&nbsp;&nbsp;$entry->{dimstring}" ;
+	    # add the caption and dimensions
+	    my $imagecaption = $entry->{caption} . $slide_counter . "&nbsp;&nbsp;&nbsp;$entry->{dimstring}" ;
 
 	    $line =~ s/<!--IMAGE-CAPTION-->/$imagecaption/g ;
 	    $line =~ s/<!--THIS-SLIDE-->/$entry->{slide_url}/g ;

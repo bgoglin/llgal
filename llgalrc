@@ -185,8 +185,11 @@
 # show_dimensions = 0
 # show_size = 0
 
-# Do not show slide counter in captions [--nc]
-# show_no_slide_counter = 0
+# Change the format of the counter shown on the slides
+# %n is replaced by the slide number, %0n gets leading zeros,
+# and %t is replaced by the number of slides.
+# Setting to "" disables the slide counter [--nc]
+# slide_counter_format = "&nbsp;&nbsp;&nbsp;(%0n/%t)"
 
 ##### Text #####
 

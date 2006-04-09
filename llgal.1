@@ -1090,12 +1090,14 @@ Show file sizes
 Default is
 .BR 0 " (" disabled ).
 .RE
-.I show_no_slide_counter = <0/1>
+.I slide_counter_format = \fI"format"
 .RS
-Do not show slide counter in captions
+Change the format of the counter on the slides.
+\fB%n\fR is replaced with the slide number, \fB%0n\fR gets leading zeros,
+and \fB%t\fR is replaced with the number of slides.
+Default is \fB"&nbsp;&nbsp;&nbsp;(%0n/%t)"\fR.
+Slide counter may be disabled by setting to an empty string
 .RB [ --nc ].
-Default is
-.BR 0 " (" "show counter" ).
 .RE
 
 .B Text:
