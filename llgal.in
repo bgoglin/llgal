@@ -401,7 +401,7 @@ sub add_defaults {
 # name of the index file (-i)
 	index_filename => "index",
 # prefix of HTML slide filenames
-	slide_filenameprefix => "",
+	slide_filenameprefix => "slide_",
 # prefix of HTML slide filenames when generated from filename
 # while there's no file associated (text, link, ...)
 	slide_filenameprefix_nofile => "NOFILE",

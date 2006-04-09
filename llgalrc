@@ -68,7 +68,7 @@
 # index_filename = "index"
 
 # Prefix of generated HTML slide filenames
-# slide_filenameprefix = ""
+# slide_filenameprefix = "slide_"
 
 # Prefix of slide filenames when generated from filename
 # while there's no file associated (text, link, ...)

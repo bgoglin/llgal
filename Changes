@@ -12,6 +12,8 @@
   * Drop -t option to change the file time effect height (filmtile_height)
     since the layout does not need it anymore. The user may easily change
     the film tile image without having llgal do it.
+  * Improve slide filename:
+    + Change default prefix to 'slide_'.
   * Fix a warning about an uninitialized value being used when --ct without
     any timestamp available (reported by Alexandre Buisse).
   * Fix a warning about an uninitialized value being used when the gallery
