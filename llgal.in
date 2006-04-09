@@ -712,7 +712,7 @@ sub process_option {
 		# during early configuration
 		if ($early_configuration) {
 		    $local_llgal_dir = $1 ;
-		} else {
+		} elsif ($1 ne $local_llgal_dir) {
 		    immediate_warning "Ignoring changes to the name of the local llgal directory outside of" ;
 		    immediate_warning "system- and user-wide configuration files." ;
 		}

@@ -17,7 +17,8 @@
   * Fix a warning about an uninitialized value being used when the gallery
     is empty.
   * Use $(MAKE) instead of make (FreeBSD breakage reported by George Wood).
-
+  * Do not warn when the local llgal directory is ignored outside of early
+    configuration if the value would not actually change.
 
 
 llgal (0.12.2)
