@@ -2727,7 +2727,8 @@ sub generate_index {
 	}
 
 	# Row header
-	print IXW "  <tr><td class=\"tiled\" colspan=\"", ($opts->{show_no_film_effect}?$num:$num+2), "\">&nbsp;</td></tr>\n"
+	# include the image to force the height of the line. we could do it in the css but IE css support sucks a lot
+	print IXW "  <tr><td class=\"tiled\" colspan=\"", $num+2, "\"><img src=\"$local_llgal_dir/$opts->{filmtile_filename}\" /></td></tr>\n"
 	    unless $opts->{show_no_film_effect} ;
 	print IXW "  <tr>\n" ;
 	print IXW "    <td class=\"thumb\">&nbsp;</td>\n"
@@ -2809,7 +2810,7 @@ sub generate_index {
 	print IXW "    <td class=\"thumb\">&nbsp;</td>\n"
 	    unless $opts->{show_no_film_effect} ;
 	print IXW "  </tr>\n" ;
-	print IXW "  <tr><td class=\"tiled\" colspan=\"", $num+2, "\">&nbsp;</td></tr>\n"
+	print IXW "  <tr><td class=\"tiled\" colspan=\"", $num+2, "\"><img src=\"$local_llgal_dir/$opts->{filmtile_filename}\" /></td></tr>\n"
 	    unless $opts->{show_no_film_effect} ;
 
 	# Dimensions and filesizes

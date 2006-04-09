@@ -1,6 +1,9 @@
   * Add the BREAK keyword to be used in captions file to force a line break
     in a row of thumbnails (requested by Alexandre Buisse).
   * Use Image::ExifTool instead of Image::Infos (thanks to Alexandre Buisse).
+  * Fix the film effect when the tile image size is modified by forcing the
+    height of the row to be exactly the height of the image. We could use
+    nice CSS to do so, but Internet Explorer CSS support sucks too much.
   * Fix a warning about an uninitialized value being used when --ct without
     any timestamp available (reported by Alexandre Buisse).
   * Fix a warning about an uninitialized value being used when the gallery

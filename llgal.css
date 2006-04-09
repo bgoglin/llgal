@@ -77,6 +77,8 @@ table.index td.text-thumb {
 table.index td.tiled {
   background-image: url("tile.png");
   background-repeat: repeat-x;
+  text-align: left;
+  font-size: 0px;
 }
 
 table.index td.thumb-dim {
