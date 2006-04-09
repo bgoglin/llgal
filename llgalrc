@@ -334,4 +334,4 @@
 # www_access_rights = 0
 
 # Extension of generate webpages [--php]
-# www_extension = "www"
+# www_extension = "html"
