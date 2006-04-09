@@ -1324,7 +1324,8 @@ sub clean_files {
 
     opendir DIR, $destination_dir ? $destination_dir : "./" ; # destination is empty for './'
     while ($_ = readdir DIR ) {
-	if (/.$opts->{www_extension}$/) {
+	if (/^$opts->{index_filename}\.$opts->{www_extension}$/
+	    or /^$opts->{slide_filenameprefix}\d+\.$opts->{www_extension}$/) {
 	    unlink "$destination_dir$_" ;
 	}
     }
