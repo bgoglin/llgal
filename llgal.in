@@ -1934,6 +1934,13 @@ sub finalize_entries {
 	} @entries ;
     }
 
+    # account slides
+    my $nslides = scalar (grep { ! $_->{no_slide} } @entries) ;
+    $gallery->{nslides} = $nslides ;
+
+    # prepare numbering
+    my $counter_length = length $nslides ;
+
     my $prev = undef ;
     my $first = undef ;
     my $indix = 0 ;
@@ -1943,8 +1950,11 @@ sub finalize_entries {
 	# entries without a slide are not taken into account
 	next if defined $entry->{no_slide} ;
 
+	# slide counter
 	$indix++;
-	$entry->{indix} = $indix ;
+	$entry->{counter} = $indix ;
+	my $counter_with_zeros = sprintf "%0${counter_length}d", $indix ;
+	$entry->{counter_with_zeros} = $counter_with_zeros ;
 
 	my $type = $entry->{type} ;
 	my $filename = $entry->{filename} ;
@@ -1954,7 +1964,7 @@ sub finalize_entries {
 	    my $slide_filename ;
 	    if ($opts->{make_slide_filename_from_filename}) {
 		if ($type == $TYPE_TXT or $type == $TYPE_LNK) {
-		    $slide_filename = "$opts->{slide_filenameprefix}$indix.$opts->{www_extension}" ;
+		    $slide_filename = "$opts->{slide_filenameprefix}$counter_with_zeros.$opts->{www_extension}" ;
 		} elsif ($opts->{make_slide_filename_from_extension}) {
 		    $slide_filename = "$filename.$opts->{www_extension}" ;
 		} else {
@@ -1964,7 +1974,7 @@ sub finalize_entries {
 		    $slide_filename = "$basename.$opts->{www_extension}" ;
 		}
 	    } else {
-		$slide_filename = "$opts->{slide_filenameprefix}$indix.$opts->{www_extension}" ;
+		$slide_filename = "$opts->{slide_filenameprefix}$counter_with_zeros.$opts->{www_extension}" ;
 	    }
 	    $entry->{slide_filename} = $slide_filename ;
 	    $entry->{slide_url} = make_safe_url_nowarn ($slide_filename) ;
@@ -2431,10 +2441,6 @@ sub generate_slides {
     @slidetemplate_text = <SR> ;
     close SR ;
 
-    # a few globals
-    my $nentries = scalar @entries ;
-    my $counter_length = length $nentries ;
-
     # create slides
     indprint "Creating individual slides: " ;
     init_percentage () ;
@@ -2522,11 +2528,9 @@ sub generate_slides {
 
 	    # compute the slide counter
 	    my $slide_counter = $opts->{slide_counter_format} ;
-	    my $counter = $entry->{indix} ;
-	    my $counter_with_zeros = sprintf "%0${counter_length}d", $counter ;
-	    $slide_counter =~ s/%n/$counter/ ;
-	    $slide_counter =~ s/%0n/$counter_with_zeros/ ;
-	    $slide_counter =~ s/%t/$nentries/ ;
+	    $slide_counter =~ s/%n/$entry->{counter}/ ;
+	    $slide_counter =~ s/%0n/$entry->{counter_with_zeros}/ ;
+	    $slide_counter =~ s/%t/$gallery->{nslides}/ ;
 
 	    # add the caption and dimensions
 	    my $imagecaption = $entry->{caption} . $slide_counter . "&nbsp;&nbsp;&nbsp;$entry->{dimstring}" ;
