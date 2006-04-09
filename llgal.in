@@ -117,7 +117,6 @@ my $generate_config = undef ;
 
 my $index_cellpadding_default = 3 ;
 my $pixels_per_row_default = 0 ; # unlimited
-my $filmtile_height_default = 21 ;
 my $thumbnail_width_max_default = 0 ; # unlimited
 my $thumbnail_height_max_default = 75 ;
 my $thumbnails_per_row_default = 5 ;
@@ -235,7 +234,6 @@ my $normal_opts_type = {
     thumbnail_width_max => $OPT_IS_NUMERIC, # > 0, 0 for unlimited, -1 for default
     show_caption_under_thumbnails => $OPT_IS_NUMERIC,
     show_no_film_effect => $OPT_IS_NUMERIC,
-    filmtile_height => $OPT_IS_NUMERIC, # >= 0, -1 for default
 # Slides
     make_no_slides => $OPT_IS_NUMERIC,
     make_slide_filename_from_filename => $OPT_IS_NUMERIC,
@@ -434,8 +432,6 @@ sub add_defaults {
 	show_caption_under_thumbnails => 0,
 # omit the film effect altogether (-r)
 	show_no_film_effect => 0,
-# height of the tile.png tiled image (-t)
-	filmtile_height => $filmtile_height_default,
 
 # Slides
 # make no slides, just thumbnail links to images (-s)
@@ -626,7 +622,6 @@ Layout Options:
     --Rl               add links between subgalleries
     -s                 make no HTML slides, link thumbnails to images
     --sort <s>         sort files with criteria <s>
-    -t <n>             height of the film tiled image (21)
     --templates <dir>  use templates in <dir>
     --title <s>        title of the index of the gallery (Index of pictures)
     -u                 write captions under thumbnails on index page
@@ -874,7 +869,6 @@ sub parse_cmdline_options {
 	'S'		=> \$opts->{add_subdirs},
 	's'		=> \$opts->{make_no_slides},
 	'sort=s'	=> \$opts->{sort_criteria},
-	't=i'		=> \$opts->{filmtile_height},
 	'templates=s'	=> \@{$opts->{template_dirs}},
 	'title=s'	=> \$opts->{index_title},
 	'u'		=> \$opts->{show_caption_under_thumbnails},
@@ -1139,16 +1133,6 @@ sub prepare_numerical_options {
     }
     die "Please give a positive or null index cellpadding value\n"
 	unless $opts->{index_cellpadding} >= 0 ;
-
-    # filmtile_height must be >= 0
-    die "Please give an integer value for film tile height\n"
-	unless is_integer ($opts->{filmtile_height}) ;
-    if ($opts->{filmtile_height} < 0) {
-	indprint "Film tile height value < 0, restoring to default value ($filmtile_height_default)\n" ;
-	$opts->{filmtile_height} = $filmtile_height_default ;
-    }
-    die "Please give a positive or null film tile height value\n"
-	unless $opts->{filmtile_height} >= 0 ;
 
     # text_slide_width must be > 0
     die "Please give an integer value for text slide width\n"
@@ -2885,18 +2869,6 @@ sub get_files {
 	indprint "Using the film tile that is available on $opts->{filmtile_location}.\n" ;
     } else {
 	get_template_file ($opts->{filmtile_filename}) ;
-	# rescale the tiled image if needed
-	my $filmtileh = (imgsize ("$destination_dir$local_llgal_dir/$opts->{filmtile_filename}"))[1] ;
-	if ($opts->{filmtile_height} != $filmtileh) {
-	    my ($status, @output) = system_with_output
-		( "reduce film tile",
-		  "mogrify", "-scale", "x$opts->{filmtile_height}", "$destination_dir$local_llgal_dir/$opts->{filmtile_filename}" ) ;
-	    if ($status) {
-		# die on whatever error
-		immediate_external_warnings @output ;
-		die "Failed to execute 'mogrify' to reduce the film tile.\n" ;
-	    }
-	}
     }
 
     # Get link images

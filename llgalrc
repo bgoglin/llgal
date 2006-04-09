@@ -124,10 +124,6 @@
 # Omit film effect [-r]
 # show_no_film_effect = 0
 
-# Film tile height [-t <n>]
-# Must be >= 0, setting to < 0 resets to default
-# filmtile_height = 21
-
 ##### Slides #####
 
 # Make no slides [-s]

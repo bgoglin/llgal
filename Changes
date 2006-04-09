@@ -4,6 +4,9 @@
   * Fix the film effect when the tile image size is modified by forcing the
     height of the row to be exactly the height of the image. We could use
     nice CSS to do so, but Internet Explorer CSS support sucks too much.
+  * Drop -t option to change the file time effect height (filmtile_height)
+    since the layout does not need it anymore. The user may easily change
+    the film tile image without having llgal do it.
   * Fix a warning about an uninitialized value being used when --ct without
     any timestamp available (reported by Alexandre Buisse).
   * Fix a warning about an uninitialized value being used when the gallery
