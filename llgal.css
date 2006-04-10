@@ -35,11 +35,11 @@ img.image-link {
   font-size: 200%;
 }
 
-.center { 
+.center {
   text-align: center;
 }
 
-.center table { 
+.center table {
   margin-left: auto;
   margin-right: auto;
 }
@@ -63,7 +63,7 @@ table.index td {
 
 table.index td.thumb img {
   vertical-align: middle;
-  border-style: none;  
+  border-style: none;
 }
 
 table.index td.text-thumb {
@@ -106,7 +106,7 @@ table.slide td.image-slide {
 
 table.slide td.image-slide img {
   vertical-align: middle;
-  border-style: none;  
+  border-style: none;
 }
 
 table.slide td.text-slide {
