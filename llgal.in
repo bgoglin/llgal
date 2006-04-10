@@ -1503,7 +1503,6 @@ sub find_user_scaled {
 
 # Image comment
 sub generate_caption_from_image_comment {
-    my $filename = shift ;
     my $infos = shift ;
     my @texts = () ;
     # Loop until a non-empty comment list is found
@@ -1532,7 +1531,6 @@ sub generate_caption_from_image_comment {
 
 # Image timestamp
 sub generate_caption_from_image_timestamp {
-    my $filename = shift ;
     my $infos = shift ;
     my $imagetime = $infos->{DateTimeOriginal} ;
     return $imagetime;
@@ -1540,19 +1538,18 @@ sub generate_caption_from_image_timestamp {
 
 # Image infos
 sub generate_caption_from_image_infos {
-     my $filename = shift ;
-     my $infos = $exifTool->ImageInfo ("$destination_dir$filename",'DateTimeOriginal', 'UserComment', 'Comment') ;
-     my @texts = () ;
-     if ($opts->{make_caption_from_image_comment}) {
-	 my @comments = generate_caption_from_image_comment ($filename, $infos) ;
-	 push (@texts, @comments) ;
-     }
-     if ($opts->{make_caption_from_image_timestamp}) {
-	 my $timestamp = generate_caption_from_image_timestamp ($filename, $infos) ;
-	 push (@texts, $timestamp) ;
-     }
-     return @texts ;
- }
+    my $infos = shift ;
+    my @texts = () ;
+    if ($opts->{make_caption_from_image_comment}) {
+	my @comments = generate_caption_from_image_comment $infos ;
+	push (@texts, @comments) ;
+    }
+    if ($opts->{make_caption_from_image_timestamp}) {
+	my $timestamp = generate_caption_from_image_timestamp $infos ;
+	push (@texts, $timestamp) ;
+    }
+    return @texts ;
+}
 
 ###################################################################################
 # Generate entries
@@ -1599,12 +1596,22 @@ sub create_file_entry {
     }
     $entry->{linktext} = $linktext ;
 
+    # for images, extract required exif infos
+    if ($type == $TYPE_IMG) {
+	my @exif_tags = () ;
+	@exif_tags = (@exif_tags, 'DateTimeOriginal')
+	    if $opts->{make_caption_from_image_timestamp} ;
+	@exif_tags = (@exif_tags, 'UserComment', 'Comment')
+	    if $opts->{make_caption_from_image_comment} ;
+	$entry->{infos} = $exifTool->ImageInfo ("$destination_dir$filename", @exif_tags) ;
+    }
+
     # the caption (will be web-safe after caption file generation)
     if (not defined $caption) {
 	my @texts = () ;
 	push (@texts, $filename)
 	    if $opts->{make_caption_from_filename} ;
-	push (@texts, generate_caption_from_image_infos ($filename))
+	push (@texts, generate_caption_from_image_infos $entry->{infos})
 	    if $type == $TYPE_IMG ;
 	$caption = join (' - ', grep {$_} @texts) ;
 	$caption =~ s/&/&amp;/g ;

@@ -147,9 +147,13 @@ table.exif {
 table.exif td.exif-name {
   text-align: right;
   background: #333333;
+  padding-left: 6px;
+  padding-right: 6px;
 }
 
 table.exif td.exif-value {
   text-align: left;
   background: #333333;
+  padding-left: 6px;
+  padding-right: 6px;
 }
