@@ -135,3 +135,21 @@ hr.index {
   padding-top: 6px;
   padding-bottom: 6px;
 }
+
+/* EXIF table */
+
+table.exif {
+  border: 0px;
+  border-spacing: 1px;
+  background: #ffffff;
+}
+
+table.exif td.exif-name {
+  text-align: right;
+  background: #333333;
+}
+
+table.exif td.exif-value {
+  text-align: left;
+  background: #333333;
+}
