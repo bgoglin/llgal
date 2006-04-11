@@ -335,8 +335,8 @@ my $special_opts_without_output = {
     default_thumb_xdim => 1,
     default_thumb_ydim => 1,
     thumbnail_create_command => 1,
-    slide_create_command => 1,
-    slide_copy_command => 1,
+    scaled_create_command => 1,
+    scaled_copy_command => 1,
 } ;
 
 # options whose merging is done as array
@@ -1219,19 +1219,19 @@ sub prepare_various_variables {
     @{$opts->{thumbnail_create_command}} = ("convert", "+profile", "*", @{$opts->{convert_options}}, @{$opts->{thumbnail_convert_options}}, @thumbnail_scale_options) ;
 
     # convert options for slides
-    @{$opts->{slide_create_command}} = ("convert", "+profile", "*", @{$opts->{convert_options}}, @{$opts->{scaled_convert_options}} ) ;
+    @{$opts->{scaled_create_command}} = ("convert", "+profile", "*", @{$opts->{convert_options}}, @{$opts->{scaled_convert_options}} ) ;
     if ($opts->{slide_height_max} > 0) {
 	if ($opts->{slide_width_max} > 0) {
-	    push (@{$opts->{slide_create_command}}, ("-scale", "$opts->{slide_width_max}x$opts->{slide_height_max}")) ;
+	    push (@{$opts->{scaled_create_command}}, ("-scale", "$opts->{slide_width_max}x$opts->{slide_height_max}")) ;
 	} else {
-	    push (@{$opts->{slide_create_command}}, ("-scale", "x$opts->{slide_height_max}")) ;
+	    push (@{$opts->{scaled_create_command}}, ("-scale", "x$opts->{slide_height_max}")) ;
 	}
     } else {
 	if ($opts->{slide_width_max} > 0) {
-	    push (@{$opts->{slide_create_command}}, ("-scale", "$opts->{slide_width_max}x")) ;
+	    push (@{$opts->{scaled_create_command}}, ("-scale", "$opts->{slide_width_max}x")) ;
 	}
     }
-    @{$opts->{slide_copy_command}} = ("cp", "-f") ;
+    @{$opts->{scaled_copy_command}} = ("cp", "-f") ;
 
     # css location
     if ($opts->{css_location} =~ /^(.*\/)$/) {
@@ -1811,11 +1811,11 @@ sub fill_file_entry {
 		if ($x <= $opts->{slide_width_max} and $y <= $opts->{slide_height_max}) {
 		    ($status, @output) = system_with_output
 			( "copy '$real_filename' scaled image",
-			  @{$opts->{slide_copy_command}}, "$real_filename", "$real_scaled_filename" ) ;
+			  @{$opts->{scaled_copy_command}}, "$real_filename", "$real_scaled_filename" ) ;
 		} else {
 		    ($status, @output) = system_with_output
 			( "create '$real_filename' scaled image",
-			  @{$opts->{slide_create_command}}, "$real_filename", "$real_scaled_filename" ) ;
+			  @{$opts->{scaled_create_command}}, "$real_filename", "$real_scaled_filename" ) ;
 		}
 		if ($status == -1) {
 		    immediate_external_warnings @output ;
