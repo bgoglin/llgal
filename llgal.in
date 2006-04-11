@@ -334,9 +334,10 @@ my $special_nonopts_with_output = {
 my $special_opts_without_output = {
     default_thumb_xdim => 1,
     default_thumb_ydim => 1,
-    thumbnail_create_command => 1,
     scaled_create_command => 1,
+    thumbnail_create_command => 1,
     scaled_copy_command => 1,
+    thumbnail_copy_command => 1,
 } ;
 
 # options whose merging is done as array
@@ -1232,6 +1233,7 @@ sub prepare_various_variables {
 	}
     }
     @{$opts->{scaled_copy_command}} = ("cp", "-f") ;
+    @{$opts->{thumbnail_copy_command}} = ("cp", "-f") ;
 
     # css location
     if ($opts->{css_location} =~ /^(.*\/)$/) {
@@ -1728,9 +1730,19 @@ sub fill_file_entry {
 	# thumbnails dimensions
 	my $real_thumb_filename = "$destination_dir$entry->{thumb_filename}" ;
 	if ((! -e "$real_thumb_filename") or $opts->{force_image_regeneration}) {
-	    my ($status, @output) = system_with_output
-		( "create '$real_filename' thumbnail",
-		  @{$opts->{thumbnail_create_command}}, "$real_filename", "$real_thumb_filename" ) ;
+	    my ($status, @output) ;
+	    # only scale down, never up.
+	    my ($x,$y) = imgsize ("$real_filename") ;
+	    if ($y <= $opts->{thumbnail_height_max}
+		and ($opts->{thumbnail_width_max} <= 0 or $x <= $opts->{thumbnail_width_max})) {
+		($status, @output) = system_with_output
+		    ( "copy '$real_filename' thumbnail",
+		      @{$opts->{thumbnail_copy_command}}, "$real_filename", "$real_thumb_filename" ) ;
+	    } else {
+		($status, @output) = system_with_output
+		    ( "create '$real_filename' thumbnail",
+		      @{$opts->{thumbnail_create_command}}, "$real_filename", "$real_thumb_filename" ) ;
+	    }
 	    if ($status == -1) {
 		immediate_external_warnings @output ;
 		die "Failed to create '$real_filename' thumbnail\n" ;
