@@ -1,3 +1,6 @@
+  * Add --exif (and show_exif_tags) to display a table of exif tags under
+    each image slide (requested by Alexandre Buisse). The layout is defined
+    by <!--EXIF-TABLE--> in the slide template and some new CSS styles.
   * Replace show_no_slide_counter in the configuration file with
     slide_counter_format where %n, %0n and %t will be replaced dynamically.
     The old show_no_slide_counter now corresponds to slide_counter_format="".

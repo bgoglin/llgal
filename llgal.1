@@ -407,6 +407,13 @@ or go crazy with
 may be used several times on the same command line.
 
 .TP
+.BI --exif " <tag1,tag2,...>"
+Display a table of EXIF tags under each image slide.
+The tags are given with their name in
+.B exiftool -list
+and separated with a comma.
+
+.TP
 .BI -i " <file>"
 Name of the main thumbnail index file.  The default is
 .BR index ,
@@ -1035,6 +1042,13 @@ Generate slide titles from captions
 Default is
 .BR 0 " (" disabled ).
 .RE
+.I show_exif_tags = <tag1,tag2,...>"
+.RS
+Display a table of EXIF tags under each image slide
+.RB [ --exif ].
+The tags are given with their name in
+.B exiftool -list
+and separated with a comma.
 
 .B Captions:
 
@@ -1444,6 +1458,10 @@ The style of the slide contents (is defined in the CSS style-sheet).
 .B <!--IMAGE-CAPTION-->
 .RS
 The caption of the slide.
+.RE
+.B <!--EXIF-TABLE-->
+.RS
+The table of EXIF tags.
 .RE
 
 

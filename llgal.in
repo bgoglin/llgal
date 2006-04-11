@@ -312,6 +312,7 @@ my $special_opts_with_input = {
     convert_options => 1,
     scaled_convert_options => 1,
     thumbnail_convert_options => 1,
+    show_exif_tags => 1,
 } ;
 
 # internal options that have a special outputting routine
@@ -321,6 +322,7 @@ my $special_opts_with_output = {
     convert_options => 1,
     scaled_convert_options => 1,
     thumbnail_convert_options => 1,
+    show_exif_tags => 1,
 } ;
 
 # stuff that is not stored in the option hash but need be outputted
@@ -453,6 +455,8 @@ sub add_defaults {
 	next_slide_link_preview => 0,
 # use captions as slide titles (-k)
 	make_slide_title_from_caption => 0,
+# show a table of exif tags
+	show_exif_tags => [],
 
 # Captions
 # this line will be placed in caption generated file
@@ -604,6 +608,7 @@ Layout Options:
     --ctf <s>          timestamp format in captions
     --codeset <s>      change the codeset in HTML pages
     --con <s>          options to pass to convert (e.g. -quality N)
+    --exif <tags>      show exif tags on each slide
     -i <file>          name of the main thumbnail index file (index)
     -k                 use the image captions for the HTML slide titles
     -L                 list links outside of the table
@@ -748,6 +753,9 @@ sub process_option {
 	    } elsif ($line =~ /^thumbnail_convert_options\s*=\s*"(.*)"$/) {
 		push (@{$opts->{thumbnail_convert_options}}, $1) ;
 
+	    } elsif ($line =~ /^show_exif_tags\s*=\s*"(.*)"$/) {
+		push (@{$opts->{show_exif_tags}}, split (/,/, $1));
+
 	    } else {
 		die "Unknown special inconfig option $optname.\n" ;
 	    }
@@ -849,6 +857,7 @@ sub parse_cmdline_options {
 	'ctf=s'		=> \$opts->{timestamp_format_in_caption},
 	'codeset=s'     => \$opts->{codeset},
 	'con=s'		=> sub { shift ; push (@{$opts->{convert_options}}, parse_convert_options (shift)) ; },
+	'exif=s'	=> sub { shift ; push (@{$opts->{show_exif_tags}}, split (/,/, shift)) ; },
 	'i=s'		=> \$opts->{index_filename},
 	'k'		=> \$opts->{make_slide_title_from_caption},
 	'L'		=> \$opts->{list_links},
@@ -1503,7 +1512,7 @@ sub find_user_scaled {
 
 # Image comment
 sub generate_caption_from_image_comment {
-    my $infos = shift ;
+    my $exif_infos = shift ;
     my @texts = () ;
     # Loop until a non-empty comment list is found
     foreach my $types (split (/,/, $opts->{make_caption_from_image_comment})) {
@@ -1511,12 +1520,12 @@ sub generate_caption_from_image_comment {
 	foreach my $type (split (/\+/, $types)) {
 	    if ($type =~ /^std$/i) {
 		# Standard comment such as JFIF or GIF
-		my $comment = $infos->{Comment} ;
+		my $comment = $exif_infos->{Comment} ;
 		push (@texts, $comment)
 		    if $comment ;
 	    } elsif ($type =~ /^exif$/i) {
 		# Exif comment
-		my $comment = $infos->{UserComment} ;
+		my $comment = $exif_infos->{UserComment} ;
 		push (@texts, $comment)
 		    if $comment ;
 	    } else {
@@ -1531,21 +1540,21 @@ sub generate_caption_from_image_comment {
 
 # Image timestamp
 sub generate_caption_from_image_timestamp {
-    my $infos = shift ;
-    my $imagetime = $infos->{DateTimeOriginal} ;
+    my $exif_infos = shift ;
+    my $imagetime = $exif_infos->{DateTimeOriginal} ;
     return $imagetime;
 }
 
 # Image infos
 sub generate_caption_from_image_infos {
-    my $infos = shift ;
+    my $exif_infos = shift ;
     my @texts = () ;
     if ($opts->{make_caption_from_image_comment}) {
-	my @comments = generate_caption_from_image_comment $infos ;
+	my @comments = generate_caption_from_image_comment $exif_infos ;
 	push (@texts, @comments) ;
     }
     if ($opts->{make_caption_from_image_timestamp}) {
-	my $timestamp = generate_caption_from_image_timestamp $infos ;
+	my $timestamp = generate_caption_from_image_timestamp $exif_infos ;
 	push (@texts, $timestamp) ;
     }
     return @texts ;
@@ -1598,12 +1607,12 @@ sub create_file_entry {
 
     # for images, extract required exif infos
     if ($type == $TYPE_IMG) {
-	my @exif_tags = () ;
+	my @exif_tags = @{$opts->{show_exif_tags}} ;
 	@exif_tags = (@exif_tags, 'DateTimeOriginal')
 	    if $opts->{make_caption_from_image_timestamp} ;
 	@exif_tags = (@exif_tags, 'UserComment', 'Comment')
 	    if $opts->{make_caption_from_image_comment} ;
-	$entry->{infos} = $exifTool->ImageInfo ("$destination_dir$filename", @exif_tags) ;
+	$entry->{exif_infos} = $exifTool->ImageInfo ("$destination_dir$filename", @exif_tags) ;
     }
 
     # the caption (will be web-safe after caption file generation)
@@ -1611,7 +1620,7 @@ sub create_file_entry {
 	my @texts = () ;
 	push (@texts, $filename)
 	    if $opts->{make_caption_from_filename} ;
-	push (@texts, generate_caption_from_image_infos $entry->{infos})
+	push (@texts, generate_caption_from_image_infos $entry->{exif_infos})
 	    if $type == $TYPE_IMG ;
 	$caption = join (' - ', grep {$_} @texts) ;
 	$caption =~ s/&/&amp;/g ;
@@ -2604,6 +2613,21 @@ sub generate_slides {
 	    $line =~ s/<!--NEXT-SLIDE-LINK-TEXT-->/$next_slide_link/g ;
 	    $line =~ s/<!--NEXT-SLIDE-->/$next->{slide_url}\" title=\"$opts->{over_next_slide_link_text}$next->{title}/g ;
 
+	    # exif information
+	    my $exif_table = "" ;
+	    if ($type == $TYPE_IMG and @{$opts->{show_exif_tags}}) {
+		my $exif_infos = $entry->{exif_infos} ;
+		foreach my $tag (@{$opts->{show_exif_tags}}) {
+		    my $value = $exif_infos->{$tag} ;
+		    my $description = $exifTool->GetDescription ($tag) ;
+		    $exif_table .= "<tr><td class=\"exif-name\">$description</td>"
+			."<td class=\"exif-value\">$value</td></tr>\n"
+			if defined $value ;
+		}
+		$exif_table = "<table class=\"exif\">\n". $exif_table ."</table>" ;
+	    }
+	    $line =~ s/<!--EXIF-TABLE-->/$exif_table/ ;
+
 	    $line =~ s/<!--CREDITS-->/$opts->{credits_text}/g ;
 
 	    # output the line
@@ -3035,6 +3059,9 @@ sub generate_config {
 
 	    } elsif ($optname eq "thumbnail_convert_options") {
 		print NEWCFG "thumbnail_convert_options = \"". (join_convert_options (@{$opts->{thumbnail_convert_options}})) ."\"\n" ;
+
+	    } elsif ($optname eq "show_exif_tags") {
+		print NEWCFG "show_exif_tags = \"". (join (",", @{$opts->{show_exif_tags}})) ."\"\n" ;
 
 	    } elsif ($optname eq "template_dirs") {
 		if (@{$opts->{template_dirs}}) {

@@ -160,6 +160,11 @@
 # Generate slide titles from captions [-k]
 # make_slide_title_from_caption = 0
 
+# Display a table of EXIF tags under each image slide [--exif]
+# The tags are given with their name in exiftool -list and separated
+# with a comma.
+# show_exif_tags = ""
+
 ##### Captions #####
 
 # This line will be added to the captions file llgal will generate when
