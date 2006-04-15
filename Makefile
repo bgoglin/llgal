@@ -35,8 +35,7 @@ clean:: clean-po
 install:: install-po
 	install -d -m 0755 $(DESTDIR)$(BINDIR)/ $(DESTDIR)$(DATADIR)/llgal/ $(DESTDIR)$(MANDIR)/man1/ $(DESTDIR)$(SYSCONFDIR)/llgal/
 	install -m 0755 llgal $(DESTDIR)$(BINDIR)/llgal
-	install -m 0644 captions.header llgal.css indextemplate.html slidetemplate.html $(DESTDIR)$(DATADIR)/llgal/
-	install -m 0644 tile.png index.png prev.png next.png $(DESTDIR)$(DATADIR)/llgal/
+	install -m 0644 data/* $(DESTDIR)$(DATADIR)/llgal/
 	install -m 0644 llgalrc $(DESTDIR)$(SYSCONFDIR)/llgal/
 	install -m 0644 llgal.1 $(DESTDIR)$(MANDIR)/man1/
 
@@ -49,13 +48,13 @@ uninstall:: uninstall-po
 tarball::
 	mkdir /tmp/$(TARBALL)/
 	cp llgal.in /tmp/$(TARBALL)
-	cp captions.header llgal.css indextemplate.html slidetemplate.html /tmp/$(TARBALL)
-	cp tile.png index.png prev.png next.png /tmp/$(TARBALL)
 	cp llgalrc /tmp/$(TARBALL)
 	cp llgal.1 /tmp/$(TARBALL)
 	cp Makefile /tmp/$(TARBALL)
 	cp Changes /tmp/$(TARBALL)
 	cp COPYING README UPGRADE VERSION /tmp/$(TARBALL)
+	mkdir /tmp/$(TARBALL)/data/
+	cp -a data/ /tmp/$(TARBALL)
 	mkdir /tmp/$(TARBALL)/$(PO_SUBDIR)/
 	cp $(PO_SUBDIR)/Makefile /tmp/$(TARBALL)/$(PO_SUBDIR)/
 	cp $(PO_SUBDIR)/*.po /tmp/$(TARBALL)/$(PO_SUBDIR)/
