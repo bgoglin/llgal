@@ -20,6 +20,8 @@
     + Drop slide_filenameprefix_nofile and use slide_filename_prefix for
       slides that have no file associated with them.
     + Add leading zeros to the number in the slide filename.
+  * When a thumbnail_max_width is defined, force all thumbnail box to this
+    width.
   * Fix slide numbering depending on LINE and BREAK entries.
   * Do not remove all html files on --clean and when regenerating the gallery,
     but only those files that match index filename or slide filename prefix

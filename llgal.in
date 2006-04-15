@@ -2773,13 +2773,18 @@ sub generate_index {
 	    my $entry = $entries[$i+$j] ;
 	    my $type = $entry->{type} ;
 	    my $title = $entry->{title} ;
-	    my $width = $entry->{thumb_xdim} ;
-	    my $height = $entry->{thumb_ydim} ;
+	    my $thumb_width = $entry->{thumb_xdim} ;
+	    my $thumb_height = $entry->{thumb_ydim} ;
+	    my $box_width = $thumb_width;
+	    my $box_height = $thumb_height;
+
+	    # if a thumbnail width max is defined, force the box to its width
+	    $box_width = $opts->{thumbnail_width_max} if $opts->{thumbnail_width_max} ;
 
 	    if ($type == $TYPE_IMG) {
 		# IMG thumbnail
 
-		print IXW "    <td class=\"thumb\" style=\"width: ${width}px; height: ${height}px;\">\n" ;
+		print IXW "    <td class=\"thumb\" style=\"width: ${box_width}px; height: ${box_height}px;\">\n" ;
 		if ($opts->{make_no_slides}) {
 		    print IXW "      <a href=\"$entry->{url}\"" ;
 		} else {
@@ -2787,7 +2792,7 @@ sub generate_index {
 		}
 		print IXW " title=\"$opts->{over_thumbnail_text}$title $entry->{scaled_dimstring}\">\n" ;
 		print IXW "        <img src=\"$entry->{thumb_url}\" "
-			."style=\"width: $entry->{thumb_xdim}px; height: $entry->{thumb_ydim}px;\" "
+			."style=\"width: ${thumb_width}px; height: ${thumb_height}px;\" "
 			."alt=\"$opts->{alt_thumbnail_text}$title $entry->{thumb_dimstring}\" />\n" ;
 		print IXW "      </a>\n" ;
 		print IXW "    </td>\n" ;
@@ -2795,7 +2800,7 @@ sub generate_index {
 	    } elsif ($entry->{thumb_url}) {
 		# not IMG, but with a user-given thumbnail
 
-		print IXW "    <td class=\"thumb\" style=\"width: ${width}px; height: ${height}px;\">\n" ;
+		print IXW "    <td class=\"thumb\" style=\"width: ${box_width}px; height: ${box_height}px;\">\n" ;
 		if ($type == $TYPE_TXT) {
 		    # TXT with a thumbnail ? ok...
 		    if ($opts->{make_no_slides}) {
@@ -2803,7 +2808,7 @@ sub generate_index {
 			print IXW "      <a href=\"$entry->{slide_url}\" "
 				."title=\"$title $entry->{scaled_dimstring}\">\n" ;
 			print IXW "        <img src=\"$entry->{thumb_url}\" "
-				."style=\"width: $entry->{thumb_xdim}px; height: $entry->{thumb_ydim}px;\" "
+				."style=\"width: ${thumb_width}px; height: ${thumb_height}px;\" "
 				."alt=\"$entry->{linktext} $entry->{thumb_dimstring}\" />\n" ;
 			print IXW "      </a>" ;
 
@@ -2811,7 +2816,7 @@ sub generate_index {
 			# thumbnail without any link
 			print IXW "      <img src=\"$entry->{thumb_url}\" "
 				."title=\"$title $entry->{scaled_dimstring}\" "
-				."style=\"width: $entry->{thumb_xdim}px; height: $entry->{thumb_ydim}px;\" "
+				."style=\"width: ${thumb_width}px; height: ${thumb_height}px;\" "
 				."alt=\"$entry->{linktext} $entry->{thumb_dimstring}\" />\n" ;
 		    }
 		} else {
@@ -2819,14 +2824,14 @@ sub generate_index {
 		    print IXW "      <a href=\"$entry->{url}\" "
 		    	."title=\"$title $entry->{scaled_dimstring}\">\n" ;
 		    print IXW "        <img src=\"$entry->{thumb_url}\" "
-			."style=\"width: $entry->{thumb_xdim}px; height: $entry->{thumb_ydim}px;\" "
+			."style=\"width: ${thumb_width}px; height: ${thumb_height}px;\" "
 			."alt=\"$entry->{linktext} $entry->{thumb_dimstring}\" />\n" ;
 		    print IXW "      </a>\n" ;
 		}
 		print IXW "    </td>\n" ;
 	    } else {
 		# not IMG, without thumbnail
-		print IXW "    <td class=\"text-thumb\" style=\"width: ", $width, "px; height: ", $height, "px;\">\n" ;
+		print IXW "    <td class=\"text-thumb\" style=\"width: ${box_width}px; height: ${box_height}px;\">\n" ;
 		if ($type == $TYPE_TXT) {
 		    # thumbnail linking to the slide
 		    print IXW "      <a href=\"$entry->{slide_url}\" title=\"$title\">$entry->{linktext}</a>\n" ;
