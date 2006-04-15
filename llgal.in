@@ -1036,14 +1036,42 @@ sub make_safe_url {
 }
 
 ######################################################################
-# sanity check
+# various common checks and definitions
 
-sub sanity_checks {
+sub prepare_common_variables {
     my $opts = shift ;
 
-    # cannot have --bigy/xy and -s
-    die "Please choose between --bigy/xy and -s\n"
-	if ($opts->{slide_height_max} or $opts->{slide_width_max}) and $opts->{make_no_slides} ;
+    # check a few string that have to be non-empty and may need to be single file without path
+    die "Please give a non-empty directory name without path as a local llgal directory\n"
+	if $local_llgal_dir eq "" or $local_llgal_dir =~ /\// ;
+}
+
+######################################################################
+# various checks and definitions to process the captions
+
+sub prepare_captions_variables {
+    my $opts = shift ;
+
+    prepare_common_variables $opts ;
+
+    # check a few string that have to be non-empty and may need to be single file without path
+    die "Please give a non-empty filename without path as a caption filename\n"
+	if $opts->{captions_filename} eq "" or $opts->{captions_filename} =~ /\// ;
+    die "Please give a non-empty caption removal line\n"
+	if $opts->{captions_removal_line} eq "" ;
+
+    # DateFormat should be initialized with whatever the user said to --ctf
+    $exifTool->Options(DateFormat => $opts->{timestamp_format_in_caption}) ;
+}
+
+######################################################################
+# various check and definitions to create the gallery
+
+sub prepare_gallery_variables {
+    my $opts = shift ;
+
+    prepare_common_variables $opts ;
+    prepare_captions_variables $opts ;
 
     # check a few string that have to be non-empty and may need to be single file without path
     die "Please give a non-empty filename without path as a CSS filename\n"
@@ -1060,32 +1088,40 @@ sub sanity_checks {
 	if $opts->{indextemplate_filename} eq "" or $opts->{indextemplate_filename} =~ /\// ;
     die "Please give a non-empty filename without path as a slide template filename\n"
 	if $opts->{slidetemplate_filename} eq "" or $opts->{slidetemplate_filename} =~ /\// ;
-    die "Please give a non-empty directory name without path as a local llgal directory\n"
-	if $local_llgal_dir eq "" or $local_llgal_dir =~ /\// ;
+
     die "Please give a non-empty string without path as a slide filename prefix\n"
 	if $opts->{scaled_image_filenameprefix} eq "" or $opts->{scaled_image_filenameprefix} =~ /\// ;
     die "Please give a non-empty string without path as a thumbnail filename prefix\n"
 	if $opts->{thumbnail_image_filenameprefix} eq "" or $opts->{thumbnail_image_filenameprefix} =~ /\// ;
     die "Please give a non-empty filename without path as a index filename\n"
 	if $opts->{index_filename} eq "" or $opts->{index_filename} =~ /\// ;
-    die "Please give a non-empty filename without path as a caption filename\n"
-	if $opts->{captions_filename} eq "" or $opts->{captions_filename} =~ /\// ;
     die "Please give a non-empty string without path as a user-given scaled image prefix\n"
 	if $opts->{user_scaled_image_filenameprefix} eq "" or $opts->{user_scaled_image_filenameprefix} =~ /\// ;
     die "Please give a non-empty string without path as a user-given thumbnail image prefix\n"
 	if $opts->{user_thumbnail_image_filenameprefix} eq "" or $opts->{user_thumbnail_image_filenameprefix} =~ /\// ;
-    die "Please give a non-empty caption removal line\n"
-	if $opts->{captions_removal_line} eq "" ;
 
-    # DateFormat should be initialized with whatever the user said to --ctf
-    $exifTool->Options(DateFormat => $opts->{timestamp_format_in_caption}) ;
-}
+    # css location
+    if ($opts->{css_location} =~ /^(.*\/)$/) {
+	$opts->{css_location} .= $opts->{css_filename} ;
+    }
 
-######################################################################
-# check and prepare numerical options
+    # images location
+    if ($opts->{filmtile_location} =~ /^(.*)\/$/) {
+	$opts->{filmtile_location} .= $opts->{filmtile_filename} ;
+    }
+    if ($opts->{index_link_image_location} =~ /^(.*\/)$/) {
+	$opts->{index_link_image_location} .= $opts->{index_link_image_filename} ;
+    }
+    if ($opts->{prev_slide_link_image_location} =~ /^(.*\/)$/) {
+	$opts->{prev_slide_link_image_location} .= $opts->{prev_slide_link_image_filename} ;
+    }
+    if ($opts->{next_slide_link_image_location} =~ /^(.*\/)$/) {
+	$opts->{next_slide_link_image_location} .= $opts->{next_slide_link_image_filename} ;
+    }
 
-sub prepare_numerical_options {
-    my $opts = shift ;
+    # cannot have --bigy/xy and -s
+    die "Please choose between --bigy/xy and -s\n"
+	if ($opts->{slide_height_max} or $opts->{slide_width_max}) and $opts->{make_no_slides} ;
 
     # thumbnail_width_max must be > 0 or 0 for unlimited
     die "Please give an integer value for thumbnail width max\n"
@@ -1185,13 +1221,6 @@ sub prepare_numerical_options {
     # either pixels or thumbnails per row must be limited
     die "Please limit pixels or thumbnails per row\n"
 	unless $opts->{pixels_per_row} > 0 or $opts->{thumbnails_per_row} > 0 ;
-}
-
-######################################################################
-# prepare a few variables for later
-
-sub prepare_various_variables {
-    my $opts = shift ;
 
     # adapt text slide width and height in case of --bigxy or --bigy
     if ($opts->{slide_height_max} > 0) {
@@ -1232,27 +1261,10 @@ sub prepare_various_variables {
 	    push (@{$opts->{scaled_create_command}}, ("-scale", "$opts->{slide_width_max}x")) ;
 	}
     }
+
+    # create scaled/thumbnails by copying the original
     @{$opts->{scaled_copy_command}} = ("cp", "-f") ;
     @{$opts->{thumbnail_copy_command}} = ("cp", "-f") ;
-
-    # css location
-    if ($opts->{css_location} =~ /^(.*\/)$/) {
-	$opts->{css_location} .= $opts->{css_filename} ;
-    }
-
-    # images location
-    if ($opts->{filmtile_location} =~ /^(.*)\/$/) {
-	$opts->{filmtile_location} .= $opts->{filmtile_filename} ;
-    }
-    if ($opts->{index_link_image_location} =~ /^(.*\/)$/) {
-	$opts->{index_link_image_location} .= $opts->{index_link_image_filename} ;
-    }
-    if ($opts->{prev_slide_link_image_location} =~ /^(.*\/)$/) {
-	$opts->{prev_slide_link_image_location} .= $opts->{prev_slide_link_image_filename} ;
-    }
-    if ($opts->{next_slide_link_image_location} =~ /^(.*\/)$/) {
-	$opts->{next_slide_link_image_location} .= $opts->{next_slide_link_image_filename} ;
-    }
 }
 
 ######################################################################
@@ -3245,7 +3257,7 @@ sub main_process {
     } elsif ($generate_captions) {
 	# generate captions and recurse in entries only
 
-	sanity_checks $opts ;
+	prepare_captions_variables $opts ;
 
 	my $gallery = generate_captions_file $opts ;
 	indprint "Now edit the $destination_dir$local_llgal_dir/$opts->{captions_filename} file to your liking and run llgal\n" ;
@@ -3261,9 +3273,7 @@ sub main_process {
     } else {
 	# main gallery creation and recurse in entries only
 
-	sanity_checks $opts ;
-	prepare_numerical_options $opts ;
-	prepare_various_variables $opts ;
+	prepare_gallery_variables $opts ;
 
 	my $gallery = init_gallery () ;
 
