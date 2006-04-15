@@ -931,8 +931,14 @@ Default is
 .RS
 Maximal width of thumbnails
 .RB [ "--xy <n> "].
+If
+.B 0
+is used, the width is unlimited.
+If not
+.BR 0 ,
+all thumbnails are padded to the given width.
 Default is
-.BR 0 " (" unlimited ).
+.BR 113 .
 .RE
 .I show_caption_under_thumbnails = <0/1>
 .RS

@@ -108,11 +108,11 @@
 
 # Maximal height of thumbnails [-y <n>, --xy <n>]
 # Must be > 0, setting to < 0 resets to default
-# thumbnail_height_max = 0
+# thumbnail_height_max = 75
 
 # Maximal width of thumbnails [--xy <n>]
 # Must be > 0, 0 means unlimited, setting to < 0 resets to default
-# thumbnail_width_max = 0
+# thumbnail_width_max = 113
 
 # Write captions under thumbnails [-u]
 # show_caption_under_thumbnails = 0

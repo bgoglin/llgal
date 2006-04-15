@@ -117,7 +117,7 @@ my $generate_config = undef ;
 
 my $index_cellpadding_default = 3 ;
 my $pixels_per_row_default = 0 ; # unlimited
-my $thumbnail_width_max_default = 0 ; # unlimited
+my $thumbnail_width_max_default = 113 ;
 my $thumbnail_height_max_default = 75 ;
 my $thumbnails_per_row_default = 5 ;
 my $slide_height_max_default = 0 ; # unlimited
