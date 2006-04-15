@@ -45,6 +45,10 @@ Do not show image counter in captions is now --nc instead of -x.
 --sp and --tp options got removed. But scaled_image_filenameprefix and
 thumbnail_image_filenameprefix configuration options allow prefix modification.
 
+-bigy (limit image height in slides) is replaced with --sy.
+
+-y (limit thumbnail height) is replaced with --ty.
+
 -t has been removed, the user just need to modify the tile.png image to
 get an updated layout.
 

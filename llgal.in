@@ -423,9 +423,9 @@ sub add_defaults {
 	pixels_per_row => $pixels_per_row_default,
 # how many thumbnails per row at most in index (-w)
 	thumbnails_per_row => $thumbnails_per_row_default,
-# max height of a thumbnail (--xy or -y)
+# max height of a thumbnail (--ty)
 	thumbnail_height_max => $thumbnail_height_max_default,
-# scale thumb longer dimension (--xy)
+# scale thumb longer dimension (--tx)
 	thumbnail_width_max => $thumbnail_width_max_default,
 # write captions under thumbnails on index page (-u)
 	show_caption_under_thumbnails => 0,
@@ -439,9 +439,9 @@ sub add_defaults {
 	make_slide_filename_from_filename => 0,
 # also use image extension in the slide names
 	make_slide_filename_from_extension => 0,
-# max width of the slides (--bigxy)
+# max width of the slides (--sx)
 	slide_width_max => $slide_width_max_default,
-# max height of the slides (--bigxy or --bigy)
+# max height of the slides (--sy)
 	slide_height_max => $slide_height_max_default,
 # default text slide width
 	text_slide_width => $text_slide_width_default,
@@ -601,8 +601,6 @@ Layout Options:
     --ad               like -a, but write only the image dimensions
     --as               like -a, but write only the file size
     --asu <s>          change file size unit (kB)
-    --bigxy <n>        like --xy, use it if you have very large image files
-    --bigy <n>         like -y, use it if you have very large image files
     --cc [<s>]         use image comments as captions
     --cf               use file names as captions
     --ct               use image timestamps as captions
@@ -626,14 +624,16 @@ Layout Options:
     --sort <s>         sort files with criteria <s>
     --templates <dir>  use templates in <dir>
     --title <s>        title of the index of the gallery (Index of pictures)
+    --sx <n>           limit image width in slides to <n> pixels
+    --sy <n>           limit image height in slides to <n> pixels
+    --tx <n>           limit thumbnail width to <n> pixels (113)
+    --ty <n>           limit thumbnail height to <n> pixels (75)
     -u                 write captions under thumbnails on index page
     --uc <url>         use a CSS file that is already available on the web
     --ui <url>         use filmtile and link images that are already available on the web
     -w <n>             rows in thumbnail index are at most <n> images wide (5)
     --www              make all llgal files world-readable
     --wx <n>           rows in thumbnail index are at most <n> pixels wide
-    --xy <n>           scale thumbs to <n> pixels in their longer dimension
-    -y <n>             scale all thumbnails to the same height <n> (75)
   Default values are given in parentheses (where applicable).
 Author:  Brice Goglin
 Homepage:  http://home.gna.org/llgal
@@ -845,8 +845,6 @@ sub parse_cmdline_options {
 	'ad'		=> \$opts->{show_dimensions},
 	'as'		=> \$opts->{show_size},
 	'asu=s'		=> \$opts->{show_size_unit},
-	'bigxy=i'	=> sub { shift ; $opts->{slide_width_max} = $opts->{slide_height_max} = shift ; },
-	'bigy=i'	=> \$opts->{slide_height_max},
 	'cc:s'		=> sub {
 				shift ; my $value = shift ;
 				if ($value eq "") { $opts->{make_caption_from_image_comment} = "std,exif" ; }
@@ -877,6 +875,10 @@ sub parse_cmdline_options {
 	'sort=s'	=> \$opts->{sort_criteria},
 	'templates=s'	=> \@{$opts->{template_dirs}},
 	'title=s'	=> \$opts->{index_title},
+	'sx=i'		=> \$opts->{slide_width_max},
+	'sy=i'		=> \$opts->{slide_height_max},
+	'tx=i'		=> \$opts->{thumbnail_width_max},
+	'ty=i'		=> \$opts->{thumbnail_height_max},
 	'u'		=> \$opts->{show_caption_under_thumbnails},
 	'uc=s'          => \$opts->{css_location},
 	'ui=s'          => sub { shift ; my $url = shift ;
@@ -888,8 +890,6 @@ sub parse_cmdline_options {
 	'w=i'		=> \$opts->{thumbnails_per_row},
 	'www'		=> \$opts->{www_access_rights},
 	'wx=i'		=> \$opts->{pixels_per_row},
-	'xy=i'		=> sub { shift ; $opts->{thumbnail_width_max} = $opts->{thumbnail_height_max} = shift ; },
-	'y=i'		=> \$opts->{thumbnail_height_max},
 	'exclude=s'	=> sub {
 				shift ;
 				my $entry = () ;
@@ -1119,8 +1119,8 @@ sub prepare_gallery_variables {
 	$opts->{next_slide_link_image_location} .= $opts->{next_slide_link_image_filename} ;
     }
 
-    # cannot have --bigy/xy and -s
-    die "Please choose between --bigy/xy and -s\n"
+    # cannot have --sx/sy and -s
+    die "Please choose between --sx/--sy and -s\n"
 	if ($opts->{slide_height_max} or $opts->{slide_width_max}) and $opts->{make_no_slides} ;
 
     # thumbnail_width_max must be > 0 or 0 for unlimited
@@ -1222,7 +1222,7 @@ sub prepare_gallery_variables {
     die "Please limit pixels or thumbnails per row\n"
 	unless $opts->{pixels_per_row} > 0 or $opts->{thumbnails_per_row} > 0 ;
 
-    # adapt text slide width and height in case of --bigxy or --bigy
+    # adapt text slide width and height in case of --sx/sy
     if ($opts->{slide_height_max} > 0) {
 	$opts->{text_slide_width} = $opts->{text_slide_width} / $opts->{text_slide_height} * $opts->{slide_height_max} ;
 	$opts->{text_slide_height} = $opts->{slide_height_max} ;
@@ -1832,7 +1832,8 @@ sub fill_file_entry {
 		# only scale down, never up.
 		($x,$y) = imgsize ("$real_filename") ;
 		my ($status, @output) ;
-		if ($x <= $opts->{slide_width_max} and $y <= $opts->{slide_height_max}) {
+		if (($opts->{slide_width_max} <= 0 or $x <= $opts->{slide_width_max})
+		    and ($opts->{slide_height_max} <= 0 or $y <= $opts->{slide_height_max})) {
 		    ($status, @output) = system_with_output
 			( "copy '$real_filename' scaled image",
 			  @{$opts->{scaled_copy_command}}, "$real_filename", "$real_scaled_filename" ) ;

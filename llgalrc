@@ -70,8 +70,8 @@
 # Prefix of generated HTML slide filenames
 # slide_filenameprefix = "slide_"
 
-# Prefix used to determine slide-image filenames from original images
-# (in case of --bigy).
+# Prefix used to determine the filenames of scaled image that are
+# shown in slides (in case of --sx or --sy).
 # These files will be stored under $local_llgal_dir.
 # scaled_image_filenameprefix = "scaled_"
 
@@ -106,11 +106,11 @@
 # Must be > 0, 0 means unlimited, setting to < 0 resets to default
 # thumbnails_per_row = 5
 
-# Maximal height of thumbnails [-y <n>, --xy <n>]
+# Maximal height of thumbnails [--ty <n>]
 # Must be > 0, setting to < 0 resets to default
 # thumbnail_height_max = 75
 
-# Maximal width of thumbnails [--xy <n>]
+# Maximal width of thumbnails [--tx <n>]
 # Must be > 0, 0 means unlimited, setting to < 0 resets to default
 # thumbnail_width_max = 113
 
@@ -132,17 +132,17 @@
 # slide filename of images that have same filenames.
 # make_slide_filename_from_extension = 0
 
-# Maximal width of slides [--bigxy <n>]
+# Maximal width of slides [--sx <n>]
 # Must be > 0, 0 means unlimited, setting to < 0 resets to default
 # slide_width_max = 0
 
-# Maximal height of slides [--bigxy <n>, --bigy <n>]
+# Maximal height of slides [--sy <n>]
 # Must be > 0, 0 means unlimited, setting to < 0 resets to default
 # slide_height_max = 0
 
 # Default size of non-image slides.
 # Must be > 0, setting to < 0 resets to default
-# Note that the --bigy <n> option may lead to reduction of these values.
+# Note that the --sx and --sy options may lead to reduction of these values.
 # text_slide_width = 400
 # text_slide_height = 300
 

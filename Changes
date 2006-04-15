@@ -18,6 +18,8 @@
       to this width by padding the thumbnail.
     + The previous behavior (unlimited width and unpadded thumbnails) may
       be restored with thumbnail_width_max=0.
+  * Replace --bigxy and --bigy with --sx and --sy.
+  * Replace --xy and -y with --tx and --ty.
   * Drop -t option to change the film time effect height (filmtile_height)
     since the layout does not need it anymore. The user may easily change
     the film tile image without having llgal do it.
