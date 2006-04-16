@@ -81,13 +81,6 @@ sub llgal_gettext {
 }
 
 ######################################################################
-# ExifTool initialization, except what might be changed with llgal config
-my $exifTool = new Image::ExifTool;
-
-# Accept unknown tags, just in case...
-$exifTool->Options(Unknown => 1) ;
-
-######################################################################
 # various temporary globals
 my $destination_string ;
 my $local_llgal_url ;
@@ -880,8 +873,12 @@ sub prepare_captions_variables {
     die "Please give a non-empty caption removal line\n"
 	if $opts->{captions_removal_line} eq "" ;
 
+    # ExifTool initialization
+    $opts->{exiftool} = new Image::ExifTool;
+    # Accept unknown tags, just in case...
+    $opts->{exiftool}->Options(Unknown => 1) ;
     # DateFormat should be initialized with whatever the user said to --ctf
-    $exifTool->Options(DateFormat => $opts->{timestamp_format_in_caption}) ;
+    $opts->{exiftool}->Options(DateFormat => $opts->{timestamp_format_in_caption}) ;
 }
 
 ######################################################################
@@ -1421,7 +1418,7 @@ sub create_file_entry {
 	    if $opts->{make_caption_from_image_timestamp} ;
 	@exif_tags = (@exif_tags, 'UserComment', 'Comment')
 	    if $opts->{make_caption_from_image_comment} ;
-	$entry->{exif_infos} = $exifTool->ImageInfo ("$self->{destination_dir}$filename", @exif_tags) ;
+	$entry->{exif_infos} = $opts->{exiftool}->ImageInfo ("$self->{destination_dir}$filename", @exif_tags) ;
     }
 
     # the caption (will be web-safe after caption file generation)
@@ -2439,7 +2436,7 @@ sub generate_slides {
 		my $exif_infos = $entry->{exif_infos} ;
 		foreach my $tag (@{$opts->{show_exif_tags}}) {
 		    my $value = $exif_infos->{$tag} ;
-		    my $description = $exifTool->GetDescription ($tag) ;
+		    my $description = $opts->{exiftool}->GetDescription ($tag) ;
 		    $exif_table .= "<tr><td class=\"exif-name\">$description</td>"
 			."<td class=\"exif-value\">$value</td></tr>\n"
 			if defined $value ;
