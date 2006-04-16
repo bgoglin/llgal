@@ -90,7 +90,6 @@ my $destination_string ;
 my $local_llgal_url ;
 my $opts ;
 my $opts_without_defaults ;
-my $indent = "" ;
 
 ######################################################################
 # general command-line options
@@ -130,7 +129,19 @@ my $text_slide_height_default = 300 ;
 
 # Print messages with indentation according to recursion level
 
-sub indprint {
+my $indent = "" ;
+
+sub save_and_indent {
+    my $saved_indent = $indent ;
+    $indent .= "  " ;
+    return $saved_indent ;
+}
+
+sub restore_indent {
+    $indent = shift ;
+}
+
+sub indented_print {
     print $indent ;
     print @_ ;
 }
@@ -1003,10 +1014,10 @@ sub find_template_file {
 sub get_template_file {
     my $filename = shift ;
     if (-e "$destination_dir$local_llgal_dir/$filename") {
-	indprint "Found $filename in $destination_dir$local_llgal_dir/, using it.\n" ;
+	indented_print "Found $filename in $destination_dir$local_llgal_dir/, using it.\n" ;
     } else {
 	my $srcdir = find_generic_template_file ($filename, 1) ;
-	indprint "No $filename in $destination_dir$local_llgal_dir/, getting a copy from $srcdir\n" ;
+	indented_print "No $filename in $destination_dir$local_llgal_dir/, getting a copy from $srcdir\n" ;
 	copy_file ($filename, $srcdir, "$destination_dir$local_llgal_dir" ) ;
     }
 }
@@ -1127,7 +1138,7 @@ sub prepare_gallery_variables {
     die "Please give an integer value for thumbnail width max\n"
 	unless is_integer ($opts->{thumbnail_width_max}) ;
     if ($opts->{thumbnail_width_max} < 0) {
-	indprint "Thumbnail width max value < 0, restoring to default (".
+	indented_print "Thumbnail width max value < 0, restoring to default (".
 	    ($thumbnail_width_max_default?$thumbnail_width_max_default:"unlimited") .")\n" ;
 	$opts->{thumbnail_width_max} = $thumbnail_width_max_default ;
     }
@@ -1138,7 +1149,7 @@ sub prepare_gallery_variables {
     die "Please give an integer value for thumbnail height max\n"
 	unless is_integer ($opts->{thumbnail_height_max}) ;
     if ($opts->{thumbnail_height_max} < 0) {
-	indprint "Thumbnail height max value < 0, restoring to default ($thumbnail_height_max_default)\n" ;
+	indented_print "Thumbnail height max value < 0, restoring to default ($thumbnail_height_max_default)\n" ;
 	$opts->{thumbnail_height_max} = $thumbnail_height_max_default ;
     }
     die "Please give a positive thumbnail height max value\n"
@@ -1148,7 +1159,7 @@ sub prepare_gallery_variables {
     die "Please give an integer value for thumbnails per row\n"
 	unless is_integer ($opts->{thumbnails_per_row}) ;
     if ($opts->{thumbnails_per_row} < 0) {
-	indprint "Thumbnails per row value < 0, restoring to default (".
+	indented_print "Thumbnails per row value < 0, restoring to default (".
 	    ($thumbnails_per_row_default?$thumbnails_per_row_default:"unlimited") .")\n" ;
 	$opts->{thumbnails_per_row} = $thumbnails_per_row_default ;
     }
@@ -1159,7 +1170,7 @@ sub prepare_gallery_variables {
     die "Please give an integer value for pixels per row\n"
 	unless is_integer ($opts->{pixels_per_row}) ;
     if ($opts->{pixels_per_row} < 0) {
-	indprint "Pixels per row value < 0, restoring to default (".
+	indented_print "Pixels per row value < 0, restoring to default (".
 	    ($pixels_per_row_default?$pixels_per_row_default:"unlimited") .")\n" ;
 	$opts->{pixels_per_row} = $pixels_per_row_default ;
     }
@@ -1170,7 +1181,7 @@ sub prepare_gallery_variables {
     die "Please give an integer value for index cellpadding\n"
 	unless is_integer ($opts->{index_cellpadding}) ;
     if ($opts->{index_cellpadding} < 0) {
-	indprint "Index cellpadding value < 0, restoring to default ($index_cellpadding_default)\n" ;
+	indented_print "Index cellpadding value < 0, restoring to default ($index_cellpadding_default)\n" ;
 	$opts->{index_cellpadding} = $index_cellpadding_default ;
     }
     die "Please give a positive or null index cellpadding value\n"
@@ -1180,7 +1191,7 @@ sub prepare_gallery_variables {
     die "Please give an integer value for text slide width\n"
 	unless is_integer ($opts->{text_slide_width}) ;
     if ($opts->{text_slide_width} < 0) {
-	indprint "Text slide width value < 0, restoring to default ($text_slide_width_default)\n" ;
+	indented_print "Text slide width value < 0, restoring to default ($text_slide_width_default)\n" ;
 	$opts->{text_slide_width} = $text_slide_width_default ;
     }
     die "Please give a positive text slide width value\n"
@@ -1190,7 +1201,7 @@ sub prepare_gallery_variables {
     die "Please give an integer value for text slide height\n"
 	unless is_integer ($opts->{text_slide_height}) ;
     if ($opts->{text_slide_height} < 0) {
-	indprint "Text slide height value < 0, restoring to default ($text_slide_height_default)\n" ;
+	indented_print "Text slide height value < 0, restoring to default ($text_slide_height_default)\n" ;
 	$opts->{text_slide_height} = $text_slide_height_default ;
     }
     die "Please give a positive text slide height value\n"
@@ -1200,7 +1211,7 @@ sub prepare_gallery_variables {
     die "Please give an integer value for slide width max\n"
 	unless is_integer ($opts->{slide_width_max}) ;
     if ($opts->{slide_width_max} < 0) {
-	indprint "Slide width max value < 0, restoring to default (".
+	indented_print "Slide width max value < 0, restoring to default (".
 	    ($slide_width_max_default?$slide_width_max_default:"unlimited") .")\n" ;
 	$opts->{slide_width_max} = $slide_width_max_default ;
     }
@@ -1211,7 +1222,7 @@ sub prepare_gallery_variables {
     die "Please give an integer value for slide height max\n"
 	unless is_integer ($opts->{slide_height_max}) ;
     if ($opts->{slide_height_max} < 0) {
-	indprint "Slide height max value < 0, restoring to default (".
+	indented_print "Slide height max value < 0, restoring to default (".
 	    ($slide_height_max_default?$slide_height_max_default:"unlimited") .")\n" ;
 	$opts->{slide_height_max} = $slide_height_max_default ;
     }
@@ -1274,9 +1285,9 @@ sub clean_files {
     my $cleanall = shift ;
     my $notdeleted = 0 ;
     if ($cleanall) {
-	indprint "Cleaning all in $destination_string\n" ;
+	indented_print "Cleaning all in $destination_string\n" ;
     } else {
-	indprint "Cleaning in $destination_string\n" ;
+	indented_print "Cleaning in $destination_string\n" ;
     }
 
     opendir DIR, "$destination_dir$local_llgal_dir"
@@ -1361,7 +1372,7 @@ sub clean_files {
 sub give_templates {
     my $destdir = shift ;
     if ( ! -e $destdir ) {
-	indprint "Creating template directory $destdir...\n" ;
+	indented_print "Creating template directory $destdir...\n" ;
 	mkdir $destdir
 	    or die "Failed to create $destdir ($!)" ;
     }
@@ -1371,10 +1382,10 @@ sub give_templates {
 	  $opts->{prev_slide_link_image_filename}, $opts->{next_slide_link_image_filename},
 	  $opts->{indextemplate_filename}, $opts->{slidetemplate_filename} ) {
 	if ( -e "$destdir/$filename" ) {
-	    indprint "$filename already exists in $destdir.\n" ;
+	    indented_print "$filename already exists in $destdir.\n" ;
 	} else {
 	    my $srcdir = find_generic_template_file ($filename, 1) ;
-	    indprint "$filename does not exist in $destdir, getting a copy from $srcdir...\n" ;
+	    indented_print "$filename does not exist in $destdir, getting a copy from $srcdir...\n" ;
 	    copy_file ($filename, $srcdir, $destdir ) ;
 	}
     }
@@ -1936,7 +1947,7 @@ sub fill_entries {
     my @entries = @{$gallery->{entries}} ;
     my @final_entries = () ;
 
-    indprint "Preparing entries: " ;
+    indented_print "Preparing entries: " ;
     init_percentage () ;
 
     my $i = 0 ;
@@ -2079,7 +2090,7 @@ sub get_entries_from_directory {
 	die "Unknown sort criteria '$opts->{sort_criteria}'.\n" ;
     }
 
-    indprint "Listing entries: " ;
+    indented_print "Listing entries: " ;
     init_percentage () ;
 
     for(my $i = 0; $i < @filenames; $i++) {
@@ -2197,7 +2208,7 @@ sub generate_captions_file {
     get_entries_from_directory $gallery ;
     my @entries = @{$gallery->{entries}} ;
 
-    indprint "Found ". (scalar @entries) ." files in $destination_string\n" ;
+    indented_print "Found ". (scalar @entries) ." files in $destination_string\n" ;
 
     my @captions = () ;
 
@@ -2216,7 +2227,7 @@ sub generate_captions_file {
     my $old_next_gallery_link_text ;
 
     if (-e "$destination_dir$local_llgal_dir/$opts->{captions_filename}") {
-	indprint "Reading existing captions from $opts->{captions_filename}.\n" ;
+	indented_print "Reading existing captions from $opts->{captions_filename}.\n" ;
 	open (CAP, "$destination_dir$local_llgal_dir/$opts->{captions_filename}")
 	    or die "Can't open $destination_dir$local_llgal_dir/$opts->{captions_filename} for reading\n" ;
 	@captions = <CAP> ;
@@ -2239,7 +2250,7 @@ sub generate_captions_file {
 	    }
 	}
 
-	indprint "Appending new captions to $opts->{captions_filename}: " ;
+	indented_print "Appending new captions to $opts->{captions_filename}: " ;
 	open (CAP, ">>$destination_dir$local_llgal_dir/$opts->{captions_filename}")
 	    or die "Can't open $destination_dir$local_llgal_dir/$opts->{captions_filename} file to append\n" ;
 
@@ -2247,7 +2258,7 @@ sub generate_captions_file {
 	print CAP "# Appended new captions (". (scalar localtime) .").\n" ;
 	print CAP "\n" ;
     } else {
-	indprint "Creating the $opts->{captions_filename} file: " ;
+	indented_print "Creating the $opts->{captions_filename} file: " ;
 	open (CAP, ">$destination_dir$local_llgal_dir/$opts->{captions_filename}")
 	    or die "Can't create $destination_dir$local_llgal_dir/$opts->{captions_filename} file\n" ;
 
@@ -2330,7 +2341,7 @@ sub read_captions_file {
     my @headers = () ;
     my @footers = () ;
 
-    indprint "Reading entries in the $opts->{captions_filename} file: " ;
+    indented_print "Reading entries in the $opts->{captions_filename} file: " ;
     init_percentage () ;
 
     open(CAP,"$destination_dir$local_llgal_dir/$opts->{captions_filename}")
@@ -2473,7 +2484,7 @@ sub generate_slides {
 
     # find the slidetemplate
     my $slidetemplate = find_template_file ($opts->{slidetemplate_filename}, 1) . "/$opts->{slidetemplate_filename}" ;
-    indprint "Using '$slidetemplate' as HTML slide template.\n" ;
+    indented_print "Using '$slidetemplate' as HTML slide template.\n" ;
 
     # keep the slidetemplate in memory instead of always reopening it
     my @slidetemplate_text ;
@@ -2483,7 +2494,7 @@ sub generate_slides {
     close SR ;
 
     # create slides
-    indprint "Creating individual slides: " ;
+    indented_print "Creating individual slides: " ;
     init_percentage () ;
     for (my $i = 0; $i < @entries; $i++) {
 	my $entry = $entries[$i] ;
@@ -2676,10 +2687,10 @@ sub generate_index {
 
     # find the indextemplate
     my $indextemplate = find_template_file ($opts->{indextemplate_filename}, 1) . "/$opts->{indextemplate_filename}" ;
-    indprint "Using '$indextemplate' as HTML index template.\n" ;
+    indented_print "Using '$indextemplate' as HTML index template.\n" ;
 
     # open the template and the destination
-    indprint "Creating the $opts->{index_filename}.$opts->{www_extension} file: " ;
+    indented_print "Creating the $opts->{index_filename}.$opts->{www_extension} file: " ;
     open(IXR, "$indextemplate")
 	or die "Can't open the index template file '$indextemplate'\n" ;
     open(IXW, ">$destination_dir$opts->{index_filename}.$opts->{www_extension}")
@@ -2932,9 +2943,9 @@ sub generate_index {
 sub get_files {
     # Get the film tile for the index
     if ($opts->{show_no_film_effect}) {
-	indprint "Omitting film effect.\n" ;
+	indented_print "Omitting film effect.\n" ;
     } elsif ($opts->{filmtile_location}) {
-	indprint "Using the film tile that is available on $opts->{filmtile_location}.\n" ;
+	indented_print "Using the film tile that is available on $opts->{filmtile_location}.\n" ;
     } else {
 	get_template_file ($opts->{filmtile_filename}) ;
     }
@@ -2942,21 +2953,21 @@ sub get_files {
     # Get link images
     if ($opts->{index_link_image}) {
 	if ($opts->{index_link_image_location}) {
-	    indprint "Using the index link image that is available on $opts->{index_link_image_location}.\n" ;
+	    indented_print "Using the index link image that is available on $opts->{index_link_image_location}.\n" ;
 	} else {
 	    get_template_file ($opts->{index_link_image_filename}) ;
 	}
     }
     if ($opts->{prev_slide_link_image} and ! $opts->{prev_slide_link_preview}) {
 	if ($opts->{prev_slide_link_image_location}) {
-	    indprint "Using the prev slide link image that is available on $opts->{prev_slide_link_image_location}.\n" ;
+	    indented_print "Using the prev slide link image that is available on $opts->{prev_slide_link_image_location}.\n" ;
 	} else {
 	    get_template_file ($opts->{prev_slide_link_image_filename}) ;
 	}
     }
     if ($opts->{next_slide_link_image} and ! $opts->{next_slide_link_preview}) {
 	if ($opts->{next_slide_link_image_location}) {
-	    indprint "Using the next slide link image that is available on $opts->{next_slide_link_image_location}.\n" ;
+	    indented_print "Using the next slide link image that is available on $opts->{next_slide_link_image_location}.\n" ;
 	} else {
 	    get_template_file ($opts->{next_slide_link_image_filename}) ;
 	}
@@ -2964,7 +2975,7 @@ sub get_files {
 
     # Get the css
     if ($opts->{css_location}) {
-	indprint "Using the CSS that is available on $opts->{css_location}.\n" ;
+	indented_print "Using the CSS that is available on $opts->{css_location}.\n" ;
     } else {
 	get_template_file ($opts->{css_filename}) ;
     }
@@ -2995,7 +3006,7 @@ sub make_www_rights {
     my $opts = shift ;
     my @entries = @{$gallery->{entries}} ;
 
-    indprint "Making all llgal files world-readable for WWW publishing.\n" ;
+    indented_print "Making all llgal files world-readable for WWW publishing.\n" ;
 
     # index
     make_readable "$destination_dir$opts->{index_filename}.$opts->{www_extension}" ;
@@ -3051,7 +3062,7 @@ sub generate_config {
     my $file = shift ;
     my $opts = shift ;
 
-    indprint "Generating config file '$file'.\n" ;
+    indented_print "Generating config file '$file'.\n" ;
     if (-e "$file") {
 	my $old_file = "$file.save.". (strftime('%Y-%m-%d_%H:%M:%S' ,localtime)) ;
 	immediate_warning "Renaming old configuration file '$file' as '$old_file'" ;
@@ -3169,17 +3180,16 @@ sub main_process ;
 sub subdir_process {
     my $dir = shift ;
     my $subdir_opts = shift ;
-    indprint "Entering subdirectory '$dir'...\n" ;
+    indented_print "Entering subdirectory '$dir'...\n" ;
     # save context
     my $saved_destination_dir = $destination_dir;
     my $saved_destination_string = $destination_string;
     my $saved_opts = $opts ;
     my $saved_opts_without_defaults = $opts_without_defaults ;
-    my $saved_indent = $indent ;
+    my $saved_indent = save_and_indent ;
     # setup new gallery context
     $destination_dir .= $dir."/" ;
     @ARGV = @llgal_options ;
-    $indent = "  ".$indent ;
     # recursive call
     my $subgallery = main_process $subdir_opts ;
     # restore context
@@ -3187,8 +3197,8 @@ sub subdir_process {
     $destination_string = $saved_destination_string;
     $opts = $saved_opts ;
     $opts_without_defaults = $saved_opts_without_defaults ;
-    $indent = $saved_indent ;
-    indprint "Leaving subdirectory '$dir'.\n" ;
+    restore_indent $saved_indent ;
+    indented_print "Leaving subdirectory '$dir'.\n" ;
     print "\n" ;
     return $subgallery ;
 }
@@ -3236,8 +3246,8 @@ sub main_process {
 	    $destdir = $user_share_dir
 		if $destdir eq "user" ;
 	    give_templates $destdir ;
-	    indprint "You may now edit templates in $destdir and generate new galleries.\n" ;
-	    indprint "You may also remove any template that you do not want to modify.\n" ;
+	    indented_print "You may now edit templates in $destdir and generate new galleries.\n" ;
+	    indented_print "You may also remove any template that you do not want to modify.\n" ;
 	}
 
 	# recursive in ALL subdirectories
@@ -3261,7 +3271,7 @@ sub main_process {
 	prepare_captions_variables $opts ;
 
 	my $gallery = generate_captions_file $opts ;
-	indprint "Now edit the $destination_dir$local_llgal_dir/$opts->{captions_filename} file to your liking and run llgal\n" ;
+	indented_print "Now edit the $destination_dir$local_llgal_dir/$opts->{captions_filename} file to your liking and run llgal\n" ;
 
 	if ($opts->{recursive}) {
 	    # list subdir entries
@@ -3282,12 +3292,12 @@ sub main_process {
 	    # generate the gallery using the caption file
 	    read_captions_file $gallery ;
 	    fill_entries $gallery ;
-	    indprint "Found ". (scalar @{$gallery->{entries}}) ." files in the captions file.\n" ;
+	    indented_print "Found ". (scalar @{$gallery->{entries}}) ." files in the captions file.\n" ;
 	} else {
 	    # generate the gallery from scratch
 	    get_entries_from_directory $gallery ;
 	    fill_entries $gallery ;
-	    indprint "Found ". (scalar @{$gallery->{entries}}) ." files in $destination_string\n" ;
+	    indented_print "Found ". (scalar @{$gallery->{entries}}) ." files in $destination_string\n" ;
 	}
 
 	finalize_entries $gallery, $opts ;
@@ -3295,7 +3305,7 @@ sub main_process {
 	add_headers_footers $gallery ;
 
 	if ($opts->{make_no_slides}) {
-	    indprint "Linking thumbnails directly to image files...  Making no html slides.\n" ;
+	    indented_print "Linking thumbnails directly to image files...  Making no html slides.\n" ;
 	} else {
 	    generate_slides $gallery ;
 	}
