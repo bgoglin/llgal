@@ -11,6 +11,7 @@ use vars qw(@EXPORT) ;
 	      find_template_file
 	      find_generic_template_file
 	      get_template_file
+	      get_llgal_files
 	      give_templates
 	      ) ;
 
@@ -68,6 +69,51 @@ sub get_template_file {
 	my $srcdir = find_generic_template_file $self, $opts, $filename, 1 ;
 	indented_print "No $filename in $self->{destination_dir}$self->{local_llgal_dir}/, getting a copy from $srcdir\n" ;
 	copy_file $filename, $srcdir, "$self->{destination_dir}$self->{local_llgal_dir}" ;
+    }
+}
+
+# Get llgal files
+sub get_llgal_files {
+    my $self = shift ;
+    my $opts = shift ;
+
+    # Get the film tile for the index
+    if ($opts->{show_no_film_effect}) {
+	indented_print "Omitting film effect.\n" ;
+    } elsif ($opts->{filmtile_location}) {
+	indented_print "Using the film tile that is available on $opts->{filmtile_location}.\n" ;
+    } else {
+	get_template_file $self, $opts, $opts->{filmtile_filename} ;
+    }
+
+    # Get link images
+    if ($opts->{index_link_image}) {
+	if ($opts->{index_link_image_location}) {
+	    indented_print "Using the index link image that is available on $opts->{index_link_image_location}.\n" ;
+	} else {
+	    get_template_file $self, $opts, $opts->{index_link_image_filename} ;
+	}
+    }
+    if ($opts->{prev_slide_link_image} and ! $opts->{prev_slide_link_preview}) {
+	if ($opts->{prev_slide_link_image_location}) {
+	    indented_print "Using the prev slide link image that is available on $opts->{prev_slide_link_image_location}.\n" ;
+	} else {
+	    get_template_file $self, $opts, $opts->{prev_slide_link_image_filename} ;
+	}
+    }
+    if ($opts->{next_slide_link_image} and ! $opts->{next_slide_link_preview}) {
+	if ($opts->{next_slide_link_image_location}) {
+	    indented_print "Using the next slide link image that is available on $opts->{next_slide_link_image_location}.\n" ;
+	} else {
+	    get_template_file $self, $opts, $opts->{next_slide_link_image_filename} ;
+	}
+    }
+
+    # Get the css
+    if ($opts->{css_location}) {
+	indented_print "Using the CSS that is available on $opts->{css_location}.\n" ;
+    } else {
+	get_template_file $self, $opts, $opts->{css_filename} ;
     }
 }
 
