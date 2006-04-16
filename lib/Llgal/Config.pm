@@ -23,12 +23,6 @@ use vars qw(@EXPORT) ;
 	      prepare_gallery_variables
 	      generate_config
 	      die_usage
-	      $normal_opts_type
-	      $special_opts_with_output
-	      $special_nonopts_with_output
-	      $OPT_IS_NUMERIC
-	      $OPT_IS_STRING
-	      $OPT_IS_NONEMPTY_STRING
 	      ) ;
 
 ######################################################################
