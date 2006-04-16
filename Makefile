@@ -7,6 +7,7 @@ endif
 
 .PHONY: llgal clean install uninstall tarball
 
+DATA_SUBDIR	=	data
 PO_SUBDIR	=	po
 
 DESTDIR	=	
@@ -35,7 +36,7 @@ clean:: clean-po
 install:: install-po
 	install -d -m 0755 $(DESTDIR)$(BINDIR)/ $(DESTDIR)$(DATADIR)/llgal/ $(DESTDIR)$(MANDIR)/man1/ $(DESTDIR)$(SYSCONFDIR)/llgal/
 	install -m 0755 llgal $(DESTDIR)$(BINDIR)/llgal
-	install -m 0644 data/* $(DESTDIR)$(DATADIR)/llgal/
+	install -m 0644 $(DATA_SUBDIR)/* $(DESTDIR)$(DATADIR)/llgal/
 	install -m 0644 llgalrc $(DESTDIR)$(SYSCONFDIR)/llgal/
 	install -m 0644 llgal.1 $(DESTDIR)$(MANDIR)/man1/
 
@@ -53,8 +54,7 @@ tarball::
 	cp Makefile /tmp/$(TARBALL)
 	cp Changes /tmp/$(TARBALL)
 	cp COPYING README UPGRADE VERSION /tmp/$(TARBALL)
-	mkdir /tmp/$(TARBALL)/data/
-	cp -a data/ /tmp/$(TARBALL)
+	cp -a $(DATA_SUBDIR)/ /tmp/$(TARBALL)
 	mkdir /tmp/$(TARBALL)/$(PO_SUBDIR)/
 	cp $(PO_SUBDIR)/Makefile /tmp/$(TARBALL)/$(PO_SUBDIR)/
 	cp $(PO_SUBDIR)/*.po /tmp/$(TARBALL)/$(PO_SUBDIR)/
