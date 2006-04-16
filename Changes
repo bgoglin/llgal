@@ -1,3 +1,5 @@
+llgal (0.13)
+
   * Add --exif (and show_exif_tags) to display a table of exif tags under
     each image slide (requested by Alexandre Buisse). The layout is defined
     by <!--EXIF-TABLE--> in the slide template and some new CSS styles.
@@ -43,6 +45,7 @@
     is empty.
   * Perl-modularization.
 
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Sun, 16 Apr 2006 19:53:00 -0400
 
 llgal (0.12.2)
 
