@@ -63,6 +63,8 @@ tarball::
 	mv /tmp/$(DEBIAN_TARBALL).tar.gz /tmp/$(TARBALL).tar.bz2 ..
 	rm -rf /tmp/$(TARBALL)
 
+.PHONY: update-po clean-po install-po uninstall-po
+
 update-po:
 	$(MAKE) -C $(PO_SUBDIR) update
 
