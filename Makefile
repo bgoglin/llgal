@@ -5,8 +5,6 @@ else
 	VERSION	=	$(shell cat VERSION)
 endif
 
-.PHONY: llgal clean install uninstall tarball
-
 DATA_SUBDIR	=	data
 LIB_SUBDIR	=	lib
 PO_SUBDIR	=	po
@@ -24,9 +22,11 @@ PERL_INSTALLDIRS	=
 TARBALL	=	$(NAME)-$(VERSION)
 DEBIAN_TARBALL	=	$(NAME)_$(VERSION).orig
 
+.PHONY: llgal clean install uninstall tarball
+
 all:: llgal
 
-llgal:: build-lib update-po
+llgal:: llgal.in VERSION build-lib update-po
 	sed -e 's!@DATADIR@!$(DESTDIR)$(DATADIR)!g' -e 's!@SYSCONFDIR@!$(DESTDIR)$(SYSCONFDIR)!g' \
 		-e 's!@LOCALEDIR@!$(DESTDIR)$(LOCALEDIR)!' -e 's!@VERSION@!$(VERSION)!g' \
 		< llgal.in > llgal
@@ -65,9 +65,10 @@ tarball::
 	mv /tmp/$(DEBIAN_TARBALL).tar.gz /tmp/$(TARBALL).tar.bz2 ..
 	rm -rf /tmp/$(TARBALL)
 
+# Perl modules
 .PHONY: build-lib clean-lib install-lib uninstall-lib prepare-lib
 
-$(LIB_SUBDIR)/Makefile.PL: $(LIB_SUBDIR)/Makefile.PL.in
+$(LIB_SUBDIR)/Makefile.PL: $(LIB_SUBDIR)/Makefile.PL.in VERSION
 	sed -e 's!@VERSION@!$(VERSION)!g' < $(LIB_SUBDIR)/Makefile.PL.in > $(LIB_SUBDIR)/Makefile.PL
 
 $(LIB_SUBDIR)/Makefile: $(LIB_SUBDIR)/Makefile.PL
@@ -88,6 +89,7 @@ clean-lib: prepare-lib
 uninstall-lib: prepare-lib
 	$(MAKE) -C $(LIB_SUBDIR) uninstall
 
+# PO files
 .PHONY: update-po clean-po install-po uninstall-po
 
 update-po:
