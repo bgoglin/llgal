@@ -40,7 +40,7 @@
     any timestamp available (reported by Alexandre Buisse).
   * Fix a warning about an uninitialized value being used when the gallery
     is empty.
-  * Begin Perl-modularization.
+  * Perl-modularization.
 
 
 llgal (0.12.2)
