@@ -449,6 +449,13 @@ thus not documented in
 .BR --help .
 
 .TP
+.B --nf
+Omit the film effect altogether.  For a simpler look you
+can also set the thumbnail background to be the same as the main
+index page background with the tile background-color option in the
+.IR llgal.css " file."
+
+.TP
 .BI -p " <n>"
 The cellpadding value of the thumbnail index tables.
 The default is
@@ -484,13 +491,6 @@ Add links to the previous gallery located by
 This option is used internally for recursive galleries, and
 thus not documented in
 .BR --help .
-
-.TP
-.B -r
-Omit the film effect altogether.  For a simpler look you
-can also set the thumbnail background to be the same as the main
-index page background with the tile background-color option in the
-.IR llgal.css " file."
 
 .TP
 .B --Rl
@@ -960,7 +960,7 @@ Default is
 .I show_no_film_effect = <0/1>
 .RS
 Omit film effect
-.RB [ -r ].
+.RB [ --nf ].
 Default is
 .BR 1 " (" enabled ).
 .RE

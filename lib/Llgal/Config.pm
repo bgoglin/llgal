@@ -312,7 +312,7 @@ sub add_defaults {
 	thumbnail_width_max => $thumbnail_width_max_default,
 # write captions under thumbnails on index page (-u)
 	show_caption_under_thumbnails => 0,
-# omit the film effect altogether (-r)
+# omit the film effect altogether (--nf)
 	show_no_film_effect => 0,
 
 # Slides
@@ -454,7 +454,7 @@ sub add_defaults {
 ######################################################################
 # Create usage now to use defaults values
 
-sub usage {
+sub die_usage {
     my $self = shift ;
     my $usage = << "END_OF_USAGE" ;
 This is llgal $self->{version}, the image slide show generator.
@@ -501,9 +501,9 @@ Layout Options:
     --lt               use thumbnail preview for links in slides
     -n                 use image file names for the HTML slide files
     --nc               omit the image count from the captions
+    --nf               omit the film effect altogether
     -p <n>             cellpadding value of thumbnail index tables (3)
     --php              use php extension for generated webpages
-    -r                 omit the film effect altogether
     --Rl               add links between subgalleries
     -s                 make no HTML slides, link thumbnails to images
     --sort <s>         sort files with criteria <s>
@@ -756,10 +756,10 @@ sub parse_cmdline_options {
 	'lt'		=> sub { $opts->{prev_slide_link_preview} = 1 ; $opts->{next_slide_link_preview} = 1 ; },
 	'n'		=> \$opts->{make_slide_filename_from_filename},
 	'nc'		=> sub { $opts->{slide_counter_format} = "" ; },
+	'nf'		=> \$opts->{show_no_film_effect},
 	'option=s'	=> sub { shift ; process_option ($opts, shift) ; },
 	'p=i'		=> \$opts->{index_cellpadding},
 	'php'		=> sub { $opts->{www_extension} = "php" ; },
-	'r'		=> \$opts->{show_no_film_effect},
 	'Rl'		=> \$opts->{link_subgalleries},
 	'S'		=> \$opts->{add_subdirs},
 	's'		=> \$opts->{make_no_slides},
@@ -804,7 +804,7 @@ sub parse_cmdline_options {
 	    # the error has already been displayed
 	    exit -1 ;
 	} else {
-	    usage $self ;
+	    die_usage $self ;
 	}
     }
 

@@ -1773,7 +1773,7 @@ $self->{early_configuration} = 0 ;
 my $cmdline_opts = parse_cmdline_options $self ;
 
 # basic special behaviors may be done here
-die_usage
+die_usage $self
     if $self->{help_asked} ;
 die "This is llgal version $self->{version}.\n"
     if $self->{version_asked} ;

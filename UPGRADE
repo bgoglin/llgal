@@ -42,6 +42,8 @@ Captions generation from filename is --cf instead of -C
 
 Do not show image counter in captions is now --nc instead of -x.
 
+Do not show film effect in the index is now --nf instead of -r.
+
 --sp and --tp options got removed. But scaled_image_filenameprefix and
 thumbnail_image_filenameprefix configuration options allow prefix modification.
 
