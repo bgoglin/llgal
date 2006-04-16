@@ -855,11 +855,12 @@ sub parse_cmdline_options {
 }
 
 ######################################################################
-# manage templates
-
 # find path to the template file in generic directories
 sub find_generic_template_file {
-    my ($filename, $check) = (shift, shift) ;
+    my $self = shift ;
+    my $opts = shift ;
+    my $filename = shift ;
+    my $check = shift ;
     foreach my $dir (@{$opts->{template_dirs}}) {
 	return $dir
 	    if -e "$dir/$filename" ;
@@ -873,21 +874,26 @@ sub find_generic_template_file {
 
 # find path to the template, using the local one if it exists
 sub find_template_file {
-    my ($filename, $check) = (shift, shift) ;
+    my $self = shift ;
+    my $opts = shift ;
+    my $filename = shift ;
+    my $check = shift ;
     return $self->{local_llgal_dir}
 	if -e "$self->{local_llgal_dir}/$filename" ;
-    return find_generic_template_file ($filename, $check) ;
+    return find_generic_template_file $self, $opts, $filename, $check ;
 }
 
 # get a template file from generic directories and save it to local directory
 sub get_template_file {
+    my $self = shift ;
+    my $opts = shift ;
     my $filename = shift ;
     if (-e "$self->{destination_dir}$self->{local_llgal_dir}/$filename") {
 	indented_print "Found $filename in $self->{destination_dir}$self->{local_llgal_dir}/, using it.\n" ;
     } else {
-	my $srcdir = find_generic_template_file ($filename, 1) ;
+	my $srcdir = find_generic_template_file $self, $opts, $filename, 1 ;
 	indented_print "No $filename in $self->{destination_dir}$self->{local_llgal_dir}/, getting a copy from $srcdir\n" ;
-	copy_file ($filename, $srcdir, "$self->{destination_dir}$self->{local_llgal_dir}" ) ;
+	copy_file $filename, $srcdir, "$self->{destination_dir}$self->{local_llgal_dir}" ;
     }
 }
 
@@ -1144,7 +1150,7 @@ sub clean_files {
 		 or /^$opts->{prev_slide_link_image_filename}$/ or /^$opts->{next_slide_link_image_filename}$/
 		 or /^$opts->{indextemplate_filename}$/ or /^$opts->{slidetemplate_filename}$/
 		 or /^$opts->{css_filename}$/) {
-	    my $original = (find_generic_template_file $_, 0)."/".$_ ;
+	    my $original = (find_generic_template_file $self, $opts, $_, 0)."/".$_ ;
 	    my $diff = 0 ;
 	    my @output ;
 	    # default is cleanall, which removes everything, as if file were not changed
@@ -1213,8 +1219,9 @@ sub clean_files {
 
 #####################################################################
 # Give templates to the given directory
-
 sub give_templates {
+    my $self = shift ;
+    my $opts = shift ;
     my $destdir = shift ;
     if ( ! -e $destdir ) {
 	indented_print "Creating template directory $destdir...\n" ;
@@ -1229,9 +1236,9 @@ sub give_templates {
 	if ( -e "$destdir/$filename" ) {
 	    indented_print "$filename already exists in $destdir.\n" ;
 	} else {
-	    my $srcdir = find_generic_template_file ($filename, 1) ;
+	    my $srcdir = find_generic_template_file $self, $opts, $filename, 1 ;
 	    indented_print "$filename does not exist in $destdir, getting a copy from $srcdir...\n" ;
-	    copy_file ($filename, $srcdir, $destdir ) ;
+	    copy_file $filename, $srcdir, $destdir ;
 	}
     }
 }
@@ -2328,7 +2335,7 @@ sub generate_slides {
 	if $? ;
 
     # find the slidetemplate
-    my $slidetemplate = find_template_file ($opts->{slidetemplate_filename}, 1) . "/$opts->{slidetemplate_filename}" ;
+    my $slidetemplate = (find_template_file $self, $opts, $opts->{slidetemplate_filename}, 1) . "/$opts->{slidetemplate_filename}" ;
     indented_print "Using '$slidetemplate' as HTML slide template.\n" ;
 
     # keep the slidetemplate in memory instead of always reopening it
@@ -2531,7 +2538,7 @@ sub generate_index {
     my @footers = @{$gallery->{footers}} ;
 
     # find the indextemplate
-    my $indextemplate = find_template_file ($opts->{indextemplate_filename}, 1) . "/$opts->{indextemplate_filename}" ;
+    my $indextemplate = (find_template_file $self, $opts, $opts->{indextemplate_filename}, 1) . "/$opts->{indextemplate_filename}" ;
     indented_print "Using '$indextemplate' as HTML index template.\n" ;
 
     # open the template and the destination
@@ -2792,7 +2799,7 @@ sub get_files {
     } elsif ($opts->{filmtile_location}) {
 	indented_print "Using the film tile that is available on $opts->{filmtile_location}.\n" ;
     } else {
-	get_template_file ($opts->{filmtile_filename}) ;
+	get_template_file $self, $opts, $opts->{filmtile_filename} ;
     }
 
     # Get link images
@@ -2800,21 +2807,21 @@ sub get_files {
 	if ($opts->{index_link_image_location}) {
 	    indented_print "Using the index link image that is available on $opts->{index_link_image_location}.\n" ;
 	} else {
-	    get_template_file ($opts->{index_link_image_filename}) ;
+	    get_template_file $self, $opts, $opts->{index_link_image_filename} ;
 	}
     }
     if ($opts->{prev_slide_link_image} and ! $opts->{prev_slide_link_preview}) {
 	if ($opts->{prev_slide_link_image_location}) {
 	    indented_print "Using the prev slide link image that is available on $opts->{prev_slide_link_image_location}.\n" ;
 	} else {
-	    get_template_file ($opts->{prev_slide_link_image_filename}) ;
+	    get_template_file $self, $opts, $opts->{prev_slide_link_image_filename} ;
 	}
     }
     if ($opts->{next_slide_link_image} and ! $opts->{next_slide_link_preview}) {
 	if ($opts->{next_slide_link_image_location}) {
 	    indented_print "Using the next slide link image that is available on $opts->{next_slide_link_image_location}.\n" ;
 	} else {
-	    get_template_file ($opts->{next_slide_link_image_filename}) ;
+	    get_template_file $self, $opts, $opts->{next_slide_link_image_filename} ;
 	}
     }
 
@@ -2822,7 +2829,7 @@ sub get_files {
     if ($opts->{css_location}) {
 	indented_print "Using the CSS that is available on $opts->{css_location}.\n" ;
     } else {
-	get_template_file ($opts->{css_filename}) ;
+	get_template_file $self, $opts, $opts->{css_filename} ;
     }
 }
 
@@ -3072,7 +3079,7 @@ sub main_process {
 		if $destdir eq "local" ;
 	    $destdir = $self->{user_share_dir}
 		if $destdir eq "user" ;
-	    give_templates $destdir ;
+	    give_templates $self, $opts, $destdir ;
 	    indented_print "You may now edit templates in $destdir and generate new galleries.\n" ;
 	    indented_print "You may also remove any template that you do not want to modify.\n" ;
 	}
