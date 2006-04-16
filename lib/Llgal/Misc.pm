@@ -18,7 +18,6 @@ use vars qw(@EXPORT ) ;
     end_percentage
     system_with_output
     is_integer
-    copy_file
     back_path
     make_safe_url
     make_safe_url_nowarn
@@ -141,21 +140,6 @@ sub system_with_output {
 sub is_integer {
     my $s = shift ;
     return $s eq int($s) ;
-}
-
-# copy a file
-sub copy_file {
-    my $filename = shift ;
-    my $srcdir = shift ;
-    my $destdir = shift ;
-    my ($status, @output) = system_with_output
-	("copy '$filename' from '$srcdir'",
-	"cp", "-f", "$srcdir/$filename", "$destdir/$filename") ;
-    if ($status) {
-	# die on whatever error
-	immediate_external_warnings @output ;
-	die "Failed to get a copy of '$filename'.\n" ;
-    }
 }
 
 # revert a path into ..

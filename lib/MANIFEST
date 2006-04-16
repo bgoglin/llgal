@@ -1,3 +1,4 @@
 MANIFEST
 Makefile.PL
 Llgal/Misc.pm
+Llgal/Templates.pm
