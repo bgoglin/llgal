@@ -1,8 +1,9 @@
 package Llgal::Templates ;
 
+use strict ;
+
 use Llgal::Misc ;
 
-use strict ;
 use Exporter 'import' ;
 use vars qw(@EXPORT) ;
 
@@ -95,3 +96,4 @@ sub give_templates {
     }
 }
 
+1 ;

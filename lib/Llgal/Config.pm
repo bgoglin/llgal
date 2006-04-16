@@ -1,15 +1,15 @@
 package Llgal::Config ;
 
+use strict ;
+
 use Llgal::Misc ;
 
 use Getopt::Long ;
 use I18N::Langinfo qw(langinfo CODESET) ;
 use Locale::gettext ;
 
-use strict ;
-no strict "refs" ;
 use Exporter 'import' ;
-use vars qw(@EXPORT ) ;
+use vars qw(@EXPORT) ;
 
 @EXPORT = qw (
 	      early_parse_cmdline_options

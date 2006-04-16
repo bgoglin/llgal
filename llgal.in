@@ -1,5 +1,7 @@
 #!/usr/bin/perl -w
 
+use strict ;
+
 use Llgal::Config ;
 use Llgal::Templates ;
 use Llgal::Misc ;
@@ -7,15 +9,9 @@ use Llgal::Misc ;
 use FileHandle ;
 use Image::Size ;
 use Image::ExifTool ;
-use POSIX qw(strftime) ;
-use Time::Local ;
-use Text::ParseWords ;
 use Cwd ;
 use Locale::gettext ;
 use POSIX qw (setlocale) ;
-
-use strict ;
-no strict "refs" ;
 
 Getopt::Long::Configure('noignorecase', 'noautoabbrev', 'bundling') ;
 STDOUT->autoflush("1") ;

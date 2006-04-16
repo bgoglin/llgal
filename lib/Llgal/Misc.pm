@@ -1,8 +1,11 @@
 package Llgal::Misc ;
 
 use strict ;
+
+use URI::Escape ;
+
 use Exporter 'import' ;
-use vars qw(@EXPORT ) ;
+use vars qw(@EXPORT) ;
 
 @EXPORT = qw (
     indented_print
@@ -24,8 +27,6 @@ use vars qw(@EXPORT ) ;
     make_readable
     make_readable_and_traversable
 ) ;
-
-use URI::Escape ;
 
 # Print messages with indentation according to recursion level
 
