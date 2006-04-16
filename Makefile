@@ -8,6 +8,7 @@ endif
 .PHONY: llgal clean install uninstall tarball
 
 DATA_SUBDIR	=	data
+LIB_SUBDIR	=	lib
 PO_SUBDIR	=	po
 
 DESTDIR	=	
@@ -18,29 +19,30 @@ DATADIR	=	$(PREFIX)/share
 SYSCONFDIR	=	$(PREFIX)/etc
 MANDIR	=	$(PREFIX)/man
 LOCALEDIR	=	$(DATADIR)/locale
+PERL_INSTALLDIRS	=	
 
 TARBALL	=	$(NAME)-$(VERSION)
 DEBIAN_TARBALL	=	$(NAME)_$(VERSION).orig
 
 all:: llgal
 
-llgal:: update-po
+llgal:: build-lib update-po
 	sed -e 's!@DATADIR@!$(DESTDIR)$(DATADIR)!g' -e 's!@SYSCONFDIR@!$(DESTDIR)$(SYSCONFDIR)!g' \
 		-e 's!@LOCALEDIR@!$(DESTDIR)$(LOCALEDIR)!' -e 's!@VERSION@!$(VERSION)!g' \
 		< llgal.in > llgal
 	chmod 755 llgal
 
-clean:: clean-po
+clean:: clean-lib clean-po
 	rm -f llgal
 
-install:: install-po
+install:: install-lib install-po
 	install -d -m 0755 $(DESTDIR)$(BINDIR)/ $(DESTDIR)$(DATADIR)/llgal/ $(DESTDIR)$(MANDIR)/man1/ $(DESTDIR)$(SYSCONFDIR)/llgal/
 	install -m 0755 llgal $(DESTDIR)$(BINDIR)/llgal
 	install -m 0644 $(DATA_SUBDIR)/* $(DESTDIR)$(DATADIR)/llgal/
 	install -m 0644 llgalrc $(DESTDIR)$(SYSCONFDIR)/llgal/
 	install -m 0644 llgal.1 $(DESTDIR)$(MANDIR)/man1/
 
-uninstall:: uninstall-po
+uninstall:: uninstall-lib uninstall-po
 	rm $(DESTDIR)$(BINDIR)/llgal
 	rm -rf $(DESTDIR)$(DATADIR)/llgal/
 	rm -rf $(DESTDIR)$(SYSCONFDIR)/llgal/
@@ -62,6 +64,29 @@ tarball::
 	cd /tmp && tar cfj $(TARBALL).tar.bz2 $(TARBALL)
 	mv /tmp/$(DEBIAN_TARBALL).tar.gz /tmp/$(TARBALL).tar.bz2 ..
 	rm -rf /tmp/$(TARBALL)
+
+.PHONY: build-lib clean-lib install-lib uninstall-lib prepare-lib
+
+$(LIB_SUBDIR)/Makefile.PL: $(LIB_SUBDIR)/Makefile.PL.in
+	sed -e 's!@VERSION@!$(VERSION)!g' < $(LIB_SUBDIR)/Makefile.PL.in > $(LIB_SUBDIR)/Makefile.PL
+
+$(LIB_SUBDIR)/Makefile: $(LIB_SUBDIR)/Makefile.PL
+	cd $(LIB_SUBDIR) && perl Makefile.PL INSTALLDIRS=$(PERL_INSTALLDIRS)	
+
+prepare-lib: $(LIB_SUBDIR)/Makefile
+
+build-lib: prepare-lib
+	$(MAKE) -C $(LIB_SUBDIR)
+
+install-lib: prepare-lib
+	$(MAKE) -C $(LIB_SUBDIR) install
+
+clean-lib: prepare-lib
+	$(MAKE) -C $(LIB_SUBDIR) distclean
+	rm $(LIB_SUBDIR)/Makefile.PL
+
+uninstall-lib: prepare-lib
+	$(MAKE) -C $(LIB_SUBDIR) uninstall
 
 .PHONY: update-po clean-po install-po uninstall-po
 
