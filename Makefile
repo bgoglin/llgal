@@ -57,6 +57,7 @@ tarball::
 	cp Changes /tmp/$(TARBALL)
 	cp COPYING README UPGRADE VERSION /tmp/$(TARBALL)
 	cp -a $(DATA_SUBDIR)/ /tmp/$(TARBALL)
+	cp -a $(LIB_SUBDIR) /tmp/$(TARBALL)
 	mkdir /tmp/$(TARBALL)/$(PO_SUBDIR)/
 	cp $(PO_SUBDIR)/Makefile /tmp/$(TARBALL)/$(PO_SUBDIR)/
 	cp $(PO_SUBDIR)/*.po /tmp/$(TARBALL)/$(PO_SUBDIR)/
