@@ -35,11 +35,11 @@ img.image-link {
   font-size: 200%;
 }
 
-.center { 
+.center {
   text-align: center;
 }
 
-.center table { 
+.center table {
   margin-left: auto;
   margin-right: auto;
 }
@@ -63,7 +63,7 @@ table.index td {
 
 table.index td.thumb img {
   vertical-align: middle;
-  border-style: none;  
+  border-style: none;
 }
 
 table.index td.text-thumb {
@@ -77,6 +77,8 @@ table.index td.text-thumb {
 table.index td.tiled {
   background-image: url("tile.png");
   background-repeat: repeat-x;
+  text-align: left;
+  font-size: 0px;
 }
 
 table.index td.thumb-dim {
@@ -104,7 +106,7 @@ table.slide td.image-slide {
 
 table.slide td.image-slide img {
   vertical-align: middle;
-  border-style: none;  
+  border-style: none;
 }
 
 table.slide td.text-slide {
@@ -132,4 +134,26 @@ hr.index {
   font-size: 120%;
   padding-top: 6px;
   padding-bottom: 6px;
+}
+
+/* EXIF table */
+
+table.exif {
+  border: 0px;
+  border-spacing: 1px;
+  background: #ffffff;
+}
+
+table.exif td.exif-name {
+  text-align: right;
+  background: #333333;
+  padding-left: 6px;
+  padding-right: 6px;
+}
+
+table.exif td.exif-value {
+  text-align: left;
+  background: #333333;
+  padding-left: 6px;
+  padding-right: 6px;
 }

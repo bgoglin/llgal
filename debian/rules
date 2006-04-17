@@ -14,7 +14,7 @@
 build: build-stamp
 build-stamp:
 	dh_testdir
-	make PREFIX=/usr SYSCONFDIR=/etc MANDIR=/usr/share/man
+	make PREFIX=/usr SYSCONFDIR=/etc MANDIR=/usr/share/man PERL_INSTALLDIRS=vendor
 	touch build-stamp
 
 clean:

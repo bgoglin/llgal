@@ -25,22 +25,21 @@ llgal requirements
 ==================
 
 llgal requires perl and imagemagick packages.
-The following perl libraries are also needed (these are their Debian names):
-* libimage-info-perl
-* libimage-size-perl
-* liburi-perl
-* liblocale-gettext-perl
+The following perl libraries are also needed:
+* Image::ExifTool
+* Image::Size
+* URI
+* Locale::gettext
 These dependencies are automatically installed when installing
 Debian or Gentoo prepackaged versions.
 
-If you need to install these libraries by yourself, you may find
-tarballs in Debian source archives (for instance):
-ftp://ftp.debian.org/debian/pool/main/libi/libimage-info-perl/libimage-info-perl_*.orig.tar.gz
-ftp://ftp.debian.org/debian/pool/main/i/image-size/image-size_*.orig.tar.gz
-ftp://ftp.debian.org/debian/pool/main/libu/liburi-perl/liburi-perl_*.orig.tar.gz
-ftp://ftp.debian.org/debian/pool/main/libl/liblocale-gettext-perl/liblocale-gettext-perl_*.orig.tar.gz
-Replace * with the last version that you'll find.
-llgal is known to work with versions 1.16/2.992/1.35/1.05/1.11.
+If you need to install these libraries by yourself, you may
+for instance find them on CPAN:
+* http://search.cpan.org/~exiftool/Image-ExifTool-6.00/lib/Image/ExifTool.pod
+* http://search.cpan.org/~rjray/Image-Size-2.992/Size.pm
+* http://search.cpan.org/~gaas/URI-1.35/URI.pm
+* http://search.cpan.org/~pvandry/gettext-1.05/gettext.pm
+llgal is known to work with these versions.
 
 
 If you experience any problem,

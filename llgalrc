@@ -68,14 +68,10 @@
 # index_filename = "index"
 
 # Prefix of generated HTML slide filenames
-# slide_filenameprefix = ""
+# slide_filenameprefix = "slide_"
 
-# Prefix of slide filenames when generated from filename
-# while there's no file associated (text, link, ...)
-# slide_filenameprefix_nofile = "NOFILE"
-
-# Prefix used to determine slide-image filenames from original images
-# (in case of --bigy).
+# Prefix used to determine the filenames of scaled image that are
+# shown in slides (in case of --sx or --sy).
 # These files will be stored under $local_llgal_dir.
 # scaled_image_filenameprefix = "scaled_"
 
@@ -110,23 +106,19 @@
 # Must be > 0, 0 means unlimited, setting to < 0 resets to default
 # thumbnails_per_row = 5
 
-# Maximal height of thumbnails [-y <n>, --xy <n>]
+# Maximal height of thumbnails [--ty <n>]
 # Must be > 0, setting to < 0 resets to default
-# thumbnail_height_max = 0
+# thumbnail_height_max = 75
 
-# Maximal width of thumbnails [--xy <n>]
+# Maximal width of thumbnails [--tx <n>]
 # Must be > 0, 0 means unlimited, setting to < 0 resets to default
-# thumbnail_width_max = 0
+# thumbnail_width_max = 113
 
 # Write captions under thumbnails [-u]
 # show_caption_under_thumbnails = 0
 
-# Omit film effect [-r]
+# Omit film effect [--nf]
 # show_no_film_effect = 0
-
-# Film tile height [-t <n>]
-# Must be >= 0, setting to < 0 resets to default
-# filmtile_height = 21
 
 ##### Slides #####
 
@@ -140,17 +132,17 @@
 # slide filename of images that have same filenames.
 # make_slide_filename_from_extension = 0
 
-# Maximal width of slides [--bigxy <n>]
+# Maximal width of slides [--sx <n>]
 # Must be > 0, 0 means unlimited, setting to < 0 resets to default
 # slide_width_max = 0
 
-# Maximal height of slides [--bigxy <n>, --bigy <n>]
+# Maximal height of slides [--sy <n>]
 # Must be > 0, 0 means unlimited, setting to < 0 resets to default
 # slide_height_max = 0
 
 # Default size of non-image slides.
 # Must be > 0, setting to < 0 resets to default
-# Note that the --bigy <n> option may lead to reduction of these values.
+# Note that the --sx and --sy options may lead to reduction of these values.
 # text_slide_width = 400
 # text_slide_height = 300
 
@@ -167,6 +159,11 @@
 
 # Generate slide titles from captions [-k]
 # make_slide_title_from_caption = 0
+
+# Display a table of EXIF tags under each image slide [--exif]
+# The tags are given with their name in exiftool -list and separated
+# with a comma.
+# show_exif_tags = ""
 
 ##### Captions #####
 
@@ -189,8 +186,11 @@
 # show_dimensions = 0
 # show_size = 0
 
-# Do not show slide counter in captions [--nc]
-# show_no_slide_counter = 0
+# Change the format of the counter shown on the slides
+# %n is replaced by the slide number, %0n gets leading zeros,
+# and %t is replaced by the number of slides.
+# Setting to "" disables the slide counter [--nc]
+# slide_counter_format = "&nbsp;&nbsp;&nbsp;(%0n/%t)"
 
 ##### Text #####
 
@@ -339,4 +339,4 @@
 # www_access_rights = 0
 
 # Extension of generate webpages [--php]
-# www_extension = "www"
+# www_extension = "html"

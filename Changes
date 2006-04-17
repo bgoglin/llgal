@@ -1,3 +1,52 @@
+llgal (0.13)
+
+  * Add --exif (and show_exif_tags) to display a table of exif tags under
+    each image slide (requested by Alexandre Buisse). The layout is defined
+    by <!--EXIF-TABLE--> in the slide template and some new CSS styles.
+  * Replace show_no_slide_counter in the configuration file with
+    slide_counter_format where %n, %0n and %t will be replaced dynamically.
+    The old show_no_slide_counter now corresponds to slide_counter_format="".
+    + By default, the slide counter gets leading zeros
+      (requested by Alexandre Buisse).
+  * Add the BREAK keyword to be used in captions file to force a line break
+    in a row of thumbnails (requested by Alexandre Buisse).
+  * Improve slide filename:
+    + Change default prefix to 'slide_'.
+    + Drop slide_filenameprefix_nofile and use slide_filename_prefix for
+      slides that have no file associated with them.
+    + Add leading zeros to the number in the slide filename.
+  * By default, thumbnail width is now limited (113px).
+    + When a thumbnail_max_width is defined, force all thumbnail boxes
+      to this width by padding the thumbnail.
+    + The previous behavior (unlimited width and unpadded thumbnails) may
+      be restored with thumbnail_width_max=0.
+  * Replace --bigxy and --bigy with --sx and --sy to reduce slide images.
+  * Replace --xy and -y with --tx and --ty to change thumbnail size.
+  * Replace -r with --nf to omit film effect in the index.
+  * Drop -t option to change the film time effect height (filmtile_height)
+    since the layout does not need it anymore. The user may easily change
+    the film tile image without having llgal do it.
+  * Fix the film effect when the tile image size is modified by forcing the
+    height of the row to be exactly the height of the image. We could use
+    nice CSS to do so, but Internet Explorer CSS support sucks too much.
+  * Use $(MAKE) instead of make in recursive invocation in the Makefile
+    (FreeBSD breakage reported by George Wood).
+  * Use Image::ExifTool instead of Image::Infos (thanks to Alexandre Buisse).
+  * Do not remove all html files on --clean and when regenerating the gallery,
+    but only those files that match index filename or slide filename prefix
+    (requested by Alexandre Buisse).
+  * Do not scale image when smaller than the thumbnail.
+  * Do not warn when the local llgal directory is ignored outside of early
+    configuration if the value would not actually change.
+  * Fix slide numbering depending on LINE entries.
+  * Fix a warning about an uninitialized value being used when --ct without
+    any timestamp available (reported by Alexandre Buisse).
+  * Fix a warning about an uninitialized value being used when the gallery
+    is empty.
+  * Perl-modularization.
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Sun, 16 Apr 2006 19:53:00 -0400
+
 llgal (0.12.2)
 
   * Add --lang and --codeset to change the locale or encoding (and the

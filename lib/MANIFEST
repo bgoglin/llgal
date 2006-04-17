@@ -1,0 +1,5 @@
+MANIFEST
+Makefile.PL
+Llgal/Config.pm
+Llgal/Misc.pm
+Llgal/Templates.pm
