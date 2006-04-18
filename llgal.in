@@ -513,9 +513,11 @@ sub fill_file_entry {
 	$entry->{thumb_filename} = "$self->{local_llgal_dir}/$thumb_filename" ;
 	$entry->{thumb_url} = "$local_llgal_url/". make_safe_url_nowarn ($thumb_filename) ;
 
-	# thumbnails dimensions
+	# if the thumbnail does not exist, or is older than the image, or regeneration is forced
 	my $real_thumb_filename = "$self->{destination_dir}$entry->{thumb_filename}" ;
-	if ((! -e "$real_thumb_filename") or $opts->{force_image_regeneration}) {
+	if ((! -e "$real_thumb_filename")
+	    or (-M "$real_thumb_filename") > (-M "$filename")
+	    or $opts->{force_image_regeneration}) {
 	    my ($status, @output) ;
 	    # only scale down, never up.
 	    my ($x,$y) = imgsize ("$real_filename") ;
@@ -599,13 +601,14 @@ sub fill_file_entry {
 	    $entry->{scaled_filename} = "$self->{local_llgal_dir}/$scaled_filename" ;
 	    $entry->{scaled_url} = "$local_llgal_url/". make_safe_url_nowarn ($scaled_filename) ;
 
-	    # scaled image dimensions
+	    # if the thumbnail does not exist, or is older than the image, or regeneration is forced
 	    my $real_scaled_filename = "$self->{destination_dir}$entry->{scaled_filename}" ;
-	    my ($x,$y) ;
-	    if ((! -e "$real_scaled_filename") or $opts->{force_image_regeneration}) {
-		# only scale down, never up.
-		($x,$y) = imgsize ("$real_filename") ;
+	    if ((! -e "$real_scaled_filename")
+		or (-M "$real_scaled_filename") > (-M "$filename")
+		or $opts->{force_image_regeneration}) {
 		my ($status, @output) ;
+		# only scale down, never up.
+		my ($x,$y) = imgsize ("$real_filename") ;
 		if (($opts->{slide_width_max} <= 0 or $x <= $opts->{slide_width_max})
 		    and ($opts->{slide_height_max} <= 0 or $y <= $opts->{slide_height_max})) {
 		    ($status, @output) = system_with_output
