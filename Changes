@@ -1,7 +1,10 @@
+llgal (0.13.1)
 
   * Force regeneration of thumbnails and scaled when the original image
     has been modified since their creation.
+  * Fix --option (reported by Alexandre Buisse).
 
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Tue, 18 Apr 2006 16:51:00 -0700
 
 llgal (0.13)
 
