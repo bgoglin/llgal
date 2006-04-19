@@ -757,7 +757,7 @@ sub parse_cmdline_options {
 	'n'		=> \$opts->{make_slide_filename_from_filename},
 	'nc'		=> sub { $opts->{slide_counter_format} = "" ; },
 	'nf'		=> \$opts->{show_no_film_effect},
-	'option=s'	=> sub { shift ; process_option ($opts, shift) ; },
+	'option=s'	=> sub { shift ; process_option $self, $opts, shift ; },
 	'p=i'		=> \$opts->{index_cellpadding},
 	'php'		=> sub { $opts->{www_extension} = "php" ; },
 	'Rl'		=> \$opts->{link_subgalleries},

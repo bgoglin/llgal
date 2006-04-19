@@ -1,9 +1,15 @@
+llgal (0.13.1-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Tue, 18 Apr 2006 17:06:52 -0700
+
 llgal (0.13-1) unstable; urgency=low
 
   * New upstream release.
   * Update debian/rules to pass PERL_INSTALLDIRS=vendor.
 
- -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Sun, 16 Apr 2006 20:15:33 -0400
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Tue, 18 Apr 2006 17:06:33 -0700
 
 llgal (0.12.2-1) unstable; urgency=low
 

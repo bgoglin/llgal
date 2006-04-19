@@ -375,7 +375,11 @@ may be used several times on the same command line.
 .TP
 .BI --exif " <tag1,tag2,...>"
 Display a table of EXIF tags under each image slide.
-The tags are given with their name in
+The tags are displayed using their description as given by
+.BR "exiftool -s myimage" .
+But, they have to be passed to
+.B llgal
+using their tag name as shown by
 .B exiftool -list
 and separated with a comma.
 
