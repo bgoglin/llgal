@@ -8,11 +8,11 @@ use Getopt::Long ;
 use I18N::Langinfo qw(langinfo CODESET) ;
 use Locale::gettext ;
 
-use Exporter 'import' ;
 use vars qw(@EXPORT) ;
 
 @EXPORT = qw (
 	      early_parse_cmdline_options
+	      init_llgal_gettext
 	      parse_cmdline_options
 	      parse_generic_config_file
 	      parse_custom_config_file
@@ -53,6 +53,12 @@ sub early_parse_cmdline_options {
 
 ######################################################################
 # gettext strings are prefixed to distinguish between identical strings
+
+sub init_llgal_gettext {
+    my $self = shift ;
+    textdomain ("llgal") ;
+    bindtextdomain ("llgal", $self->{locale_dir}) ;
+}
 
 sub llgal_gettext {
     my $id = shift ;

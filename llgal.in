@@ -2,7 +2,7 @@
 
 use strict ;
 
-use Llgal::Config ;
+require Llgal::Config ;
 require Llgal::Templates ;
 use Llgal::Misc ;
 
@@ -23,6 +23,7 @@ my $self = {
     llgal_share_dir => "@DATADIR@/llgal",
     user_share_dir => $ENV{HOME}."/.llgal",
     generic_configuration_filename => "llgalrc",
+    locale_dir => "@LOCALEDIR@",
 
     # local llgal directory, may be modified during early configuration
     local_llgal_dir => ".llgal",
@@ -53,11 +54,10 @@ my $self = {
 my @llgal_options = @ARGV ;
 
 # parse early command line options
-early_parse_cmdline_options $self ;
+Llgal::Config::early_parse_cmdline_options ($self) ;
 
 # gettext initialization
-textdomain ("llgal") ;
-bindtextdomain ("llgal", "@LOCALEDIR@") ;
+Llgal::Config::init_llgal_gettext ($self) ;
 
 ######################################################################
 # various temporary globals
@@ -1767,15 +1767,17 @@ sub make_www_rights {
 # evaluate generic configuration files
 my $generic_opts = {} ;
 # system-wide configuration file
-merge_opts $generic_opts, parse_generic_config_file $self, "$self->{llgal_config_dir}/$self->{generic_configuration_filename}" ;
+Llgal::Config::merge_opts ($generic_opts, Llgal::Config::parse_generic_config_file
+			   ($self, "$self->{llgal_config_dir}/$self->{generic_configuration_filename}")) ;
 # user-wide configuration file
-merge_opts $generic_opts, parse_generic_config_file $self, "$self->{user_share_dir}/$self->{generic_configuration_filename}" ;
+Llgal::Config::merge_opts ($generic_opts, Llgal::Config::parse_generic_config_file
+			   ($self, "$self->{user_share_dir}/$self->{generic_configuration_filename}")) ;
 
 # early configuration ends here
 $self->{early_configuration} = 0 ;
 
 # parse cmdline now but DO NOT MERGE now
-my $cmdline_opts = parse_cmdline_options $self ;
+my $cmdline_opts = Llgal::Config::parse_cmdline_options ($self) ;
 
 # basic special behaviors may be done here
 die_usage $self
@@ -1824,14 +1826,15 @@ sub main_process {
     setup_destination ;
 
     # add recursive specific opts first, so that they may be locally overriden
-    $opts_without_defaults = merge_opts_into $generic_opts, $recursive_opts ;
+    $opts_without_defaults = Llgal::Config::merge_opts_into ($generic_opts, $recursive_opts) ;
 
     # evaluate gallery specific configuration, without modifying $generic_opts
-    merge_opts $opts_without_defaults, parse_generic_config_file $self, "$self->{destination_dir}$self->{local_llgal_dir}/$self->{generic_configuration_filename}" ;
+    Llgal::Config::merge_opts ($opts_without_defaults, Llgal::Config::parse_generic_config_file
+			       ($self, "$self->{destination_dir}$self->{local_llgal_dir}/$self->{generic_configuration_filename}")) ;
 
     # DO NOT MOVE THIS LINE BEFORE CONFIG FILE PARSING
     # parse command line options
-    merge_opts $opts_without_defaults, $cmdline_opts ;
+    Llgal::Config::merge_opts ($opts_without_defaults, $cmdline_opts) ;
 
     # set the locale before getting the defaults
     if (defined $opts_without_defaults->{language}) {
@@ -1841,7 +1844,7 @@ sub main_process {
     }
 
     # set defaults values for all uninitialized values
-    $opts = add_defaults $opts_without_defaults ;
+    $opts = Llgal::Config::add_defaults ($opts_without_defaults) ;
 
     if ($self->{clean_asked} or $self->{cleanall_asked} or $self->{give_templates}) {
 	# complex special behaviors that need full configuration, and recurse in all subdirectories
@@ -1882,7 +1885,7 @@ sub main_process {
     } elsif ($self->{generate_captions}) {
 	# generate captions and recurse in entries only
 
-	prepare_captions_variables $self, $opts ;
+	Llgal::Config::prepare_captions_variables ($self, $opts) ;
 
 	my $gallery = generate_captions_file $opts ;
 	indented_print "Now edit the $self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename} file to your liking and run llgal\n" ;
@@ -1898,7 +1901,7 @@ sub main_process {
     } else {
 	# main gallery creation and recurse in entries only
 
-	prepare_gallery_variables $self, $opts ;
+	Llgal::Config::prepare_gallery_variables ($self, $opts) ;
 
 	my $gallery = init_gallery () ;
 
@@ -1933,7 +1936,7 @@ sub main_process {
 
 	# generate a local config for this gallery
 	if (defined $self->{generate_config} and $self->{generate_config} eq "local") {
-	    generate_config $self, "$self->{destination_dir}$self->{local_llgal_dir}/$self->{generic_configuration_filename}", $opts_without_defaults ;
+	    Llgal::Config::generate_config ($self, "$self->{destination_dir}$self->{local_llgal_dir}/$self->{generic_configuration_filename}", $opts_without_defaults) ;
 	}
 
 	if ($opts->{recursive}) {
@@ -1981,5 +1984,5 @@ my $root_gallery = main_process {} ;
 
 # only generate a config once
 if (defined $self->{generate_config} and not $self->{generate_config} eq "local") {
-    generate_config $self, $self->{generate_config}, $opts_without_defaults ;
+    Llgal::Config::generate_config ($self, $self->{generate_config}, $opts_without_defaults) ;
 }
