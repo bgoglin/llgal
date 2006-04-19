@@ -3,7 +3,7 @@
 use strict ;
 
 use Llgal::Config ;
-use Llgal::Templates ;
+require Llgal::Templates ;
 use Llgal::Misc ;
 
 use FileHandle ;
@@ -87,7 +87,7 @@ sub clean_files {
 		 or /^$opts->{prev_slide_link_image_filename}$/ or /^$opts->{next_slide_link_image_filename}$/
 		 or /^$opts->{indextemplate_filename}$/ or /^$opts->{slidetemplate_filename}$/
 		 or /^$opts->{css_filename}$/) {
-	    my $original = (find_generic_template_file $self, $opts, $_, 0)."/".$_ ;
+	    my $original = (Llgal::Templates::find_generic_template_file ($self, $opts, $_, 0))."/".$_ ;
 	    my $diff = 0 ;
 	    my @output ;
 	    # default is cleanall, which removes everything, as if file were not changed
@@ -1249,7 +1249,8 @@ sub generate_slides {
 	if $? ;
 
     # find the slidetemplate
-    my $slidetemplate = (find_template_file $self, $opts, $opts->{slidetemplate_filename}, 1) . "/$opts->{slidetemplate_filename}" ;
+    my $slidetemplate = (Llgal::Templates::find_template_file ($self, $opts, $opts->{slidetemplate_filename}, 1))
+	. "/$opts->{slidetemplate_filename}" ;
     indented_print "Using '$slidetemplate' as HTML slide template.\n" ;
 
     # keep the slidetemplate in memory instead of always reopening it
@@ -1452,7 +1453,8 @@ sub generate_index {
     my @footers = @{$gallery->{footers}} ;
 
     # find the indextemplate
-    my $indextemplate = (find_template_file $self, $opts, $opts->{indextemplate_filename}, 1) . "/$opts->{indextemplate_filename}" ;
+    my $indextemplate = (Llgal::Templates::find_template_file ($self, $opts, $opts->{indextemplate_filename}, 1))
+	. "/$opts->{indextemplate_filename}" ;
     indented_print "Using '$indextemplate' as HTML index template.\n" ;
 
     # open the template and the destination
@@ -1857,7 +1859,7 @@ sub main_process {
 		if $destdir eq "local" ;
 	    $destdir = $self->{user_share_dir}
 		if $destdir eq "user" ;
-	    give_templates $self, $opts, $destdir ;
+	    Llgal::Templates::give_templates ($self, $opts, $destdir) ;
 	    indented_print "You may now edit templates in $destdir and generate new galleries.\n" ;
 	    indented_print "You may also remove any template that you do not want to modify.\n" ;
 	}
@@ -1924,7 +1926,7 @@ sub main_process {
 
 	generate_index $gallery ;
 
-	get_llgal_files $self, $opts ;
+	Llgal::Templates::get_llgal_files ($self, $opts) ;
 
 	make_www_rights $gallery, $opts
 	    if $opts->{www_access_rights} ;
