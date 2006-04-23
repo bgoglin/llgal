@@ -1,3 +1,11 @@
+
+  * Support subdirectory images that the user may add to the gallery
+    by inserting their path in the captions file.
+    + Thumbnails and scaled image filenames are generated after replacing
+      the path separator (/) with the new configurable
+      path_separator_replacement.
+
+
 llgal (0.13.1)
 
   * Force regeneration of thumbnails and scaled when the original image

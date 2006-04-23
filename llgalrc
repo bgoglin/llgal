@@ -89,6 +89,9 @@
 # Additional prefix of user-provided thumbnails
 # user_thumbnail_image_filenameprefix = "my"
 
+# Character to use to replace / in the thumbnail/scaled of subdir images
+# path_separator_replacement = "@"
+
 ##### Index #####
 
 # Cellpadding in the index table [-p <n>]

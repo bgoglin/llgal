@@ -510,6 +510,7 @@ sub fill_file_entry {
 
 	# filename and url
 	$thumb_filename = "$opts->{thumbnail_image_filenameprefix}$filename" ;
+	$thumb_filename =~ s/\//$opts->{path_separator_replacement}/g ;
 	$entry->{thumb_filename} = "$self->{local_llgal_dir}/$thumb_filename" ;
 	$entry->{thumb_url} = "$local_llgal_url/". make_safe_url_nowarn ($thumb_filename) ;
 
@@ -598,6 +599,7 @@ sub fill_file_entry {
 
 	    # filename and url
 	    $scaled_filename = "$opts->{scaled_image_filenameprefix}$filename" ;
+	    $scaled_filename =~ s/\//$opts->{path_separator_replacement}/g ;
 	    $entry->{scaled_filename} = "$self->{local_llgal_dir}/$scaled_filename" ;
 	    $entry->{scaled_url} = "$local_llgal_url/". make_safe_url_nowarn ($scaled_filename) ;
 

@@ -113,6 +113,7 @@ my $normal_opts_type = {
     captions_filename => $OPT_IS_NONEMPTY_STRING,
     user_scaled_image_filenameprefix => $OPT_IS_NONEMPTY_STRING,
     user_thumbnail_image_filenameprefix => $OPT_IS_NONEMPTY_STRING,
+    path_separator_replacement => $OPT_IS_NONEMPTY_STRING,
 # Index
     index_cellpadding => $OPT_IS_NUMERIC, # >= 0, -1 for default
     list_links => $OPT_IS_NUMERIC,
@@ -302,6 +303,8 @@ sub add_defaults {
 	user_scaled_image_filenameprefix => "my",
 # additional prefix of user-provided thumbnails
 	user_thumbnail_image_filenameprefix => "my",
+# character to use to replace / in the thumbnail/scaled of subdir images
+	path_separator_replacement => "@",
 
 # Index
 # cellpadding value for the thumbnail index tables (-p)
