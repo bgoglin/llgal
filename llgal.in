@@ -822,11 +822,12 @@ sub finalize_entries {
 # Generating entry table from files in target directory
 
 sub get_entries_from_directory {
-    my $gallery = shift ;
+    my $dir = shift ;
+    my $dir_string = shift ;
     my @entries = () ;
 
-    opendir DIR, $self->{destination_dir} ? $self->{destination_dir} : "./" # destination is empty for './'
-	or die "Can't open $destination_string ($!)\n" ;
+    opendir DIR, $dir
+	or die "Can't open $dir_string ($!)\n" ;
     # get all files, except dot-starting ones and webpages
     my @filenames = grep ((!/\.$opts->{www_extension}$/i and !/^\./), readdir DIR) ;
     closedir DIR ;
@@ -863,7 +864,8 @@ sub get_entries_from_directory {
 
     for(my $i = 0; $i < @filenames; $i++) {
 	my $filename = $filenames[$i] ;
-	if (-d "$self->{destination_dir}$filename") {
+	chomp $filename ;
+	if (-d "$dir$filename") {
 	    # directory
 	    if ($opts->{add_subdirs} or $opts->{recursive}) {
 		my $entry = create_file_entry ($TYPE_DIR, $filename, undef, undef) ;
@@ -905,7 +907,12 @@ sub get_entries_from_directory {
     end_percentage () ;
     show_warnings ;
 
-    @{$gallery->{entries}} = @entries ;
+    return @entries ;
+}
+
+sub get_entries {
+    my $dir = $self->{destination_dir} ? $self->{destination_dir} : "./" ; # destination is empty for './'
+    return get_entries_from_directory $dir, $destination_string ;
 }
 
 #######################################################################
@@ -968,13 +975,10 @@ sub setup_destination {
 #######################################################################
 # Generate captions file
 
-sub generate_captions_file {
+sub generate_captions_entries {
     my $opts = shift ;
 
-    # use a temp gallery to pass the entries back to the caller
-    my $gallery = init_gallery () ;
-    get_entries_from_directory $gallery ;
-    my @entries = @{$gallery->{entries}} ;
+    my @entries = get_entries ;
 
     indented_print "Found ". (scalar @entries) ." files in $destination_string\n" ;
 
@@ -1097,7 +1101,7 @@ sub generate_captions_file {
     close CAP ;
     show_warnings ;
 
-    return $gallery ;
+    return @entries ;
 }
 
 #######################################################################
@@ -1889,12 +1893,12 @@ sub main_process {
 
 	Llgal::Config::prepare_captions_variables ($self, $opts) ;
 
-	my $gallery = generate_captions_file $opts ;
+	my @entries = generate_captions_entries $opts ;
 	indented_print "Now edit the $self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename} file to your liking and run llgal\n" ;
 
 	if ($opts->{recursive}) {
 	    # list subdir entries
-	    my @dir_entries = grep { $_->{type} == $TYPE_DIR } @{$gallery->{entries}} ;
+	    my @dir_entries = grep { $_->{type} == $TYPE_DIR } @entries ;
 	    # process recursively
 	    print "\n" if @dir_entries ;
 	    map { subdir_process $_->{filename}, {} } @dir_entries ;
@@ -1914,7 +1918,7 @@ sub main_process {
 	    indented_print "Found ". (scalar @{$gallery->{entries}}) ." files in the captions file.\n" ;
 	} else {
 	    # generate the gallery from scratch
-	    get_entries_from_directory $gallery ;
+	    @{$gallery->{entries}} = get_entries ;
 	    fill_entries $gallery ;
 	    indented_print "Found ". (scalar @{$gallery->{entries}}) ." files in $destination_string\n" ;
 	}
