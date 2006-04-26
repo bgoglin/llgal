@@ -227,8 +227,6 @@ my $special_opts_without_output = {
     default_thumb_ydim => 1,
     scaled_create_command => 1,
     thumbnail_create_command => 1,
-    scaled_copy_command => 1,
-    thumbnail_copy_command => 1,
 } ;
 
 # options whose merging is done as array

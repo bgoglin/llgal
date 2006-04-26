@@ -8,6 +8,8 @@
     + Thumbnails and scaled image filenames are generated after replacing
       the path separator (/) with the new configurable
       path_separator_replacement.
+  * Do not create a thumbnail or scaled image if the original is already
+    smaller than the maximal dimensions.
   * Fix -h/--help.
 
 

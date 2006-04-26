@@ -531,21 +531,23 @@ sub fill_file_entry {
 	    my ($x,$y) = imgsize ("$real_filename") ;
 	    if ($y <= $opts->{thumbnail_height_max}
 		and ($opts->{thumbnail_width_max} <= 0 or $x <= $opts->{thumbnail_width_max})) {
-		($status, @output) = system_with_output
-		    ( "copy '$real_filename' thumbnail",
-		      @{$opts->{thumbnail_copy_command}}, "$real_filename", "$real_thumb_filename" ) ;
+		# the original is not large enough, keep it
+		$entry->{thumb_filename} = $entry->{filename} ;
+		$entry->{thumb_url} = $entry->{url} ;
+		$real_thumb_filename = "$self->{destination_dir}$entry->{filename}" ;
 	    } else {
+		# scale down
 		($status, @output) = system_with_output
 		    ( "create '$real_filename' thumbnail",
 		      @{$opts->{thumbnail_create_command}}, "$real_filename", "$real_thumb_filename" ) ;
-	    }
-	    if ($status == -1) {
-		immediate_external_warnings @output ;
-		die "Failed to create '$real_filename' thumbnail\n" ;
-	    } elsif ($status) {
-		add_warning "Failed to create '$real_filename' thumbnail" ;
-		add_external_warnings @output ;
-		return undef ;
+		if ($status == -1) {
+		    immediate_external_warnings @output ;
+		    die "Failed to create '$real_filename' thumbnail\n" ;
+		} elsif ($status) {
+		    add_warning "Failed to create '$real_filename' thumbnail" ;
+		    add_external_warnings @output ;
+		    return undef ;
+		}
 	    }
 	}
 	($entry->{thumb_xdim},$entry->{thumb_ydim}) = imgsize ("$real_thumb_filename") ;
@@ -620,21 +622,23 @@ sub fill_file_entry {
 		my ($x,$y) = imgsize ("$real_filename") ;
 		if (($opts->{slide_width_max} <= 0 or $x <= $opts->{slide_width_max})
 		    and ($opts->{slide_height_max} <= 0 or $y <= $opts->{slide_height_max})) {
-		    ($status, @output) = system_with_output
-			( "copy '$real_filename' scaled image",
-			  @{$opts->{scaled_copy_command}}, "$real_filename", "$real_scaled_filename" ) ;
+		    # the original is not large enough, keep it
+		    $entry->{scaled_filename} = $entry->{filename} ;
+		    $entry->{scaled_url} = $entry->{url} ;
+		    $real_scaled_filename = "$self->{destination_dir}$entry->{filename}" ;
 		} else {
+		    # scale down
 		    ($status, @output) = system_with_output
 			( "create '$real_filename' scaled image",
 			  @{$opts->{scaled_create_command}}, "$real_filename", "$real_scaled_filename" ) ;
-		}
-		if ($status == -1) {
-		    immediate_external_warnings @output ;
-		    die "Failed to create '$real_filename' scaled image\n" ;
-		} elsif ($status) {
-		    add_warning "Failed to create '$real_filename' scaled image" ;
-		    add_external_warnings @output ;
-		    return undef ;
+		    if ($status == -1) {
+			immediate_external_warnings @output ;
+			die "Failed to create '$real_filename' scaled image\n" ;
+		    } elsif ($status) {
+			add_warning "Failed to create '$real_filename' scaled image" ;
+			add_external_warnings @output ;
+			return undef ;
+		    }
 		}
 	    }
 	    ($entry->{scaled_xdim},$entry->{scaled_ydim}) = imgsize ("$real_scaled_filename") ;
