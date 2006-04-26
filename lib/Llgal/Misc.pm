@@ -152,14 +152,12 @@ sub back_path {
 
 # generating safe url
 sub make_safe_url_nowarn {
-    my $file = shift ;
-    my $safe = uri_escape ($file) ;
-    return $safe ;
+    return join '/', map { uri_escape $_ } (split /\//, shift) ;
 }
 
 sub make_safe_url {
     my $file = shift ;
-    my $safe = uri_escape ($file) ;
+    my $safe = make_safe_url_nowarn ($file) ;
 
     add_warning "Non-ascii characters were escaped in filename '$file'."
 	if $safe ne $file and $file =~ /[\x80-\xFF]/ ;

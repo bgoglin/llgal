@@ -2,8 +2,8 @@
 
 use strict ;
 
-use Llgal::Config ;
-use Llgal::Templates ;
+require Llgal::Config ;
+require Llgal::Templates ;
 use Llgal::Misc ;
 
 use FileHandle ;
@@ -23,6 +23,7 @@ my $self = {
     llgal_share_dir => "@DATADIR@/llgal",
     user_share_dir => $ENV{HOME}."/.llgal",
     generic_configuration_filename => "llgalrc",
+    locale_dir => "@LOCALEDIR@",
 
     # local llgal directory, may be modified during early configuration
     local_llgal_dir => ".llgal",
@@ -53,11 +54,10 @@ my $self = {
 my @llgal_options = @ARGV ;
 
 # parse early command line options
-early_parse_cmdline_options $self ;
+Llgal::Config::early_parse_cmdline_options ($self) ;
 
 # gettext initialization
-textdomain ("llgal") ;
-bindtextdomain ("llgal", "@LOCALEDIR@") ;
+Llgal::Config::init_llgal_gettext ($self) ;
 
 ######################################################################
 # various temporary globals
@@ -87,7 +87,7 @@ sub clean_files {
 		 or /^$opts->{prev_slide_link_image_filename}$/ or /^$opts->{next_slide_link_image_filename}$/
 		 or /^$opts->{indextemplate_filename}$/ or /^$opts->{slidetemplate_filename}$/
 		 or /^$opts->{css_filename}$/) {
-	    my $original = (find_generic_template_file $self, $opts, $_, 0)."/".$_ ;
+	    my $original = (Llgal::Templates::find_generic_template_file ($self, $opts, $_, 0))."/".$_ ;
 	    my $diff = 0 ;
 	    my @output ;
 	    # default is cleanall, which removes everything, as if file were not changed
@@ -406,8 +406,15 @@ sub create_file_entry {
     # the caption (will be web-safe after caption file generation)
     if (not defined $caption) {
 	my @texts = () ;
-	push (@texts, $filename)
-	    if $opts->{make_caption_from_filename} ;
+	if ($opts->{make_caption_from_extension}) {
+	    push (@texts, $filename) ;
+	} elsif ($opts->{make_caption_from_filename}) {
+	    # remove the extension
+	    my @parts = split (/\./, $filename) ;
+	    pop @parts ;
+	    my $basename = join ('.', @parts) ;
+	    push (@texts, $basename) ;
+	}
 	push (@texts, generate_caption_from_image_infos $entry->{exif_infos})
 	    if $type == $TYPE_IMG ;
 	$caption = join (' - ', grep {$_} @texts) ;
@@ -510,6 +517,7 @@ sub fill_file_entry {
 
 	# filename and url
 	$thumb_filename = "$opts->{thumbnail_image_filenameprefix}$filename" ;
+	$thumb_filename =~ s/\//$opts->{path_separator_replacement}/g ;
 	$entry->{thumb_filename} = "$self->{local_llgal_dir}/$thumb_filename" ;
 	$entry->{thumb_url} = "$local_llgal_url/". make_safe_url_nowarn ($thumb_filename) ;
 
@@ -523,21 +531,23 @@ sub fill_file_entry {
 	    my ($x,$y) = imgsize ("$real_filename") ;
 	    if ($y <= $opts->{thumbnail_height_max}
 		and ($opts->{thumbnail_width_max} <= 0 or $x <= $opts->{thumbnail_width_max})) {
-		($status, @output) = system_with_output
-		    ( "copy '$real_filename' thumbnail",
-		      @{$opts->{thumbnail_copy_command}}, "$real_filename", "$real_thumb_filename" ) ;
+		# the original is not large enough, keep it
+		$entry->{thumb_filename} = $entry->{filename} ;
+		$entry->{thumb_url} = $entry->{url} ;
+		$real_thumb_filename = "$self->{destination_dir}$entry->{filename}" ;
 	    } else {
+		# scale down
 		($status, @output) = system_with_output
 		    ( "create '$real_filename' thumbnail",
 		      @{$opts->{thumbnail_create_command}}, "$real_filename", "$real_thumb_filename" ) ;
-	    }
-	    if ($status == -1) {
-		immediate_external_warnings @output ;
-		die "Failed to create '$real_filename' thumbnail\n" ;
-	    } elsif ($status) {
-		add_warning "Failed to create '$real_filename' thumbnail" ;
-		add_external_warnings @output ;
-		return undef ;
+		if ($status == -1) {
+		    immediate_external_warnings @output ;
+		    die "Failed to create '$real_filename' thumbnail\n" ;
+		} elsif ($status) {
+		    add_warning "Failed to create '$real_filename' thumbnail" ;
+		    add_external_warnings @output ;
+		    return undef ;
+		}
 	    }
 	}
 	($entry->{thumb_xdim},$entry->{thumb_ydim}) = imgsize ("$real_thumb_filename") ;
@@ -598,6 +608,7 @@ sub fill_file_entry {
 
 	    # filename and url
 	    $scaled_filename = "$opts->{scaled_image_filenameprefix}$filename" ;
+	    $scaled_filename =~ s/\//$opts->{path_separator_replacement}/g ;
 	    $entry->{scaled_filename} = "$self->{local_llgal_dir}/$scaled_filename" ;
 	    $entry->{scaled_url} = "$local_llgal_url/". make_safe_url_nowarn ($scaled_filename) ;
 
@@ -611,21 +622,23 @@ sub fill_file_entry {
 		my ($x,$y) = imgsize ("$real_filename") ;
 		if (($opts->{slide_width_max} <= 0 or $x <= $opts->{slide_width_max})
 		    and ($opts->{slide_height_max} <= 0 or $y <= $opts->{slide_height_max})) {
-		    ($status, @output) = system_with_output
-			( "copy '$real_filename' scaled image",
-			  @{$opts->{scaled_copy_command}}, "$real_filename", "$real_scaled_filename" ) ;
+		    # the original is not large enough, keep it
+		    $entry->{scaled_filename} = $entry->{filename} ;
+		    $entry->{scaled_url} = $entry->{url} ;
+		    $real_scaled_filename = "$self->{destination_dir}$entry->{filename}" ;
 		} else {
+		    # scale down
 		    ($status, @output) = system_with_output
 			( "create '$real_filename' scaled image",
 			  @{$opts->{scaled_create_command}}, "$real_filename", "$real_scaled_filename" ) ;
-		}
-		if ($status == -1) {
-		    immediate_external_warnings @output ;
-		    die "Failed to create '$real_filename' scaled image\n" ;
-		} elsif ($status) {
-		    add_warning "Failed to create '$real_filename' scaled image" ;
-		    add_external_warnings @output ;
-		    return undef ;
+		    if ($status == -1) {
+			immediate_external_warnings @output ;
+			die "Failed to create '$real_filename' scaled image\n" ;
+		    } elsif ($status) {
+			add_warning "Failed to create '$real_filename' scaled image" ;
+			add_external_warnings @output ;
+			return undef ;
+		    }
 		}
 	    }
 	    ($entry->{scaled_xdim},$entry->{scaled_ydim}) = imgsize ("$real_scaled_filename") ;
@@ -820,11 +833,14 @@ sub finalize_entries {
 # Generating entry table from files in target directory
 
 sub get_entries_from_directory {
-    my $gallery = shift ;
+    my $dir = shift ;
+    my $dir_string = shift ;
+    my $add_subdirs = shift ;
+    my $add_others = shift ;
     my @entries = () ;
 
-    opendir DIR, $self->{destination_dir} ? $self->{destination_dir} : "./" # destination is empty for './'
-	or die "Can't open $destination_string ($!)\n" ;
+    opendir DIR, $dir
+	or die "Can't open $dir_string ($!)\n" ;
     # get all files, except dot-starting ones and webpages
     my @filenames = grep ((!/\.$opts->{www_extension}$/i and !/^\./), readdir DIR) ;
     closedir DIR ;
@@ -861,9 +877,10 @@ sub get_entries_from_directory {
 
     for(my $i = 0; $i < @filenames; $i++) {
 	my $filename = $filenames[$i] ;
-	if (-d "$self->{destination_dir}$filename") {
+	chomp $filename ;
+	if (-d "$dir$filename") {
 	    # directory
-	    if ($opts->{add_subdirs} or $opts->{recursive}) {
+	    if ($add_subdirs) {
 		my $entry = create_file_entry ($TYPE_DIR, $filename, undef, undef) ;
 		push @entries, $entry
 		    if defined $entry ;
@@ -889,7 +906,7 @@ sub get_entries_from_directory {
 
 	    } else {
 	      JUST_A_FILE:
-		if ($opts->{add_all_files}) {
+		if ($add_others) {
 		    # not an image, not a movie, just a file
 		    my $entry = create_file_entry ($TYPE_FIL, $filename, undef, undef) ;
 		    push @entries, $entry
@@ -903,7 +920,18 @@ sub get_entries_from_directory {
     end_percentage () ;
     show_warnings ;
 
-    @{$gallery->{entries}} = @entries ;
+    return @entries ;
+}
+
+sub get_entries {
+    my $opts = shift ;
+    my $dir = $self->{destination_dir} ? $self->{destination_dir} : "./" ; # destination is empty for './'
+    my @entries = get_entries_from_directory
+	$dir,
+	$destination_string,
+	($opts->{add_subdirs} or $opts->{recursive}),
+	$opts->{add_all_files} ;
+    return @entries ;
 }
 
 #######################################################################
@@ -966,13 +994,10 @@ sub setup_destination {
 #######################################################################
 # Generate captions file
 
-sub generate_captions_file {
+sub generate_captions_entries {
     my $opts = shift ;
 
-    # use a temp gallery to pass the entries back to the caller
-    my $gallery = init_gallery () ;
-    get_entries_from_directory $gallery ;
-    my @entries = @{$gallery->{entries}} ;
+    my @entries = get_entries $opts ;
 
     indented_print "Found ". (scalar @entries) ." files in $destination_string\n" ;
 
@@ -1095,7 +1120,7 @@ sub generate_captions_file {
     close CAP ;
     show_warnings ;
 
-    return $gallery ;
+    return @entries ;
 }
 
 #######################################################################
@@ -1249,7 +1274,8 @@ sub generate_slides {
 	if $? ;
 
     # find the slidetemplate
-    my $slidetemplate = (find_template_file $self, $opts, $opts->{slidetemplate_filename}, 1) . "/$opts->{slidetemplate_filename}" ;
+    my $slidetemplate = (Llgal::Templates::find_template_file ($self, $opts, $opts->{slidetemplate_filename}, 1))
+	. "/$opts->{slidetemplate_filename}" ;
     indented_print "Using '$slidetemplate' as HTML slide template.\n" ;
 
     # keep the slidetemplate in memory instead of always reopening it
@@ -1452,7 +1478,8 @@ sub generate_index {
     my @footers = @{$gallery->{footers}} ;
 
     # find the indextemplate
-    my $indextemplate = (find_template_file $self, $opts, $opts->{indextemplate_filename}, 1) . "/$opts->{indextemplate_filename}" ;
+    my $indextemplate = (Llgal::Templates::find_template_file ($self, $opts, $opts->{indextemplate_filename}, 1))
+	. "/$opts->{indextemplate_filename}" ;
     indented_print "Using '$indextemplate' as HTML index template.\n" ;
 
     # open the template and the destination
@@ -1765,18 +1792,20 @@ sub make_www_rights {
 # evaluate generic configuration files
 my $generic_opts = {} ;
 # system-wide configuration file
-merge_opts $generic_opts, parse_generic_config_file $self, "$self->{llgal_config_dir}/$self->{generic_configuration_filename}" ;
+Llgal::Config::merge_opts ($generic_opts, Llgal::Config::parse_generic_config_file
+			   ($self, "$self->{llgal_config_dir}/$self->{generic_configuration_filename}")) ;
 # user-wide configuration file
-merge_opts $generic_opts, parse_generic_config_file $self, "$self->{user_share_dir}/$self->{generic_configuration_filename}" ;
+Llgal::Config::merge_opts ($generic_opts, Llgal::Config::parse_generic_config_file
+			   ($self, "$self->{user_share_dir}/$self->{generic_configuration_filename}")) ;
 
 # early configuration ends here
 $self->{early_configuration} = 0 ;
 
 # parse cmdline now but DO NOT MERGE now
-my $cmdline_opts = parse_cmdline_options $self ;
+my $cmdline_opts = Llgal::Config::parse_cmdline_options ($self) ;
 
 # basic special behaviors may be done here
-die_usage $self
+Llgal::Config::die_usage ($self)
     if $self->{help_asked} ;
 die "This is llgal version $self->{version}.\n"
     if $self->{version_asked} ;
@@ -1822,14 +1851,15 @@ sub main_process {
     setup_destination ;
 
     # add recursive specific opts first, so that they may be locally overriden
-    $opts_without_defaults = merge_opts_into $generic_opts, $recursive_opts ;
+    $opts_without_defaults = Llgal::Config::merge_opts_into ($generic_opts, $recursive_opts) ;
 
     # evaluate gallery specific configuration, without modifying $generic_opts
-    merge_opts $opts_without_defaults, parse_generic_config_file $self, "$self->{destination_dir}$self->{local_llgal_dir}/$self->{generic_configuration_filename}" ;
+    Llgal::Config::merge_opts ($opts_without_defaults, Llgal::Config::parse_generic_config_file
+			       ($self, "$self->{destination_dir}$self->{local_llgal_dir}/$self->{generic_configuration_filename}")) ;
 
     # DO NOT MOVE THIS LINE BEFORE CONFIG FILE PARSING
     # parse command line options
-    merge_opts $opts_without_defaults, $cmdline_opts ;
+    Llgal::Config::merge_opts ($opts_without_defaults, $cmdline_opts) ;
 
     # set the locale before getting the defaults
     if (defined $opts_without_defaults->{language}) {
@@ -1839,7 +1869,7 @@ sub main_process {
     }
 
     # set defaults values for all uninitialized values
-    $opts = add_defaults $opts_without_defaults ;
+    $opts = Llgal::Config::add_defaults ($opts_without_defaults) ;
 
     if ($self->{clean_asked} or $self->{cleanall_asked} or $self->{give_templates}) {
 	# complex special behaviors that need full configuration, and recurse in all subdirectories
@@ -1857,7 +1887,7 @@ sub main_process {
 		if $destdir eq "local" ;
 	    $destdir = $self->{user_share_dir}
 		if $destdir eq "user" ;
-	    give_templates $self, $opts, $destdir ;
+	    Llgal::Templates::give_templates ($self, $opts, $destdir) ;
 	    indented_print "You may now edit templates in $destdir and generate new galleries.\n" ;
 	    indented_print "You may also remove any template that you do not want to modify.\n" ;
 	}
@@ -1880,14 +1910,14 @@ sub main_process {
     } elsif ($self->{generate_captions}) {
 	# generate captions and recurse in entries only
 
-	prepare_captions_variables $self, $opts ;
+	Llgal::Config::prepare_captions_variables ($self, $opts) ;
 
-	my $gallery = generate_captions_file $opts ;
+	my @entries = generate_captions_entries $opts ;
 	indented_print "Now edit the $self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename} file to your liking and run llgal\n" ;
 
 	if ($opts->{recursive}) {
 	    # list subdir entries
-	    my @dir_entries = grep { $_->{type} == $TYPE_DIR } @{$gallery->{entries}} ;
+	    my @dir_entries = grep { $_->{type} == $TYPE_DIR } @entries ;
 	    # process recursively
 	    print "\n" if @dir_entries ;
 	    map { subdir_process $_->{filename}, {} } @dir_entries ;
@@ -1896,7 +1926,7 @@ sub main_process {
     } else {
 	# main gallery creation and recurse in entries only
 
-	prepare_gallery_variables $self, $opts ;
+	Llgal::Config::prepare_gallery_variables ($self, $opts) ;
 
 	my $gallery = init_gallery () ;
 
@@ -1907,7 +1937,7 @@ sub main_process {
 	    indented_print "Found ". (scalar @{$gallery->{entries}}) ." files in the captions file.\n" ;
 	} else {
 	    # generate the gallery from scratch
-	    get_entries_from_directory $gallery ;
+	    @{$gallery->{entries}} = get_entries $opts ;
 	    fill_entries $gallery ;
 	    indented_print "Found ". (scalar @{$gallery->{entries}}) ." files in $destination_string\n" ;
 	}
@@ -1924,14 +1954,14 @@ sub main_process {
 
 	generate_index $gallery ;
 
-	get_llgal_files $self, $opts ;
+	Llgal::Templates::get_llgal_files ($self, $opts) ;
 
 	make_www_rights $gallery, $opts
 	    if $opts->{www_access_rights} ;
 
 	# generate a local config for this gallery
 	if (defined $self->{generate_config} and $self->{generate_config} eq "local") {
-	    generate_config $self, "$self->{destination_dir}$self->{local_llgal_dir}/$self->{generic_configuration_filename}", $opts_without_defaults ;
+	    Llgal::Config::generate_config ($self, "$self->{destination_dir}$self->{local_llgal_dir}/$self->{generic_configuration_filename}", $opts_without_defaults) ;
 	}
 
 	if ($opts->{recursive}) {
@@ -1979,5 +2009,5 @@ my $root_gallery = main_process {} ;
 
 # only generate a config once
 if (defined $self->{generate_config} and not $self->{generate_config} eq "local") {
-    generate_config $self, $self->{generate_config}, $opts_without_defaults ;
+    Llgal::Config::generate_config ($self, $self->{generate_config}, $opts_without_defaults) ;
 }

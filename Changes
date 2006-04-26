@@ -1,3 +1,20 @@
+llgal (0.13.2)
+
+  * --cf now does not include the filename extension in the caption
+    (requested by Alexandre Buisse).
+    + make_caption_from_extension may be used to add the extension
+      as previously.
+  * Support subdirectory images that the user may add to the gallery
+    by inserting their path in the captions file.
+    + Thumbnails and scaled image filenames are generated after replacing
+      the path separator (/) with the new configurable
+      path_separator_replacement.
+  * Do not create a thumbnail or scaled image if the original is already
+    smaller than the maximal dimensions.
+  * Fix -h/--help.
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Thu, 27 Apr 2006 00:32:00 +0200
+
 llgal (0.13.1)
 
   * Force regeneration of thumbnails and scaled when the original image

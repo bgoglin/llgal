@@ -8,11 +8,11 @@ use Getopt::Long ;
 use I18N::Langinfo qw(langinfo CODESET) ;
 use Locale::gettext ;
 
-use Exporter 'import' ;
 use vars qw(@EXPORT) ;
 
 @EXPORT = qw (
 	      early_parse_cmdline_options
+	      init_llgal_gettext
 	      parse_cmdline_options
 	      parse_generic_config_file
 	      parse_custom_config_file
@@ -53,6 +53,12 @@ sub early_parse_cmdline_options {
 
 ######################################################################
 # gettext strings are prefixed to distinguish between identical strings
+
+sub init_llgal_gettext {
+    my $self = shift ;
+    textdomain ("llgal") ;
+    bindtextdomain ("llgal", $self->{locale_dir}) ;
+}
 
 sub llgal_gettext {
     my $id = shift ;
@@ -107,6 +113,7 @@ my $normal_opts_type = {
     captions_filename => $OPT_IS_NONEMPTY_STRING,
     user_scaled_image_filenameprefix => $OPT_IS_NONEMPTY_STRING,
     user_thumbnail_image_filenameprefix => $OPT_IS_NONEMPTY_STRING,
+    path_separator_replacement => $OPT_IS_NONEMPTY_STRING,
 # Index
     index_cellpadding => $OPT_IS_NUMERIC, # >= 0, -1 for default
     list_links => $OPT_IS_NUMERIC,
@@ -135,6 +142,7 @@ my $normal_opts_type = {
     make_caption_from_image_comment => $OPT_IS_STRING,
     make_caption_from_image_timestamp => $OPT_IS_NUMERIC,
     make_caption_from_filename => $OPT_IS_NUMERIC,
+    make_caption_from_extension => $OPT_IS_NUMERIC,
     show_dimensions => $OPT_IS_NUMERIC,
     show_size => $OPT_IS_NUMERIC,
     slide_counter_format => $OPT_IS_STRING,
@@ -219,8 +227,6 @@ my $special_opts_without_output = {
     default_thumb_ydim => 1,
     scaled_create_command => 1,
     thumbnail_create_command => 1,
-    scaled_copy_command => 1,
-    thumbnail_copy_command => 1,
 } ;
 
 # options whose merging is done as array
@@ -296,6 +302,8 @@ sub add_defaults {
 	user_scaled_image_filenameprefix => "my",
 # additional prefix of user-provided thumbnails
 	user_thumbnail_image_filenameprefix => "my",
+# character to use to replace / in the thumbnail/scaled of subdir images
+	path_separator_replacement => "@",
 
 # Index
 # cellpadding value for the thumbnail index tables (-p)
@@ -804,7 +812,7 @@ sub parse_cmdline_options {
 	    # the error has already been displayed
 	    exit -1 ;
 	} else {
-	    die_usage $self ;
+	    die_usage ($self) ;
 	}
     }
 
