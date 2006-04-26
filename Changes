@@ -1,8 +1,9 @@
+llgal (0.13.2)
 
   * --cf now does not include the filename extension in the caption
     (requested by Alexandre Buisse).
     + make_caption_from_extension may be used to add the extension
-      ad previously.
+      as previously.
   * Support subdirectory images that the user may add to the gallery
     by inserting their path in the captions file.
     + Thumbnails and scaled image filenames are generated after replacing
@@ -12,6 +13,7 @@
     smaller than the maximal dimensions.
   * Fix -h/--help.
 
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Thu, 27 Apr 2006 00:32:00 +0200
 
 llgal (0.13.1)
 
