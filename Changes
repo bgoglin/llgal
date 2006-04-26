@@ -8,6 +8,7 @@
     + Thumbnails and scaled image filenames are generated after replacing
       the path separator (/) with the new configurable
       path_separator_replacement.
+  * Fix -h/--help.
 
 
 llgal (0.13.1)

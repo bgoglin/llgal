@@ -814,7 +814,7 @@ sub parse_cmdline_options {
 	    # the error has already been displayed
 	    exit -1 ;
 	} else {
-	    die_usage $self ;
+	    die_usage ($self) ;
 	}
     }
 
