@@ -1,6 +1,8 @@
 llgal (0.13.2-1) unstable; urgency=low
 
   * New upstream release.
+  * Add an empty binary-arch target in debian/rules.
+  * Replace Build-Depends-Indep with Build-Depends in debian/control.
 
  -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Thu, 27 Apr 2006 00:35:28 +0200
 
