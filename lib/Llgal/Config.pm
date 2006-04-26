@@ -142,6 +142,7 @@ my $normal_opts_type = {
     make_caption_from_image_comment => $OPT_IS_STRING,
     make_caption_from_image_timestamp => $OPT_IS_NUMERIC,
     make_caption_from_filename => $OPT_IS_NUMERIC,
+    make_caption_from_extension => $OPT_IS_NUMERIC,
     show_dimensions => $OPT_IS_NUMERIC,
     show_size => $OPT_IS_NUMERIC,
     slide_counter_format => $OPT_IS_STRING,

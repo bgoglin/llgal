@@ -406,8 +406,15 @@ sub create_file_entry {
     # the caption (will be web-safe after caption file generation)
     if (not defined $caption) {
 	my @texts = () ;
-	push (@texts, $filename)
-	    if $opts->{make_caption_from_filename} ;
+	if ($opts->{make_caption_from_extension}) {
+	    push (@texts, $filename) ;
+	} elsif ($opts->{make_caption_from_filename}) {
+	    # remove the extension
+	    my @parts = split (/\./, $filename) ;
+	    pop @parts ;
+	    my $basename = join ('.', @parts) ;
+	    push (@texts, $basename) ;
+	}
 	push (@texts, generate_caption_from_image_infos $entry->{exif_infos})
 	    if $type == $TYPE_IMG ;
 	$caption = join (' - ', grep {$_} @texts) ;

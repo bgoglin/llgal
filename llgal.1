@@ -1091,9 +1091,14 @@ Default is \fB"REMOVE THIS LINE IF LLGAL SHOULD NOT REMOVE THIS FILE"\fR.
 .RE
 .I make_caption_from_filename = <0/1>
 .RS
-Generate captions from filenames
-.RB [ -C ].
+Generate captions from filenames without their extension
+.RB [ --cf ].
 Default is
+.BR 0 " (" disabled ).
+.RE
+.I make_caption_from_extension = <0/1>
+.RS
+Generate captions from filenames with their extension.
 .BR 0 " (" disabled ).
 .RE
 .I make_caption_from_image_comment = ",-separated strings of +-separated strings"

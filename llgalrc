@@ -182,8 +182,11 @@
 # Also generate captions from timestamp stored in images [--ct]
 # make_caption_from_image_timestamp = 0
 
-# Generate captions from filenames [--cf]
+# Generate captions from filenames without their extension [--cf]
 # make_caption_from_filename = 0
+
+# Generate captions from filenames with their extension
+# make_caption_from_extension = 0
 
 # Show dimensions and/or size of the images and movies [-a, --ad, --as]
 # show_dimensions = 0

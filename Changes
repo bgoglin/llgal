@@ -1,4 +1,8 @@
 
+  * --cf now does not include the filename extension in the caption
+    (requested by Alexandre Buisse).
+    + make_caption_from_extension may be used to add the extension
+      ad previously.
   * Support subdirectory images that the user may add to the gallery
     by inserting their path in the captions file.
     + Thumbnails and scaled image filenames are generated after replacing
