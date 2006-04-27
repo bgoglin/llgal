@@ -102,18 +102,18 @@ sub clean_files {
 		    ("compare $_ with its original",
 		     "cmp", "-s", "$self->{destination_dir}$self->{local_llgal_dir}/$_", "$original") ;
 		if ($diff == -1) {
-		    $messages->immediate_external_warnings (@output) ;
+		    $messages->warning (@output) ;
 		    die "Failed to execute 'cmp' to check whether $self->{destination_dir}$self->{local_llgal_dir}/$_ has been modified ($!).\n" ;
 		}
-		$messages->add_external_warnings (@output) ;
+		$messages->warning (@output) ;
 		# on other errors, assume files are different ($diff != 0)
 	    }
 	    if ($diff) {
-		$messages->add_warning ("Preserved $self->{destination_dir}$self->{local_llgal_dir}/$_ since it seems to be modified.") ;
+		$messages->warning ("Preserved $self->{destination_dir}$self->{local_llgal_dir}/$_ since it seems to be modified.") ;
 		$notdeleted++ ;
 	    } else {
 		if (!unlink "$self->{destination_dir}$self->{local_llgal_dir}/$_" and ! $!{ENOENT}) {
-		    $messages->add_warning ("Failed to remove file $self->{destination_dir}$self->{local_llgal_dir}/$_ ($!).") ;
+		    $messages->warning ("Failed to remove file $self->{destination_dir}$self->{local_llgal_dir}/$_ ($!).") ;
 		}
 	    }
 	} elsif (/^$opts->{captions_filename}$/) {
@@ -125,18 +125,18 @@ sub clean_files {
 		    ("check for caption removal line",
 		     "grep", "-q", "$opts->{captions_removal_line}", "$self->{destination_dir}$self->{local_llgal_dir}/$_") ;
 		if ($grep == -1) {
-		    $messages->immediate_external_warnings (@output) ;
+		    $messages->warning (@output) ;
 		    die "Failed to execute 'grep' to check whether $self->{destination_dir}$self->{local_llgal_dir}/$_ has been modified ($!).\n" ;
 		}
-		$messages->add_external_warnings (@output) ;
+		$messages->warning (@output) ;
 		# on other errors, assume file doesn't contain the caption removal line ($grep != 0)
 	    }
 	    if ($grep) {
-		$messages->add_warning ("Preserved $self->{destination_dir}$self->{local_llgal_dir}/$_ since it seems to be modified.") ;
+		$messages->warning ("Preserved $self->{destination_dir}$self->{local_llgal_dir}/$_ since it seems to be modified.") ;
 		$notdeleted++ ;
 	    } else {
 		if (!unlink "$self->{destination_dir}$self->{local_llgal_dir}/$_" and ! $!{ENOENT}) {
-		    $messages->add_warning ("Failed to remove file $self->{destination_dir}$self->{local_llgal_dir}/$_.") ;
+		    $messages->warning ("Failed to remove file $self->{destination_dir}$self->{local_llgal_dir}/$_.") ;
 		}
 	    }
 	} else {
@@ -146,7 +146,7 @@ sub clean_files {
     closedir DIR ;
     if ($notdeleted <= 2 and $cleanall) {
 	if (!rmdir "$self->{destination_dir}$self->{local_llgal_dir}"  and ! $!{ENOENT}) {
-	    $messages->add_warning ("Failed to remove directory $self->{destination_dir}$self->{local_llgal_dir} ($!).") ;
+	    $messages->warning ("Failed to remove directory $self->{destination_dir}$self->{local_llgal_dir} ($!).") ;
 	}
     }
 
@@ -219,7 +219,7 @@ sub check_file {
     my $filename = shift ;
 
     if (! -e $filename) {
-	$messages->add_warning ("Cannot find file '$filename', skipping it.") ;
+	$messages->warning ("Cannot find file '$filename', skipping it.") ;
 	return -1 ;
     }
 
@@ -242,11 +242,11 @@ sub check_image {
 	( "check \"$filename\" validity",
 	  "identify", $filename ) ;
     if ($status == -1) {
-	$messages->immediate_external_warnings (@output) ;
+	$messages->warning (@output) ;
 	die "Failed to check \"$filename\" validity\n" ;
     } elsif ($status) {
-	# do not show external warnings
-	$messages->add_warning ("Bad image file '$filename', skipping it.") ;
+	# do not show actual identify output
+	$messages->warning ("Bad image file '$filename', skipping it.") ;
 	return -1 ;
     }
     return 0 ;
@@ -365,7 +365,7 @@ sub make_safe_url {
     my $file = shift ;
     my $safe = make_safe_url_nowarn ($file) ;
 
-    $messages->add_warning ("Non-ascii characters were escaped in filename '$file'.")
+    $messages->warning ("Non-ascii characters were escaped in filename '$file'.")
 	if $safe ne $file and $file =~ /[\x80-\xFF]/ ;
 
     return $safe ;
@@ -564,11 +564,11 @@ sub fill_file_entry {
 		    ( "create '$real_filename' thumbnail",
 		      @{$opts->{thumbnail_create_command}}, "$real_filename", "$real_thumb_filename" ) ;
 		if ($status == -1) {
-		    $messages->immediate_external_warnings (@output) ;
+		    $messages->warning (@output) ;
 		    die "Failed to create '$real_filename' thumbnail\n" ;
 		} elsif ($status) {
-		    $messages->add_warning ("Failed to create '$real_filename' thumbnail") ;
-		    $messages->add_external_warnings (@output) ;
+		    $messages->warning ("Failed to create '$real_filename' thumbnail") ;
+		    $messages->warning (@output) ;
 		    return undef ;
 		}
 	    }
@@ -655,11 +655,11 @@ sub fill_file_entry {
 			( "create '$real_filename' scaled image",
 			  @{$opts->{scaled_create_command}}, "$real_filename", "$real_scaled_filename" ) ;
 		    if ($status == -1) {
-			$messages->immediate_external_warnings (@output) ;
+			$messages->warning (@output) ;
 			die "Failed to create '$real_filename' scaled image\n" ;
 		    } elsif ($status) {
-			$messages->add_warning ("Failed to create '$real_filename' scaled image") ;
-			$messages->add_external_warnings (@output) ;
+			$messages->warning ("Failed to create '$real_filename' scaled image") ;
+			$messages->warning (@output) ;
 			return undef ;
 		    }
 		}
@@ -768,7 +768,6 @@ sub fill_entries {
 	$messages->update_percentage (($i++)+1) ;
     }
     $messages->end_percentage () ;
-    $messages->show_warnings () ;
 
     @{$gallery->{entries}} = @final_entries ;
 }
@@ -941,7 +940,6 @@ sub get_entries_from_directory {
 	$messages->update_percentage ($i+1) ;
     }
     $messages->end_percentage () ;
-    $messages->show_warnings () ;
 
     return @entries ;
 }
@@ -980,20 +978,20 @@ sub check_destination {
     my $path = getcwd."/".$self->{destination_dir} ;
     if ($path =~ m@/*(?:[^/]+/+)*([^/]+)/+$@) {
 	if ($1 eq $self->{local_llgal_dir}) {
-	    $messages->immediate_warning ("!! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !!") ;
-	    $messages->immediate_warning ("Your working directory looks like a .llgal directory. !!") ;
-	    $messages->immediate_warning ("This might not be what you really want to do.         !!") ;
-	    $messages->immediate_warning ("!! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !!") ;
+	    $messages->warning ("!! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !!") ;
+	    $messages->warning ("Your working directory looks like a .llgal directory. !!") ;
+	    $messages->warning ("This might not be what you really want to do.         !!") ;
+	    $messages->warning ("!! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !!") ;
 	}
     }
 
     # TODO: remove this one day (maybe on march 7th 2006, since it will be 6 month ?)
     # temporary check, to be removed soon
     if ($self->{local_llgal_dir} ne ".llgal.files" and -e "$self->{destination_dir}.llgal.files") {
-	$messages->immediate_warning ("!! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !!") ;
-	$messages->immediate_warning ("llgal now uses '.llgal' instead '.llgal.files'. !!") ;
-	$messages->immediate_warning ("You should probably update it.                  !!") ;
-	$messages->immediate_warning ("!! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !!") ;
+	$messages->warning ("!! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !!") ;
+	$messages->warning ("llgal now uses '.llgal' instead '.llgal.files'. !!") ;
+	$messages->warning ("You should probably update it.                  !!") ;
+	$messages->warning ("!! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !!") ;
     }
 
     # create globals to factorize later
@@ -1081,7 +1079,7 @@ sub generate_captions_entries {
 	    while (my $line = <CAPHEADER>) { print CAP $line ; }
 	    close CAPHEADER ;
 	} else {
-	    $messages->add_warning ("Failed to open $opts->{captions_header_filename}\n") ;
+	    $messages->warning ("Failed to open $opts->{captions_header_filename}\n") ;
 	}
 	print CAP "# $opts->{captions_removal_line}\n" ;
 	print CAP "\n" ;
@@ -1139,7 +1137,6 @@ sub generate_captions_entries {
     }
 
     $messages->end_percentage () ;
-    $messages->show_warnings () ;
 
     close CAP ;
 
@@ -1250,7 +1247,6 @@ sub read_captions_file {
     }
     close CAP ;
     $messages->end_percentage () ;
-    $messages->show_warnings () ;
 
     @{$gallery->{entries}} = @entries ;
     @{$gallery->{headers}} = @headers ;
@@ -1491,7 +1487,7 @@ sub generate_slides {
     }
     $messages->end_percentage () ;
 }
-$messages->show_warnings () ;
+
 
 #######################################################################
 # Creating the index file
@@ -1749,9 +1745,8 @@ sub generate_index {
     close IXR ;
 
     $messages->end_percentage () ;
-    $messages->show_warnings () ;
 
-    $messages->immediate_warning ("Row width max ($opts->{pixels_per_row}) too low for one single thumbnail. "
+    $messages->warning ("Row width max ($opts->{pixels_per_row}) too low for one single thumbnail. "
 	. "Forced $forced_width_warning time". ($forced_width_warning>1?"s":"") .".")
 	if $forced_width_warning ;
 }
@@ -1763,7 +1758,7 @@ sub make_readable {
     my $file = shift ;
     my ($status, @output) = Llgal::Utils::system_with_output
 	("make world readable", "chmod", "a+r", $file) ;
-    $messages->add_external_warnings (@output)
+    $messages->warning (@output)
 	if $status ;
 }
 
@@ -1771,7 +1766,7 @@ sub make_readable_and_traversable {
     my $file = shift ;
     my ($status, @output) = Llgal::Utils::system_with_output
 	("make world readable and traversable", "chmod", "a+rx", $file) ;
-    $messages->add_external_warnings (@output)
+    $messages->warning (@output)
 	if $status ;
 }
 
@@ -1825,8 +1820,6 @@ sub make_www_rights {
 	    if ($type == $TYPE_IMG or $entry->{scaled_url})
 	    and ($opts->{slide_width_max} > 0 or $opts->{slide_height_max} > 0) and !$opts->{make_no_slides} ;
     }
-
-    $messages->show_warnings () ;
 }
 
 #######################################################################
@@ -1929,8 +1922,9 @@ sub main_process {
 	if ($self->{clean_asked} or $self->{cleanall_asked}) {
 	    # clean
 	    my $cleanall = shift ;
+	    $messages->delay_warnings () ;
 	    clean_files $self->{cleanall_asked} ;
-	    $messages->show_warnings () ;
+	    $messages->show_delayed_warnings () ;
 
 	} elsif ($self->{give_templates}) {
 	    # give templates
@@ -2008,8 +2002,10 @@ sub main_process {
 
 	Llgal::Templates::get_llgal_files ($self, $opts) ;
 
+	$messages->delay_warnings () ;
 	make_www_rights $gallery, $opts
 	    if $opts->{www_access_rights} ;
+	$messages->show_delayed_warnings () ;
 
 	# generate a local config for this gallery
 	if (defined $self->{generate_config} and $self->{generate_config} eq "local") {

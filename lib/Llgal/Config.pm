@@ -613,8 +613,8 @@ sub process_option {
 		if ($self->{early_configuration}) {
 		    $self->{local_llgal_dir} = $1 ;
 		} elsif ($1 ne $self->{local_llgal_dir}) {
-		    $messages->immediate_warning ("Ignoring changes to the name of the local llgal directory outside of") ;
-		    $messages->immediate_warning ("system- and user-wide configuration files.") ;
+		    $messages->warning ("Ignoring changes to the name of the local llgal directory outside of") ;
+		    $messages->warning ("system- and user-wide configuration files.") ;
 		}
 
 	    } elsif ($line =~ /^exclude\s*=\s*"(.+)"$/) {
@@ -680,7 +680,7 @@ sub parse_generic_config_file {
     my $oldconffile = $file ;
     $oldconffile =~ s/$self->{local_llgal_dir}\/llgalrc$/.llgalrc/ ;
     $oldconffile =~ s/llgal\/llgalrc$/llgalrc/ ;
-    $messages->immediate_warning ("Obsolete configuration file $oldconffile skipped, should be moved to $file.")
+    $messages->warning ("Obsolete configuration file $oldconffile skipped, should be moved to $file.")
 	if -e $oldconffile ;
 
     # generic configuration files may not exist
@@ -1076,7 +1076,7 @@ sub generate_config {
     $messages->print ("Generating config file '$file'.\n") ;
     if (-e "$file") {
 	my $old_file = "$file.save.". (strftime('%Y-%m-%d_%H:%M:%S' ,localtime)) ;
-	$messages->immediate_warning ("Renaming old configuration file '$file' as '$old_file'") ;
+	$messages->warning ("Renaming old configuration file '$file' as '$old_file'") ;
 	rename "$file", "$old_file" ;
     }
 

@@ -13,7 +13,8 @@ sub new {
     bless $self ;
     $self->{indent} = "" ;
     $self->{percentage_total} = 0 ;
-    $self->{delayed_warnings} = "" ;
+    $self->{delayed_warning} = 0 ;
+    $self->{pending_warnings} = "" ;
     return $self ;
 }
 
@@ -22,7 +23,9 @@ sub copy {
     my $new_self = {
 	indent => $self->{indent},
 	percentage_total => $self->{percentage_total},
-	delayed_warnings => $self->{delayed_warnings},
+	percentage_in_progress => $self->{percentage_in_progress},
+	delayed_warning => $self->{delayed_warning},
+	pending_warnings => $self->{pending_warnings},
     } ;
     bless $new_self ;
     return $new_self ;
@@ -46,44 +49,36 @@ sub indent {
 
 my $warning_prefix = "!! " ;
 
-sub add_warning {
-    my $self = shift ;
-    $self->{delayed_warnings} .= $warning_prefix.(shift)."\n" ;
-}
-
-sub add_external_warnings {
+sub warning {
     my $self = shift ;
     while (@_) {
 	my $line = shift ;
 	chomp $line ;
-	add_warning "# $line" ;
+	if ($self->{delayed_warning}) {
+	    $self->{pending_warnings} .= $warning_prefix.$line."\n" ;
+	} else {
+	    print $warning_prefix.$line."\n" ;
+	}
     }
 }
 
-sub show_warnings {
+sub delay_warnings {
     my $self = shift ;
-    print $self->{delayed_warnings} ;
-    $self->{delayed_warnings} = "" ;
+    $self->{delayed_warning} = 1 ;
 }
 
-sub immediate_warning {
+sub show_delayed_warnings {
     my $self = shift ;
-    print $warning_prefix.(shift)."\n" ;
-}
-
-sub immediate_external_warnings {
-    my $self = shift ;
-    while (@_) {
-	my $line = shift ;
-	chomp $line ;
-	immediate_warning "# $line" ;
-    }
+    print $self->{pending_warnings} ;
+    $self->{pending_warnings} = "" ;
+    $self->{delayed_warning} = 0 ;
 }
 
 # percentage printing
 
 sub init_percentage {
     my $self = shift ;
+    $self->{delayed_warning} = 1 ;
     $self->{percentage_total} = shift ;
     print "  0%" ;
 }
@@ -105,6 +100,7 @@ sub update_percentage {
 sub end_percentage {
     my $self = shift ;
     print "\b\b\b\b100%\n" ;
+    $self->show_delayed_warnings () ;
 }
 
 

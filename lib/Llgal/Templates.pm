@@ -25,7 +25,7 @@ sub copy_file {
 	"cp", "-f", "$srcdir/$filename", "$destdir/$filename") ;
     if ($status) {
 	# die on whatever error
-	$messages->immediate_external_warnings (@output) ;
+	$messages->warning (@output) ;
 	die "Failed to get a copy of '$filename'.\n" ;
     }
 }
