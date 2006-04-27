@@ -1,3 +1,10 @@
+
+  * When -n is passed, slide filename is generated from the image filename
+    and the slide filename prefix (it helps cleaning HTML files).
+    + Add a note about slide_filenameprefix == "" which could lead to removal
+      of non-llgal HTML files.
+
+
 llgal (0.13.2)
 
   * --cf now does not include the filename extension in the caption

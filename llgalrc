@@ -68,6 +68,9 @@
 # index_filename = "index"
 
 # Prefix of generated HTML slide filenames
+# Note that this prefix is used to decide what HTML to delete when --clean
+# is passed. Setting this option to an empty string will make llgal remove
+# all HTML files.
 # slide_filenameprefix = "slide_"
 
 # Prefix used to determine the filenames of scaled image that are

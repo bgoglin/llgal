@@ -153,7 +153,7 @@ sub clean_files {
     opendir DIR, $self->{destination_dir} ? $self->{destination_dir} : "./" ; # destination is empty for './'
     while ($_ = readdir DIR ) {
 	if (/^$opts->{index_filename}\.$opts->{www_extension}$/
-	    or /^$opts->{slide_filenameprefix}\d+\.$opts->{www_extension}$/) {
+	    or /^$opts->{slide_filenameprefix}.*\.$opts->{www_extension}$/) {
 	    unlink "$self->{destination_dir}$_" ;
 	}
     }
@@ -820,12 +820,12 @@ sub finalize_entries {
 		if ($type == $TYPE_TXT or $type == $TYPE_LNK) {
 		    $slide_filename = "$opts->{slide_filenameprefix}$counter_with_zeros.$opts->{www_extension}" ;
 		} elsif ($opts->{make_slide_filename_from_extension}) {
-		    $slide_filename = "$filename.$opts->{www_extension}" ;
+		    $slide_filename = "$opts->{slide_filenameprefix}$filename.$opts->{www_extension}" ;
 		} else {
 		    my @parts = split (/\./, $filename) ;
 		    pop @parts ;
 		    my $basename = join ('.', @parts) ;
-		    $slide_filename = "$basename.$opts->{www_extension}" ;
+		    $slide_filename = "$opts->{slide_filenameprefix}$basename.$opts->{www_extension}" ;
 		}
 	    } else {
 		$slide_filename = "$opts->{slide_filenameprefix}$counter_with_zeros.$opts->{www_extension}" ;

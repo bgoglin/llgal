@@ -872,6 +872,12 @@ Default is
 .RS
 Prefix of generated HTML slide filenames.
 Default is \fB"slide_"\fR.
+Note that this prefix is used to decide what HTML to delete when
+.B --clean
+is passed.
+Setting this option to an empty string will make llgal remove
+.I all
+HTML files.
 .RE
 .I scaled_image_filenameprefix = \fI"filename prefix"
 .RS
