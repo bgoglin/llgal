@@ -7,8 +7,6 @@ use vars qw(@EXPORT) ;
 
 @EXPORT = qw (
     system_with_output
-    is_integer
-    back_path
 ) ;
 
 # system routine which:
@@ -41,20 +39,6 @@ sub system_with_output {
 	close $pipe_in ;
 	exit -1 ;
     }
-}
-
-# check whether an argument is an integer
-
-sub is_integer {
-    my $s = shift ;
-    return $s eq int($s) ;
-}
-
-# revert a path into ..
-sub back_path {
-    my $dir = shift ;
-    $dir =~ s/([^\/]+)/../g ;
-    return $dir ;
 }
 
 1;

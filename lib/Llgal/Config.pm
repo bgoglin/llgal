@@ -823,6 +823,14 @@ sub parse_cmdline_options {
 }
 
 ######################################################################
+# check and defaults
+
+# check whether an argument is an integer
+sub is_integer {
+    my $s = shift ;
+    return $s eq int($s) ;
+}
+
 # various common checks and definitions
 sub prepare_common_variables {
     my $self = shift ;

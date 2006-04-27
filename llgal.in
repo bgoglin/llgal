@@ -1857,6 +1857,13 @@ die "This is llgal version $self->{version}.\n"
 # we may check the destination directory
 check_destination ;
 
+# revert a path into ..
+sub back_path {
+    my $dir = shift ;
+    $dir =~ s/([^\/]+)/../g ;
+    return $dir ;
+}
+
 # forward declaration
 sub main_process ;
 
