@@ -3,7 +3,7 @@ package Llgal::Config ;
 use strict ;
 
 require Llgal::Messages ;
-use Llgal::Misc ;
+require Llgal::Utils ;
 
 use Getopt::Long ;
 use I18N::Langinfo qw(langinfo CODESET) ;

@@ -5,7 +5,7 @@ use strict ;
 require Llgal::Config ;
 require Llgal::Messages ;
 require Llgal::Templates ;
-use Llgal::Misc ;
+require Llgal::Utils ;
 
 use FileHandle ;
 use Image::Size ;
@@ -98,7 +98,7 @@ sub clean_files {
 	    my @output ;
 	    # default is cleanall, which removes everything, as if file were not changed
 	    if (!$cleanall) {
-		($diff, @output) = system_with_output
+		($diff, @output) = Llgal::Utils::system_with_output
 		    ("compare $_ with its original",
 		     "cmp", "-s", "$self->{destination_dir}$self->{local_llgal_dir}/$_", "$original") ;
 		if ($diff == -1) {
@@ -121,7 +121,7 @@ sub clean_files {
 	    my @output ;
 	    # default is cleanall, which removes everything, as if the removal line was here
 	    if (!$cleanall) {
-		($grep, @output) = system_with_output
+		($grep, @output) = Llgal::Utils::system_with_output
 		    ("check for caption removal line",
 		     "grep", "-q", "$opts->{captions_removal_line}", "$self->{destination_dir}$self->{local_llgal_dir}/$_") ;
 		if ($grep == -1) {
@@ -238,7 +238,7 @@ sub check_file {
 
 sub check_image {
     my $filename = shift ;
-    my ($status, @output) = system_with_output
+    my ($status, @output) = Llgal::Utils::system_with_output
 	( "check \"$filename\" validity",
 	  "identify", $filename ) ;
     if ($status == -1) {
@@ -560,7 +560,7 @@ sub fill_file_entry {
 		$real_thumb_filename = "$self->{destination_dir}$entry->{filename}" ;
 	    } else {
 		# scale down
-		($status, @output) = system_with_output
+		($status, @output) = Llgal::Utils::system_with_output
 		    ( "create '$real_filename' thumbnail",
 		      @{$opts->{thumbnail_create_command}}, "$real_filename", "$real_thumb_filename" ) ;
 		if ($status == -1) {
@@ -651,7 +651,7 @@ sub fill_file_entry {
 		    $real_scaled_filename = "$self->{destination_dir}$entry->{filename}" ;
 		} else {
 		    # scale down
-		    ($status, @output) = system_with_output
+		    ($status, @output) = Llgal::Utils::system_with_output
 			( "create '$real_filename' scaled image",
 			  @{$opts->{scaled_create_command}}, "$real_filename", "$real_scaled_filename" ) ;
 		    if ($status == -1) {
@@ -1761,16 +1761,16 @@ sub generate_index {
 
 sub make_readable {
     my $file = shift ;
-    my ($status, @output) = system_with_output ("make world readable",
-						"chmod", "a+r", $file) ;
+    my ($status, @output) = Llgal::Utils::system_with_output
+	("make world readable", "chmod", "a+r", $file) ;
     $messages->add_external_warnings (@output)
 	if $status ;
 }
 
 sub make_readable_and_traversable {
     my $file = shift ;
-    my ($status, @output) = system_with_output ("make world readable and traversable",
-						"chmod", "a+rx", $file) ;
+    my ($status, @output) = Llgal::Utils::system_with_output
+	("make world readable and traversable", "chmod", "a+rx", $file) ;
     $messages->add_external_warnings (@output)
 	if $status ;
 }

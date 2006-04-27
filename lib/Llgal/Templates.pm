@@ -2,7 +2,7 @@ package Llgal::Templates ;
 
 use strict ;
 
-use Llgal::Misc ;
+use Llgal::Utils ;
 
 use vars qw(@EXPORT) ;
 
@@ -20,7 +20,7 @@ sub copy_file {
     my $filename = shift ;
     my $srcdir = shift ;
     my $destdir = shift ;
-    my ($status, @output) = system_with_output
+    my ($status, @output) = Llgal::Utils::system_with_output
 	("copy '$filename' from '$srcdir'",
 	"cp", "-f", "$srcdir/$filename", "$destdir/$filename") ;
     if ($status) {

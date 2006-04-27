@@ -1,8 +1,7 @@
-package Llgal::Misc ;
+package Llgal::Utils ;
 
 use strict ;
 
-use Exporter 'import' ;
 use vars qw(@EXPORT) ;
 
 @EXPORT = qw (
