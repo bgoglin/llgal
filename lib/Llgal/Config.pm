@@ -2,6 +2,7 @@ package Llgal::Config ;
 
 use strict ;
 
+require Llgal::Messages ;
 use Llgal::Misc ;
 
 use Getopt::Long ;
@@ -567,6 +568,7 @@ sub process_option_error {
 sub process_option {
     my $self = shift ;
     my $opts = shift ;
+    my $messages = $self->{messages} ;
     my $line = shift ;
     chomp $line ;
 
@@ -611,8 +613,8 @@ sub process_option {
 		if ($self->{early_configuration}) {
 		    $self->{local_llgal_dir} = $1 ;
 		} elsif ($1 ne $self->{local_llgal_dir}) {
-		    immediate_warning "Ignoring changes to the name of the local llgal directory outside of" ;
-		    immediate_warning "system- and user-wide configuration files." ;
+		    $messages->immediate_warning ("Ignoring changes to the name of the local llgal directory outside of") ;
+		    $messages->immediate_warning ("system- and user-wide configuration files.") ;
 		}
 
 	    } elsif ($line =~ /^exclude\s*=\s*"(.+)"$/) {
@@ -669,6 +671,7 @@ sub process_option {
 
 sub parse_generic_config_file {
     my $self = shift ;
+    my $messages = $self->{messages} ;
     my $opts = {} ;
     my $file = shift ;
 
@@ -677,7 +680,7 @@ sub parse_generic_config_file {
     my $oldconffile = $file ;
     $oldconffile =~ s/$self->{local_llgal_dir}\/llgalrc$/.llgalrc/ ;
     $oldconffile =~ s/llgal\/llgalrc$/llgalrc/ ;
-    immediate_warning "Obsolete configuration file $oldconffile skipped, should be moved to $file."
+    $messages->immediate_warning ("Obsolete configuration file $oldconffile skipped, should be moved to $file.")
 	if -e $oldconffile ;
 
     # generic configuration files may not exist
@@ -855,6 +858,7 @@ sub prepare_captions_variables {
 sub prepare_gallery_variables {
     my $self = shift ;
     my $opts = shift ;
+    my $messages = $self->{messages} ;
 
     prepare_captions_variables $self, $opts ;
 
@@ -912,8 +916,8 @@ sub prepare_gallery_variables {
     die "Please give an integer value for thumbnail width max\n"
 	unless is_integer ($opts->{thumbnail_width_max}) ;
     if ($opts->{thumbnail_width_max} < 0) {
-	indented_print "Thumbnail width max value < 0, restoring to default (".
-	    ($thumbnail_width_max_default?$thumbnail_width_max_default:"unlimited") .")\n" ;
+	$messages->print ("Thumbnail width max value < 0, restoring to default (".
+	    ($thumbnail_width_max_default?$thumbnail_width_max_default:"unlimited") .")\n") ;
 	$opts->{thumbnail_width_max} = $thumbnail_width_max_default ;
     }
     die "Please give a positive thumbnail width max value (or 0 for unlimited)\n"
@@ -923,7 +927,7 @@ sub prepare_gallery_variables {
     die "Please give an integer value for thumbnail height max\n"
 	unless is_integer ($opts->{thumbnail_height_max}) ;
     if ($opts->{thumbnail_height_max} < 0) {
-	indented_print "Thumbnail height max value < 0, restoring to default ($thumbnail_height_max_default)\n" ;
+	$messages->print ("Thumbnail height max value < 0, restoring to default ($thumbnail_height_max_default)\n") ;
 	$opts->{thumbnail_height_max} = $thumbnail_height_max_default ;
     }
     die "Please give a positive thumbnail height max value\n"
@@ -933,8 +937,8 @@ sub prepare_gallery_variables {
     die "Please give an integer value for thumbnails per row\n"
 	unless is_integer ($opts->{thumbnails_per_row}) ;
     if ($opts->{thumbnails_per_row} < 0) {
-	indented_print "Thumbnails per row value < 0, restoring to default (".
-	    ($thumbnails_per_row_default?$thumbnails_per_row_default:"unlimited") .")\n" ;
+	$messages->print ("Thumbnails per row value < 0, restoring to default (".
+	    ($thumbnails_per_row_default?$thumbnails_per_row_default:"unlimited") .")\n") ;
 	$opts->{thumbnails_per_row} = $thumbnails_per_row_default ;
     }
     die "Please give a positive thumbnails per row value (or 0 for unlimited)\n"
@@ -944,8 +948,8 @@ sub prepare_gallery_variables {
     die "Please give an integer value for pixels per row\n"
 	unless is_integer ($opts->{pixels_per_row}) ;
     if ($opts->{pixels_per_row} < 0) {
-	indented_print "Pixels per row value < 0, restoring to default (".
-	    ($pixels_per_row_default?$pixels_per_row_default:"unlimited") .")\n" ;
+	$messages->print ("Pixels per row value < 0, restoring to default (".
+	    ($pixels_per_row_default?$pixels_per_row_default:"unlimited") .")\n") ;
 	$opts->{pixels_per_row} = $pixels_per_row_default ;
     }
     die "Please give a positive pixels per row value (or 0 for unlimited)\n"
@@ -955,7 +959,7 @@ sub prepare_gallery_variables {
     die "Please give an integer value for index cellpadding\n"
 	unless is_integer ($opts->{index_cellpadding}) ;
     if ($opts->{index_cellpadding} < 0) {
-	indented_print "Index cellpadding value < 0, restoring to default ($index_cellpadding_default)\n" ;
+	$messages->print ("Index cellpadding value < 0, restoring to default ($index_cellpadding_default)\n") ;
 	$opts->{index_cellpadding} = $index_cellpadding_default ;
     }
     die "Please give a positive or null index cellpadding value\n"
@@ -965,7 +969,7 @@ sub prepare_gallery_variables {
     die "Please give an integer value for text slide width\n"
 	unless is_integer ($opts->{text_slide_width}) ;
     if ($opts->{text_slide_width} < 0) {
-	indented_print "Text slide width value < 0, restoring to default ($text_slide_width_default)\n" ;
+	$messages->print ("Text slide width value < 0, restoring to default ($text_slide_width_default)\n") ;
 	$opts->{text_slide_width} = $text_slide_width_default ;
     }
     die "Please give a positive text slide width value\n"
@@ -975,7 +979,7 @@ sub prepare_gallery_variables {
     die "Please give an integer value for text slide height\n"
 	unless is_integer ($opts->{text_slide_height}) ;
     if ($opts->{text_slide_height} < 0) {
-	indented_print "Text slide height value < 0, restoring to default ($text_slide_height_default)\n" ;
+	$messages->print ("Text slide height value < 0, restoring to default ($text_slide_height_default)\n") ;
 	$opts->{text_slide_height} = $text_slide_height_default ;
     }
     die "Please give a positive text slide height value\n"
@@ -985,8 +989,8 @@ sub prepare_gallery_variables {
     die "Please give an integer value for slide width max\n"
 	unless is_integer ($opts->{slide_width_max}) ;
     if ($opts->{slide_width_max} < 0) {
-	indented_print "Slide width max value < 0, restoring to default (".
-	    ($slide_width_max_default?$slide_width_max_default:"unlimited") .")\n" ;
+	$messages->print ("Slide width max value < 0, restoring to default (".
+	    ($slide_width_max_default?$slide_width_max_default:"unlimited") .")\n") ;
 	$opts->{slide_width_max} = $slide_width_max_default ;
     }
     die "Please give a positive slide width max value (or 0 for unlimited)\n"
@@ -996,8 +1000,8 @@ sub prepare_gallery_variables {
     die "Please give an integer value for slide height max\n"
 	unless is_integer ($opts->{slide_height_max}) ;
     if ($opts->{slide_height_max} < 0) {
-	indented_print "Slide height max value < 0, restoring to default (".
-	    ($slide_height_max_default?$slide_height_max_default:"unlimited") .")\n" ;
+	$messages->print ("Slide height max value < 0, restoring to default (".
+	    ($slide_height_max_default?$slide_height_max_default:"unlimited") .")\n") ;
 	$opts->{slide_height_max} = $slide_height_max_default ;
     }
     die "Please give a positive slide height max value (or 0 for unlimited)\n"
@@ -1059,11 +1063,12 @@ sub generate_config {
     my $self = shift ;
     my $file = shift ;
     my $opts = shift ;
+    my $messages = $self->{messages} ;
 
-    indented_print "Generating config file '$file'.\n" ;
+    $messages->print ("Generating config file '$file'.\n") ;
     if (-e "$file") {
 	my $old_file = "$file.save.". (strftime('%Y-%m-%d_%H:%M:%S' ,localtime)) ;
-	immediate_warning "Renaming old configuration file '$file' as '$old_file'" ;
+	$messages->immediate_warning ("Renaming old configuration file '$file' as '$old_file'") ;
 	rename "$file", "$old_file" ;
     }
 
