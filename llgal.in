@@ -797,6 +797,8 @@ sub finalize_entries {
 	    if ($type == $TYPE_LNK or $type == $TYPE_DIR or $type == $TYPE_MVI or $type == $TYPE_FIL) {
 		$_->{no_thumb} = 1 ;
 		$_->{no_slide} = 1 ;
+	    } elsif ($type == $TYPE_TXT) {
+		$_->{no_thumb} = 1 ;
 	    }
 	} @entries ;
     }
