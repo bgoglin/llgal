@@ -424,7 +424,17 @@ sub create_file_entry {
 	    if $opts->{make_caption_from_image_timestamp} ;
 	@exif_tags = (@exif_tags, 'UserComment', 'Comment')
 	    if $opts->{make_caption_from_image_comment} ;
-	$entry->{exif_infos} = $opts->{exiftool}->ImageInfo ("$self->{destination_dir}$filename", @exif_tags) ;
+	if (@exif_tags) {
+	    if (not defined $opts->{exif_info}) {
+		# ExifTool initialization
+		$opts->{exiftool} = new Image::ExifTool;
+		# Accept unknown tags, just in case...
+		$opts->{exiftool}->Options(Unknown => 1) ;
+		# DateFormat should be initialized with whatever the user said to --ctf
+		$opts->{exiftool}->Options(DateFormat => $opts->{timestamp_format_in_caption}) ;
+	    }
+	    $entry->{exif_infos} = $opts->{exiftool}->ImageInfo ("$self->{destination_dir}$filename", @exif_tags) ;
+	}
     }
 
     # the caption (will be web-safe after caption file generation)

@@ -853,13 +853,6 @@ sub prepare_captions_variables {
 	if $opts->{captions_filename} eq "" or $opts->{captions_filename} =~ /\// ;
     die "Please give a non-empty caption removal line\n"
 	if $opts->{captions_removal_line} eq "" ;
-
-    # ExifTool initialization
-    $opts->{exiftool} = new Image::ExifTool;
-    # Accept unknown tags, just in case...
-    $opts->{exiftool}->Options(Unknown => 1) ;
-    # DateFormat should be initialized with whatever the user said to --ctf
-    $opts->{exiftool}->Options(DateFormat => $opts->{timestamp_format_in_caption}) ;
 }
 
 # various check and definitions to create the gallery
