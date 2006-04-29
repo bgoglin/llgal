@@ -182,7 +182,8 @@ sub init_gallery {
 # - linktext (an associated text that may be used in a link, www-safe)
 # - caption (the caption of the slide, www-safe)
 # - title (title, www-safe)
-# - no_slide (1 or undef)
+# - no_thumb (1 or undef, means that the entry is listed instead of displayed as a thumbnail)
+# - no_slide (1 or undef, means that the entry does not appear as any slide at all)
 
 # - xdim, ydim, kbytes (details about the image or movie)
 # - dimstring (string containing dimensions and/or size that were requested)
@@ -698,6 +699,7 @@ sub create_nofile_entry {
     # row break and horizontal lines need nothing
     if ($type == $TYPE_LIN or $type == $TYPE_BRK) {
 	$entry->{no_slide} = 1 ;
+	$entry->{no_thumb} = 1 ;
 	return $entry ;
     }
 
@@ -782,8 +784,10 @@ sub finalize_entries {
     if ($opts->{list_links}) {
 	map {
 	    my $type = $_->{type} ;
-	    $_->{no_slide} = 1
-		if $type == $TYPE_LNK or $type == $TYPE_DIR or $type == $TYPE_MVI or $type == $TYPE_FIL ;
+	    if ($type == $TYPE_LNK or $type == $TYPE_DIR or $type == $TYPE_MVI or $type == $TYPE_FIL) {
+		$_->{no_thumb} = 1 ;
+		$_->{no_slide} = 1 ;
+	    }
 	} @entries ;
     }
 
@@ -1555,7 +1559,7 @@ sub generate_index {
 	    next ;
 	}
 
-	if ($entry->{no_slide}) {
+	if ($entry->{no_thumb}) {
 	    # output a line with this text
 	    print IXW "<div class=\"header\">" ;
 	    if ($type == $TYPE_TXT) {
@@ -1576,7 +1580,7 @@ sub generate_index {
 	# figure out how many entries to put on this row
 	while ($i + $num < @entries) {
 	    # stop if this is listed instead of having a slide
-	    last if defined $entries[$i+$num]->{no_slide} ;
+	    last if defined $entries[$i+$num]->{no_thumb} ;
 	    # stop if there's too much thumbnail on this row
 	    last if $opts->{thumbnails_per_row}
 	    and $num + 1 > $opts->{thumbnails_per_row} ;
@@ -1813,7 +1817,7 @@ sub make_www_rights {
 
 	# thumbnail
 	make_readable "$self->{destination_dir}$entry->{thumb_filename}"
-	    if ($type == $TYPE_IMG or $entry->{thumb_url}) and !defined $entry->{no_slide} ;
+	    if ($type == $TYPE_IMG or $entry->{thumb_url}) and !defined $entry->{no_thumb} ;
 
 	# scaled image
 	make_readable "$self->{destination_dir}$entry->{scaled_filename}"
