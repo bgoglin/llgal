@@ -269,12 +269,12 @@ sub find_user_thumbnail {
     my $user_thumbnail_filename = "$opts->{user_thumbnail_image_filenameprefix}$opts->{thumbnail_image_filenameprefix}$filename" ;
 
     if ($type == $TYPE_IMG) {
-	if (-f "$self->{local_llgal_dir}/$user_thumbnail_filename") {
+	if (-f "$self->{destination_dir}$self->{local_llgal_dir}/$user_thumbnail_filename") {
 	    return $user_thumbnail_filename ;
 	}
     } else {
 	foreach my $ext (split (/\|/, $opts->{image_extensions})) {
-	    if (-f "$self->{local_llgal_dir}/$user_thumbnail_filename.$ext") {
+	    if (-f "$self->{destination_dir}$self->{local_llgal_dir}/$user_thumbnail_filename.$ext") {
 		return "$user_thumbnail_filename.$ext" ;
 	    }
 	}
@@ -289,12 +289,12 @@ sub find_user_scaled {
     my $user_scaled_filename = "$opts->{user_scaled_image_filenameprefix}$opts->{scaled_image_filenameprefix}$filename" ;
 
     if ($type == $TYPE_IMG) {
-	if (-f "$self->{local_llgal_dir}/$user_scaled_filename") {
+	if (-f "$self->{destination_dir}$self->{local_llgal_dir}/$user_scaled_filename") {
 	    return $user_scaled_filename ;
 	}
     } else {
 	foreach my $ext (split (/\|/, $opts->{image_extensions})) {
-	    if (-f "$self->{local_llgal_dir}/$user_scaled_filename.$ext") {
+	    if (-f "$self->{destination_dir}$self->{local_llgal_dir}/$user_scaled_filename.$ext") {
 		return "$user_scaled_filename.$ext" ;
 	    }
 	}
@@ -517,7 +517,7 @@ sub fill_file_entry {
 	$entry->{thumb_url} = "$local_llgal_url/". make_safe_url_nowarn ($thumb_filename) ;
 
 	# thumbnails dimensions
-	my ($x, $y) = imgsize ("$self->{local_llgal_dir}/$thumb_filename") ;
+	my ($x, $y) = imgsize ("$self->{destination_dir}$self->{local_llgal_dir}/$thumb_filename") ;
 	if ($y > $opts->{thumbnail_height_max}) {
 	    $x = $x * ($opts->{thumbnail_height_max} / $y) ;
 	    $y = $opts->{thumbnail_height_max} ;
@@ -547,26 +547,26 @@ sub fill_file_entry {
 
 	# if the thumbnail does not exist, or is older than the image, or regeneration is forced
 	my $real_thumb_filename = "$self->{destination_dir}$entry->{thumb_filename}" ;
-	if ((! -e "$real_thumb_filename")
-	    or (-M "$real_thumb_filename") > (-M "$filename")
+	if ((! -e $real_thumb_filename)
+	    or (-M $real_thumb_filename) > (-M $real_filename)
 	    or $opts->{force_image_regeneration}) {
 	    my ($status, @output) ;
 	    # only scale down, never up.
-	    my ($x,$y) = imgsize ("$real_filename") ;
+	    my ($x,$y) = imgsize ($real_filename) ;
 	    if ($y <= $opts->{thumbnail_height_max}
 		and ($opts->{thumbnail_width_max} <= 0 or $x <= $opts->{thumbnail_width_max})) {
 		# the original is not large enough, keep it
 		$entry->{thumb_filename} = $entry->{filename} ;
 		$entry->{thumb_url} = $entry->{url} ;
-		$real_thumb_filename = "$self->{destination_dir}$entry->{filename}" ;
+		$real_thumb_filename = $real_filename ;
 	    } else {
 		# scale down
 		($status, @output) = Llgal::Utils::system_with_output
-		    ( "create '$real_filename' thumbnail",
-		      @{$opts->{thumbnail_create_command}}, "$real_filename", "$real_thumb_filename" ) ;
+		    ( "create '$filename' thumbnail",
+		      @{$opts->{thumbnail_create_command}}, $real_filename, $real_thumb_filename ) ;
 		if ($status == -1) {
 		    $messages->warning (@output) ;
-		    die "Failed to create '$real_filename' thumbnail\n" ;
+		    die "Failed to create '$filename' thumbnail\n" ;
 		} elsif ($status) {
 		    $messages->warning ("Failed to create '$real_filename' thumbnail") ;
 		    $messages->warning (@output) ;
@@ -574,7 +574,7 @@ sub fill_file_entry {
 		}
 	    }
 	}
-	($entry->{thumb_xdim},$entry->{thumb_ydim}) = imgsize ("$real_thumb_filename") ;
+	($entry->{thumb_xdim},$entry->{thumb_ydim}) = imgsize ($real_thumb_filename) ;
 
 	# dimstring
 	if ($opts->{show_dimensions}) {
@@ -603,7 +603,7 @@ sub fill_file_entry {
 	    $entry->{scaled_url} = "$local_llgal_url/". make_safe_url_nowarn ($scaled_filename) ;
 
 	    # thumbnails dimensions
-	    my ($x, $y) = imgsize ("$self->{local_llgal_dir}/$scaled_filename") ;
+	    my ($x, $y) = imgsize ("$self->{destination_dir}$self->{local_llgal_dir}/$scaled_filename") ;
 	    if ($opts->{slide_height_max} > 0 and $y > $opts->{slide_height_max}) {
 		$x = $x * ($opts->{slide_height_max} / $y) ;
 		$y = $opts->{slide_height_max} ;
@@ -614,7 +614,7 @@ sub fill_file_entry {
 	    }
 
 	    ($entry->{scaled_xdim},$entry->{scaled_ydim}) = ($x, $y) ;
-	    $entry->{scaled_kbytes} = (-s "$self->{local_llgal_dir}/$scaled_filename") >> 10 ;
+	    $entry->{scaled_kbytes} = (-s "$self->{destination_dir}$self->{local_llgal_dir}/$scaled_filename") >> 10 ;
 
 	    # dimstring
 	    if ($opts->{show_dimensions} and $opts->{show_size}) {
@@ -638,26 +638,26 @@ sub fill_file_entry {
 
 	    # if the thumbnail does not exist, or is older than the image, or regeneration is forced
 	    my $real_scaled_filename = "$self->{destination_dir}$entry->{scaled_filename}" ;
-	    if ((! -e "$real_scaled_filename")
-		or (-M "$real_scaled_filename") > (-M "$filename")
+	    if ((! -e $real_scaled_filename)
+		or (-M $real_scaled_filename) > (-M $real_filename)
 		or $opts->{force_image_regeneration}) {
 		my ($status, @output) ;
 		# only scale down, never up.
-		my ($x,$y) = imgsize ("$real_filename") ;
+		my ($x,$y) = imgsize ($real_filename) ;
 		if (($opts->{slide_width_max} <= 0 or $x <= $opts->{slide_width_max})
 		    and ($opts->{slide_height_max} <= 0 or $y <= $opts->{slide_height_max})) {
 		    # the original is not large enough, keep it
 		    $entry->{scaled_filename} = $entry->{filename} ;
 		    $entry->{scaled_url} = $entry->{url} ;
-		    $real_scaled_filename = "$self->{destination_dir}$entry->{filename}" ;
+		    $real_scaled_filename = $real_filename ;
 		} else {
 		    # scale down
 		    ($status, @output) = Llgal::Utils::system_with_output
-			( "create '$real_filename' scaled image",
-			  @{$opts->{scaled_create_command}}, "$real_filename", "$real_scaled_filename" ) ;
+			( "create '$filename' scaled image",
+			  @{$opts->{scaled_create_command}}, $real_filename, $real_scaled_filename ) ;
 		    if ($status == -1) {
 			$messages->warning (@output) ;
-			die "Failed to create '$real_filename' scaled image\n" ;
+			die "Failed to create '$filename' scaled image\n" ;
 		    } elsif ($status) {
 			$messages->warning ("Failed to create '$real_filename' scaled image") ;
 			$messages->warning (@output) ;
@@ -665,8 +665,8 @@ sub fill_file_entry {
 		    }
 		}
 	    }
-	    ($entry->{scaled_xdim},$entry->{scaled_ydim}) = imgsize ("$real_scaled_filename") ;
-	    $entry->{scaled_kbytes} = (-s "$real_scaled_filename") >> 10 ;
+	    ($entry->{scaled_xdim},$entry->{scaled_ydim}) = imgsize ($real_scaled_filename) ;
+	    $entry->{scaled_kbytes} = (-s $real_scaled_filename) >> 10 ;
 
 	    # dimstring
 	    if ($opts->{show_dimensions} and $opts->{show_size}) {

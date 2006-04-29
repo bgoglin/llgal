@@ -3,7 +3,7 @@
     and the slide filename prefix (it helps cleaning HTML files).
     + Add a note about slide_filenameprefix == "" which could lead to removal
       of non-llgal HTML files.
-
+  * Fix several operations on thumbnails and scaled images when -d is passed.
 
 llgal (0.13.2)
 
