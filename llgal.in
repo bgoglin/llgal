@@ -724,6 +724,7 @@ sub create_nofile_entry {
     $entry->{linktext} = $linktext ;
 
     # the caption (will be web-safe after caption file generation)
+    $caption = "" unless defined $caption ;
     $entry->{caption} = $caption ;
 
     # add caption to the title if asked
@@ -1176,6 +1177,7 @@ sub generate_captions_entries {
 		    ( 0 .. $#captions ) ;
 
 	} elsif ($type == $TYPE_TXT) {
+	    # TODO: do not insert again ? (in case of --Ps)
 	    print CAP "TXT: " . $entry->{linktext} ." ---- ". $entry->{caption} ."\n";
 
 	} elsif ($type == $TYPE_LIN) {
