@@ -182,6 +182,7 @@ my $normal_opts_type = {
     add_all_files => $OPT_IS_NUMERIC,
     add_subdirs => $OPT_IS_NUMERIC,
     sort_criteria => $OPT_IS_NONEMPTY_STRING,
+    separate_subsections => $OPT_IS_NUMERIC,
 # Various
     codeset => $OPT_IS_STRING,
     language => $OPT_IS_STRING,
@@ -438,6 +439,8 @@ sub add_defaults {
 	sort_criteria => "name",
 # subsection directories
 	subsection_dirs => [],
+# do we separate subsections in the gallery
+	separate_subsections => 0,
 
 # Various
 # codeset to be set in HTML headers (--codeset)
@@ -778,6 +781,7 @@ sub parse_cmdline_options {
 	'nf'		=> \$opts->{show_no_film_effect},
 	'option=s'	=> sub { shift ; process_option $self, $opts, shift ; },
 	'P=s'		=> \@{$opts->{subsection_dirs}},
+	'Ps'		=> \$opts->{separate_subsections},
 	'p=i'		=> \$opts->{index_cellpadding},
 	'php'		=> sub { $opts->{www_extension} = "php" ; },
 	'Rl'		=> \$opts->{link_subgalleries},

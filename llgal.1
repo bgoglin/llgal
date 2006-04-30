@@ -271,6 +271,11 @@ The path of the subdirectory must be given as a relative path
 .BR . " or to the path given to " -d ")."
 
 .TP
+.BI --Ps
+Add a separation line and the subdirectory name at the begining of
+each title.
+
+.TP
 .B -S
 Each subdirectory will get a dedicated slide.
 If a captions file exists, only the subdirectories that
@@ -1362,12 +1367,21 @@ The order of includes and excludes is respected.
 Sort criteria when scanning files in the working directory.
 Default is \fB"name"\fR.
 .RE
-.I subsection_dir - \fI"subdir"
+.I subsection_dir = \fI"subdir"
 .RS
 Include subdirectory contents in the gallery
 .RB [ "-P <subdir>" ].
 This option may be used several times.
 Subdirectory path must be given relatively to the working directory.
+Default is to use the content of the working directory.
+.RE
+.I separate_subsections = <0/1>
+.RS
+Add a separation line and the subdirectory name at the begining of
+each title
+.RB [ --Ps ].
+Default is
+.BR 0 " (" disabled ).
 .RE
 
 .B Various:

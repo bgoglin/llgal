@@ -965,19 +965,24 @@ sub get_entries_from_directory {
 
 sub get_entries {
     my $opts = shift ;
-    my @entries ;
+    my @entries = () ;
     my $dir = $self->{destination_dir} ? $self->{destination_dir} : "./" ; # destination is empty for './'
     if (defined $opts->{subsection_dirs}) {
-	@entries = map {
-	    my $subdir = $_ ;
+	foreach my $subdir (@{$opts->{subsection_dirs}}) {
 	    $subdir .= "/" unless $subdir =~ m@/$@ ;
-	    get_entries_from_directory
-			     $dir,
-			     $destination_string,
-			     $subdir,
-			     ($opts->{add_subdirs} or $opts->{recursive}),
-			     $opts->{add_all_files}
-	} @{$opts->{subsection_dirs}} ;
+	    # separation line and title
+	    if ($opts->{separate_subsections}) {
+		push @entries, (create_nofile_entry $TYPE_LIN, undef, undef, undef) ;
+		push @entries, (create_nofile_entry $TYPE_TXT, undef, $subdir, "") ;
+	    }
+	    # subsection entries
+	    push @entries, get_entries_from_directory
+		$dir,
+		$destination_string,
+		$subdir,
+		($opts->{add_subdirs} or $opts->{recursive}),
+		$opts->{add_all_files} ;
+	}
     } else {
 	@entries = get_entries_from_directory
 	    $dir,
@@ -1148,25 +1153,41 @@ sub generate_captions_entries {
 		." ---- ". $entry->{caption} ."\n"
 		unless grep { $captions[$_] =~ m/^(\s*IMG:)?\s*$entry->{filename}\s+----\s/ }
 		    ( 0 .. $#captions ) ;
+
 	} elsif ($type == $TYPE_MVI) {
 	    print CAP "MVI: " . $entry->{filename}
 		." ---- ". $entry->{linktext}
 		." ---- ". $entry->{caption} ."\n"
 		unless grep { $captions[$_] =~ m/^\s*MVI:\s*$entry->{filename}\s+----\s/ }
 		    ( 0 .. $#captions ) ;
+
 	} elsif ($type == $TYPE_FIL) {
 	    print CAP "FIL: " . $entry->{filename}
 		." ---- ". $entry->{linktext}
 		." ---- ". $entry->{caption} ."\n"
 		unless grep { $captions[$_] =~ m/^\s*FIL:\s*$entry->{filename}\s+----\s/ }
 		    ( 0 .. $#captions ) ;
+
 	} elsif ($type == $TYPE_DIR) {
 	    print CAP "DIR: " . $entry->{filename}
 		." ---- ". $entry->{linktext}
 		." ---- ". $entry->{caption} ."\n"
 		unless grep { $captions[$_] =~ m/^\s*DIR:\s*$entry->{filename}\s+----\s/ }
 		    ( 0 .. $#captions ) ;
+
+	} elsif ($type == $TYPE_TXT) {
+	    print CAP "TXT: " . $entry->{linktext} ." ---- ". $entry->{caption} ."\n";
+
+	} elsif ($type == $TYPE_LIN) {
+	    print CAP "LINE\n" ;
+
+	} elsif ($type == $TYPE_BRK) {
+	    print CAP "BREAK\n" ;
+
+	} else {
+	    die "Unrecognized entry type $type.\n" ;
 	}
+
 	$messages->update_percentage ($i+1) ;
     }
 

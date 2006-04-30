@@ -299,6 +299,9 @@
 # What subdirectories to use for subsections [-P]
 # subsection_dir = "subdir"
 
+# Add a separation line and the subdirectory name at the begining of each title [--Ps]
+# separate_subsections = 0
+
 ##### Recursion #####
 
 # Run recursively in subdirectories [-R]
