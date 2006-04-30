@@ -1,8 +1,9 @@
 llgal (0.13.3-1) unstable; urgency=low
 
   * New upstream release.
+  * Update Standards-Version to 3.7.0.
 
- -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Sun, 30 Apr 2006 23:30:23 +0200
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Sun, 30 Apr 2006 23:33:59 +0200
 
 llgal (0.13.2-1) unstable; urgency=low
 

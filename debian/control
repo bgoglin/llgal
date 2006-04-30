@@ -3,7 +3,7 @@ Section: web
 Priority: optional
 Maintainer: Brice Goglin <Brice.Goglin@ens-lyon.org>
 Build-Depends: debhelper (>= 4.0.2)
-Standards-Version: 3.6.2.1
+Standards-Version: 3.7.0
 
 Package: llgal
 Architecture: all
