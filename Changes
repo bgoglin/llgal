@@ -1,3 +1,4 @@
+llgal (0.13.3)
 
   * Add -P (and section_dir) to use photos in a special subdirectory
     instead of the working directory. May be used multiple times to create
@@ -18,6 +19,7 @@
     actually filling the template.
   * Improve percentage printing for progression.
 
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Thu, 30 Apr 2006 23:31:00 +0200
 
 llgal (0.13.2)
 
