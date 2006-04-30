@@ -21,6 +21,9 @@ msgstr "prev_slide_link_text|&lt;&lt;Précédent"
 msgid "next_slide_link_text|Next&gt;&gt;"
 msgstr "next_slide_link_text|Suivant&gt;&gt;"
 
+msgid "section_text|Section "
+msgstr "section_text|Section "
+
 msgid "MVI_link_text|Open movie "
 msgstr "MVI_link_text|Ouvrir le film "
 

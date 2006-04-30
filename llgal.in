@@ -974,7 +974,7 @@ sub get_entries {
 	    # separation line and title
 	    if ($opts->{separate_sections}) {
 		push @entries, (create_nofile_entry $TYPE_LIN, undef, undef, undef) ;
-		push @entries, (create_nofile_entry $TYPE_TXT, undef, $subdir, "") ;
+		push @entries, (create_nofile_entry $TYPE_TXT, undef, $opts->{section_text}.$subdir, $opts->{section_text}.$subdir) ;
 	    }
 	    # section entries
 	    push @entries, get_entries_from_directory

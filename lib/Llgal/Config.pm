@@ -387,6 +387,8 @@ sub add_defaults {
 	prev_slide_link_text => llgal_gettext ("prev_slide_link_text|&lt;&lt;Prev"),
 # label of link from a slide to the next one
 	next_slide_link_text => llgal_gettext ("next_slide_link_text|Next&gt;&gt;"),
+# label of text inserted as a section title
+	section_text => llgal_gettext ("section_text|Section "),
 # text prefixing the link text
 	MVI_link_text => llgal_gettext ("MVI_link_text|Open movie "),
 	FIL_link_text => llgal_gettext ("FIL_link_text|Download file "),
