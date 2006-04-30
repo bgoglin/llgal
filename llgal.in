@@ -967,15 +967,15 @@ sub get_entries {
     my $opts = shift ;
     my @entries = () ;
     my $dir = $self->{destination_dir} ? $self->{destination_dir} : "./" ; # destination is empty for './'
-    if (defined $opts->{subsection_dirs}) {
-	foreach my $subdir (@{$opts->{subsection_dirs}}) {
+    if (defined $opts->{section_dirs}) {
+	foreach my $subdir (@{$opts->{section_dirs}}) {
 	    $subdir .= "/" unless $subdir =~ m@/$@ ;
 	    # separation line and title
-	    if ($opts->{separate_subsections}) {
+	    if ($opts->{separate_sections}) {
 		push @entries, (create_nofile_entry $TYPE_LIN, undef, undef, undef) ;
 		push @entries, (create_nofile_entry $TYPE_TXT, undef, $subdir, "") ;
 	    }
-	    # subsection entries
+	    # section entries
 	    push @entries, get_entries_from_directory
 		$dir,
 		$destination_string,

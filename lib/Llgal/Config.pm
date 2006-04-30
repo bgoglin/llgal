@@ -182,7 +182,7 @@ my $normal_opts_type = {
     add_all_files => $OPT_IS_NUMERIC,
     add_subdirs => $OPT_IS_NUMERIC,
     sort_criteria => $OPT_IS_NONEMPTY_STRING,
-    separate_subsections => $OPT_IS_NUMERIC,
+    separate_sections => $OPT_IS_NUMERIC,
 # Various
     codeset => $OPT_IS_STRING,
     language => $OPT_IS_STRING,
@@ -206,7 +206,7 @@ my $special_opts_with_input = {
     scaled_convert_options => 1,
     thumbnail_convert_options => 1,
     show_exif_tags => 1,
-    subsection_dir => 1,
+    section_dir => 1,
 } ;
 
 # internal options that have a special outputting routine
@@ -217,7 +217,7 @@ my $special_opts_with_output = {
     scaled_convert_options => 1,
     thumbnail_convert_options => 1,
     show_exif_tags => 1,
-    subsection_dirs => 1,
+    section_dirs => 1,
 } ;
 
 # stuff that is not stored in the option hash but need be outputted
@@ -437,10 +437,10 @@ sub add_defaults {
 	excludes => [],
 # sort criteria
 	sort_criteria => "name",
-# subsection directories
-	subsection_dirs => [],
-# do we separate subsections in the gallery
-	separate_subsections => 0,
+# section directories
+	section_dirs => [],
+# do we separate sections in the gallery
+	separate_sections => 0,
 
 # Various
 # codeset to be set in HTML headers (--codeset)
@@ -519,6 +519,7 @@ Layout Options:
     --nc               omit the image count from the captions
     --nf               omit the film effect altogether
     -P <dir>           use images in <dir> subdirectory of the working directory
+    -Ps                separate sections in the index with a line and a title
     -p <n>             cellpadding value of thumbnail index tables (3)
     --php              use php extension for generated webpages
     --Rl               add links between subgalleries
@@ -663,8 +664,8 @@ sub process_option {
 	    } elsif ($line =~ /^show_exif_tags\s*=\s*"(.*)"$/) {
 		push (@{$opts->{show_exif_tags}}, split (/,/, $1));
 
-	    } elsif ($line =~ /^subsection_dir\s*=\s*"(.+)"$/) {
-		push (@{$opts->{subsection_dirs}}, $1) ;
+	    } elsif ($line =~ /^section_dir\s*=\s*"(.+)"$/) {
+		push (@{$opts->{section_dirs}}, $1) ;
 
 	    } else {
 		die "Unknown special inconfig option $optname.\n" ;
@@ -780,8 +781,8 @@ sub parse_cmdline_options {
 	'nc'		=> sub { $opts->{slide_counter_format} = "" ; },
 	'nf'		=> \$opts->{show_no_film_effect},
 	'option=s'	=> sub { shift ; process_option $self, $opts, shift ; },
-	'P=s'		=> \@{$opts->{subsection_dirs}},
-	'Ps'		=> \$opts->{separate_subsections},
+	'P=s'		=> \@{$opts->{section_dirs}},
+	'Ps'		=> \$opts->{separate_sections},
 	'p=i'		=> \$opts->{index_cellpadding},
 	'php'		=> sub { $opts->{www_extension} = "php" ; },
 	'Rl'		=> \$opts->{link_subgalleries},
@@ -1135,11 +1136,11 @@ sub generate_config {
 		    } @{$opts->{excludes}} ;
 		}
 
-	    } elsif ($optname eq "subsection_dirs") {
-		if (@{$opts->{subsection_dirs}}) {
+	    } elsif ($optname eq "section_dirs") {
+		if (@{$opts->{section_dirs}}) {
 		    map {
-			print NEWCFG "subsection_dir = \"$_\"\n" ;
-		    } @{$opts->{subsection_dirs}} ;
+			print NEWCFG "section_dir = \"$_\"\n" ;
+		    } @{$opts->{section_dirs}} ;
 		}
 
 	    } else {
