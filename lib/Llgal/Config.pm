@@ -169,6 +169,14 @@ my $normal_opts_type = {
     show_size_unit => $OPT_IS_STRING,
     timestamp_format_in_caption => $OPT_IS_NONEMPTY_STRING,
     credits_text => $OPT_IS_STRING,
+# What files to insert
+    image_extensions => $OPT_IS_STRING,
+    movie_extensions => $OPT_IS_STRING,
+    add_all_files => $OPT_IS_NUMERIC,
+    add_subdirs => $OPT_IS_NUMERIC,
+    sort_criteria => $OPT_IS_NONEMPTY_STRING,
+# Sections
+    separate_sections => $OPT_IS_NUMERIC,
 # Recursion
     parent_gallery_link => $OPT_IS_NUMERIC,
     prev_gallery_link => $OPT_IS_NUMERIC,
@@ -176,13 +184,6 @@ my $normal_opts_type = {
     next_gallery_link => $OPT_IS_NUMERIC,
     next_gallery_link_target => $OPT_IS_STRING,
     link_subgalleries => $OPT_IS_NUMERIC,
-# What files to insert
-    image_extensions => $OPT_IS_STRING,
-    movie_extensions => $OPT_IS_STRING,
-    add_all_files => $OPT_IS_NUMERIC,
-    add_subdirs => $OPT_IS_NUMERIC,
-    sort_criteria => $OPT_IS_NONEMPTY_STRING,
-    separate_sections => $OPT_IS_NUMERIC,
 # Various
     codeset => $OPT_IS_STRING,
     language => $OPT_IS_STRING,
@@ -413,18 +414,6 @@ sub add_defaults {
 # credits line at the bottom of the index
 	credits_text => llgal_gettext ("credits_text|created with <a href=\"http://home.gna.org/llgal\">llgal</a>"),
 
-# Recursion
-# add links between subgalleries
-	link_subgalleries => 0,
-# generate header and footer for link to parent gallery
-	parent_gallery_link => 0,
-# generate header and footer for link to previous subgallery
-	prev_gallery_link => 0,
-	prev_gallery_link_target => "",
-# generate header and footer for link to next subgallery
-	next_gallery_link => 0,
-	next_gallery_link_target => "",
-
 # What files to insert in the gallery
 # image and movie extensions
 	image_extensions => "jpg|jpeg|png|gif|tif|tiff|bmp",
@@ -437,10 +426,24 @@ sub add_defaults {
 	excludes => [],
 # sort criteria
 	sort_criteria => "name",
+
+# Sections
 # section directories
 	section_dirs => [],
 # do we separate sections in the gallery
 	separate_sections => 0,
+
+# Recursion
+# add links between subgalleries
+	link_subgalleries => 0,
+# generate header and footer for link to parent gallery
+	parent_gallery_link => 0,
+# generate header and footer for link to previous subgallery
+	prev_gallery_link => 0,
+	prev_gallery_link_target => "",
+# generate header and footer for link to next subgallery
+	next_gallery_link => 0,
+	next_gallery_link_target => "",
 
 # Various
 # codeset to be set in HTML headers (--codeset)

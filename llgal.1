@@ -913,7 +913,7 @@ Name of the caption file that will be generated when llgal is called
 with
 .BR --gc ,
 or will be automatically used if it exists to generate slide captions.
-Default is \fB"captions\fR.
+Default is \fB"captions"\fR.
 .RE
 .I user_scaled_image_filenameprefix = \fI"filename prefix"
 .RS
@@ -1274,6 +1274,71 @@ Credits text at the bottom of the index
 Default is \fB"created with <a href="http://home.gna.org/llgal">llgal</a>"\fR.
 .RE
 
+.B What files to insert in the gallery:
+
+.I image_extensions = \fI"|-separated strings"
+.RS
+Extensions that are matched when searching images
+Default is \fB"jpg|jpeg|png|gif|tif|tiff|bmp"\fR.
+.RE
+.I movie_extensions = \fI"|-separated strings"
+.RS
+Extensions that are matched when searching movies
+Default is \fB"mpg|mpeg|avi|mov|ogm|wmv"\fR.
+.RE
+.I add_all_files = <0/1>
+.RS
+Add all files to the list of entries, not only images and movies
+.RB [ -A ].
+Default is
+.BR 0 " (" disabled ).
+.RE
+.I add_subdirs = <0/1>
+.RS
+Add subdirectories to the list of entries
+.RB [ -S ].
+Default is
+.BR 0 " (" disabled ).
+.RE
+.I exclude = \fI"string"
+.RS
+Exclude files whose name matches
+.RB [ "--exclude <s>" ].
+This option may be used several times.
+Dot begining files and html files are excluded by default.
+.RE
+.I include = \fI"string"
+.RS
+Include files whose name matches and were previously excluded
+.RB [ "--include <s>" ].
+This option may be used several times.
+The order of includes and excludes is respected.
+.RE
+.I sort_criteria = \fI"string"
+.RS
+Sort criteria when scanning files in the working directory.
+Default is \fB"name"\fR.
+.RE
+
+.B Sections:
+
+.I section_dir = \fI"subdir"
+.RS
+Include subdirectory contents in the gallery
+.RB [ "-P <subdir>" ].
+This option may be used several times.
+Subdirectory path must be given relatively to the working directory.
+Default is to use the content of the working directory.
+.RE
+.I separate_sections = <0/1>
+.RS
+Add a separation line and the subdirectory name at the begining of
+each section
+.RB [ --Ps ].
+Default is
+.BR 0 " (" disabled ).
+.RE
+
 .B Recursion:
 
 .I recursive = <0/1>
@@ -1320,68 +1385,6 @@ Default is
 .RS
 Target of the link to the next subgallery
 .RB [ "--next-gal <url>" ].
-.RE
-
-.B What files to insert in the gallery:
-
-.I image_extensions = \fI"|-separated strings"
-.RS
-Extensions that are matched when searching images
-Default is \fB"jpg|jpeg|png|gif|tif|tiff|bmp"\fR.
-.RE
-.I movie_extensions = \fI"|-separated strings"
-.RS
-Extensions that are matched when searching movies
-Default is \fB"mpg|mpeg|avi|mov|ogm|wmv"\fR.
-.RE
-.I add_all_files = <0/1>
-.RS
-Add all files to the list of entries, not only images and movies
-.RB [ -A ].
-Default is
-.BR 0 " (" disabled ).
-.RE
-.I add_subdirs = <0/1>
-.RS
-Add subdirectories to the list of entries
-.RB [ -S ].
-Default is
-.BR 0 " (" disabled ).
-.RE
-.I exclude = \fI"string"
-.RS
-Exclude files whose name matches
-.RB [ "--exclude <s>" ].
-This option may be used several times.
-Dot begining files and html files are excluded by default.
-.RE
-.I include = \fI"string"
-.RS
-Include files whose name matches and were previously excluded
-.RB [ "--include <s>" ].
-This option may be used several times.
-The order of includes and excludes is respected.
-.RE
-.I sort_criteria = \fI"string"
-.RS
-Sort criteria when scanning files in the working directory.
-Default is \fB"name"\fR.
-.RE
-.I section_dir = \fI"subdir"
-.RS
-Include subdirectory contents in the gallery
-.RB [ "-P <subdir>" ].
-This option may be used several times.
-Subdirectory path must be given relatively to the working directory.
-Default is to use the content of the working directory.
-.RE
-.I separate_sections = <0/1>
-.RS
-Add a separation line and the subdirectory name at the begining of
-each section
-.RB [ --Ps ].
-Default is
-.BR 0 " (" disabled ).
 .RE
 
 .B Various:

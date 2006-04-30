@@ -296,6 +296,8 @@
 # Sort criteria when scanning files in the working directory [--sort]
 # sort_criteria = "name"
 
+##### Sections #####
+
 # Add a new subdirectory to the list of sections [-P]
 # section_dir = "subdir"
 
