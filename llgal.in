@@ -2037,12 +2037,12 @@ sub main_process {
 	    # generate the gallery using the caption file
 	    read_captions_file $gallery ;
 	    fill_entries $gallery ;
-	    $messages->print ("Found ". (scalar @{$gallery->{entries}}) ." files in the captions file.\n") ;
+	    $messages->print ("Found ". (scalar @{$gallery->{entries}}) ." entries in the captions file.\n") ;
 	} else {
 	    # generate the gallery from scratch
 	    @{$gallery->{entries}} = get_entries $opts ;
 	    fill_entries $gallery ;
-	    $messages->print ("Found ". (scalar @{$gallery->{entries}}) ." files in $destination_string\n") ;
+	    $messages->print ("Found ". (scalar @{$gallery->{entries}}) ." entries in $destination_string\n") ;
 	}
 
 	finalize_entries $gallery, $opts ;
