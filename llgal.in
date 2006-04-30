@@ -968,7 +968,7 @@ sub get_entries {
     my $opts = shift ;
     my @entries = () ;
     my $dir = $self->{destination_dir} ? $self->{destination_dir} : "./" ; # destination is empty for './'
-    if (defined $opts->{section_dirs}) {
+    if (defined $opts->{section_dirs} and @{$opts->{section_dirs}}) {
 	foreach my $subdir (@{$opts->{section_dirs}}) {
 	    $subdir .= "/" unless $subdir =~ m@/$@ ;
 	    # separation line and title
