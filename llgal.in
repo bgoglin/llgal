@@ -970,7 +970,8 @@ sub get_entries {
     my $dir = $self->{destination_dir} ? $self->{destination_dir} : "./" ; # destination is empty for './'
     if (defined $opts->{section_dirs} and @{$opts->{section_dirs}}) {
 	foreach my $subdir (@{$opts->{section_dirs}}) {
-	    $subdir .= "/" unless $subdir =~ m@/$@ ;
+	    # remove ending slashes
+	    $subdir =~ s/\/*$//g ;
 	    # separation line and title
 	    if ($opts->{separate_sections}) {
 		push @entries, (create_nofile_entry $TYPE_LIN, undef, undef, undef) ;
@@ -980,7 +981,7 @@ sub get_entries {
 	    push @entries, get_entries_from_directory
 		$dir,
 		$destination_string,
-		$subdir,
+		"$subdir/",
 		($opts->{add_subdirs} or $opts->{recursive}),
 		$opts->{add_all_files} ;
 	}
