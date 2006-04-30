@@ -1,5 +1,6 @@
 MANIFEST
 Makefile.PL
 Llgal/Config.pm
-Llgal/Misc.pm
+Llgal/Messages.pm
 Llgal/Templates.pm
+Llgal/Utils.pm

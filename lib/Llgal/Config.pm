@@ -2,7 +2,8 @@ package Llgal::Config ;
 
 use strict ;
 
-use Llgal::Misc ;
+require Llgal::Messages ;
+require Llgal::Utils ;
 
 use Getopt::Long ;
 use I18N::Langinfo qw(langinfo CODESET) ;
@@ -168,6 +169,14 @@ my $normal_opts_type = {
     show_size_unit => $OPT_IS_STRING,
     timestamp_format_in_caption => $OPT_IS_NONEMPTY_STRING,
     credits_text => $OPT_IS_STRING,
+# What files to insert
+    image_extensions => $OPT_IS_STRING,
+    movie_extensions => $OPT_IS_STRING,
+    add_all_files => $OPT_IS_NUMERIC,
+    add_subdirs => $OPT_IS_NUMERIC,
+    sort_criteria => $OPT_IS_NONEMPTY_STRING,
+# Sections
+    separate_sections => $OPT_IS_NUMERIC,
 # Recursion
     parent_gallery_link => $OPT_IS_NUMERIC,
     prev_gallery_link => $OPT_IS_NUMERIC,
@@ -175,12 +184,6 @@ my $normal_opts_type = {
     next_gallery_link => $OPT_IS_NUMERIC,
     next_gallery_link_target => $OPT_IS_STRING,
     link_subgalleries => $OPT_IS_NUMERIC,
-# What files to insert
-    image_extensions => $OPT_IS_STRING,
-    movie_extensions => $OPT_IS_STRING,
-    add_all_files => $OPT_IS_NUMERIC,
-    add_subdirs => $OPT_IS_NUMERIC,
-    sort_criteria => $OPT_IS_NONEMPTY_STRING,
 # Various
     codeset => $OPT_IS_STRING,
     language => $OPT_IS_STRING,
@@ -204,6 +207,7 @@ my $special_opts_with_input = {
     scaled_convert_options => 1,
     thumbnail_convert_options => 1,
     show_exif_tags => 1,
+    section_dir => 1,
 } ;
 
 # internal options that have a special outputting routine
@@ -214,6 +218,7 @@ my $special_opts_with_output = {
     scaled_convert_options => 1,
     thumbnail_convert_options => 1,
     show_exif_tags => 1,
+    section_dirs => 1,
 } ;
 
 # stuff that is not stored in the option hash but need be outputted
@@ -382,6 +387,8 @@ sub add_defaults {
 	prev_slide_link_text => llgal_gettext ("prev_slide_link_text|&lt;&lt;Prev"),
 # label of link from a slide to the next one
 	next_slide_link_text => llgal_gettext ("next_slide_link_text|Next&gt;&gt;"),
+# label of text inserted as a section title
+	section_text => llgal_gettext ("section_text|Section "),
 # text prefixing the link text
 	MVI_link_text => llgal_gettext ("MVI_link_text|Open movie "),
 	FIL_link_text => llgal_gettext ("FIL_link_text|Download file "),
@@ -409,18 +416,6 @@ sub add_defaults {
 # credits line at the bottom of the index
 	credits_text => llgal_gettext ("credits_text|created with <a href=\"http://home.gna.org/llgal\">llgal</a>"),
 
-# Recursion
-# add links between subgalleries
-	link_subgalleries => 0,
-# generate header and footer for link to parent gallery
-	parent_gallery_link => 0,
-# generate header and footer for link to previous subgallery
-	prev_gallery_link => 0,
-	prev_gallery_link_target => "",
-# generate header and footer for link to next subgallery
-	next_gallery_link => 0,
-	next_gallery_link_target => "",
-
 # What files to insert in the gallery
 # image and movie extensions
 	image_extensions => "jpg|jpeg|png|gif|tif|tiff|bmp",
@@ -433,6 +428,24 @@ sub add_defaults {
 	excludes => [],
 # sort criteria
 	sort_criteria => "name",
+
+# Sections
+# section directories
+	section_dirs => [],
+# do we separate sections in the gallery
+	separate_sections => 0,
+
+# Recursion
+# add links between subgalleries
+	link_subgalleries => 0,
+# generate header and footer for link to parent gallery
+	parent_gallery_link => 0,
+# generate header and footer for link to previous subgallery
+	prev_gallery_link => 0,
+	prev_gallery_link_target => "",
+# generate header and footer for link to next subgallery
+	next_gallery_link => 0,
+	next_gallery_link_target => "",
 
 # Various
 # codeset to be set in HTML headers (--codeset)
@@ -479,7 +492,7 @@ Additional Behavior Options:
   The behavior might also be modified with the following options,
   either when generating a gallery or not:
     --config <s>       pass an additional configuration files
-    -d <dir>           operate on files in directory <dir> (current directory)
+    -d <dir>           operate in directory <dir> (current directory)
     -f                 force thumbnail and scaled slide regeneration
     --gencfg <file>    generate the configuration file <file>
     --option <s>       pass an additional option as in configuration files
@@ -510,6 +523,8 @@ Layout Options:
     -n                 use image file names for the HTML slide files
     --nc               omit the image count from the captions
     --nf               omit the film effect altogether
+    -P <dir>           use images in <dir> subdirectory of the working directory
+    -Ps                separate sections in the index with a line and a title
     -p <n>             cellpadding value of thumbnail index tables (3)
     --php              use php extension for generated webpages
     --Rl               add links between subgalleries
@@ -567,6 +582,7 @@ sub process_option_error {
 sub process_option {
     my $self = shift ;
     my $opts = shift ;
+    my $messages = $self->{messages} ;
     my $line = shift ;
     chomp $line ;
 
@@ -611,8 +627,8 @@ sub process_option {
 		if ($self->{early_configuration}) {
 		    $self->{local_llgal_dir} = $1 ;
 		} elsif ($1 ne $self->{local_llgal_dir}) {
-		    immediate_warning "Ignoring changes to the name of the local llgal directory outside of" ;
-		    immediate_warning "system- and user-wide configuration files." ;
+		    $messages->warning ("Ignoring changes to the name of the local llgal directory outside of") ;
+		    $messages->warning ("system- and user-wide configuration files.") ;
 		}
 
 	    } elsif ($line =~ /^exclude\s*=\s*"(.+)"$/) {
@@ -653,6 +669,9 @@ sub process_option {
 	    } elsif ($line =~ /^show_exif_tags\s*=\s*"(.*)"$/) {
 		push (@{$opts->{show_exif_tags}}, split (/,/, $1));
 
+	    } elsif ($line =~ /^section_dir\s*=\s*"(.+)"$/) {
+		push (@{$opts->{section_dirs}}, $1) ;
+
 	    } else {
 		die "Unknown special inconfig option $optname.\n" ;
 	    }
@@ -669,6 +688,7 @@ sub process_option {
 
 sub parse_generic_config_file {
     my $self = shift ;
+    my $messages = $self->{messages} ;
     my $opts = {} ;
     my $file = shift ;
 
@@ -677,7 +697,7 @@ sub parse_generic_config_file {
     my $oldconffile = $file ;
     $oldconffile =~ s/$self->{local_llgal_dir}\/llgalrc$/.llgalrc/ ;
     $oldconffile =~ s/llgal\/llgalrc$/llgalrc/ ;
-    immediate_warning "Obsolete configuration file $oldconffile skipped, should be moved to $file."
+    $messages->warning ("Obsolete configuration file $oldconffile skipped, should be moved to $file.")
 	if -e $oldconffile ;
 
     # generic configuration files may not exist
@@ -766,6 +786,8 @@ sub parse_cmdline_options {
 	'nc'		=> sub { $opts->{slide_counter_format} = "" ; },
 	'nf'		=> \$opts->{show_no_film_effect},
 	'option=s'	=> sub { shift ; process_option $self, $opts, shift ; },
+	'P=s'		=> \@{$opts->{section_dirs}},
+	'Ps'		=> \$opts->{separate_sections},
 	'p=i'		=> \$opts->{index_cellpadding},
 	'php'		=> sub { $opts->{www_extension} = "php" ; },
 	'Rl'		=> \$opts->{link_subgalleries},
@@ -820,6 +842,14 @@ sub parse_cmdline_options {
 }
 
 ######################################################################
+# check and defaults
+
+# check whether an argument is an integer
+sub is_integer {
+    my $s = shift ;
+    return $s eq int($s) ;
+}
+
 # various common checks and definitions
 sub prepare_common_variables {
     my $self = shift ;
@@ -842,19 +872,13 @@ sub prepare_captions_variables {
 	if $opts->{captions_filename} eq "" or $opts->{captions_filename} =~ /\// ;
     die "Please give a non-empty caption removal line\n"
 	if $opts->{captions_removal_line} eq "" ;
-
-    # ExifTool initialization
-    $opts->{exiftool} = new Image::ExifTool;
-    # Accept unknown tags, just in case...
-    $opts->{exiftool}->Options(Unknown => 1) ;
-    # DateFormat should be initialized with whatever the user said to --ctf
-    $opts->{exiftool}->Options(DateFormat => $opts->{timestamp_format_in_caption}) ;
 }
 
 # various check and definitions to create the gallery
 sub prepare_gallery_variables {
     my $self = shift ;
     my $opts = shift ;
+    my $messages = $self->{messages} ;
 
     prepare_captions_variables $self, $opts ;
 
@@ -912,8 +936,8 @@ sub prepare_gallery_variables {
     die "Please give an integer value for thumbnail width max\n"
 	unless is_integer ($opts->{thumbnail_width_max}) ;
     if ($opts->{thumbnail_width_max} < 0) {
-	indented_print "Thumbnail width max value < 0, restoring to default (".
-	    ($thumbnail_width_max_default?$thumbnail_width_max_default:"unlimited") .")\n" ;
+	$messages->print ("Thumbnail width max value < 0, restoring to default (".
+	    ($thumbnail_width_max_default?$thumbnail_width_max_default:"unlimited") .")\n") ;
 	$opts->{thumbnail_width_max} = $thumbnail_width_max_default ;
     }
     die "Please give a positive thumbnail width max value (or 0 for unlimited)\n"
@@ -923,7 +947,7 @@ sub prepare_gallery_variables {
     die "Please give an integer value for thumbnail height max\n"
 	unless is_integer ($opts->{thumbnail_height_max}) ;
     if ($opts->{thumbnail_height_max} < 0) {
-	indented_print "Thumbnail height max value < 0, restoring to default ($thumbnail_height_max_default)\n" ;
+	$messages->print ("Thumbnail height max value < 0, restoring to default ($thumbnail_height_max_default)\n") ;
 	$opts->{thumbnail_height_max} = $thumbnail_height_max_default ;
     }
     die "Please give a positive thumbnail height max value\n"
@@ -933,8 +957,8 @@ sub prepare_gallery_variables {
     die "Please give an integer value for thumbnails per row\n"
 	unless is_integer ($opts->{thumbnails_per_row}) ;
     if ($opts->{thumbnails_per_row} < 0) {
-	indented_print "Thumbnails per row value < 0, restoring to default (".
-	    ($thumbnails_per_row_default?$thumbnails_per_row_default:"unlimited") .")\n" ;
+	$messages->print ("Thumbnails per row value < 0, restoring to default (".
+	    ($thumbnails_per_row_default?$thumbnails_per_row_default:"unlimited") .")\n") ;
 	$opts->{thumbnails_per_row} = $thumbnails_per_row_default ;
     }
     die "Please give a positive thumbnails per row value (or 0 for unlimited)\n"
@@ -944,8 +968,8 @@ sub prepare_gallery_variables {
     die "Please give an integer value for pixels per row\n"
 	unless is_integer ($opts->{pixels_per_row}) ;
     if ($opts->{pixels_per_row} < 0) {
-	indented_print "Pixels per row value < 0, restoring to default (".
-	    ($pixels_per_row_default?$pixels_per_row_default:"unlimited") .")\n" ;
+	$messages->print ("Pixels per row value < 0, restoring to default (".
+	    ($pixels_per_row_default?$pixels_per_row_default:"unlimited") .")\n") ;
 	$opts->{pixels_per_row} = $pixels_per_row_default ;
     }
     die "Please give a positive pixels per row value (or 0 for unlimited)\n"
@@ -955,7 +979,7 @@ sub prepare_gallery_variables {
     die "Please give an integer value for index cellpadding\n"
 	unless is_integer ($opts->{index_cellpadding}) ;
     if ($opts->{index_cellpadding} < 0) {
-	indented_print "Index cellpadding value < 0, restoring to default ($index_cellpadding_default)\n" ;
+	$messages->print ("Index cellpadding value < 0, restoring to default ($index_cellpadding_default)\n") ;
 	$opts->{index_cellpadding} = $index_cellpadding_default ;
     }
     die "Please give a positive or null index cellpadding value\n"
@@ -965,7 +989,7 @@ sub prepare_gallery_variables {
     die "Please give an integer value for text slide width\n"
 	unless is_integer ($opts->{text_slide_width}) ;
     if ($opts->{text_slide_width} < 0) {
-	indented_print "Text slide width value < 0, restoring to default ($text_slide_width_default)\n" ;
+	$messages->print ("Text slide width value < 0, restoring to default ($text_slide_width_default)\n") ;
 	$opts->{text_slide_width} = $text_slide_width_default ;
     }
     die "Please give a positive text slide width value\n"
@@ -975,7 +999,7 @@ sub prepare_gallery_variables {
     die "Please give an integer value for text slide height\n"
 	unless is_integer ($opts->{text_slide_height}) ;
     if ($opts->{text_slide_height} < 0) {
-	indented_print "Text slide height value < 0, restoring to default ($text_slide_height_default)\n" ;
+	$messages->print ("Text slide height value < 0, restoring to default ($text_slide_height_default)\n") ;
 	$opts->{text_slide_height} = $text_slide_height_default ;
     }
     die "Please give a positive text slide height value\n"
@@ -985,8 +1009,8 @@ sub prepare_gallery_variables {
     die "Please give an integer value for slide width max\n"
 	unless is_integer ($opts->{slide_width_max}) ;
     if ($opts->{slide_width_max} < 0) {
-	indented_print "Slide width max value < 0, restoring to default (".
-	    ($slide_width_max_default?$slide_width_max_default:"unlimited") .")\n" ;
+	$messages->print ("Slide width max value < 0, restoring to default (".
+	    ($slide_width_max_default?$slide_width_max_default:"unlimited") .")\n") ;
 	$opts->{slide_width_max} = $slide_width_max_default ;
     }
     die "Please give a positive slide width max value (or 0 for unlimited)\n"
@@ -996,8 +1020,8 @@ sub prepare_gallery_variables {
     die "Please give an integer value for slide height max\n"
 	unless is_integer ($opts->{slide_height_max}) ;
     if ($opts->{slide_height_max} < 0) {
-	indented_print "Slide height max value < 0, restoring to default (".
-	    ($slide_height_max_default?$slide_height_max_default:"unlimited") .")\n" ;
+	$messages->print ("Slide height max value < 0, restoring to default (".
+	    ($slide_height_max_default?$slide_height_max_default:"unlimited") .")\n") ;
 	$opts->{slide_height_max} = $slide_height_max_default ;
     }
     die "Please give a positive slide height max value (or 0 for unlimited)\n"
@@ -1059,11 +1083,12 @@ sub generate_config {
     my $self = shift ;
     my $file = shift ;
     my $opts = shift ;
+    my $messages = $self->{messages} ;
 
-    indented_print "Generating config file '$file'.\n" ;
+    $messages->print ("Generating config file '$file'.\n") ;
     if (-e "$file") {
 	my $old_file = "$file.save.". (strftime('%Y-%m-%d_%H:%M:%S' ,localtime)) ;
-	immediate_warning "Renaming old configuration file '$file' as '$old_file'" ;
+	$messages->warning ("Renaming old configuration file '$file' as '$old_file'") ;
 	rename "$file", "$old_file" ;
     }
 
@@ -1114,6 +1139,13 @@ sub generate_config {
 		    map {
 			print NEWCFG ($_->{excluded} ? "exclude" : "include"). " = \"". $_->{filter} ."\"\n" ;
 		    } @{$opts->{excludes}} ;
+		}
+
+	    } elsif ($optname eq "section_dirs") {
+		if (@{$opts->{section_dirs}}) {
+		    map {
+			print NEWCFG "section_dir = \"$_\"\n" ;
+		    } @{$opts->{section_dirs}} ;
 		}
 
 	    } else {

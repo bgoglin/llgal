@@ -1,3 +1,26 @@
+llgal (0.13.3)
+
+  * Add -P (and section_dir) to use photos in a special subdirectory
+    instead of the working directory. May be used multiple times to create
+    a unique gallery with photos from several subdirectories
+    (requested by Samuel Mimram and Samuel Thibault).
+    + Add --Ps (separate_sections) to automaticaly add BREAK and TXT
+      entries at the begining of each section.
+  * When -n is passed, slide filename is generated from the image filename
+    and the slide filename prefix (it helps cleaning HTML files).
+    + Add a note about slide_filenameprefix == "" which could lead to removal
+      of non-llgal HTML files.
+  * When -L is passed, TXT entries are listed without thumbnails in the index,
+    but they still appear as a slide (it will help creating sections).
+  * Fix several operations on thumbnails and scaled images when -d is passed.
+  * Do not waste time in ExifTool when there's nothing to do (do not read tags
+    when none is required, and initialize on demand).
+  * Optimize slide generation a little bit by pre-computing fields before
+    actually filling the template.
+  * Improve percentage printing for progression.
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Thu, 30 Apr 2006 23:31:00 +0200
+
 llgal (0.13.2)
 
   * --cf now does not include the filename extension in the caption

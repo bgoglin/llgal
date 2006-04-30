@@ -3,8 +3,9 @@
 use strict ;
 
 require Llgal::Config ;
+require Llgal::Messages ;
 require Llgal::Templates ;
-use Llgal::Misc ;
+require Llgal::Utils ;
 
 use FileHandle ;
 use Image::Size ;
@@ -12,6 +13,7 @@ use Image::ExifTool ;
 use Cwd ;
 use Locale::gettext ;
 use POSIX qw (setlocale) ;
+use URI::Escape ;
 
 Getopt::Long::Configure('noignorecase', 'noautoabbrev', 'bundling') ;
 STDOUT->autoflush("1") ;
@@ -27,8 +29,10 @@ my $self = {
 
     # local llgal directory, may be modified during early configuration
     local_llgal_dir => ".llgal",
-    # look in current directory "."%
+    # look in current directory "."
     destination_dir => ".",
+    # no subsection by default
+    # subsection_dirs => (),
 
     # some variable may only be modified when by system
     # or user-wide configuration files only
@@ -48,6 +52,9 @@ my $self = {
     give_templates => undef,
     # generate a config file
     generate_config => undef,
+
+    # level of indentation, warnings, ...
+    messages => Llgal::Messages::new (),
 } ;
 
 # store command-line options upfront to write in the index <HEAD>
@@ -61,6 +68,7 @@ Llgal::Config::init_llgal_gettext ($self) ;
 
 ######################################################################
 # various temporary globals
+my $messages = $self->{messages} ;
 my $destination_string ;
 my $local_llgal_url ;
 my $opts ;
@@ -73,9 +81,9 @@ sub clean_files {
     my $cleanall = shift ;
     my $notdeleted = 0 ;
     if ($cleanall) {
-	indented_print "Cleaning all in $destination_string\n" ;
+	$messages->print ("Cleaning all in $destination_string\n") ;
     } else {
-	indented_print "Cleaning in $destination_string\n" ;
+	$messages->print ("Cleaning in $destination_string\n") ;
     }
 
     opendir DIR, "$self->{destination_dir}$self->{local_llgal_dir}"
@@ -92,22 +100,22 @@ sub clean_files {
 	    my @output ;
 	    # default is cleanall, which removes everything, as if file were not changed
 	    if (!$cleanall) {
-		($diff, @output) = system_with_output
+		($diff, @output) = Llgal::Utils::system_with_output
 		    ("compare $_ with its original",
 		     "cmp", "-s", "$self->{destination_dir}$self->{local_llgal_dir}/$_", "$original") ;
 		if ($diff == -1) {
-		    immediate_external_warnings @output ;
+		    $messages->warning (@output) ;
 		    die "Failed to execute 'cmp' to check whether $self->{destination_dir}$self->{local_llgal_dir}/$_ has been modified ($!).\n" ;
 		}
-		add_external_warnings @output ;
+		$messages->warning (@output) ;
 		# on other errors, assume files are different ($diff != 0)
 	    }
 	    if ($diff) {
-		add_warning "Preserved $self->{destination_dir}$self->{local_llgal_dir}/$_ since it seems to be modified." ;
+		$messages->warning ("Preserved $self->{destination_dir}$self->{local_llgal_dir}/$_ since it seems to be modified.") ;
 		$notdeleted++ ;
 	    } else {
 		if (!unlink "$self->{destination_dir}$self->{local_llgal_dir}/$_" and ! $!{ENOENT}) {
-		    add_warning "Failed to remove file $self->{destination_dir}$self->{local_llgal_dir}/$_ ($!)." ;
+		    $messages->warning ("Failed to remove file $self->{destination_dir}$self->{local_llgal_dir}/$_ ($!).") ;
 		}
 	    }
 	} elsif (/^$opts->{captions_filename}$/) {
@@ -115,22 +123,22 @@ sub clean_files {
 	    my @output ;
 	    # default is cleanall, which removes everything, as if the removal line was here
 	    if (!$cleanall) {
-		($grep, @output) = system_with_output
+		($grep, @output) = Llgal::Utils::system_with_output
 		    ("check for caption removal line",
 		     "grep", "-q", "$opts->{captions_removal_line}", "$self->{destination_dir}$self->{local_llgal_dir}/$_") ;
 		if ($grep == -1) {
-		    immediate_external_warnings @output ;
+		    $messages->warning (@output) ;
 		    die "Failed to execute 'grep' to check whether $self->{destination_dir}$self->{local_llgal_dir}/$_ has been modified ($!).\n" ;
 		}
-		add_external_warnings @output ;
+		$messages->warning (@output) ;
 		# on other errors, assume file doesn't contain the caption removal line ($grep != 0)
 	    }
 	    if ($grep) {
-		add_warning "Preserved $self->{destination_dir}$self->{local_llgal_dir}/$_ since it seems to be modified." ;
+		$messages->warning ("Preserved $self->{destination_dir}$self->{local_llgal_dir}/$_ since it seems to be modified.") ;
 		$notdeleted++ ;
 	    } else {
 		if (!unlink "$self->{destination_dir}$self->{local_llgal_dir}/$_" and ! $!{ENOENT}) {
-		    add_warning "Failed to remove file $self->{destination_dir}$self->{local_llgal_dir}/$_." ;
+		    $messages->warning ("Failed to remove file $self->{destination_dir}$self->{local_llgal_dir}/$_.") ;
 		}
 	    }
 	} else {
@@ -140,14 +148,14 @@ sub clean_files {
     closedir DIR ;
     if ($notdeleted <= 2 and $cleanall) {
 	if (!rmdir "$self->{destination_dir}$self->{local_llgal_dir}"  and ! $!{ENOENT}) {
-	    add_warning "Failed to remove directory $self->{destination_dir}$self->{local_llgal_dir} ($!)." ;
+	    $messages->warning ("Failed to remove directory $self->{destination_dir}$self->{local_llgal_dir} ($!).") ;
 	}
     }
 
     opendir DIR, $self->{destination_dir} ? $self->{destination_dir} : "./" ; # destination is empty for './'
     while ($_ = readdir DIR ) {
 	if (/^$opts->{index_filename}\.$opts->{www_extension}$/
-	    or /^$opts->{slide_filenameprefix}\d+\.$opts->{www_extension}$/) {
+	    or /^$opts->{slide_filenameprefix}.*\.$opts->{www_extension}$/) {
 	    unlink "$self->{destination_dir}$_" ;
 	}
     }
@@ -176,7 +184,8 @@ sub init_gallery {
 # - linktext (an associated text that may be used in a link, www-safe)
 # - caption (the caption of the slide, www-safe)
 # - title (title, www-safe)
-# - no_slide (1 or undef)
+# - no_thumb (1 or undef, means that the entry is listed instead of displayed as a thumbnail)
+# - no_slide (1 or undef, means that the entry does not appear as any slide at all)
 
 # - xdim, ydim, kbytes (details about the image or movie)
 # - dimstring (string containing dimensions and/or size that were requested)
@@ -213,7 +222,7 @@ sub check_file {
     my $filename = shift ;
 
     if (! -e $filename) {
-	add_warning "Cannot find file '$filename', skipping it." ;
+	$messages->warning ("Cannot find file '$filename', skipping it.") ;
 	return -1 ;
     }
 
@@ -232,15 +241,15 @@ sub check_file {
 
 sub check_image {
     my $filename = shift ;
-    my ($status, @output) = system_with_output
+    my ($status, @output) = Llgal::Utils::system_with_output
 	( "check \"$filename\" validity",
 	  "identify", $filename ) ;
     if ($status == -1) {
-	immediate_external_warnings @output ;
+	$messages->warning (@output) ;
 	die "Failed to check \"$filename\" validity\n" ;
     } elsif ($status) {
-	# do not show external warnings
-	add_warning "Bad image file '$filename', skipping it." ;
+	# do not show actual identify output
+	$messages->warning ("Bad image file '$filename', skipping it.") ;
 	return -1 ;
     }
     return 0 ;
@@ -262,12 +271,12 @@ sub find_user_thumbnail {
     my $user_thumbnail_filename = "$opts->{user_thumbnail_image_filenameprefix}$opts->{thumbnail_image_filenameprefix}$filename" ;
 
     if ($type == $TYPE_IMG) {
-	if (-f "$self->{local_llgal_dir}/$user_thumbnail_filename") {
+	if (-f "$self->{destination_dir}$self->{local_llgal_dir}/$user_thumbnail_filename") {
 	    return $user_thumbnail_filename ;
 	}
     } else {
 	foreach my $ext (split (/\|/, $opts->{image_extensions})) {
-	    if (-f "$self->{local_llgal_dir}/$user_thumbnail_filename.$ext") {
+	    if (-f "$self->{destination_dir}$self->{local_llgal_dir}/$user_thumbnail_filename.$ext") {
 		return "$user_thumbnail_filename.$ext" ;
 	    }
 	}
@@ -282,12 +291,12 @@ sub find_user_scaled {
     my $user_scaled_filename = "$opts->{user_scaled_image_filenameprefix}$opts->{scaled_image_filenameprefix}$filename" ;
 
     if ($type == $TYPE_IMG) {
-	if (-f "$self->{local_llgal_dir}/$user_scaled_filename") {
+	if (-f "$self->{destination_dir}$self->{local_llgal_dir}/$user_scaled_filename") {
 	    return $user_scaled_filename ;
 	}
     } else {
 	foreach my $ext (split (/\|/, $opts->{image_extensions})) {
-	    if (-f "$self->{local_llgal_dir}/$user_scaled_filename.$ext") {
+	    if (-f "$self->{destination_dir}$self->{local_llgal_dir}/$user_scaled_filename.$ext") {
 		return "$user_scaled_filename.$ext" ;
 	    }
 	}
@@ -349,6 +358,23 @@ sub generate_caption_from_image_infos {
 }
 
 ###################################################################################
+# generating safe url
+
+sub make_safe_url_nowarn {
+    return join '/', map { uri_escape $_ } (split /\//, shift) ;
+}
+
+sub make_safe_url {
+    my $file = shift ;
+    my $safe = make_safe_url_nowarn ($file) ;
+
+    $messages->warning ("Non-ascii characters were escaped in filename '$file'.")
+	if $safe ne $file and $file =~ /[\x80-\xFF]/ ;
+
+    return $safe ;
+}
+
+###################################################################################
 # Generate entries
 
 sub create_file_entry {
@@ -400,7 +426,17 @@ sub create_file_entry {
 	    if $opts->{make_caption_from_image_timestamp} ;
 	@exif_tags = (@exif_tags, 'UserComment', 'Comment')
 	    if $opts->{make_caption_from_image_comment} ;
-	$entry->{exif_infos} = $opts->{exiftool}->ImageInfo ("$self->{destination_dir}$filename", @exif_tags) ;
+	if (@exif_tags) {
+	    if (not defined $opts->{exif_info}) {
+		# ExifTool initialization
+		$opts->{exiftool} = new Image::ExifTool;
+		# Accept unknown tags, just in case...
+		$opts->{exiftool}->Options(Unknown => 1) ;
+		# DateFormat should be initialized with whatever the user said to --ctf
+		$opts->{exiftool}->Options(DateFormat => $opts->{timestamp_format_in_caption}) ;
+	    }
+	    $entry->{exif_infos} = $opts->{exiftool}->ImageInfo ("$self->{destination_dir}$filename", @exif_tags) ;
+	}
     }
 
     # the caption (will be web-safe after caption file generation)
@@ -493,7 +529,7 @@ sub fill_file_entry {
 	$entry->{thumb_url} = "$local_llgal_url/". make_safe_url_nowarn ($thumb_filename) ;
 
 	# thumbnails dimensions
-	my ($x, $y) = imgsize ("$self->{local_llgal_dir}/$thumb_filename") ;
+	my ($x, $y) = imgsize ("$self->{destination_dir}$self->{local_llgal_dir}/$thumb_filename") ;
 	if ($y > $opts->{thumbnail_height_max}) {
 	    $x = $x * ($opts->{thumbnail_height_max} / $y) ;
 	    $y = $opts->{thumbnail_height_max} ;
@@ -523,34 +559,34 @@ sub fill_file_entry {
 
 	# if the thumbnail does not exist, or is older than the image, or regeneration is forced
 	my $real_thumb_filename = "$self->{destination_dir}$entry->{thumb_filename}" ;
-	if ((! -e "$real_thumb_filename")
-	    or (-M "$real_thumb_filename") > (-M "$filename")
+	if ((! -e $real_thumb_filename)
+	    or (-M $real_thumb_filename) > (-M $real_filename)
 	    or $opts->{force_image_regeneration}) {
 	    my ($status, @output) ;
 	    # only scale down, never up.
-	    my ($x,$y) = imgsize ("$real_filename") ;
+	    my ($x,$y) = imgsize ($real_filename) ;
 	    if ($y <= $opts->{thumbnail_height_max}
 		and ($opts->{thumbnail_width_max} <= 0 or $x <= $opts->{thumbnail_width_max})) {
 		# the original is not large enough, keep it
 		$entry->{thumb_filename} = $entry->{filename} ;
 		$entry->{thumb_url} = $entry->{url} ;
-		$real_thumb_filename = "$self->{destination_dir}$entry->{filename}" ;
+		$real_thumb_filename = $real_filename ;
 	    } else {
 		# scale down
-		($status, @output) = system_with_output
-		    ( "create '$real_filename' thumbnail",
-		      @{$opts->{thumbnail_create_command}}, "$real_filename", "$real_thumb_filename" ) ;
+		($status, @output) = Llgal::Utils::system_with_output
+		    ( "create '$filename' thumbnail",
+		      @{$opts->{thumbnail_create_command}}, $real_filename, $real_thumb_filename ) ;
 		if ($status == -1) {
-		    immediate_external_warnings @output ;
-		    die "Failed to create '$real_filename' thumbnail\n" ;
+		    $messages->warning (@output) ;
+		    die "Failed to create '$filename' thumbnail\n" ;
 		} elsif ($status) {
-		    add_warning "Failed to create '$real_filename' thumbnail" ;
-		    add_external_warnings @output ;
+		    $messages->warning ("Failed to create '$real_filename' thumbnail") ;
+		    $messages->warning (@output) ;
 		    return undef ;
 		}
 	    }
 	}
-	($entry->{thumb_xdim},$entry->{thumb_ydim}) = imgsize ("$real_thumb_filename") ;
+	($entry->{thumb_xdim},$entry->{thumb_ydim}) = imgsize ($real_thumb_filename) ;
 
 	# dimstring
 	if ($opts->{show_dimensions}) {
@@ -579,7 +615,7 @@ sub fill_file_entry {
 	    $entry->{scaled_url} = "$local_llgal_url/". make_safe_url_nowarn ($scaled_filename) ;
 
 	    # thumbnails dimensions
-	    my ($x, $y) = imgsize ("$self->{local_llgal_dir}/$scaled_filename") ;
+	    my ($x, $y) = imgsize ("$self->{destination_dir}$self->{local_llgal_dir}/$scaled_filename") ;
 	    if ($opts->{slide_height_max} > 0 and $y > $opts->{slide_height_max}) {
 		$x = $x * ($opts->{slide_height_max} / $y) ;
 		$y = $opts->{slide_height_max} ;
@@ -590,7 +626,7 @@ sub fill_file_entry {
 	    }
 
 	    ($entry->{scaled_xdim},$entry->{scaled_ydim}) = ($x, $y) ;
-	    $entry->{scaled_kbytes} = (-s "$self->{local_llgal_dir}/$scaled_filename") >> 10 ;
+	    $entry->{scaled_kbytes} = (-s "$self->{destination_dir}$self->{local_llgal_dir}/$scaled_filename") >> 10 ;
 
 	    # dimstring
 	    if ($opts->{show_dimensions} and $opts->{show_size}) {
@@ -614,35 +650,35 @@ sub fill_file_entry {
 
 	    # if the thumbnail does not exist, or is older than the image, or regeneration is forced
 	    my $real_scaled_filename = "$self->{destination_dir}$entry->{scaled_filename}" ;
-	    if ((! -e "$real_scaled_filename")
-		or (-M "$real_scaled_filename") > (-M "$filename")
+	    if ((! -e $real_scaled_filename)
+		or (-M $real_scaled_filename) > (-M $real_filename)
 		or $opts->{force_image_regeneration}) {
 		my ($status, @output) ;
 		# only scale down, never up.
-		my ($x,$y) = imgsize ("$real_filename") ;
+		my ($x,$y) = imgsize ($real_filename) ;
 		if (($opts->{slide_width_max} <= 0 or $x <= $opts->{slide_width_max})
 		    and ($opts->{slide_height_max} <= 0 or $y <= $opts->{slide_height_max})) {
 		    # the original is not large enough, keep it
 		    $entry->{scaled_filename} = $entry->{filename} ;
 		    $entry->{scaled_url} = $entry->{url} ;
-		    $real_scaled_filename = "$self->{destination_dir}$entry->{filename}" ;
+		    $real_scaled_filename = $real_filename ;
 		} else {
 		    # scale down
-		    ($status, @output) = system_with_output
-			( "create '$real_filename' scaled image",
-			  @{$opts->{scaled_create_command}}, "$real_filename", "$real_scaled_filename" ) ;
+		    ($status, @output) = Llgal::Utils::system_with_output
+			( "create '$filename' scaled image",
+			  @{$opts->{scaled_create_command}}, $real_filename, $real_scaled_filename ) ;
 		    if ($status == -1) {
-			immediate_external_warnings @output ;
-			die "Failed to create '$real_filename' scaled image\n" ;
+			$messages->warning (@output) ;
+			die "Failed to create '$filename' scaled image\n" ;
 		    } elsif ($status) {
-			add_warning "Failed to create '$real_filename' scaled image" ;
-			add_external_warnings @output ;
+			$messages->warning ("Failed to create '$real_filename' scaled image") ;
+			$messages->warning (@output) ;
 			return undef ;
 		    }
 		}
 	    }
-	    ($entry->{scaled_xdim},$entry->{scaled_ydim}) = imgsize ("$real_scaled_filename") ;
-	    $entry->{scaled_kbytes} = (-s "$real_scaled_filename") >> 10 ;
+	    ($entry->{scaled_xdim},$entry->{scaled_ydim}) = imgsize ($real_scaled_filename) ;
+	    $entry->{scaled_kbytes} = (-s $real_scaled_filename) >> 10 ;
 
 	    # dimstring
 	    if ($opts->{show_dimensions} and $opts->{show_size}) {
@@ -675,6 +711,7 @@ sub create_nofile_entry {
     # row break and horizontal lines need nothing
     if ($type == $TYPE_LIN or $type == $TYPE_BRK) {
 	$entry->{no_slide} = 1 ;
+	$entry->{no_thumb} = 1 ;
 	return $entry ;
     }
 
@@ -687,6 +724,7 @@ sub create_nofile_entry {
     $entry->{linktext} = $linktext ;
 
     # the caption (will be web-safe after caption file generation)
+    $caption = "" unless defined $caption ;
     $entry->{caption} = $caption ;
 
     # add caption to the title if asked
@@ -726,8 +764,8 @@ sub fill_entries {
     my @entries = @{$gallery->{entries}} ;
     my @final_entries = () ;
 
-    indented_print "Preparing entries: " ;
-    init_percentage () ;
+    $messages->print ("Preparing entries: ") ;
+    $messages->init_percentage (scalar @entries) ;
 
     my $i = 0 ;
     for my $entry (@entries) {
@@ -742,10 +780,9 @@ sub fill_entries {
 	}
 	push @final_entries, $final_entry
 	    if defined $final_entry ;
-	print_percentage (($i++)+1, scalar @entries) ;
+	$messages->update_percentage (($i++)+1) ;
     }
-    end_percentage () ;
-    show_warnings ;
+    $messages->end_percentage () ;
 
     @{$gallery->{entries}} = @final_entries ;
 }
@@ -760,8 +797,12 @@ sub finalize_entries {
     if ($opts->{list_links}) {
 	map {
 	    my $type = $_->{type} ;
-	    $_->{no_slide} = 1
-		if $type == $TYPE_LNK or $type == $TYPE_DIR or $type == $TYPE_MVI or $type == $TYPE_FIL ;
+	    if ($type == $TYPE_LNK or $type == $TYPE_DIR or $type == $TYPE_MVI or $type == $TYPE_FIL) {
+		$_->{no_thumb} = 1 ;
+		$_->{no_slide} = 1 ;
+	    } elsif ($type == $TYPE_TXT) {
+		$_->{no_thumb} = 1 ;
+	    }
 	} @entries ;
     }
 
@@ -797,12 +838,12 @@ sub finalize_entries {
 		if ($type == $TYPE_TXT or $type == $TYPE_LNK) {
 		    $slide_filename = "$opts->{slide_filenameprefix}$counter_with_zeros.$opts->{www_extension}" ;
 		} elsif ($opts->{make_slide_filename_from_extension}) {
-		    $slide_filename = "$filename.$opts->{www_extension}" ;
+		    $slide_filename = "$opts->{slide_filenameprefix}$filename.$opts->{www_extension}" ;
 		} else {
 		    my @parts = split (/\./, $filename) ;
 		    pop @parts ;
 		    my $basename = join ('.', @parts) ;
-		    $slide_filename = "$basename.$opts->{www_extension}" ;
+		    $slide_filename = "$opts->{slide_filenameprefix}$basename.$opts->{www_extension}" ;
 		}
 	    } else {
 		$slide_filename = "$opts->{slide_filenameprefix}$counter_with_zeros.$opts->{www_extension}" ;
@@ -835,14 +876,15 @@ sub finalize_entries {
 sub get_entries_from_directory {
     my $dir = shift ;
     my $dir_string = shift ;
+    my $subdir = shift ;
     my $add_subdirs = shift ;
     my $add_others = shift ;
     my @entries = () ;
 
-    opendir DIR, $dir
-	or die "Can't open $dir_string ($!)\n" ;
+    opendir DIR, "$dir$subdir"
+	or die "Can't open $dir_string$subdir ($!)\n" ;
     # get all files, except dot-starting ones and webpages
-    my @filenames = grep ((!/\.$opts->{www_extension}$/i and !/^\./), readdir DIR) ;
+    my @filenames = map { "$subdir$_" } (grep ((!/\.$opts->{www_extension}$/i and !/^\./), readdir DIR)) ;
     closedir DIR ;
 
     # sort now so that slide numbering doesn't become wrong later
@@ -872,8 +914,8 @@ sub get_entries_from_directory {
 	die "Unknown sort criteria '$opts->{sort_criteria}'.\n" ;
     }
 
-    indented_print "Listing entries: " ;
-    init_percentage () ;
+    $messages->print ("Listing entries".($subdir ? " in $subdir " : "").": ") ;
+    $messages->init_percentage (scalar @filenames) ;
 
     for(my $i = 0; $i < @filenames; $i++) {
 	my $filename = $filenames[$i] ;
@@ -915,22 +957,42 @@ sub get_entries_from_directory {
 	    }
 	}
 
-	print_percentage ($i+1, scalar @filenames) ;
+	$messages->update_percentage ($i+1) ;
     }
-    end_percentage () ;
-    show_warnings ;
+    $messages->end_percentage () ;
 
     return @entries ;
 }
 
 sub get_entries {
     my $opts = shift ;
+    my @entries = () ;
     my $dir = $self->{destination_dir} ? $self->{destination_dir} : "./" ; # destination is empty for './'
-    my @entries = get_entries_from_directory
-	$dir,
-	$destination_string,
-	($opts->{add_subdirs} or $opts->{recursive}),
-	$opts->{add_all_files} ;
+    if (defined $opts->{section_dirs} and @{$opts->{section_dirs}}) {
+	foreach my $subdir (@{$opts->{section_dirs}}) {
+	    # remove ending slashes
+	    $subdir =~ s/\/*$//g ;
+	    # separation line and title
+	    if ($opts->{separate_sections}) {
+		push @entries, (create_nofile_entry $TYPE_LIN, undef, undef, undef) ;
+		push @entries, (create_nofile_entry $TYPE_TXT, undef, $opts->{section_text}.$subdir, $opts->{section_text}.$subdir) ;
+	    }
+	    # section entries
+	    push @entries, get_entries_from_directory
+		$dir,
+		$destination_string,
+		"$subdir/",
+		($opts->{add_subdirs} or $opts->{recursive}),
+		$opts->{add_all_files} ;
+	}
+    } else {
+	@entries = get_entries_from_directory
+	    $dir,
+	    $destination_string,
+	    "",
+	    ($opts->{add_subdirs} or $opts->{recursive}),
+	    $opts->{add_all_files} ;
+    }
     return @entries ;
 }
 
@@ -957,20 +1019,20 @@ sub check_destination {
     my $path = getcwd."/".$self->{destination_dir} ;
     if ($path =~ m@/*(?:[^/]+/+)*([^/]+)/+$@) {
 	if ($1 eq $self->{local_llgal_dir}) {
-	    immediate_warning "!! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !!" ;
-	    immediate_warning "Your working directory looks like a .llgal directory. !!" ;
-	    immediate_warning "This might not be what you really want to do.         !!" ;
-	    immediate_warning "!! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !!" ;
+	    $messages->warning ("!! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !!") ;
+	    $messages->warning ("Your working directory looks like a .llgal directory. !!") ;
+	    $messages->warning ("This might not be what you really want to do.         !!") ;
+	    $messages->warning ("!! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !!") ;
 	}
     }
 
     # TODO: remove this one day (maybe on march 7th 2006, since it will be 6 month ?)
     # temporary check, to be removed soon
     if ($self->{local_llgal_dir} ne ".llgal.files" and -e "$self->{destination_dir}.llgal.files") {
-	immediate_warning "!! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !!" ;
-	immediate_warning "llgal now uses '.llgal' instead '.llgal.files'. !!" ;
-	immediate_warning "You should probably update it.                  !!" ;
-	immediate_warning "!! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !!" ;
+	$messages->warning ("!! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !!") ;
+	$messages->warning ("llgal now uses '.llgal' instead '.llgal.files'. !!") ;
+	$messages->warning ("You should probably update it.                  !!") ;
+	$messages->warning ("!! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !! !!") ;
     }
 
     # create globals to factorize later
@@ -999,7 +1061,7 @@ sub generate_captions_entries {
 
     my @entries = get_entries $opts ;
 
-    indented_print "Found ". (scalar @entries) ." files in $destination_string\n" ;
+    $messages->print ("Found ". (scalar @entries) ." entries in $destination_string\n") ;
 
     my @captions = () ;
 
@@ -1018,7 +1080,7 @@ sub generate_captions_entries {
     my $old_next_gallery_link_text ;
 
     if (-e "$self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename}") {
-	indented_print "Reading existing captions from $opts->{captions_filename}.\n" ;
+	$messages->print ("Reading existing captions from $opts->{captions_filename}.\n") ;
 	open (CAP, "$self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename}")
 	    or die "Can't open $self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename} for reading\n" ;
 	@captions = <CAP> ;
@@ -1041,7 +1103,7 @@ sub generate_captions_entries {
 	    }
 	}
 
-	indented_print "Appending new captions to $opts->{captions_filename}: " ;
+	$messages->print ("Appending new captions to $opts->{captions_filename}: ") ;
 	open (CAP, ">>$self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename}")
 	    or die "Can't open $self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename} file to append\n" ;
 
@@ -1049,7 +1111,7 @@ sub generate_captions_entries {
 	print CAP "# Appended new captions (". (scalar localtime) .").\n" ;
 	print CAP "\n" ;
     } else {
-	indented_print "Creating the $opts->{captions_filename} file: " ;
+	$messages->print ("Creating the $opts->{captions_filename} file: ") ;
 	open (CAP, ">$self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename}")
 	    or die "Can't create $self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename} file\n" ;
 
@@ -1058,7 +1120,7 @@ sub generate_captions_entries {
 	    while (my $line = <CAPHEADER>) { print CAP $line ; }
 	    close CAPHEADER ;
 	} else {
-	    add_warning "Failed to open $opts->{captions_header_filename}\n" ;
+	    $messages->warning ("Failed to open $opts->{captions_header_filename}\n") ;
 	}
 	print CAP "# $opts->{captions_removal_line}\n" ;
 	print CAP "\n" ;
@@ -1083,7 +1145,7 @@ sub generate_captions_entries {
 	    or $old_next_gallery_link_text ne $opts->{next_gallery_link_text} ) ;
     print CAP "\n" ;
 
-    init_percentage () ;
+    $messages->init_percentage (scalar @entries) ;
 
     for (my $i = 0; $i < @entries; $i++) {
 	my $entry = $entries[$i] ;
@@ -1093,32 +1155,48 @@ sub generate_captions_entries {
 		." ---- ". $entry->{caption} ."\n"
 		unless grep { $captions[$_] =~ m/^(\s*IMG:)?\s*$entry->{filename}\s+----\s/ }
 		    ( 0 .. $#captions ) ;
+
 	} elsif ($type == $TYPE_MVI) {
 	    print CAP "MVI: " . $entry->{filename}
 		." ---- ". $entry->{linktext}
 		." ---- ". $entry->{caption} ."\n"
 		unless grep { $captions[$_] =~ m/^\s*MVI:\s*$entry->{filename}\s+----\s/ }
 		    ( 0 .. $#captions ) ;
+
 	} elsif ($type == $TYPE_FIL) {
 	    print CAP "FIL: " . $entry->{filename}
 		." ---- ". $entry->{linktext}
 		." ---- ". $entry->{caption} ."\n"
 		unless grep { $captions[$_] =~ m/^\s*FIL:\s*$entry->{filename}\s+----\s/ }
 		    ( 0 .. $#captions ) ;
+
 	} elsif ($type == $TYPE_DIR) {
 	    print CAP "DIR: " . $entry->{filename}
 		." ---- ". $entry->{linktext}
 		." ---- ". $entry->{caption} ."\n"
 		unless grep { $captions[$_] =~ m/^\s*DIR:\s*$entry->{filename}\s+----\s/ }
 		    ( 0 .. $#captions ) ;
+
+	} elsif ($type == $TYPE_TXT) {
+	    # TODO: do not insert again ? (in case of --Ps)
+	    print CAP "TXT: " . $entry->{linktext} ." ---- ". $entry->{caption} ."\n";
+
+	} elsif ($type == $TYPE_LIN) {
+	    print CAP "LINE\n" ;
+
+	} elsif ($type == $TYPE_BRK) {
+	    print CAP "BREAK\n" ;
+
+	} else {
+	    die "Unrecognized entry type $type.\n" ;
 	}
-	print_percentage ($i+1, scalar @entries) ;
+
+	$messages->update_percentage ($i+1) ;
     }
 
-    end_percentage () ;
+    $messages->end_percentage () ;
 
     close CAP ;
-    show_warnings ;
 
     return @entries ;
 }
@@ -1132,13 +1210,14 @@ sub read_captions_file {
     my @headers = () ;
     my @footers = () ;
 
-    indented_print "Reading entries in the $opts->{captions_filename} file: " ;
-    init_percentage () ;
+    $messages->print ("Reading entries in the $opts->{captions_filename} file: ") ;
 
     open(CAP,"$self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename}")
 	or die "Can't open $self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename} file\n" ;
 
     my $size = (-s CAP) ;
+    $messages->init_percentage ($size) ;
+
     my $line ;
     while (defined ($line = <CAP>)) {
 	chomp $line ;
@@ -1222,11 +1301,10 @@ sub read_captions_file {
 		    if defined $entry ;
 	    }
 	}
-	print_percentage (tell CAP, $size) ;
+	$messages->update_percentage (tell CAP) ;
     }
     close CAP ;
-    end_percentage () ;
-    show_warnings ;
+    $messages->end_percentage () ;
 
     @{$gallery->{entries}} = @entries ;
     @{$gallery->{headers}} = @headers ;
@@ -1276,7 +1354,7 @@ sub generate_slides {
     # find the slidetemplate
     my $slidetemplate = (Llgal::Templates::find_template_file ($self, $opts, $opts->{slidetemplate_filename}, 1))
 	. "/$opts->{slidetemplate_filename}" ;
-    indented_print "Using '$slidetemplate' as HTML slide template.\n" ;
+    $messages->print ("Using '$slidetemplate' as HTML slide template.\n") ;
 
     # keep the slidetemplate in memory instead of always reopening it
     my @slidetemplate_text ;
@@ -1286,8 +1364,9 @@ sub generate_slides {
     close SR ;
 
     # create slides
-    indented_print "Creating individual slides: " ;
-    init_percentage () ;
+    $messages->print ("Creating individual slides: ") ;
+    $messages->init_percentage (scalar @entries) ;
+
     for (my $i = 0; $i < @entries; $i++) {
 	my $entry = $entries[$i] ;
 
@@ -1296,177 +1375,179 @@ sub generate_slides {
 	open(SW, ">$self->{destination_dir}$entry->{slide_filename}")
 	    or die "Can't create slide file\n" ;
 	my $type = $entry->{type} ;
-	my $title = $entry->{title} ;
+
+	##############################
+	# Precompute all fields first
+
+	# titles
+	my $SLIDE_TITLE = $entry->{title} ;
+	my $TITLE = $opts->{index_title} ;
+
+	# css and codeset
+	my $CSS = "$self->{local_llgal_dir}/$opts->{css_filename}" ;
+	$CSS = $opts->{css_location} if $opts->{css_location} ;
+	my $LLGAL_CODESET = $opts->{codeset} ;
+
+	# this style contents and style
+	my $THIS_SLIDE_STYLE = "image-slide" ;
+	$THIS_SLIDE_STYLE = "text-slide\" style=\"width: $opts->{text_slide_width}px; height: $opts->{text_slide_height}px;"
+	    if !$entry->{scaled_url} ;
+	my $THIS_SLIDE ;
+	if ($type == $TYPE_IMG) {
+	    # image slide
+
+	    if (defined $entry->{scaled_filename}) {
+		# scaled image with link to the real image
+		$THIS_SLIDE = "<a href=\"$entry->{url}\" "
+		    ."title=\"$opts->{over_scaled_text}$TITLE $entry->{dimstring}\">" ;
+		$THIS_SLIDE .= "<img src=\"$entry->{scaled_url}\" "
+		    ."style=\"width: $entry->{scaled_xdim}px; height: $entry->{scaled_ydim}px;\" "
+		    ."alt=\"$opts->{alt_scaled_text}$TITLE $entry->{scaled_dimstring}\" />" ;
+		$THIS_SLIDE .= "</a>" ;
+
+	    } else {
+		# real image
+		$THIS_SLIDE = "<img src=\"$entry->{url}\" "
+		    ."style=\"width: $entry->{scaled_xdim}px; height: $entry->{scaled_ydim}px;\" "
+		    ."alt=\"$opts->{alt_full_text}$TITLE $entry->{dimstring}\" "
+		    ."title=\"$TITLE $entry->{dimstring}\" />" ;
+
+	    }
+	} elsif ($entry->{scaled_url}) {
+	    # another type, with a user-given scaled image
+	    if ($type == $TYPE_TXT) {
+		# text with scaled image ? ok...
+		$THIS_SLIDE = "<img src=\"$entry->{scaled_url}\" "
+		    ."style=\"width: $entry->{scaled_xdim}px; height: $entry->{scaled_ydim}px;\" "
+		    ."title=\"$TITLE $entry->{dimstring}\" "
+		    ."alt=\"$entry->{linktext} $entry->{scaled_dimstring}\" />" ;
+
+	    } else {
+		# another type with scaled image linking to the target
+		$THIS_SLIDE = "<a href=\"$entry->{url}\" "
+		    ."title=\"$TITLE $entry->{dimstring}\">" ;
+		$THIS_SLIDE .= "<img src=\"$entry->{scaled_url}\" "
+		    ."style=\"width: $entry->{scaled_xdim}px; height: $entry->{scaled_ydim}px;\" "
+		    ."alt=\"$entry->{linktext} $entry->{scaled_dimstring}\" />" ;
+		$THIS_SLIDE .= "</a>" ;
+	    }
+
+	} elsif ($type == $TYPE_TXT) {
+	    # text slide
+	    $THIS_SLIDE = $entry->{linktext} ;
+	} else {
+	    # link-style slide
+	    $THIS_SLIDE = "<a href=\"$entry->{url}\" title=\"$TITLE $entry->{dimstring}\">$entry->{linktext}</a>" ;
+	}
+
+	# slide counter
+	my $slide_counter = $opts->{slide_counter_format} ;
+	$slide_counter =~ s/%n/$entry->{counter}/ ;
+	$slide_counter =~ s/%0n/$entry->{counter_with_zeros}/ ;
+	$slide_counter =~ s/%t/$gallery->{nslides}/ ;
+	# caption
+	my $IMAGE_CAPTION = $entry->{caption} . $slide_counter . "&nbsp;&nbsp;&nbsp;$entry->{dimstring}" ;
+
+	# index
+	my $INDEX_LINK_TEXT = $opts->{index_link_text} ;
+	if ($opts->{index_link_image}) {
+	    if ($opts->{index_link_image_location}) {
+		$INDEX_LINK_TEXT = "<img src=\"$opts->{index_link_image_location}\" "
+		    ."alt=\"$opts->{index_link_text}\" "
+		    ."class=\"image-link\" />" ;
+	    } else {
+		$INDEX_LINK_TEXT = "<img src=\"$self->{local_llgal_dir}/". (make_safe_url $opts->{index_link_image_filename}) ."\" "
+		    ."alt=\"$opts->{index_link_text}\" class=\"image-link\" />" ;
+	    }
+	}
+	my $INDEX_FILE = "$opts->{index_filename}.$opts->{www_extension}\" title=\"$opts->{over_index_link_text}" ;
+
+	# previous slide
+	my $prev = $entries[$entry->{prev}] ;
+	my $PREV_SLIDE_LINK_TEXT ;
+	if ($opts->{prev_slide_link_preview} and $prev->{thumb_url}) {
+	    $PREV_SLIDE_LINK_TEXT = "<img src=\"$prev->{thumb_url}\" "
+		."style=\"width: $prev->{thumb_xdim}px; height: $prev->{thumb_ydim}px;\" "
+		."alt=\"$opts->{prev_slide_link_text}\" />" ;
+	} elsif ($opts->{prev_slide_link_image}) {
+	    if ($opts->{prev_slide_link_image_location}) {
+		$PREV_SLIDE_LINK_TEXT = "<img src=\"$opts->{prev_slide_link_image_location}\" "
+		    ."alt=\"$opts->{prev_slide_link_text}\" class=\"image-link\" />" ;
+	    } else {
+		$PREV_SLIDE_LINK_TEXT = "<img src=\"$self->{local_llgal_dir}/". (make_safe_url $opts->{prev_slide_link_image_filename}) ."\" "
+		    ."alt=\"$opts->{prev_slide_link_text}\" class=\"image-link\" />" ;
+	    }
+	} else {
+	    $PREV_SLIDE_LINK_TEXT = $opts->{prev_slide_link_text} ;
+	}
+	my $PREV_SLIDE = "$prev->{slide_url}\" title=\"$opts->{over_prev_slide_link_text}$prev->{title}" ;
+
+	# next slide
+	my $next = $entries[$entry->{next}] ;
+	my $NEXT_SLIDE_LINK_TEXT ;
+	if ($opts->{next_slide_link_preview} and $next->{thumb_url}) {
+	    $NEXT_SLIDE_LINK_TEXT = "<img src=\"$next->{thumb_url}\" "
+		."style=\"width: $next->{thumb_xdim}px; height: $next->{thumb_ydim}px;\" "
+		."alt=\"$opts->{next_slide_link_text}\" />" ;
+	} elsif ($opts->{next_slide_link_image}) {
+	    if ($opts->{next_slide_link_image_location}) {
+		$NEXT_SLIDE_LINK_TEXT = "<img src=\"". $opts->{next_slide_link_image_location} ."\" "
+		    ."alt=\"$opts->{next_slide_link_text}\" class=\"image-link\" />" ;
+	    } else {
+		$NEXT_SLIDE_LINK_TEXT = "<img src=\"$self->{local_llgal_dir}/". (make_safe_url $opts->{next_slide_link_image_filename}) ."\" "
+		    ."alt=\"$opts->{next_slide_link_text}\" class=\"image-link\" />" ;
+	    }
+	} else {
+	    $NEXT_SLIDE_LINK_TEXT = $opts->{next_slide_link_text} ;
+	}
+	my $NEXT_SLIDE = "$next->{slide_url}\" title=\"$opts->{over_next_slide_link_text}$next->{title}" ;
+
+	# exif information
+	my $EXIF_TABLE = "" ;
+	if ($type == $TYPE_IMG and @{$opts->{show_exif_tags}}) {
+	    my $exif_infos = $entry->{exif_infos} ;
+	    foreach my $tag (@{$opts->{show_exif_tags}}) {
+		my $value = $exif_infos->{$tag} ;
+		my $description = $opts->{exiftool}->GetDescription ($tag) ;
+		$EXIF_TABLE .= "<tr><td class=\"exif-name\">$description</td>"
+		    ."<td class=\"exif-value\">$value</td></tr>\n"
+		    if defined $value ;
+	    }
+	    $EXIF_TABLE = "<table class=\"exif\">\n". $EXIF_TABLE ."</table>" ;
+	}
+
+	# credits text
+	my $CREDITS = $opts->{credits_text} ;
+
+	#################################
+	# Replace fields in the template
 
 	my @slidetemplate_text_copy = @slidetemplate_text ; # don't touch the original template
         for my $line (@slidetemplate_text_copy) {
-	    $line =~ s/LLGAL-CODESET/$opts->{codeset}/g ;
-	    $line =~ s/<!--SLIDE-TITLE-->/$title/g ;
-	    $line =~ s/<!--TITLE-->/$opts->{index_title}/g ;
-	    if ($opts->{css_location}) {
-		$line =~ s/<!--CSS-->/$opts->{css_location}/g ;
-	    } else {
-		$line =~ s/<!--CSS-->/$self->{local_llgal_dir}\/$opts->{css_filename}/g ;
-	    }
-
-	    # set the style
-	    if ($line =~ m/<!--THIS-SLIDE-STYLE-->/g) {
-		if ($entry->{scaled_url}) {
-		    $line =~ s/<!--THIS-SLIDE-STYLE-->/image-slide/ ;
-		} else {
-		    $line =~ s/<!--THIS-SLIDE-STYLE-->/text-slide" style="width: $opts->{text_slide_width}px; height: $opts->{text_slide_height}px;/ ;
-		}
-	    }
-
-	    # fill the main part
-	    if ($line =~ m/<!--THIS-SLIDE-->/g) {
-		my $content ;
-		if ($type == $TYPE_IMG) {
-		    # image slide
-
-		    if (defined $entry->{scaled_filename}) {
-			# scaled image with link to the real image
-			$content = "<a href=\"$entry->{url}\" "
-			    ."title=\"$opts->{over_scaled_text}$title $entry->{dimstring}\">" ;
-			$content .= "<img src=\"$entry->{scaled_url}\" "
-			    ."style=\"width: $entry->{scaled_xdim}px; height: $entry->{scaled_ydim}px;\" "
-			    ."alt=\"$opts->{alt_scaled_text}$title $entry->{scaled_dimstring}\" />" ;
-			$content .= "</a>" ;
-
-		    } else {
-			# real image
-			$content = "<img src=\"$entry->{url}\" "
-			    ."style=\"width: $entry->{scaled_xdim}px; height: $entry->{scaled_ydim}px;\" "
-			    ."alt=\"$opts->{alt_full_text}$title $entry->{dimstring}\" "
-			    ."title=\"$title $entry->{dimstring}\" />" ;
-
-		    }
-		} elsif ($entry->{scaled_url}) {
-		    # another type, with a user-given scaled image
-		    if ($type == $TYPE_TXT) {
-			# text with scaled image ? ok...
-			$content = "<img src=\"$entry->{scaled_url}\" "
-			    ."style=\"width: $entry->{scaled_xdim}px; height: $entry->{scaled_ydim}px;\" "
-			    ."title=\"$title $entry->{dimstring}\" "
-			    ."alt=\"$entry->{linktext} $entry->{scaled_dimstring}\" />" ;
-		    } else {
-			# another type with scaled image linking to the target
-			$content = "<a href=\"$entry->{url}\" "
-			    ."title=\"$title $entry->{dimstring}\">" ;
-			$content .= "<img src=\"$entry->{scaled_url}\" "
-			    ."style=\"width: $entry->{scaled_xdim}px; height: $entry->{scaled_ydim}px;\" "
-			    ."alt=\"$entry->{linktext} $entry->{scaled_dimstring}\" />" ;
-			$content .= "</a>" ;
-		    }
-		} elsif ($type == $TYPE_TXT) {
-		    # text slide
-		    $content = $entry->{linktext} ;
-		} else {
-		    # link-style slide
-		    $content = "<a href=\"$entry->{url}\" title=\"$title $entry->{dimstring}\">$entry->{linktext}</a>" ;
-		}
-
-		# finally replace <!--THIS-SLIDE-->
-		$line =~ s/<!--THIS-SLIDE-->/$content/ ;
-	    }
-
-	    # compute the slide counter
-	    my $slide_counter = $opts->{slide_counter_format} ;
-	    $slide_counter =~ s/%n/$entry->{counter}/ ;
-	    $slide_counter =~ s/%0n/$entry->{counter_with_zeros}/ ;
-	    $slide_counter =~ s/%t/$gallery->{nslides}/ ;
-
-	    # add the caption and dimensions
-	    my $imagecaption = $entry->{caption} . $slide_counter . "&nbsp;&nbsp;&nbsp;$entry->{dimstring}" ;
-
-	    $line =~ s/<!--IMAGE-CAPTION-->/$imagecaption/g ;
-	    $line =~ s/<!--THIS-SLIDE-->/$entry->{slide_url}/g ;
-
-	    # process INDEX-FILE
-	    my $index_link = $opts->{index_link_text} ;
-	    if ($opts->{index_link_image}) {
-		if ($opts->{index_link_image_location}) {
-		    $index_link = "<img src=\"$opts->{index_link_image_location}\" "
-			."alt=\"$opts->{index_link_text}\" "
-			."class=\"image-link\" />" ;
-		} else {
-		    $index_link = "<img src=\"$self->{local_llgal_dir}/". (make_safe_url $opts->{index_link_image_filename}) ."\" "
-			."alt=\"$opts->{index_link_text}\" class=\"image-link\" />" ;
-		}
-	    }
-	    $line =~ s/<!--INDEX-LINK-TEXT-->/$index_link/g ;
-	    $line =~ s/<!--INDEX-FILE-->/$opts->{index_filename}.$opts->{www_extension}\" title=\"$opts->{over_index_link_text}/g ;
-
-	    # process PREV-SLIDE
-	    my $prev = $entries[$entry->{prev}] ;
-
-	    my $prev_slide_link ;
-	    if ($opts->{prev_slide_link_preview} and $prev->{thumb_url}) {
-		$prev_slide_link = "<img src=\"$prev->{thumb_url}\" "
-		    ."style=\"width: $prev->{thumb_xdim}px; height: $prev->{thumb_ydim}px;\" "
-		    ."alt=\"$opts->{prev_slide_link_text}\" />" ;
-	    } elsif ($opts->{prev_slide_link_image}) {
-		if ($opts->{prev_slide_link_image_location}) {
-		    $prev_slide_link = "<img src=\"$opts->{prev_slide_link_image_location}\" "
-			."alt=\"$opts->{prev_slide_link_text}\" class=\"image-link\" />" ;
-		} else {
-		    $prev_slide_link = "<img src=\"$self->{local_llgal_dir}/". (make_safe_url $opts->{prev_slide_link_image_filename}) ."\" "
-			."alt=\"$opts->{prev_slide_link_text}\" class=\"image-link\" />" ;
-		}
-	    } else {
-		$prev_slide_link = $opts->{prev_slide_link_text} ;
-	    }
-	    $line =~ s/<!--PREV-SLIDE-LINK-TEXT-->/$prev_slide_link/g ;
-	    $line =~ s/<!--PREV-SLIDE-->/$prev->{slide_url}\" title=\"$opts->{over_prev_slide_link_text}$prev->{title}/g ;
-
-	    # process NEXT-SLIDE
-	    my $next = $entries[$entry->{next}] ;
-
-	    my $next_slide_link ;
-	    if ($opts->{next_slide_link_preview} and $next->{thumb_url}) {
-		$next_slide_link = "<img src=\"$next->{thumb_url}\" "
-		    ."style=\"width: $next->{thumb_xdim}px; height: $next->{thumb_ydim}px;\" "
-		    ."alt=\"$opts->{next_slide_link_text}\" />" ;
-	    } elsif ($opts->{next_slide_link_image}) {
-		if ($opts->{next_slide_link_image_location}) {
-		    $next_slide_link = "<img src=\"". $opts->{next_slide_link_image_location} ."\" "
-			."alt=\"$opts->{next_slide_link_text}\" class=\"image-link\" />" ;
-		} else {
-		    $next_slide_link = "<img src=\"$self->{local_llgal_dir}/". (make_safe_url $opts->{next_slide_link_image_filename}) ."\" "
-			."alt=\"$opts->{next_slide_link_text}\" class=\"image-link\" />" ;
-		}
-	    } else {
-		$next_slide_link = $opts->{next_slide_link_text} ;
-	    }
-	    $line =~ s/<!--NEXT-SLIDE-LINK-TEXT-->/$next_slide_link/g ;
-	    $line =~ s/<!--NEXT-SLIDE-->/$next->{slide_url}\" title=\"$opts->{over_next_slide_link_text}$next->{title}/g ;
-
-	    # exif information
-	    my $exif_table = "" ;
-	    if ($type == $TYPE_IMG and @{$opts->{show_exif_tags}}) {
-		my $exif_infos = $entry->{exif_infos} ;
-		foreach my $tag (@{$opts->{show_exif_tags}}) {
-		    my $value = $exif_infos->{$tag} ;
-		    my $description = $opts->{exiftool}->GetDescription ($tag) ;
-		    $exif_table .= "<tr><td class=\"exif-name\">$description</td>"
-			."<td class=\"exif-value\">$value</td></tr>\n"
-			if defined $value ;
-		}
-		$exif_table = "<table class=\"exif\">\n". $exif_table ."</table>" ;
-	    }
-	    $line =~ s/<!--EXIF-TABLE-->/$exif_table/ ;
-
-	    $line =~ s/<!--CREDITS-->/$opts->{credits_text}/g ;
-
+	    $line =~ s/LLGAL-CODESET/$LLGAL_CODESET/g ;
+	    $line =~ s/<!--SLIDE-TITLE-->/$SLIDE_TITLE/g ;
+	    $line =~ s/<!--TITLE-->/$TITLE/g ;
+	    $line =~ s/<!--CSS-->/$CSS/g ;
+	    $line =~ s/<!--THIS-SLIDE-STYLE-->/$THIS_SLIDE_STYLE/g ;
+	    $line =~ s/<!--THIS-SLIDE-->/$THIS_SLIDE/ ;
+	    $line =~ s/<!--IMAGE-CAPTION-->/$IMAGE_CAPTION/g ;
+	    $line =~ s/<!--INDEX-LINK-TEXT-->/$INDEX_LINK_TEXT/g ;
+	    $line =~ s/<!--INDEX-FILE-->/$INDEX_FILE/g ;
+	    $line =~ s/<!--PREV-SLIDE-LINK-TEXT-->/$PREV_SLIDE_LINK_TEXT/g ;
+	    $line =~ s/<!--PREV-SLIDE-->/$PREV_SLIDE/g ;
+	    $line =~ s/<!--NEXT-SLIDE-LINK-TEXT-->/$NEXT_SLIDE_LINK_TEXT/g ;
+	    $line =~ s/<!--NEXT-SLIDE-->/$NEXT_SLIDE/g ;
+	    $line =~ s/<!--EXIF-TABLE-->/$EXIF_TABLE/ ;
+	    $line =~ s/<!--CREDITS-->/$CREDITS/g ;
 	    # output the line
 	    print SW "$line" ;
 	}
 	close SW ;
-	print_percentage ($i+1, scalar @entries) ;
+	$messages->update_percentage ($i+1) ;
     }
-    end_percentage () ;
+    $messages->end_percentage () ;
 }
-show_warnings ;
+
 
 #######################################################################
 # Creating the index file
@@ -1480,10 +1561,10 @@ sub generate_index {
     # find the indextemplate
     my $indextemplate = (Llgal::Templates::find_template_file ($self, $opts, $opts->{indextemplate_filename}, 1))
 	. "/$opts->{indextemplate_filename}" ;
-    indented_print "Using '$indextemplate' as HTML index template.\n" ;
+    $messages->print ("Using '$indextemplate' as HTML index template.\n") ;
 
     # open the template and the destination
-    indented_print "Creating the $opts->{index_filename}.$opts->{www_extension} file: " ;
+    $messages->print ("Creating the $opts->{index_filename}.$opts->{www_extension} file: ") ;
     open(IXR, "$indextemplate")
 	or die "Can't open the index template file '$indextemplate'\n" ;
     open(IXW, ">$self->{destination_dir}$opts->{index_filename}.$opts->{www_extension}")
@@ -1517,7 +1598,8 @@ sub generate_index {
     # output thumbnails
     my $forced_width_warning = 0 ;
     my $i = 0 ;
-    init_percentage () ;
+    $messages->init_percentage (scalar @entries) ;
+
     while ($i < scalar @entries) {
 	my $entry = $entries[$i] ;
 	my $type = $entry->{type} ;
@@ -1528,12 +1610,12 @@ sub generate_index {
 		print IXW "<hr class=\"index\">" ;
 	    }
 	    # next line, next entry
-	    print_percentage ($i+1, scalar @entries) ;
+	    $messages->update_percentage ($i+1) ;
 	    $i++ ;
 	    next ;
 	}
 
-	if ($entry->{no_slide}) {
+	if ($entry->{no_thumb}) {
 	    # output a line with this text
 	    print IXW "<div class=\"header\">" ;
 	    if ($type == $TYPE_TXT) {
@@ -1543,7 +1625,7 @@ sub generate_index {
 	    }
 	    print IXW "</div>\n" ;
 	    # next line, next entry
-	    print_percentage ($i+1, scalar @entries) ;
+	    $messages->update_percentage ($i+1) ;
 	    $i++ ;
 	    next ;
 	}
@@ -1554,7 +1636,7 @@ sub generate_index {
 	# figure out how many entries to put on this row
 	while ($i + $num < @entries) {
 	    # stop if this is listed instead of having a slide
-	    last if defined $entries[$i+$num]->{no_slide} ;
+	    last if defined $entries[$i+$num]->{no_thumb} ;
 	    # stop if there's too much thumbnail on this row
 	    last if $opts->{thumbnails_per_row}
 	    and $num + 1 > $opts->{thumbnails_per_row} ;
@@ -1659,7 +1741,7 @@ sub generate_index {
 		print IXW "    </td>\n" ;
 	    }
 
-	    print_percentage ($i+$j+1, scalar @entries) ;
+	    $messages->update_percentage ($i+$j+1) ;
 	}
 
 	# Row footer
@@ -1722,22 +1804,38 @@ sub generate_index {
     close IXW ;
     close IXR ;
 
-    end_percentage () ;
-    show_warnings ;
+    $messages->end_percentage () ;
 
-    immediate_warning "Row width max ($opts->{pixels_per_row}) too low for one single thumbnail. "
-	. "Forced $forced_width_warning time". ($forced_width_warning>1?"s":"") ."."
+    $messages->warning ("Row width max ($opts->{pixels_per_row}) too low for one single thumbnail. "
+	. "Forced $forced_width_warning time". ($forced_width_warning>1?"s":"") .".")
 	if $forced_width_warning ;
 }
 
 #######################################################################
 # If --www was invoked make all files world-readable at the END
+
+sub make_readable {
+    my $file = shift ;
+    my ($status, @output) = Llgal::Utils::system_with_output
+	("make world readable", "chmod", "a+r", $file) ;
+    $messages->warning (@output)
+	if $status ;
+}
+
+sub make_readable_and_traversable {
+    my $file = shift ;
+    my ($status, @output) = Llgal::Utils::system_with_output
+	("make world readable and traversable", "chmod", "a+rx", $file) ;
+    $messages->warning (@output)
+	if $status ;
+}
+
 sub make_www_rights {
     my $gallery = shift ;
     my $opts = shift ;
     my @entries = @{$gallery->{entries}} ;
 
-    indented_print "Making all llgal files world-readable for WWW publishing.\n" ;
+    $messages->print ("Making all llgal files world-readable for WWW publishing.\n") ;
 
     # index
     make_readable "$self->{destination_dir}$opts->{index_filename}.$opts->{www_extension}" ;
@@ -1775,15 +1873,13 @@ sub make_www_rights {
 
 	# thumbnail
 	make_readable "$self->{destination_dir}$entry->{thumb_filename}"
-	    if ($type == $TYPE_IMG or $entry->{thumb_url}) and !defined $entry->{no_slide} ;
+	    if ($type == $TYPE_IMG or $entry->{thumb_url}) and !defined $entry->{no_thumb} ;
 
 	# scaled image
 	make_readable "$self->{destination_dir}$entry->{scaled_filename}"
 	    if ($type == $TYPE_IMG or $entry->{scaled_url})
 	    and ($opts->{slide_width_max} > 0 or $opts->{slide_height_max} > 0) and !$opts->{make_no_slides} ;
     }
-
-    show_warnings ;
 }
 
 #######################################################################
@@ -1814,6 +1910,13 @@ die "This is llgal version $self->{version}.\n"
 # we may check the destination directory
 check_destination ;
 
+# revert a path into ..
+sub back_path {
+    my $dir = shift ;
+    $dir =~ s/([^\/]+)/../g ;
+    return $dir ;
+}
+
 # forward declaration
 sub main_process ;
 
@@ -1821,13 +1924,14 @@ sub main_process ;
 sub subdir_process {
     my $dir = shift ;
     my $subdir_opts = shift ;
-    indented_print "Entering subdirectory '$dir'...\n" ;
+    $messages->print ("Entering subdirectory '$dir'...\n") ;
     # save context
     my $saved_destination_dir = $self->{destination_dir};
     my $saved_destination_string = $destination_string;
     my $saved_opts = $opts ;
     my $saved_opts_without_defaults = $opts_without_defaults ;
-    my $saved_indent = save_and_indent ;
+    my $saved_messages = $messages->copy () ;
+    $messages->indent () ;
     # setup new gallery context
     $self->{destination_dir} .= $dir."/" ;
     @ARGV = @llgal_options ;
@@ -1838,8 +1942,9 @@ sub subdir_process {
     $destination_string = $saved_destination_string;
     $opts = $saved_opts ;
     $opts_without_defaults = $saved_opts_without_defaults ;
-    restore_indent $saved_indent ;
-    indented_print "Leaving subdirectory '$dir'.\n" ;
+    $messages = $saved_messages ;
+    $self->{messages} = $messages ;
+    $messages->print ("Leaving subdirectory '$dir'.\n") ;
     print "\n" ;
     return $subgallery ;
 }
@@ -1877,8 +1982,9 @@ sub main_process {
 	if ($self->{clean_asked} or $self->{cleanall_asked}) {
 	    # clean
 	    my $cleanall = shift ;
+	    $messages->delay_warnings () ;
 	    clean_files $self->{cleanall_asked} ;
-	    show_warnings ;
+	    $messages->show_delayed_warnings () ;
 
 	} elsif ($self->{give_templates}) {
 	    # give templates
@@ -1888,8 +1994,8 @@ sub main_process {
 	    $destdir = $self->{user_share_dir}
 		if $destdir eq "user" ;
 	    Llgal::Templates::give_templates ($self, $opts, $destdir) ;
-	    indented_print "You may now edit templates in $destdir and generate new galleries.\n" ;
-	    indented_print "You may also remove any template that you do not want to modify.\n" ;
+	    $messages->print ("You may now edit templates in $destdir and generate new galleries.\n") ;
+	    $messages->print ("You may also remove any template that you do not want to modify.\n") ;
 	}
 
 	# recursive in ALL subdirectories
@@ -1913,7 +2019,7 @@ sub main_process {
 	Llgal::Config::prepare_captions_variables ($self, $opts) ;
 
 	my @entries = generate_captions_entries $opts ;
-	indented_print "Now edit the $self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename} file to your liking and run llgal\n" ;
+	$messages->print ("Now edit the $self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename} file to your liking and run llgal\n") ;
 
 	if ($opts->{recursive}) {
 	    # list subdir entries
@@ -1934,12 +2040,12 @@ sub main_process {
 	    # generate the gallery using the caption file
 	    read_captions_file $gallery ;
 	    fill_entries $gallery ;
-	    indented_print "Found ". (scalar @{$gallery->{entries}}) ." files in the captions file.\n" ;
+	    $messages->print ("Found ". (scalar @{$gallery->{entries}}) ." entries in the captions file.\n") ;
 	} else {
 	    # generate the gallery from scratch
 	    @{$gallery->{entries}} = get_entries $opts ;
 	    fill_entries $gallery ;
-	    indented_print "Found ". (scalar @{$gallery->{entries}}) ." files in $destination_string\n" ;
+	    $messages->print ("Found ". (scalar @{$gallery->{entries}}) ." entries in $destination_string\n") ;
 	}
 
 	finalize_entries $gallery, $opts ;
@@ -1947,7 +2053,7 @@ sub main_process {
 	add_headers_footers $gallery ;
 
 	if ($opts->{make_no_slides}) {
-	    indented_print "Linking thumbnails directly to image files...  Making no html slides.\n" ;
+	    $messages->print ("Linking thumbnails directly to image files...  Making no html slides.\n") ;
 	} else {
 	    generate_slides $gallery ;
 	}
@@ -1956,8 +2062,10 @@ sub main_process {
 
 	Llgal::Templates::get_llgal_files ($self, $opts) ;
 
+	$messages->delay_warnings () ;
 	make_www_rights $gallery, $opts
 	    if $opts->{www_access_rights} ;
+	$messages->show_delayed_warnings () ;
 
 	# generate a local config for this gallery
 	if (defined $self->{generate_config} and $self->{generate_config} eq "local") {

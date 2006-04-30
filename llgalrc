@@ -68,6 +68,9 @@
 # index_filename = "index"
 
 # Prefix of generated HTML slide filenames
+# Note that this prefix is used to decide what HTML to delete when --clean
+# is passed. Setting this option to an empty string will make llgal remove
+# all HTML files.
 # slide_filenameprefix = "slide_"
 
 # Prefix used to determine the filenames of scaled image that are
@@ -292,6 +295,14 @@
 
 # Sort criteria when scanning files in the working directory [--sort]
 # sort_criteria = "name"
+
+##### Sections #####
+
+# Add a new subdirectory to the list of sections [-P]
+# section_dir = "subdir"
+
+# Add a separation line and the subdirectory name at the begining of each section [--Ps]
+# separate_sections = 0
 
 ##### Recursion #####
 
