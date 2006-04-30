@@ -967,14 +967,17 @@ sub get_entries {
     my $opts = shift ;
     my @entries ;
     my $dir = $self->{destination_dir} ? $self->{destination_dir} : "./" ; # destination is empty for './'
-    if (defined $self->{subsection_dirs}) {
-	@entries = map { get_entries_from_directory
+    if (defined $opts->{subsection_dirs}) {
+	@entries = map {
+	    my $subdir = $_ ;
+	    $subdir .= "/" unless $subdir =~ m@/$@ ;
+	    get_entries_from_directory
 			     $dir,
 			     $destination_string,
-			     $_,
+			     $subdir,
 			     ($opts->{add_subdirs} or $opts->{recursive}),
 			     $opts->{add_all_files}
-		     } @{$self->{subsection_dirs}} ;
+	} @{$opts->{subsection_dirs}} ;
     } else {
 	@entries = get_entries_from_directory
 	    $dir,

@@ -296,6 +296,9 @@
 # Sort criteria when scanning files in the working directory [--sort]
 # sort_criteria = "name"
 
+# What subdirectories to use for subsections [-P]
+# subsection_dir = "subdir"
+
 ##### Recursion #####
 
 # Run recursively in subdirectories [-R]

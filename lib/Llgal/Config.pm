@@ -205,6 +205,7 @@ my $special_opts_with_input = {
     scaled_convert_options => 1,
     thumbnail_convert_options => 1,
     show_exif_tags => 1,
+    subsection_dir => 1,
 } ;
 
 # internal options that have a special outputting routine
@@ -215,6 +216,7 @@ my $special_opts_with_output = {
     scaled_convert_options => 1,
     thumbnail_convert_options => 1,
     show_exif_tags => 1,
+    subsection_dirs => 1,
 } ;
 
 # stuff that is not stored in the option hash but need be outputted
@@ -434,6 +436,8 @@ sub add_defaults {
 	excludes => [],
 # sort criteria
 	sort_criteria => "name",
+# subsection directories
+	subsection_dirs => [],
 
 # Various
 # codeset to be set in HTML headers (--codeset)
@@ -656,6 +660,9 @@ sub process_option {
 	    } elsif ($line =~ /^show_exif_tags\s*=\s*"(.*)"$/) {
 		push (@{$opts->{show_exif_tags}}, split (/,/, $1));
 
+	    } elsif ($line =~ /^subsection_dir\s*=\s*"(.+)"$/) {
+		push (@{$opts->{subsection_dirs}}, $1) ;
+
 	    } else {
 		die "Unknown special inconfig option $optname.\n" ;
 	    }
@@ -770,10 +777,7 @@ sub parse_cmdline_options {
 	'nc'		=> sub { $opts->{slide_counter_format} = "" ; },
 	'nf'		=> \$opts->{show_no_film_effect},
 	'option=s'	=> sub { shift ; process_option $self, $opts, shift ; },
-	'P=s'		=> sub { shift ; my $dir = shift ;
-				 $dir .= "/" unless $dir =~ m@/$@ ;
-				 push @{$self->{subsection_dirs}}, $dir ;
-				 },
+	'P=s'		=> \@{$opts->{subsection_dirs}},
 	'p=i'		=> \$opts->{index_cellpadding},
 	'php'		=> sub { $opts->{www_extension} = "php" ; },
 	'Rl'		=> \$opts->{link_subgalleries},
@@ -1125,6 +1129,13 @@ sub generate_config {
 		    map {
 			print NEWCFG ($_->{excluded} ? "exclude" : "include"). " = \"". $_->{filter} ."\"\n" ;
 		    } @{$opts->{excludes}} ;
+		}
+
+	    } elsif ($optname eq "subsection_dirs") {
+		if (@{$opts->{subsection_dirs}}) {
+		    map {
+			print NEWCFG "subsection_dir = \"$_\"\n" ;
+		    } @{$opts->{subsection_dirs}} ;
 		}
 
 	    } else {
