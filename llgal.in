@@ -1059,7 +1059,7 @@ sub generate_captions_entries {
 
     my @entries = get_entries $opts ;
 
-    $messages->print ("Found ". (scalar @entries) ." files in $destination_string\n") ;
+    $messages->print ("Found ". (scalar @entries) ." entries in $destination_string\n") ;
 
     my @captions = () ;
 
