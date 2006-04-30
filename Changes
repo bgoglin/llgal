@@ -8,6 +8,7 @@
   * Fix several operations on thumbnails and scaled images when -d is passed.
   * Do not waste time in ExifTool when there's nothing to do (do not read tags
     when none is required, and initialize on demand).
+  * Improve percentage printing for progression.
 
 
 llgal (0.13.2)

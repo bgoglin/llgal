@@ -80,26 +80,19 @@ sub init_percentage {
     my $self = shift ;
     $self->{delayed_warning} = 1 ;
     $self->{percentage_total} = shift ;
-    print "  0%" ;
+    print "   0.00%" ;
 }
 
 sub update_percentage {
     my $self = shift ;
     my $i = shift ;
-    my $val = int($i*100/$self->{percentage_total}) ;
-    print "\b\b\b\b" ;
-    if ($val == 100) {
-	print "100%" ;
-    } elsif ($val >= 10) {
-	print " ".$val."%" ;
-    } else {
-	print "  ".$val."%" ;
-    }
+    my $val = $i*100/$self->{percentage_total} ;
+    printf "\b\b\b\b\b\b\b\b% 7.2f%%", $val ;
 }
 
 sub end_percentage {
     my $self = shift ;
-    print "\b\b\b\b100%\n" ;
+    print "\b\b\b\b\b\b\b\b 100.00%\n" ;
     $self->show_delayed_warnings () ;
 }
 
