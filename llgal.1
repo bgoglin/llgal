@@ -163,9 +163,9 @@ may be used several times on the same command line.
 
 .TP
 .BI -d " <dir>"
-Operate on image files in directory
-.IR <dir> ,
-which is also where the HTML and thumbnail files will be generated.
+Operate in directory
+.I <dir>
+when generating the HTML files, thumbnails and scaled images.
 The default is the current directory.
 
 .TP
@@ -260,6 +260,15 @@ Exclude files whose name matches
 Include files whose name matches
 .I <s>
 and where previously excluded.
+
+.TP
+.BI -P " <subdir>"
+Use photos in the subdirectory instead of the working directory.
+May be used multiple times to group multiple subdirectories in the
+same gallery.
+The path of the subdirectory must be given as a relative path
+(relative to
+.BR . " or to the path given to " -d ")."
 
 .TP
 .B -S

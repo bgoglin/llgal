@@ -1,4 +1,8 @@
 
+  * Add -P to use photos in a special subdirectory instead of the working
+    directory. May be used multiple times to create a unique gallery with
+    photos from several subdirectories (requested by Samuel Mimram and
+    Samuel Thibault).
   * When -n is passed, slide filename is generated from the image filename
     and the slide filename prefix (it helps cleaning HTML files).
     + Add a note about slide_filenameprefix == "" which could lead to removal

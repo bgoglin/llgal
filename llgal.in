@@ -29,8 +29,10 @@ my $self = {
 
     # local llgal directory, may be modified during early configuration
     local_llgal_dir => ".llgal",
-    # look in current directory "."%
+    # look in current directory "."
     destination_dir => ".",
+    # no subsection by default
+    # subsection_dirs => (),
 
     # some variable may only be modified when by system
     # or user-wide configuration files only
@@ -873,14 +875,15 @@ sub finalize_entries {
 sub get_entries_from_directory {
     my $dir = shift ;
     my $dir_string = shift ;
+    my $subdir = shift ;
     my $add_subdirs = shift ;
     my $add_others = shift ;
     my @entries = () ;
 
-    opendir DIR, $dir
-	or die "Can't open $dir_string ($!)\n" ;
+    opendir DIR, "$dir$subdir"
+	or die "Can't open $dir_string$subdir ($!)\n" ;
     # get all files, except dot-starting ones and webpages
-    my @filenames = grep ((!/\.$opts->{www_extension}$/i and !/^\./), readdir DIR) ;
+    my @filenames = map { "$subdir$_" } (grep ((!/\.$opts->{www_extension}$/i and !/^\./), readdir DIR)) ;
     closedir DIR ;
 
     # sort now so that slide numbering doesn't become wrong later
@@ -910,7 +913,7 @@ sub get_entries_from_directory {
 	die "Unknown sort criteria '$opts->{sort_criteria}'.\n" ;
     }
 
-    $messages->print ("Listing entries: ") ;
+    $messages->print ("Listing entries".($subdir ? " in $subdir " : "").": ") ;
     $messages->init_percentage (scalar @filenames) ;
 
     for(my $i = 0; $i < @filenames; $i++) {
@@ -962,12 +965,24 @@ sub get_entries_from_directory {
 
 sub get_entries {
     my $opts = shift ;
+    my @entries ;
     my $dir = $self->{destination_dir} ? $self->{destination_dir} : "./" ; # destination is empty for './'
-    my @entries = get_entries_from_directory
-	$dir,
-	$destination_string,
-	($opts->{add_subdirs} or $opts->{recursive}),
-	$opts->{add_all_files} ;
+    if (defined $self->{subsection_dirs}) {
+	@entries = map { get_entries_from_directory
+			     $dir,
+			     $destination_string,
+			     $_,
+			     ($opts->{add_subdirs} or $opts->{recursive}),
+			     $opts->{add_all_files}
+		     } @{$self->{subsection_dirs}} ;
+    } else {
+	@entries = get_entries_from_directory
+	    $dir,
+	    $destination_string,
+	    "",
+	    ($opts->{add_subdirs} or $opts->{recursive}),
+	    $opts->{add_all_files} ;
+    }
     return @entries ;
 }
 

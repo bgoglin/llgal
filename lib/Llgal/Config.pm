@@ -480,7 +480,7 @@ Additional Behavior Options:
   The behavior might also be modified with the following options,
   either when generating a gallery or not:
     --config <s>       pass an additional configuration files
-    -d <dir>           operate on files in directory <dir> (current directory)
+    -d <dir>           operate in directory <dir> (current directory)
     -f                 force thumbnail and scaled slide regeneration
     --gencfg <file>    generate the configuration file <file>
     --option <s>       pass an additional option as in configuration files
@@ -511,6 +511,7 @@ Layout Options:
     -n                 use image file names for the HTML slide files
     --nc               omit the image count from the captions
     --nf               omit the film effect altogether
+    -P <dir>           use images in <dir> subdirectory of the working directory
     -p <n>             cellpadding value of thumbnail index tables (3)
     --php              use php extension for generated webpages
     --Rl               add links between subgalleries
@@ -769,6 +770,10 @@ sub parse_cmdline_options {
 	'nc'		=> sub { $opts->{slide_counter_format} = "" ; },
 	'nf'		=> \$opts->{show_no_film_effect},
 	'option=s'	=> sub { shift ; process_option $self, $opts, shift ; },
+	'P=s'		=> sub { shift ; my $dir = shift ;
+				 $dir .= "/" unless $dir =~ m@/$@ ;
+				 push @{$self->{subsection_dirs}}, $dir ;
+				 },
 	'p=i'		=> \$opts->{index_cellpadding},
 	'php'		=> sub { $opts->{www_extension} = "php" ; },
 	'Rl'		=> \$opts->{link_subgalleries},
