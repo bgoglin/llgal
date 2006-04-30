@@ -1375,168 +1375,170 @@ sub generate_slides {
 	open(SW, ">$self->{destination_dir}$entry->{slide_filename}")
 	    or die "Can't create slide file\n" ;
 	my $type = $entry->{type} ;
-	my $title = $entry->{title} ;
+
+	##############################
+	# Precompute all fields first
+
+	# titles
+	my $SLIDE_TITLE = $entry->{title} ;
+	my $TITLE = $opts->{index_title} ;
+
+	# css and codeset
+	my $CSS = "$self->{local_llgal_dir}/$opts->{css_filename}" ;
+	$CSS = $opts->{css_location} if $opts->{css_location} ;
+	my $LLGAL_CODESET = $opts->{codeset} ;
+
+	# this style contents and style
+	my $THIS_SLIDE_STYLE = "image-slide" ;
+	$THIS_SLIDE_STYLE = "text-slide\" style=\"width: $opts->{text_slide_width}px; height: $opts->{text_slide_height}px;"
+	    if !$entry->{scaled_url} ;
+	my $THIS_SLIDE ;
+	if ($type == $TYPE_IMG) {
+	    # image slide
+
+	    if (defined $entry->{scaled_filename}) {
+		# scaled image with link to the real image
+		$THIS_SLIDE = "<a href=\"$entry->{url}\" "
+		    ."title=\"$opts->{over_scaled_text}$TITLE $entry->{dimstring}\">" ;
+		$THIS_SLIDE .= "<img src=\"$entry->{scaled_url}\" "
+		    ."style=\"width: $entry->{scaled_xdim}px; height: $entry->{scaled_ydim}px;\" "
+		    ."alt=\"$opts->{alt_scaled_text}$TITLE $entry->{scaled_dimstring}\" />" ;
+		$THIS_SLIDE .= "</a>" ;
+
+	    } else {
+		# real image
+		$THIS_SLIDE = "<img src=\"$entry->{url}\" "
+		    ."style=\"width: $entry->{scaled_xdim}px; height: $entry->{scaled_ydim}px;\" "
+		    ."alt=\"$opts->{alt_full_text}$TITLE $entry->{dimstring}\" "
+		    ."title=\"$TITLE $entry->{dimstring}\" />" ;
+
+	    }
+	} elsif ($entry->{scaled_url}) {
+	    # another type, with a user-given scaled image
+	    if ($type == $TYPE_TXT) {
+		# text with scaled image ? ok...
+		$THIS_SLIDE = "<img src=\"$entry->{scaled_url}\" "
+		    ."style=\"width: $entry->{scaled_xdim}px; height: $entry->{scaled_ydim}px;\" "
+		    ."title=\"$TITLE $entry->{dimstring}\" "
+		    ."alt=\"$entry->{linktext} $entry->{scaled_dimstring}\" />" ;
+
+	    } else {
+		# another type with scaled image linking to the target
+		$THIS_SLIDE = "<a href=\"$entry->{url}\" "
+		    ."title=\"$TITLE $entry->{dimstring}\">" ;
+		$THIS_SLIDE .= "<img src=\"$entry->{scaled_url}\" "
+		    ."style=\"width: $entry->{scaled_xdim}px; height: $entry->{scaled_ydim}px;\" "
+		    ."alt=\"$entry->{linktext} $entry->{scaled_dimstring}\" />" ;
+		$THIS_SLIDE .= "</a>" ;
+	    }
+
+	} elsif ($type == $TYPE_TXT) {
+	    # text slide
+	    $THIS_SLIDE = $entry->{linktext} ;
+	} else {
+	    # link-style slide
+	    $THIS_SLIDE = "<a href=\"$entry->{url}\" title=\"$TITLE $entry->{dimstring}\">$entry->{linktext}</a>" ;
+	}
+
+	# slide counter
+	my $slide_counter = $opts->{slide_counter_format} ;
+	$slide_counter =~ s/%n/$entry->{counter}/ ;
+	$slide_counter =~ s/%0n/$entry->{counter_with_zeros}/ ;
+	$slide_counter =~ s/%t/$gallery->{nslides}/ ;
+	# caption
+	my $IMAGE_CAPTION = $entry->{caption} . $slide_counter . "&nbsp;&nbsp;&nbsp;$entry->{dimstring}" ;
+
+	# index
+	my $INDEX_LINK_TEXT = $opts->{index_link_text} ;
+	if ($opts->{index_link_image}) {
+	    if ($opts->{index_link_image_location}) {
+		$INDEX_LINK_TEXT = "<img src=\"$opts->{index_link_image_location}\" "
+		    ."alt=\"$opts->{index_link_text}\" "
+		    ."class=\"image-link\" />" ;
+	    } else {
+		$INDEX_LINK_TEXT = "<img src=\"$self->{local_llgal_dir}/". (make_safe_url $opts->{index_link_image_filename}) ."\" "
+		    ."alt=\"$opts->{index_link_text}\" class=\"image-link\" />" ;
+	    }
+	}
+	my $INDEX_FILE = "$opts->{index_filename}.$opts->{www_extension}\" title=\"$opts->{over_index_link_text}" ;
+
+	# previous slide
+	my $prev = $entries[$entry->{prev}] ;
+	my $PREV_SLIDE_LINK_TEXT ;
+	if ($opts->{prev_slide_link_preview} and $prev->{thumb_url}) {
+	    $PREV_SLIDE_LINK_TEXT = "<img src=\"$prev->{thumb_url}\" "
+		."style=\"width: $prev->{thumb_xdim}px; height: $prev->{thumb_ydim}px;\" "
+		."alt=\"$opts->{prev_slide_link_text}\" />" ;
+	} elsif ($opts->{prev_slide_link_image}) {
+	    if ($opts->{prev_slide_link_image_location}) {
+		$PREV_SLIDE_LINK_TEXT = "<img src=\"$opts->{prev_slide_link_image_location}\" "
+		    ."alt=\"$opts->{prev_slide_link_text}\" class=\"image-link\" />" ;
+	    } else {
+		$PREV_SLIDE_LINK_TEXT = "<img src=\"$self->{local_llgal_dir}/". (make_safe_url $opts->{prev_slide_link_image_filename}) ."\" "
+		    ."alt=\"$opts->{prev_slide_link_text}\" class=\"image-link\" />" ;
+	    }
+	} else {
+	    $PREV_SLIDE_LINK_TEXT = $opts->{prev_slide_link_text} ;
+	}
+	my $PREV_SLIDE = "$prev->{slide_url}\" title=\"$opts->{over_prev_slide_link_text}$prev->{title}" ;
+
+	# next slide
+	my $next = $entries[$entry->{next}] ;
+	my $NEXT_SLIDE_LINK_TEXT ;
+	if ($opts->{next_slide_link_preview} and $next->{thumb_url}) {
+	    $NEXT_SLIDE_LINK_TEXT = "<img src=\"$next->{thumb_url}\" "
+		."style=\"width: $next->{thumb_xdim}px; height: $next->{thumb_ydim}px;\" "
+		."alt=\"$opts->{next_slide_link_text}\" />" ;
+	} elsif ($opts->{next_slide_link_image}) {
+	    if ($opts->{next_slide_link_image_location}) {
+		$NEXT_SLIDE_LINK_TEXT = "<img src=\"". $opts->{next_slide_link_image_location} ."\" "
+		    ."alt=\"$opts->{next_slide_link_text}\" class=\"image-link\" />" ;
+	    } else {
+		$NEXT_SLIDE_LINK_TEXT = "<img src=\"$self->{local_llgal_dir}/". (make_safe_url $opts->{next_slide_link_image_filename}) ."\" "
+		    ."alt=\"$opts->{next_slide_link_text}\" class=\"image-link\" />" ;
+	    }
+	} else {
+	    $NEXT_SLIDE_LINK_TEXT = $opts->{next_slide_link_text} ;
+	}
+	my $NEXT_SLIDE = "$next->{slide_url}\" title=\"$opts->{over_next_slide_link_text}$next->{title}" ;
+
+	# exif information
+	my $EXIF_TABLE = "" ;
+	if ($type == $TYPE_IMG and @{$opts->{show_exif_tags}}) {
+	    my $exif_infos = $entry->{exif_infos} ;
+	    foreach my $tag (@{$opts->{show_exif_tags}}) {
+		my $value = $exif_infos->{$tag} ;
+		my $description = $opts->{exiftool}->GetDescription ($tag) ;
+		$EXIF_TABLE .= "<tr><td class=\"exif-name\">$description</td>"
+		    ."<td class=\"exif-value\">$value</td></tr>\n"
+		    if defined $value ;
+	    }
+	    $EXIF_TABLE = "<table class=\"exif\">\n". $EXIF_TABLE ."</table>" ;
+	}
+
+	# credits text
+	my $CREDITS = $opts->{credits_text} ;
+
+	#################################
+	# Replace fields in the template
 
 	my @slidetemplate_text_copy = @slidetemplate_text ; # don't touch the original template
         for my $line (@slidetemplate_text_copy) {
-	    $line =~ s/LLGAL-CODESET/$opts->{codeset}/g ;
-	    $line =~ s/<!--SLIDE-TITLE-->/$title/g ;
-	    $line =~ s/<!--TITLE-->/$opts->{index_title}/g ;
-	    if ($opts->{css_location}) {
-		$line =~ s/<!--CSS-->/$opts->{css_location}/g ;
-	    } else {
-		$line =~ s/<!--CSS-->/$self->{local_llgal_dir}\/$opts->{css_filename}/g ;
-	    }
-
-	    # set the style
-	    if ($line =~ m/<!--THIS-SLIDE-STYLE-->/g) {
-		if ($entry->{scaled_url}) {
-		    $line =~ s/<!--THIS-SLIDE-STYLE-->/image-slide/ ;
-		} else {
-		    $line =~ s/<!--THIS-SLIDE-STYLE-->/text-slide" style="width: $opts->{text_slide_width}px; height: $opts->{text_slide_height}px;/ ;
-		}
-	    }
-
-	    # fill the main part
-	    if ($line =~ m/<!--THIS-SLIDE-->/g) {
-		my $content ;
-		if ($type == $TYPE_IMG) {
-		    # image slide
-
-		    if (defined $entry->{scaled_filename}) {
-			# scaled image with link to the real image
-			$content = "<a href=\"$entry->{url}\" "
-			    ."title=\"$opts->{over_scaled_text}$title $entry->{dimstring}\">" ;
-			$content .= "<img src=\"$entry->{scaled_url}\" "
-			    ."style=\"width: $entry->{scaled_xdim}px; height: $entry->{scaled_ydim}px;\" "
-			    ."alt=\"$opts->{alt_scaled_text}$title $entry->{scaled_dimstring}\" />" ;
-			$content .= "</a>" ;
-
-		    } else {
-			# real image
-			$content = "<img src=\"$entry->{url}\" "
-			    ."style=\"width: $entry->{scaled_xdim}px; height: $entry->{scaled_ydim}px;\" "
-			    ."alt=\"$opts->{alt_full_text}$title $entry->{dimstring}\" "
-			    ."title=\"$title $entry->{dimstring}\" />" ;
-
-		    }
-		} elsif ($entry->{scaled_url}) {
-		    # another type, with a user-given scaled image
-		    if ($type == $TYPE_TXT) {
-			# text with scaled image ? ok...
-			$content = "<img src=\"$entry->{scaled_url}\" "
-			    ."style=\"width: $entry->{scaled_xdim}px; height: $entry->{scaled_ydim}px;\" "
-			    ."title=\"$title $entry->{dimstring}\" "
-			    ."alt=\"$entry->{linktext} $entry->{scaled_dimstring}\" />" ;
-		    } else {
-			# another type with scaled image linking to the target
-			$content = "<a href=\"$entry->{url}\" "
-			    ."title=\"$title $entry->{dimstring}\">" ;
-			$content .= "<img src=\"$entry->{scaled_url}\" "
-			    ."style=\"width: $entry->{scaled_xdim}px; height: $entry->{scaled_ydim}px;\" "
-			    ."alt=\"$entry->{linktext} $entry->{scaled_dimstring}\" />" ;
-			$content .= "</a>" ;
-		    }
-		} elsif ($type == $TYPE_TXT) {
-		    # text slide
-		    $content = $entry->{linktext} ;
-		} else {
-		    # link-style slide
-		    $content = "<a href=\"$entry->{url}\" title=\"$title $entry->{dimstring}\">$entry->{linktext}</a>" ;
-		}
-
-		# finally replace <!--THIS-SLIDE-->
-		$line =~ s/<!--THIS-SLIDE-->/$content/ ;
-	    }
-
-	    # compute the slide counter
-	    my $slide_counter = $opts->{slide_counter_format} ;
-	    $slide_counter =~ s/%n/$entry->{counter}/ ;
-	    $slide_counter =~ s/%0n/$entry->{counter_with_zeros}/ ;
-	    $slide_counter =~ s/%t/$gallery->{nslides}/ ;
-
-	    # add the caption and dimensions
-	    my $imagecaption = $entry->{caption} . $slide_counter . "&nbsp;&nbsp;&nbsp;$entry->{dimstring}" ;
-
-	    $line =~ s/<!--IMAGE-CAPTION-->/$imagecaption/g ;
-	    $line =~ s/<!--THIS-SLIDE-->/$entry->{slide_url}/g ;
-
-	    # process INDEX-FILE
-	    my $index_link = $opts->{index_link_text} ;
-	    if ($opts->{index_link_image}) {
-		if ($opts->{index_link_image_location}) {
-		    $index_link = "<img src=\"$opts->{index_link_image_location}\" "
-			."alt=\"$opts->{index_link_text}\" "
-			."class=\"image-link\" />" ;
-		} else {
-		    $index_link = "<img src=\"$self->{local_llgal_dir}/". (make_safe_url $opts->{index_link_image_filename}) ."\" "
-			."alt=\"$opts->{index_link_text}\" class=\"image-link\" />" ;
-		}
-	    }
-	    $line =~ s/<!--INDEX-LINK-TEXT-->/$index_link/g ;
-	    $line =~ s/<!--INDEX-FILE-->/$opts->{index_filename}.$opts->{www_extension}\" title=\"$opts->{over_index_link_text}/g ;
-
-	    # process PREV-SLIDE
-	    my $prev = $entries[$entry->{prev}] ;
-
-	    my $prev_slide_link ;
-	    if ($opts->{prev_slide_link_preview} and $prev->{thumb_url}) {
-		$prev_slide_link = "<img src=\"$prev->{thumb_url}\" "
-		    ."style=\"width: $prev->{thumb_xdim}px; height: $prev->{thumb_ydim}px;\" "
-		    ."alt=\"$opts->{prev_slide_link_text}\" />" ;
-	    } elsif ($opts->{prev_slide_link_image}) {
-		if ($opts->{prev_slide_link_image_location}) {
-		    $prev_slide_link = "<img src=\"$opts->{prev_slide_link_image_location}\" "
-			."alt=\"$opts->{prev_slide_link_text}\" class=\"image-link\" />" ;
-		} else {
-		    $prev_slide_link = "<img src=\"$self->{local_llgal_dir}/". (make_safe_url $opts->{prev_slide_link_image_filename}) ."\" "
-			."alt=\"$opts->{prev_slide_link_text}\" class=\"image-link\" />" ;
-		}
-	    } else {
-		$prev_slide_link = $opts->{prev_slide_link_text} ;
-	    }
-	    $line =~ s/<!--PREV-SLIDE-LINK-TEXT-->/$prev_slide_link/g ;
-	    $line =~ s/<!--PREV-SLIDE-->/$prev->{slide_url}\" title=\"$opts->{over_prev_slide_link_text}$prev->{title}/g ;
-
-	    # process NEXT-SLIDE
-	    my $next = $entries[$entry->{next}] ;
-
-	    my $next_slide_link ;
-	    if ($opts->{next_slide_link_preview} and $next->{thumb_url}) {
-		$next_slide_link = "<img src=\"$next->{thumb_url}\" "
-		    ."style=\"width: $next->{thumb_xdim}px; height: $next->{thumb_ydim}px;\" "
-		    ."alt=\"$opts->{next_slide_link_text}\" />" ;
-	    } elsif ($opts->{next_slide_link_image}) {
-		if ($opts->{next_slide_link_image_location}) {
-		    $next_slide_link = "<img src=\"". $opts->{next_slide_link_image_location} ."\" "
-			."alt=\"$opts->{next_slide_link_text}\" class=\"image-link\" />" ;
-		} else {
-		    $next_slide_link = "<img src=\"$self->{local_llgal_dir}/". (make_safe_url $opts->{next_slide_link_image_filename}) ."\" "
-			."alt=\"$opts->{next_slide_link_text}\" class=\"image-link\" />" ;
-		}
-	    } else {
-		$next_slide_link = $opts->{next_slide_link_text} ;
-	    }
-	    $line =~ s/<!--NEXT-SLIDE-LINK-TEXT-->/$next_slide_link/g ;
-	    $line =~ s/<!--NEXT-SLIDE-->/$next->{slide_url}\" title=\"$opts->{over_next_slide_link_text}$next->{title}/g ;
-
-	    # exif information
-	    my $exif_table = "" ;
-	    if ($type == $TYPE_IMG and @{$opts->{show_exif_tags}}) {
-		my $exif_infos = $entry->{exif_infos} ;
-		foreach my $tag (@{$opts->{show_exif_tags}}) {
-		    my $value = $exif_infos->{$tag} ;
-		    my $description = $opts->{exiftool}->GetDescription ($tag) ;
-		    $exif_table .= "<tr><td class=\"exif-name\">$description</td>"
-			."<td class=\"exif-value\">$value</td></tr>\n"
-			if defined $value ;
-		}
-		$exif_table = "<table class=\"exif\">\n". $exif_table ."</table>" ;
-	    }
-	    $line =~ s/<!--EXIF-TABLE-->/$exif_table/ ;
-
-	    $line =~ s/<!--CREDITS-->/$opts->{credits_text}/g ;
-
+	    $line =~ s/LLGAL-CODESET/$LLGAL_CODESET/g ;
+	    $line =~ s/<!--SLIDE-TITLE-->/$SLIDE_TITLE/g ;
+	    $line =~ s/<!--TITLE-->/$TITLE/g ;
+	    $line =~ s/<!--CSS-->/$CSS/g ;
+	    $line =~ s/<!--THIS-SLIDE-STYLE-->/$THIS_SLIDE_STYLE/g ;
+	    $line =~ s/<!--THIS-SLIDE-->/$THIS_SLIDE/ ;
+	    $line =~ s/<!--IMAGE-CAPTION-->/$IMAGE_CAPTION/g ;
+	    $line =~ s/<!--INDEX-LINK-TEXT-->/$INDEX_LINK_TEXT/g ;
+	    $line =~ s/<!--INDEX-FILE-->/$INDEX_FILE/g ;
+	    $line =~ s/<!--PREV-SLIDE-LINK-TEXT-->/$PREV_SLIDE_LINK_TEXT/g ;
+	    $line =~ s/<!--PREV-SLIDE-->/$PREV_SLIDE/g ;
+	    $line =~ s/<!--NEXT-SLIDE-LINK-TEXT-->/$NEXT_SLIDE_LINK_TEXT/g ;
+	    $line =~ s/<!--NEXT-SLIDE-->/$NEXT_SLIDE/g ;
+	    $line =~ s/<!--EXIF-TABLE-->/$EXIF_TABLE/ ;
+	    $line =~ s/<!--CREDITS-->/$CREDITS/g ;
 	    # output the line
 	    print SW "$line" ;
 	}
