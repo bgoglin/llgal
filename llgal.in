@@ -1340,6 +1340,53 @@ sub add_headers_footers {
 }
 
 #######################################################################
+# Precompute common fields to be inserted in the HTML pages
+
+sub precompute_common_html_fields
+{
+    my $gallery = shift ;
+    my @entries = @{$gallery->{entries}} ;
+    my $common_fields = () ;
+
+    # index title
+    $common_fields->{"<!--TITLE-->"} = $opts->{index_title} ;
+
+    # index link text
+    $common_fields->{"<!--INDEX-LINK-TEXT-->"} = $opts->{index_link_text} ;
+    if ($opts->{index_link_image}) {
+	if ($opts->{index_link_image_location}) {
+	    $common_fields->{"<!--INDEX-LINK-TEXT-->"} = "<img src=\"$opts->{index_link_image_location}\" "
+		."alt=\"$opts->{index_link_text}\" "
+		."class=\"image-link\" />" ;
+	} else {
+	    $common_fields->{"<!--INDEX-LINK-TEXT-->"} = "<img src=\"$self->{local_llgal_dir}/"
+		. (make_safe_url $opts->{index_link_image_filename}) ."\" "
+		."alt=\"$opts->{index_link_text}\" class=\"image-link\" />" ;
+	}
+    }
+
+    # index file
+    $common_fields->{"<!--INDEX-FILE-->"} = "$opts->{index_filename}.$opts->{www_extension}\" title=\"$opts->{over_index_link_text}" ;
+
+    # css
+    $common_fields->{"<!--CSS-->"} = "$self->{local_llgal_dir}/$opts->{css_filename}" ;
+    if ($opts->{css_location}) {
+	$common_fields->{"<!-- CSS -->"} = $opts->{css_location} ;
+    }
+
+    # codeset
+    $common_fields->{"LLGAL-CODESET"} = $opts->{codeset} ;
+
+    # command line
+    $common_fields->{"LLGAL-OPTIONS"} = join " ", @llgal_options ;
+
+    # credits text
+    $common_fields->{"<!--CREDITS-->"} = $opts->{credits_text} ;
+
+    $gallery->{common_fields} = $common_fields ;
+}
+
+#######################################################################
 # Create the individual slide show files
 
 sub generate_slides {
@@ -1367,34 +1414,6 @@ sub generate_slides {
     $messages->print ("Creating individual slides: ") ;
     $messages->init_percentage (scalar @entries) ;
 
-    ##############################
-    # Precompute common fields
-
-    # index
-    my $TITLE = $opts->{index_title} ;
-    my $INDEX_LINK_TEXT = $opts->{index_link_text} ;
-    if ($opts->{index_link_image}) {
-	if ($opts->{index_link_image_location}) {
-	    $INDEX_LINK_TEXT = "<img src=\"$opts->{index_link_image_location}\" "
-		."alt=\"$opts->{index_link_text}\" "
-		."class=\"image-link\" />" ;
-	} else {
-	    $INDEX_LINK_TEXT = "<img src=\"$self->{local_llgal_dir}/". (make_safe_url $opts->{index_link_image_filename}) ."\" "
-		."alt=\"$opts->{index_link_text}\" class=\"image-link\" />" ;
-	}
-    }
-    my $INDEX_FILE = "$opts->{index_filename}.$opts->{www_extension}\" title=\"$opts->{over_index_link_text}" ;
-
-    # css
-    my $CSS = "$self->{local_llgal_dir}/$opts->{css_filename}" ;
-    $CSS = $opts->{css_location} if $opts->{css_location} ;
-
-    # codeset
-    my $LLGAL_CODESET = $opts->{codeset} ;
-
-    # credits text
-    my $CREDITS = $opts->{credits_text} ;
-
     for (my $i = 0; $i < @entries; $i++) {
 	my $entry = $entries[$i] ;
 
@@ -1421,18 +1440,18 @@ sub generate_slides {
 	    if (defined $entry->{scaled_filename}) {
 		# scaled image with link to the real image
 		$THIS_SLIDE = "<a href=\"$entry->{url}\" "
-		    ."title=\"$opts->{over_scaled_text}$TITLE $entry->{dimstring}\">" ;
+		    ."title=\"$opts->{over_scaled_text}$entry->{title} $entry->{dimstring}\">" ;
 		$THIS_SLIDE .= "<img src=\"$entry->{scaled_url}\" "
 		    ."style=\"width: $entry->{scaled_xdim}px; height: $entry->{scaled_ydim}px;\" "
-		    ."alt=\"$opts->{alt_scaled_text}$TITLE $entry->{scaled_dimstring}\" />" ;
+		    ."alt=\"$opts->{alt_scaled_text}$entry->{title} $entry->{scaled_dimstring}\" />" ;
 		$THIS_SLIDE .= "</a>" ;
 
 	    } else {
 		# real image
 		$THIS_SLIDE = "<img src=\"$entry->{url}\" "
 		    ."style=\"width: $entry->{scaled_xdim}px; height: $entry->{scaled_ydim}px;\" "
-		    ."alt=\"$opts->{alt_full_text}$TITLE $entry->{dimstring}\" "
-		    ."title=\"$TITLE $entry->{dimstring}\" />" ;
+		    ."alt=\"$opts->{alt_full_text}$entry->{title} $entry->{dimstring}\" "
+		    ."title=\"$entry->{title} $entry->{dimstring}\" />" ;
 
 	    }
 	} elsif ($entry->{scaled_url}) {
@@ -1441,13 +1460,13 @@ sub generate_slides {
 		# text with scaled image ? ok...
 		$THIS_SLIDE = "<img src=\"$entry->{scaled_url}\" "
 		    ."style=\"width: $entry->{scaled_xdim}px; height: $entry->{scaled_ydim}px;\" "
-		    ."title=\"$TITLE $entry->{dimstring}\" "
+		    ."title=\"$entry->{title} $entry->{dimstring}\" "
 		    ."alt=\"$entry->{linktext} $entry->{scaled_dimstring}\" />" ;
 
 	    } else {
 		# another type with scaled image linking to the target
 		$THIS_SLIDE = "<a href=\"$entry->{url}\" "
-		    ."title=\"$TITLE $entry->{dimstring}\">" ;
+		    ."title=\"$entry->{title} $entry->{dimstring}\">" ;
 		$THIS_SLIDE .= "<img src=\"$entry->{scaled_url}\" "
 		    ."style=\"width: $entry->{scaled_xdim}px; height: $entry->{scaled_ydim}px;\" "
 		    ."alt=\"$entry->{linktext} $entry->{scaled_dimstring}\" />" ;
@@ -1459,7 +1478,7 @@ sub generate_slides {
 	    $THIS_SLIDE = $entry->{linktext} ;
 	} else {
 	    # link-style slide
-	    $THIS_SLIDE = "<a href=\"$entry->{url}\" title=\"$TITLE $entry->{dimstring}\">$entry->{linktext}</a>" ;
+	    $THIS_SLIDE = "<a href=\"$entry->{url}\" title=\"$entry->{title} $entry->{dimstring}\">$entry->{linktext}</a>" ;
 	}
 
 	# slide counter
@@ -1529,21 +1548,24 @@ sub generate_slides {
 
 	my @slidetemplate_text_copy = @slidetemplate_text ; # don't touch the original template
         for my $line (@slidetemplate_text_copy) {
-	    $line =~ s/LLGAL-CODESET/$LLGAL_CODESET/g ;
+
+	    # common fields
+	    my $common_fields = $gallery->{common_fields} ;
+	    foreach my $field (keys %{$common_fields}) {
+		$line =~ s/$field/$common_fields->{$field}/g ;
+	    }
+
+	    # slide specific fields
 	    $line =~ s/<!--SLIDE-TITLE-->/$SLIDE_TITLE/g ;
-	    $line =~ s/<!--TITLE-->/$TITLE/g ;
-	    $line =~ s/<!--CSS-->/$CSS/g ;
 	    $line =~ s/<!--THIS-SLIDE-STYLE-->/$THIS_SLIDE_STYLE/g ;
 	    $line =~ s/<!--THIS-SLIDE-->/$THIS_SLIDE/ ;
 	    $line =~ s/<!--IMAGE-CAPTION-->/$IMAGE_CAPTION/g ;
-	    $line =~ s/<!--INDEX-LINK-TEXT-->/$INDEX_LINK_TEXT/g ;
-	    $line =~ s/<!--INDEX-FILE-->/$INDEX_FILE/g ;
 	    $line =~ s/<!--PREV-SLIDE-LINK-TEXT-->/$PREV_SLIDE_LINK_TEXT/g ;
 	    $line =~ s/<!--PREV-SLIDE-->/$PREV_SLIDE/g ;
 	    $line =~ s/<!--NEXT-SLIDE-LINK-TEXT-->/$NEXT_SLIDE_LINK_TEXT/g ;
 	    $line =~ s/<!--NEXT-SLIDE-->/$NEXT_SLIDE/g ;
 	    $line =~ s/<!--EXIF-TABLE-->/$EXIF_TABLE/ ;
-	    $line =~ s/<!--CREDITS-->/$CREDITS/g ;
+
 	    # output the line
 	    print SW "$line" ;
 	}
@@ -1587,13 +1609,9 @@ sub generate_index {
 		print IXW "    <div class=\"header\">" . $header . "</div>\n" ;
 	    }
 	} else {
-	    $line =~ s/LLGAL-CODESET/$opts->{codeset}/g ;
-	    $line =~ s/LLGAL-OPTIONS/@llgal_options/g ;
-	    $line =~ s/<!--TITLE-->/$opts->{index_title}/g ;
-	    if ($opts->{css_location}) {
-		$line =~ s/<!--CSS-->/$opts->{css_location}/g ;
-	    } else {
-		$line =~ s/<!--CSS-->/$self->{local_llgal_dir}\/$opts->{css_filename}/g ;
+	    my $common_fields = $gallery->{common_fields} ;
+	    foreach my $field (keys %{$common_fields}) {
+		$line =~ s/$field/$common_fields->{$field}/g ;
 	    }
 	    print IXW "$line" ;
 	}
@@ -1801,8 +1819,10 @@ sub generate_index {
 		print IXW "    <div class=\"footer\">" . $footer . "</div>\n" ;
 	    }
 	} else {
-	    $line =~ s/<!--TITLE-->/$opts->{index_title}/g ;
-	    $line =~ s/<!--CREDITS-->/$opts->{credits_text}/g ;
+	    my $common_fields = $gallery->{common_fields} ;
+	    foreach my $field (keys %{$common_fields}) {
+		$line =~ s/$field/$common_fields->{$field}/g ;
+	    }
 	    print IXW "$line" ;
 	}
     }
@@ -2056,6 +2076,8 @@ sub main_process {
 	finalize_entries $gallery, $opts ;
 
 	add_headers_footers $gallery ;
+
+	precompute_common_html_fields $gallery ;
 
 	if ($opts->{make_no_slides}) {
 	    $messages->print ("Linking thumbnails directly to image files...  Making no html slides.\n") ;

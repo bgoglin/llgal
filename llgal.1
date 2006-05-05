@@ -1471,6 +1471,10 @@ Default is \fB"html"\fR.
 When generation web pages, the following fields will be replaced
 from the templates by the associated value (computed by llgal).
 
+.B <!--TITLE-->
+.RS
+The title of the index.
+.RE
 .B <!--CSS-->
 .RS
 The CSS style-sheet.
@@ -1481,19 +1485,28 @@ The credits line given by
 .I credits_text
 configuration option.
 .RE
+.B <!--INDEX-FILE-->
+.RS
+The filename of the index.
+.RE
+.B <!--INDEX-LINK-TEXT-->
+.RS
+The label of the link to the index (might be an image).
+.RE
 .B LLGAL-CODESET
 .RS
 The character encoding, usually set to iso-8859-1 or utf-8.
+.RE
+.B LLGAL-OPTIONS
+.RS
+The options that were passed to llgal on the command line
+to generate the gallery.
 .RE
 
 When generating the index from template
 .IR indextemplate.html ,
 the following additional fields will also be replaced.
 
-.B <!--TITLE-->
-.RS
-The title of the index.
-.RE
 .B <!--HEADERS-->
 .RS
 The list of headers that are given in the captions file.
@@ -1501,10 +1514,6 @@ The list of headers that are given in the captions file.
 .B <!--FOOTERS-->
 .RS
 The list of footers that are given in the captions file.
-.RE
-.B LLGAL-OPTIONS
-.RS
-The command line that was used to generate the gallery.
 .RE
 
 When generating slides from template
@@ -1514,26 +1523,6 @@ the following additional fields will also be replaced.
 .B <!--SLIDE-TITLE-->
 .RS
 The title of the slide.
-.RE
-.B <!--INDEX-FILE-->
-.RS
-The filename of the index.
-.RE
-.B <!--INDEX-LINK-TEXT-->
-.RS
-The label of the link to the index (might be an image).
-.RE
-.BR <!--PREV-SLIDE--> and <!--NEXT-SLIDE-->
-.RS
-The filename of the previous and next slides.
-.RE
-.BR <!--NEXT-SLIDE-LINK-TEXT--> and <!--PREV-SLIDE-LINK-TEXT-->
-.RS
-The label of the link to previous and next slides (might be an image).
-.RE
-.B <!--THIS-SLIDE-->
-.RS
-The actual contents of the slide (might be an image).
 .RE
 .B <!--THIS-SLIDE-STYLE-->
 .RS
@@ -1546,6 +1535,18 @@ The caption of the slide.
 .B <!--EXIF-TABLE-->
 .RS
 The table of EXIF tags.
+.RE
+.B <!--THIS-SLIDE-->
+.RS
+The actual contents of the slide (might be an image).
+.RE
+.BR <!--PREV-SLIDE--> and <!--NEXT-SLIDE-->
+.RS
+The filename of the previous and next slides.
+.RE
+.BR <!--NEXT-SLIDE-LINK-TEXT--> and <!--PREV-SLIDE-LINK-TEXT-->
+.RS
+The label of the link to previous and next slides (might be an image).
 .RE
 
 

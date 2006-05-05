@@ -2,8 +2,12 @@
   * -v is now --verbose (and verbose configuration option has been added).
     + Add/convert some messages to be printing when --verbose is passed.
     + --version is -V.
-  * More tiny optimization of the slide generation by precomputing.
+  * Improve replacement of <!--FOO--> fields when generating the slides
+    and index HTML pages.
+    + More tiny optimizations of the HTML slide and index generation by
+      precomputing more fields.
   * Fix generation of configuration file when an old has to be renamed.
+  * Fix image title and alternative in HTML slides.
   * Some fixes in the manpage.
 
 
