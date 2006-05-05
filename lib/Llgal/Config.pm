@@ -8,6 +8,7 @@ require Llgal::Utils ;
 use Getopt::Long ;
 use I18N::Langinfo qw(langinfo CODESET) ;
 use Locale::gettext ;
+use POSIX qw(strftime) ;
 
 use vars qw(@EXPORT) ;
 
@@ -208,6 +209,7 @@ my $special_opts_with_input = {
     thumbnail_convert_options => 1,
     show_exif_tags => 1,
     section_dir => 1,
+    verbose => 1,
 } ;
 
 # internal options that have a special outputting routine
@@ -224,6 +226,7 @@ my $special_opts_with_output = {
 # stuff that is not stored in the option hash but need be outputted
 my $special_nonopts_with_output = {
     local_llgal_dir => 1,
+    verbose => 1,
 } ;
 
 # internal options that are never output
@@ -486,8 +489,9 @@ Behavior Options:
     --cleanall         remove all generated and user modified files
     --gc               generate or update the captions file
     --gt [<dir>]       give templates to the directory <dir>
-    -h, --help         displays this brief help
-    -v, --version      show version
+    -h, --help         display this brief help
+    -v, --verbose      display notice messages
+    -V, --version      show version
 Additional Behavior Options:
   The behavior might also be modified with the following options,
   either when generating a gallery or not:
@@ -672,6 +676,9 @@ sub process_option {
 	    } elsif ($line =~ /^section_dir\s*=\s*"(.+)"$/) {
 		push (@{$opts->{section_dirs}}, $1) ;
 
+	    } elsif ($line =~ /^verbose\s*=\s*(\d+)$/) {
+		$messages->{verbose} = $1 ;
+
 	    } else {
 		die "Unknown special inconfig option $optname.\n" ;
 	    }
@@ -717,9 +724,11 @@ sub parse_custom_config_file {
     my $self = shift ;
     my $opts = shift ;
     my $file = shift ;
+    my $messages = $self->{messages} ;
 
     # don't use a capitalized file handle since it would be shared across recursive calls
     if (open my $conf, $file) {
+	$messages->notice ("Reading additional configuration file '$file'...\n");
 	$current_configuration_file = $file ;
 	while (<$conf>) {
 	    process_option $self, $opts, $_
@@ -751,8 +760,9 @@ sub parse_cmdline_options {
 				$value = "local" if !$value ;
 				$self->{give_templates} = $value ;
 				},
+	'v|verbose'	=> \$self->{messages}->{verbose},
 	'h|help'	=> \$self->{help_asked},
-	'v|version'	=> \$self->{version_asked},
+	'V|version'	=> \$self->{version_asked},
 	'f'		=> \$opts->{force_image_regeneration},
 	'gencfg=s'	=> \$self->{generate_config},
 	'config=s'	=> sub { shift ; parse_custom_config_file $self, $opts, shift ; },
@@ -936,7 +946,7 @@ sub prepare_gallery_variables {
     die "Please give an integer value for thumbnail width max\n"
 	unless is_integer ($opts->{thumbnail_width_max}) ;
     if ($opts->{thumbnail_width_max} < 0) {
-	$messages->print ("Thumbnail width max value < 0, restoring to default (".
+	$messages->notice ("Thumbnail width max value < 0, restoring to default (".
 	    ($thumbnail_width_max_default?$thumbnail_width_max_default:"unlimited") .")\n") ;
 	$opts->{thumbnail_width_max} = $thumbnail_width_max_default ;
     }
@@ -947,7 +957,7 @@ sub prepare_gallery_variables {
     die "Please give an integer value for thumbnail height max\n"
 	unless is_integer ($opts->{thumbnail_height_max}) ;
     if ($opts->{thumbnail_height_max} < 0) {
-	$messages->print ("Thumbnail height max value < 0, restoring to default ($thumbnail_height_max_default)\n") ;
+	$messages->notice ("Thumbnail height max value < 0, restoring to default ($thumbnail_height_max_default)\n") ;
 	$opts->{thumbnail_height_max} = $thumbnail_height_max_default ;
     }
     die "Please give a positive thumbnail height max value\n"
@@ -957,7 +967,7 @@ sub prepare_gallery_variables {
     die "Please give an integer value for thumbnails per row\n"
 	unless is_integer ($opts->{thumbnails_per_row}) ;
     if ($opts->{thumbnails_per_row} < 0) {
-	$messages->print ("Thumbnails per row value < 0, restoring to default (".
+	$messages->notice ("Thumbnails per row value < 0, restoring to default (".
 	    ($thumbnails_per_row_default?$thumbnails_per_row_default:"unlimited") .")\n") ;
 	$opts->{thumbnails_per_row} = $thumbnails_per_row_default ;
     }
@@ -968,7 +978,7 @@ sub prepare_gallery_variables {
     die "Please give an integer value for pixels per row\n"
 	unless is_integer ($opts->{pixels_per_row}) ;
     if ($opts->{pixels_per_row} < 0) {
-	$messages->print ("Pixels per row value < 0, restoring to default (".
+	$messages->notice ("Pixels per row value < 0, restoring to default (".
 	    ($pixels_per_row_default?$pixels_per_row_default:"unlimited") .")\n") ;
 	$opts->{pixels_per_row} = $pixels_per_row_default ;
     }
@@ -979,7 +989,7 @@ sub prepare_gallery_variables {
     die "Please give an integer value for index cellpadding\n"
 	unless is_integer ($opts->{index_cellpadding}) ;
     if ($opts->{index_cellpadding} < 0) {
-	$messages->print ("Index cellpadding value < 0, restoring to default ($index_cellpadding_default)\n") ;
+	$messages->notice ("Index cellpadding value < 0, restoring to default ($index_cellpadding_default)\n") ;
 	$opts->{index_cellpadding} = $index_cellpadding_default ;
     }
     die "Please give a positive or null index cellpadding value\n"
@@ -989,7 +999,7 @@ sub prepare_gallery_variables {
     die "Please give an integer value for text slide width\n"
 	unless is_integer ($opts->{text_slide_width}) ;
     if ($opts->{text_slide_width} < 0) {
-	$messages->print ("Text slide width value < 0, restoring to default ($text_slide_width_default)\n") ;
+	$messages->notice ("Text slide width value < 0, restoring to default ($text_slide_width_default)\n") ;
 	$opts->{text_slide_width} = $text_slide_width_default ;
     }
     die "Please give a positive text slide width value\n"
@@ -999,7 +1009,7 @@ sub prepare_gallery_variables {
     die "Please give an integer value for text slide height\n"
 	unless is_integer ($opts->{text_slide_height}) ;
     if ($opts->{text_slide_height} < 0) {
-	$messages->print ("Text slide height value < 0, restoring to default ($text_slide_height_default)\n") ;
+	$messages->notice ("Text slide height value < 0, restoring to default ($text_slide_height_default)\n") ;
 	$opts->{text_slide_height} = $text_slide_height_default ;
     }
     die "Please give a positive text slide height value\n"
@@ -1009,7 +1019,7 @@ sub prepare_gallery_variables {
     die "Please give an integer value for slide width max\n"
 	unless is_integer ($opts->{slide_width_max}) ;
     if ($opts->{slide_width_max} < 0) {
-	$messages->print ("Slide width max value < 0, restoring to default (".
+	$messages->notice ("Slide width max value < 0, restoring to default (".
 	    ($slide_width_max_default?$slide_width_max_default:"unlimited") .")\n") ;
 	$opts->{slide_width_max} = $slide_width_max_default ;
     }
@@ -1020,7 +1030,7 @@ sub prepare_gallery_variables {
     die "Please give an integer value for slide height max\n"
 	unless is_integer ($opts->{slide_height_max}) ;
     if ($opts->{slide_height_max} < 0) {
-	$messages->print ("Slide height max value < 0, restoring to default (".
+	$messages->notice ("Slide height max value < 0, restoring to default (".
 	    ($slide_height_max_default?$slide_height_max_default:"unlimited") .")\n") ;
 	$opts->{slide_height_max} = $slide_height_max_default ;
     }
@@ -1106,6 +1116,9 @@ sub generate_config {
 
 	    if ($optname eq "local_llgal_dir") {
 		print NEWCFG "local_llgal_dir = \"$self->{local_llgal_dir}\"\n" ;
+
+	    } elsif ($optname eq "verbose") {
+		print NEWCFG "verbose = $messages->{verbose}\n" ;
 
 	    } else {
 		die "Unknown non-options $optname to output.\n" ;

@@ -1,3 +1,11 @@
+
+  * -v is now --verbose (and verbose configuration option has been added).
+    + Add/convert some messages to be printing when --verbose is passed.
+    + --version is -V.
+  * Fix generation of configuration file when an old has to be renamed.
+  * Some fixes in the manpage.
+
+
 llgal (0.13.3)
 
   * Add -P (and section_dir) to use photos in a special subdirectory

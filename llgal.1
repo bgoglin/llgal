@@ -140,7 +140,7 @@ for details about template files.
 Display brief help.
 
 .TP
-.B -v, --version
+.B -V, --version
 Display llgal version.
 
 
@@ -236,6 +236,10 @@ will
 .B not
 check whether a subdirectory is in the captions file.
 All not-dot-begining subdirectories will be cleaned.
+
+.TP
+.B -v, --verbose
+Display notice messages.
 
 
 .SH SELECTING FILES
@@ -1097,6 +1101,7 @@ Display a table of EXIF tags under each image slide
 The tags are given with their name in
 .B exiftool -list
 and separated with a comma.
+.RE
 
 .B Captions:
 
@@ -1437,7 +1442,14 @@ Default is \fB""\fR.
 Force regeneration of thumbnails and scaled images
 .RB [ -f ].
 Default is
-.BR 0 .
+.BR 0 " (" disabled ).
+.RE
+.I verbose = <0/1>
+.RS
+Print notice messages
+.RB [ -v ].
+Default is
+.BR 0 " (" disabled ).
 .RE
 .I www_access_rights = <0/1>
 .RS

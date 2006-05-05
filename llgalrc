@@ -352,6 +352,9 @@
 # Force regeneration of thumbnails and scaled images [-f].
 # force_image_regeneration = 0
 
+# Print notice messages [-v]
+# verbose = 0
+
 # Give access rights for www access [--www]
 # www_access_rights = 0
 
