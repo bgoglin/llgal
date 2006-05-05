@@ -1367,6 +1367,34 @@ sub generate_slides {
     $messages->print ("Creating individual slides: ") ;
     $messages->init_percentage (scalar @entries) ;
 
+    ##############################
+    # Precompute common fields
+
+    # index
+    my $TITLE = $opts->{index_title} ;
+    my $INDEX_LINK_TEXT = $opts->{index_link_text} ;
+    if ($opts->{index_link_image}) {
+	if ($opts->{index_link_image_location}) {
+	    $INDEX_LINK_TEXT = "<img src=\"$opts->{index_link_image_location}\" "
+		."alt=\"$opts->{index_link_text}\" "
+		."class=\"image-link\" />" ;
+	} else {
+	    $INDEX_LINK_TEXT = "<img src=\"$self->{local_llgal_dir}/". (make_safe_url $opts->{index_link_image_filename}) ."\" "
+		."alt=\"$opts->{index_link_text}\" class=\"image-link\" />" ;
+	}
+    }
+    my $INDEX_FILE = "$opts->{index_filename}.$opts->{www_extension}\" title=\"$opts->{over_index_link_text}" ;
+
+    # css
+    my $CSS = "$self->{local_llgal_dir}/$opts->{css_filename}" ;
+    $CSS = $opts->{css_location} if $opts->{css_location} ;
+
+    # codeset
+    my $LLGAL_CODESET = $opts->{codeset} ;
+
+    # credits text
+    my $CREDITS = $opts->{credits_text} ;
+
     for (my $i = 0; $i < @entries; $i++) {
 	my $entry = $entries[$i] ;
 
@@ -1381,12 +1409,6 @@ sub generate_slides {
 
 	# titles
 	my $SLIDE_TITLE = $entry->{title} ;
-	my $TITLE = $opts->{index_title} ;
-
-	# css and codeset
-	my $CSS = "$self->{local_llgal_dir}/$opts->{css_filename}" ;
-	$CSS = $opts->{css_location} if $opts->{css_location} ;
-	my $LLGAL_CODESET = $opts->{codeset} ;
 
 	# this style contents and style
 	my $THIS_SLIDE_STYLE = "image-slide" ;
@@ -1448,20 +1470,6 @@ sub generate_slides {
 	# caption
 	my $IMAGE_CAPTION = $entry->{caption} . $slide_counter . "&nbsp;&nbsp;&nbsp;$entry->{dimstring}" ;
 
-	# index
-	my $INDEX_LINK_TEXT = $opts->{index_link_text} ;
-	if ($opts->{index_link_image}) {
-	    if ($opts->{index_link_image_location}) {
-		$INDEX_LINK_TEXT = "<img src=\"$opts->{index_link_image_location}\" "
-		    ."alt=\"$opts->{index_link_text}\" "
-		    ."class=\"image-link\" />" ;
-	    } else {
-		$INDEX_LINK_TEXT = "<img src=\"$self->{local_llgal_dir}/". (make_safe_url $opts->{index_link_image_filename}) ."\" "
-		    ."alt=\"$opts->{index_link_text}\" class=\"image-link\" />" ;
-	    }
-	}
-	my $INDEX_FILE = "$opts->{index_filename}.$opts->{www_extension}\" title=\"$opts->{over_index_link_text}" ;
-
 	# previous slide
 	my $prev = $entries[$entry->{prev}] ;
 	my $PREV_SLIDE_LINK_TEXT ;
@@ -1515,9 +1523,6 @@ sub generate_slides {
 	    }
 	    $EXIF_TABLE = "<table class=\"exif\">\n". $EXIF_TABLE ."</table>" ;
 	}
-
-	# credits text
-	my $CREDITS = $opts->{credits_text} ;
 
 	#################################
 	# Replace fields in the template
