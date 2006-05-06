@@ -207,14 +207,14 @@ sub init_gallery {
 # - gallery (the whole gallery in the subdirectory pointed by this entry)
 
 # types
-my $TYPE_TXT = 0 ;
-my $TYPE_LNK = 1 ;
-my $TYPE_IMG = 2 ;
-my $TYPE_MVI = 3 ;
-my $TYPE_FIL = 4 ;
+my $TYPE_TEXT = 0 ;
+my $TYPE_LINK = 1 ;
+my $TYPE_IMAGE = 2 ;
+my $TYPE_MOVIE = 3 ;
+my $TYPE_FILE = 4 ;
 my $TYPE_DIR = 5 ;
-my $TYPE_LIN = 6 ;
-my $TYPE_BRK = 7 ;
+my $TYPE_LINE = 6 ;
+my $TYPE_BREAK = 7 ;
 
 ###################################################################################
 # checking files
@@ -271,7 +271,7 @@ sub find_user_thumbnail {
     my $filename = $entry->{filename} ;
     my $user_thumbnail_filename = "$opts->{user_thumbnail_image_filenameprefix}$opts->{thumbnail_image_filenameprefix}$filename" ;
 
-    if ($type == $TYPE_IMG) {
+    if ($type == $TYPE_IMAGE) {
 	if (-f "$self->{destination_dir}$self->{local_llgal_dir}/$user_thumbnail_filename") {
 	    return $user_thumbnail_filename ;
 	}
@@ -291,7 +291,7 @@ sub find_user_scaled {
     my $filename = $entry->{filename} ;
     my $user_scaled_filename = "$opts->{user_scaled_image_filenameprefix}$opts->{scaled_image_filenameprefix}$filename" ;
 
-    if ($type == $TYPE_IMG) {
+    if ($type == $TYPE_IMAGE) {
 	if (-f "$self->{destination_dir}$self->{local_llgal_dir}/$user_scaled_filename") {
 	    return $user_scaled_filename ;
 	}
@@ -388,10 +388,10 @@ sub create_file_entry {
     # check file
     return undef
 	if check_file ("$self->{destination_dir}$filename") < 0 ;
-    if ($type == $TYPE_IMG) {
+    if ($type == $TYPE_IMAGE) {
 	return undef
 	    if check_image ("$self->{destination_dir}$filename") < 0 ;
-    } elsif ($type == $TYPE_MVI) {
+    } elsif ($type == $TYPE_MOVIE) {
 	return undef
 	    if check_movie ("$self->{destination_dir}$filename") < 0 ;
     }
@@ -408,9 +408,9 @@ sub create_file_entry {
     # the link text (will be web-safe after caption file generation)
     if (not defined $linktext) {
 	$linktext = "" ;
-	if ($type == $TYPE_MVI) {
+	if ($type == $TYPE_MOVIE) {
 	    $linktext = $opts->{MVI_link_text}.$filename ;
-	} elsif ($type == $TYPE_FIL) {
+	} elsif ($type == $TYPE_FILE) {
 	    $linktext = $opts->{FIL_link_text}.$filename ;
 	} elsif ($type == $TYPE_DIR) {
 	    $linktext = $opts->{DIR_link_text}.$filename ;
@@ -421,7 +421,7 @@ sub create_file_entry {
     $entry->{linktext} = $linktext ;
 
     # for images, extract required exif infos
-    if ($type == $TYPE_IMG) {
+    if ($type == $TYPE_IMAGE) {
 	my @exif_tags = @{$opts->{show_exif_tags}} ;
 	@exif_tags = (@exif_tags, 'DateTimeOriginal')
 	    if $opts->{make_caption_from_image_timestamp} ;
@@ -453,7 +453,7 @@ sub create_file_entry {
 	    push (@texts, $basename) ;
 	}
 	push (@texts, generate_caption_from_image_infos $entry->{exif_infos})
-	    if $type == $TYPE_IMG ;
+	    if $type == $TYPE_IMAGE ;
 	$caption = join (' - ', grep {$_} @texts) ;
 	$caption =~ s/&/&amp;/g ;
 #	$caption =~ s/"/&\#34;/g ;
@@ -485,7 +485,7 @@ sub fill_file_entry {
     my $real_filename = "$self->{destination_dir}$filename" ;
 
     # xdim, ydim, kbytes of the image or movie
-    if ($type == $TYPE_IMG) {
+    if ($type == $TYPE_IMAGE) {
 	my ($x,$y) = imgsize ("$self->{destination_dir}$filename") ;
 	$entry->{xdim} = $x ;
 	$entry->{ydim} = $y ;
@@ -493,7 +493,7 @@ sub fill_file_entry {
 	$entry->{scaled_xdim} = $x ;
 	$entry->{scaled_ydim} = $y ;
     }
-    if ($type == $TYPE_IMG or $type == $TYPE_MVI or $type == $TYPE_FIL) {
+    if ($type == $TYPE_IMAGE or $type == $TYPE_MOVIE or $type == $TYPE_FILE) {
 	my $kbytes = (-s "$self->{destination_dir}$filename") >> 10 ;
 	$entry->{kbytes} = $kbytes ;
 	# initialize here so that we can use it even when scaled are not used
@@ -501,7 +501,7 @@ sub fill_file_entry {
     }
 
     # dimstring
-    if ($type == $TYPE_IMG) {
+    if ($type == $TYPE_IMAGE) {
 	if ($opts->{show_dimensions} and $opts->{show_size}) {
 	    $entry->{dimstring} = "($entry->{xdim}x$entry->{ydim}, $entry->{kbytes}$opts->{show_size_unit})" ;
 	} elsif ($opts->{show_size}) {
@@ -511,7 +511,7 @@ sub fill_file_entry {
 	} else {
 	    $entry->{dimstring} = "" ;
 	}
-    } elsif ($type == $TYPE_MVI or $type == $TYPE_FIL) {
+    } elsif ($type == $TYPE_MOVIE or $type == $TYPE_FILE) {
 	if ($opts->{show_size}) {
 	    $entry->{dimstring} = "($entry->{kbytes}$opts->{show_size_unit})" ;
 	} else {
@@ -549,7 +549,7 @@ sub fill_file_entry {
 	    $entry->{thumb_dimstring} = "" ;
 	}
 
-    } elsif ($type == $TYPE_IMG) {
+    } elsif ($type == $TYPE_IMAGE) {
 	# no user provided thumbnail, generate one
 
 	# filename and url
@@ -640,7 +640,7 @@ sub fill_file_entry {
 		$entry->{scaled_dimstring} = "" ;
 	    }
 
-	} elsif ($type == $TYPE_IMG and ($opts->{slide_width_max} > 0 or $opts->{slide_height_max} > 0)) {
+	} elsif ($type == $TYPE_IMAGE and ($opts->{slide_width_max} > 0 or $opts->{slide_height_max} > 0)) {
 	    # no user provided scaled, generate one
 
 	    # filename and url
@@ -710,7 +710,7 @@ sub create_nofile_entry {
     $entry->{type} = $type ;
 
     # row break and horizontal lines need nothing
-    if ($type == $TYPE_LIN or $type == $TYPE_BRK) {
+    if ($type == $TYPE_LINE or $type == $TYPE_BREAK) {
 	$entry->{no_slide} = 1 ;
 	$entry->{no_thumb} = 1 ;
 	return $entry ;
@@ -772,9 +772,9 @@ sub fill_entries {
     for my $entry (@entries) {
 	my $type = $entry->{type} ;
 	my $final_entry ;
-	if ($type == $TYPE_LIN or $type == $TYPE_BRK) {
+	if ($type == $TYPE_LINE or $type == $TYPE_BREAK) {
 	    $final_entry = $entry ; # nothing to do
-	} elsif ($type == $TYPE_TXT or $type == $TYPE_LNK) {
+	} elsif ($type == $TYPE_TEXT or $type == $TYPE_LINK) {
 	    $final_entry = fill_nofile_entry $entry ;
 	} else {
 	    $final_entry = fill_file_entry $entry ;
@@ -798,10 +798,10 @@ sub finalize_entries {
     if ($opts->{list_links}) {
 	map {
 	    my $type = $_->{type} ;
-	    if ($type == $TYPE_LNK or $type == $TYPE_DIR or $type == $TYPE_MVI or $type == $TYPE_FIL) {
+	    if ($type == $TYPE_LINK or $type == $TYPE_DIR or $type == $TYPE_MOVIE or $type == $TYPE_FILE) {
 		$_->{no_thumb} = 1 ;
 		$_->{no_slide} = 1 ;
-	    } elsif ($type == $TYPE_TXT) {
+	    } elsif ($type == $TYPE_TEXT) {
 		$_->{no_thumb} = 1 ;
 	    }
 	} @entries ;
@@ -833,10 +833,10 @@ sub finalize_entries {
 	my $filename = $entry->{filename} ;
 
 	# HTML slide and its url
-	if (!$opts->{make_no_slides} and $type != $TYPE_LIN and $type != $TYPE_BRK) {
+	if (!$opts->{make_no_slides} and $type != $TYPE_LINE and $type != $TYPE_BREAK) {
 	    my $slide_filename ;
 	    if ($opts->{make_slide_filename_from_filename}) {
-		if ($type == $TYPE_TXT or $type == $TYPE_LNK) {
+		if ($type == $TYPE_TEXT or $type == $TYPE_LINK) {
 		    $slide_filename = "$opts->{slide_filenameprefix}$counter_with_zeros.$opts->{www_extension}" ;
 		} elsif ($opts->{make_slide_filename_from_extension}) {
 		    $slide_filename = "$opts->{slide_filenameprefix}$filename.$opts->{www_extension}" ;
@@ -935,14 +935,14 @@ sub get_entries_from_directory {
 
 	    if ($filename =~ /($opts->{image_extensions})$/i) {
 		# image
-		my $entry = create_file_entry ($TYPE_IMG, $filename, undef, undef) ;
+		my $entry = create_file_entry ($TYPE_IMAGE, $filename, undef, undef) ;
 		goto JUST_A_FILE
 		    if not defined $entry ;
 		push @entries, $entry ;
 
 	    } elsif ($filename =~ /($opts->{movie_extensions})$/i) {
 		# movie
-		my $entry = create_file_entry ($TYPE_MVI, $filename, undef, undef) ;
+		my $entry = create_file_entry ($TYPE_MOVIE, $filename, undef, undef) ;
 		goto JUST_A_FILE
 		    if not defined $entry ;
 		push @entries, $entry ;
@@ -951,7 +951,7 @@ sub get_entries_from_directory {
 	      JUST_A_FILE:
 		if ($add_others) {
 		    # not an image, not a movie, just a file
-		    my $entry = create_file_entry ($TYPE_FIL, $filename, undef, undef) ;
+		    my $entry = create_file_entry ($TYPE_FILE, $filename, undef, undef) ;
 		    push @entries, $entry
 			if defined $entry ;
 		}
@@ -975,8 +975,8 @@ sub get_entries {
 	    $subdir =~ s/\/*$//g ;
 	    # separation line and title
 	    if ($opts->{separate_sections}) {
-		push @entries, (create_nofile_entry $TYPE_LIN, undef, undef, undef) ;
-		push @entries, (create_nofile_entry $TYPE_TXT, undef, $opts->{section_text}.$subdir, $opts->{section_text}.$subdir) ;
+		push @entries, (create_nofile_entry $TYPE_LINE, undef, undef, undef) ;
+		push @entries, (create_nofile_entry $TYPE_TEXT, undef, $opts->{section_text}.$subdir, $opts->{section_text}.$subdir) ;
 	    }
 	    # section entries
 	    push @entries, get_entries_from_directory
@@ -1151,20 +1151,20 @@ sub generate_captions_entries {
     for (my $i = 0; $i < @entries; $i++) {
 	my $entry = $entries[$i] ;
 	my $type = $entry->{type} ;
-	if ($type == $TYPE_IMG) {
+	if ($type == $TYPE_IMAGE) {
 	    print CAP "IMG: ". $entry->{filename}
 		." ---- ". $entry->{caption} ."\n"
 		unless grep { $captions[$_] =~ m/^(\s*IMG:)?\s*$entry->{filename}\s+----\s/ }
 		    ( 0 .. $#captions ) ;
 
-	} elsif ($type == $TYPE_MVI) {
+	} elsif ($type == $TYPE_MOVIE) {
 	    print CAP "MVI: " . $entry->{filename}
 		." ---- ". $entry->{linktext}
 		." ---- ". $entry->{caption} ."\n"
 		unless grep { $captions[$_] =~ m/^\s*MVI:\s*$entry->{filename}\s+----\s/ }
 		    ( 0 .. $#captions ) ;
 
-	} elsif ($type == $TYPE_FIL) {
+	} elsif ($type == $TYPE_FILE) {
 	    print CAP "FIL: " . $entry->{filename}
 		." ---- ". $entry->{linktext}
 		." ---- ". $entry->{caption} ."\n"
@@ -1178,14 +1178,14 @@ sub generate_captions_entries {
 		unless grep { $captions[$_] =~ m/^\s*DIR:\s*$entry->{filename}\s+----\s/ }
 		    ( 0 .. $#captions ) ;
 
-	} elsif ($type == $TYPE_TXT) {
+	} elsif ($type == $TYPE_TEXT) {
 	    # TODO: do not insert again ? (in case of --Ps)
 	    print CAP "TXT: " . $entry->{linktext} ." ---- ". $entry->{caption} ."\n";
 
-	} elsif ($type == $TYPE_LIN) {
+	} elsif ($type == $TYPE_LINE) {
 	    print CAP "LINE\n" ;
 
-	} elsif ($type == $TYPE_BRK) {
+	} elsif ($type == $TYPE_BREAK) {
 	    print CAP "BREAK\n" ;
 
 	} else {
@@ -1267,11 +1267,11 @@ sub read_captions_file {
 		# - \s is facultative after TYP: at the begining
 		if ($line =~ m/^TXT:\s*(.+)\s+----\s*(?:\s(.*))?\s*$/) {
 		    # text slide
-		    $entry = create_nofile_entry ($TYPE_TXT, undef, $1, $2) ;
+		    $entry = create_nofile_entry ($TYPE_TEXT, undef, $1, $2) ;
 
 		} elsif ($line =~ m/^LNK:\s*(.+)\s+----\s+(.+)\s+----\s*(?:\s(.*))?\s*$/) {
 		    # link slide
-		    $entry = create_nofile_entry ($TYPE_LNK, $1, $2, $3) ;
+		    $entry = create_nofile_entry ($TYPE_LINK, $1, $2, $3) ;
 
 		} elsif ($line =~ m/^DIR:\s*(.+)\s+----\s+(.+)\s+----\s*(?:\s(.*))?\s*$/) {
 		    # directory slide
@@ -1279,24 +1279,24 @@ sub read_captions_file {
 
 		} elsif ($line =~ m/^MVI:\s*(.+)\s+----\s+(.+)\s+----\s*(?:\s(.*))?\s*$/) {
 		    # movie slide
-		    $entry = create_file_entry ($TYPE_MVI, $1, $2, $3) ;
+		    $entry = create_file_entry ($TYPE_MOVIE, $1, $2, $3) ;
 
 		} elsif ($line =~ m/^FIL:\s*(.+)\s+----\s+(.+)\s+----\s*(?:\s(.*))?\s*$/) {
 		    # movie slide
-		    $entry = create_file_entry ($TYPE_FIL, $1, $2, $3) ;
+		    $entry = create_file_entry ($TYPE_FILE, $1, $2, $3) ;
 
 		} elsif ($line =~ m/^LINE/) {
 		    # horizontal line
-		    $entry = create_nofile_entry ($TYPE_LIN, undef, undef, undef) ;
+		    $entry = create_nofile_entry ($TYPE_LINE, undef, undef, undef) ;
 
 		} elsif ($line =~ m/^BREAK/) {
 		    # thumbnail row break
-		    $entry = create_nofile_entry ($TYPE_BRK, undef, undef, undef) ;
+		    $entry = create_nofile_entry ($TYPE_BREAK, undef, undef, undef) ;
 
 		} elsif ($line =~ m/^IMG:\s*(.+)\s+----\s*(?:\s(.*))?\s*$/
 			 or $line =~ m/^(.+)\s+----\s*(?:\s(.*))?\s*$/) {
 		    # image slide (default)
-		    $entry = create_file_entry ($TYPE_IMG, $1, undef, $2) ;
+		    $entry = create_file_entry ($TYPE_IMAGE, $1, undef, $2) ;
 
 		} else {
 		    die "Unrecognized line #$. in captions file: \"$line\"\n" ;
@@ -1441,7 +1441,7 @@ sub generate_slides {
 	$THIS_SLIDE_STYLE = "text-slide\" style=\"width: $opts->{text_slide_width}px; height: $opts->{text_slide_height}px;"
 	    if !$entry->{scaled_url} ;
 	my $THIS_SLIDE ;
-	if ($type == $TYPE_IMG) {
+	if ($type == $TYPE_IMAGE) {
 	    # image slide
 
 	    if (defined $entry->{scaled_filename}) {
@@ -1463,7 +1463,7 @@ sub generate_slides {
 	    }
 	} elsif ($entry->{scaled_url}) {
 	    # another type, with a user-given scaled image
-	    if ($type == $TYPE_TXT) {
+	    if ($type == $TYPE_TEXT) {
 		# text with scaled image ? ok...
 		$THIS_SLIDE = "<img src=\"$entry->{scaled_url}\" "
 		    ."style=\"width: $entry->{scaled_xdim}px; height: $entry->{scaled_ydim}px;\" "
@@ -1480,7 +1480,7 @@ sub generate_slides {
 		$THIS_SLIDE .= "</a>" ;
 	    }
 
-	} elsif ($type == $TYPE_TXT) {
+	} elsif ($type == $TYPE_TEXT) {
 	    # text slide
 	    $THIS_SLIDE = $entry->{linktext} ;
 	} else {
@@ -1538,7 +1538,7 @@ sub generate_slides {
 
 	# exif information
 	my $EXIF_TABLE = "" ;
-	if ($type == $TYPE_IMG and @{$opts->{show_exif_tags}}) {
+	if ($type == $TYPE_IMAGE and @{$opts->{show_exif_tags}}) {
 	    my $exif_infos = $entry->{exif_infos} ;
 	    foreach my $tag (@{$opts->{show_exif_tags}}) {
 		my $value = $exif_infos->{$tag} ;
@@ -1648,8 +1648,8 @@ sub generate_index {
 	my $entry = $entries[$i] ;
 	my $type = $entry->{type} ;
 
-	if ($type == $TYPE_LIN or $type == $TYPE_BRK) {
-	    if ($type == $TYPE_LIN) {
+	if ($type == $TYPE_LINE or $type == $TYPE_BREAK) {
+	    if ($type == $TYPE_LINE) {
 		# output a horizontal line
 		print IXW "<hr class=\"index\">" ;
 	    }
@@ -1662,7 +1662,7 @@ sub generate_index {
 	if ($entry->{no_thumb}) {
 	    # output a line with this text
 	    print IXW "<div class=\"header\">" ;
-	    if ($type == $TYPE_TXT) {
+	    if ($type == $TYPE_TEXT) {
 		print IXW $entry->{linktext} ;
 	    } else {
 		print IXW "<a href=\"$entry->{url}\" title=\"$entry->{title} $entry->{dimstring}\">$entry->{linktext}</a>" ;
@@ -1724,7 +1724,7 @@ sub generate_index {
 	    # if a thumbnail width max is defined, force the box to its width
 	    $box_width = $opts->{thumbnail_width_max} if $opts->{thumbnail_width_max} ;
 
-	    if ($type == $TYPE_IMG) {
+	    if ($type == $TYPE_IMAGE) {
 		# IMG thumbnail
 
 		print IXW "    <td class=\"thumb\" style=\"width: ${box_width}px; height: ${box_height}px;\">\n" ;
@@ -1744,7 +1744,7 @@ sub generate_index {
 		# not IMG, but with a user-given thumbnail
 
 		print IXW "    <td class=\"thumb\" style=\"width: ${box_width}px; height: ${box_height}px;\">\n" ;
-		if ($type == $TYPE_TXT) {
+		if ($type == $TYPE_TEXT) {
 		    # TXT with a thumbnail ? ok...
 		    if ($opts->{make_no_slides}) {
 			# thumbnail linking to the TXT slide
@@ -1775,7 +1775,7 @@ sub generate_index {
 	    } else {
 		# not IMG, without thumbnail
 		print IXW "    <td class=\"text-thumb\" style=\"width: ${box_width}px; height: ${box_height}px;\">\n" ;
-		if ($type == $TYPE_TXT) {
+		if ($type == $TYPE_TEXT) {
 		    # thumbnail linking to the slide
 		    print IXW "      <a href=\"$entry->{slide_url}\" title=\"$title\">$entry->{linktext}</a>\n" ;
 		} else {
@@ -1917,7 +1917,7 @@ sub make_www_rights {
 	# target
 	if ($type == $TYPE_DIR) {
 	    make_readable_and_traversable "$self->{destination_dir}$entry->{filename}" ;
-	} elsif ($type == $TYPE_MVI or $type == $TYPE_FIL) {
+	} elsif ($type == $TYPE_MOVIE or $type == $TYPE_FILE) {
 	    make_readable "$self->{destination_dir}$entry->{filename}" ;
 	}
 
@@ -1927,11 +1927,11 @@ sub make_www_rights {
 
 	# thumbnail
 	make_readable "$self->{destination_dir}$entry->{thumb_filename}"
-	    if ($type == $TYPE_IMG or $entry->{thumb_url}) and !defined $entry->{no_thumb} ;
+	    if ($type == $TYPE_IMAGE or $entry->{thumb_url}) and !defined $entry->{no_thumb} ;
 
 	# scaled image
 	make_readable "$self->{destination_dir}$entry->{scaled_filename}"
-	    if ($type == $TYPE_IMG or $entry->{scaled_url})
+	    if ($type == $TYPE_IMAGE or $entry->{scaled_url})
 	    and ($opts->{slide_width_max} > 0 or $opts->{slide_height_max} > 0) and !$opts->{make_no_slides} ;
     }
 }
