@@ -178,6 +178,7 @@ my $normal_opts_type = {
     add_subdirs => $OPT_IS_NUMERIC,
     sort_criteria => $OPT_IS_NONEMPTY_STRING,
 # Sections
+    entitle_sections => $OPT_IS_NUMERIC,
     separate_sections => $OPT_IS_NUMERIC,
 # Recursion
     parent_gallery_link => $OPT_IS_NUMERIC,
@@ -436,6 +437,8 @@ sub add_defaults {
 # Sections
 # section directories
 	section_dirs => [],
+# do we add a text slide to entitle sections
+	entitle_sections => 0,
 # do we separate sections in the gallery
 	separate_sections => 0,
 
@@ -802,7 +805,7 @@ sub parse_cmdline_options {
 	'nf'		=> \$opts->{show_no_film_effect},
 	'option=s'	=> sub { shift ; process_option $self, $opts, shift ; },
 	'P=s'		=> \@{$opts->{section_dirs}},
-	'Ps'		=> \$opts->{separate_sections},
+	'Ps'		=> sub { $opts->{entitle_sections} = 1 ; $opts->{separate_sections} = 1 ; },
 	'p=i'		=> \$opts->{index_cellpadding},
 	'php'		=> sub { $opts->{www_extension} = "php" ; },
 	'Rl'		=> \$opts->{link_subgalleries},

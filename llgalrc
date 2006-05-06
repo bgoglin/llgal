@@ -304,7 +304,9 @@
 # Add a new subdirectory to the list of sections [-P]
 # section_dir = "subdir"
 
-# Add a separation line and the subdirectory name at the begining of each section [--Ps]
+# Add the subdirectory name as a title at the begining of each section [--Ps]
+
+# Add a horizontal line at the begining of each section in the index [--Ps]
 # separate_sections = 0
 
 ##### Recursion #####

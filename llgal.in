@@ -977,10 +977,10 @@ sub get_entries {
 	    # remove ending slashes
 	    $subdir =~ s/\/*$//g ;
 	    # separation line and title
-	    if ($opts->{separate_sections}) {
-		push @entries, (create_nofile_entry $TYPE_LINE, undef, undef, undef) ;
-		push @entries, (create_nofile_entry $TYPE_TEXT, undef, $opts->{section_text}.$subdir, $opts->{section_text}.$subdir) ;
-	    }
+	    push @entries, (create_nofile_entry $TYPE_LINE, undef, undef, undef)
+		if $opts->{separate_sections} ;
+	    push @entries, (create_nofile_entry $TYPE_TEXT, undef, $opts->{section_text}.$subdir, $opts->{section_text}.$subdir)
+		if $opts->{entitle_sections} ;
 	    # section entries
 	    push @entries, get_entries_from_directory
 		$dir,

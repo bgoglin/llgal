@@ -276,8 +276,8 @@ The path of the subdirectory must be given as a relative path
 
 .TP
 .BI --Ps
-Add a separation line and the subdirectory name at the begining of
-each title.
+Add a horizontal line and the subdirectory name as a title at
+the begining of each section.
 
 .TP
 .B -S
@@ -1344,10 +1344,16 @@ This option may be used several times.
 Subdirectory path must be given relatively to the working directory.
 Default is to use the content of the working directory.
 .RE
+.I entitle_sections = <0/1>
+.RS
+Add the subdirectory name as a title at the begining each section
+.RB [ --Ps ].
+Default is
+.BR 0 " (" disabled ).
+.RE
 .I separate_sections = <0/1>
 .RS
-Add a separation line and the subdirectory name at the begining of
-each section
+Add a horizontal line at the begining of each section in the index
 .RB [ --Ps ].
 Default is
 .BR 0 " (" disabled ).
