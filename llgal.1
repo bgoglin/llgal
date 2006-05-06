@@ -391,15 +391,16 @@ or go crazy with
 may be used several times on the same command line.
 
 .TP
-.BI --exif " <tag1,tag2,...>"
+.BI --exif " [<tag1,tag2,...>]"
 Display a table of EXIF tags under each image slide.
+If an argument is given, it contains a comma-separated list
+of tags.
+The tag names have to be passed as shown by
+.BR "exiftool -list" .
+If no argument is given, all available Exif tags are displayed.
+
 The tags are displayed using their description as given by
 .BR "exiftool -s myimage" .
-But, they have to be passed to
-.B llgal
-using their tag name as shown by
-.B exiftool -list
-and separated with a comma.
 
 .TP
 .BI -i " <file>"
@@ -1104,6 +1105,11 @@ Display a table of EXIF tags under each image slide
 The tags are given with their name in
 .B exiftool -list
 and separated with a comma.
+.RE
+.I show_all_exif_tags = <0/1>
+.RS
+Display a table of all available EXIF tags under each image slide
+.RB [ --exif ].
 .RE
 
 .B Captions:

@@ -422,12 +422,15 @@ sub create_file_entry {
 
     # for images, extract required exif infos
     if ($type == $TYPE_IMAGE) {
-	my @exif_tags = @{$opts->{show_exif_tags}} ;
-	@exif_tags = (@exif_tags, 'DateTimeOriginal')
-	    if $opts->{make_caption_from_image_timestamp} ;
-	@exif_tags = (@exif_tags, 'UserComment', 'Comment')
-	    if $opts->{make_caption_from_image_comment} ;
-	if (@exif_tags) {
+	my @exif_tags = () ;
+	if (!$opts->{show_all_exif_tags}) {
+	    @exif_tags = @{$opts->{show_exif_tags}} ;
+	    @exif_tags = (@exif_tags, 'DateTimeOriginal')
+		if $opts->{make_caption_from_image_timestamp} ;
+	    @exif_tags = (@exif_tags, 'UserComment', 'Comment')
+		if $opts->{make_caption_from_image_comment} ;
+	}
+	if (@exif_tags or $opts->{show_all_exif_tags}) {
 	    if (not defined $opts->{exif_info}) {
 		# ExifTool initialization
 		$opts->{exiftool} = new Image::ExifTool;
@@ -1538,9 +1541,10 @@ sub generate_slides {
 
 	# exif information
 	my $EXIF_TABLE = "" ;
-	if ($type == $TYPE_IMAGE and @{$opts->{show_exif_tags}}) {
+	if ($type == $TYPE_IMAGE
+	    and (@{$opts->{show_exif_tags}} or $opts->{show_all_exif_tags})) {
 	    my $exif_infos = $entry->{exif_infos} ;
-	    foreach my $tag (@{$opts->{show_exif_tags}}) {
+	    foreach my $tag ($opts->{show_all_exif_tags} ? (keys %{$exif_infos}) : @{$opts->{show_exif_tags}}) {
 		my $value = $exif_infos->{$tag} ;
 		my $description = $opts->{exiftool}->GetDescription ($tag) ;
 		$EXIF_TABLE .= "<tr><td class=\"exif-name\">$description</td>"

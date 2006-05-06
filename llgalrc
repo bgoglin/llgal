@@ -171,6 +171,9 @@
 # with a comma.
 # show_exif_tags = ""
 
+# Display a table of all available EXIF tags under each image slide [--exif]
+# show_all_exif_tags = 0
+
 ##### Captions #####
 
 # This line will be added to the captions file llgal will generate when

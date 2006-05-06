@@ -1,6 +1,7 @@
 
   * Add REPLACE keyword in the captions for a configurable replacement
     in the HTML pages (requested by Alexandre Buisse).
+  * --exif without argument shows all exif tags that exist in the image.
   * -v is now --verbose (and verbose configuration option has been added).
     + Add/convert some messages to be printing when --verbose is passed.
     + --version is -V.

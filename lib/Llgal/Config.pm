@@ -139,6 +139,7 @@ my $normal_opts_type = {
     prev_slide_link_preview => $OPT_IS_NUMERIC,
     next_slide_link_preview => $OPT_IS_NUMERIC,
     make_slide_title_from_caption => $OPT_IS_NUMERIC,
+    show_all_exif_tags => $OPT_IS_NUMERIC,
 # Captions
     captions_removal_line => $OPT_IS_NONEMPTY_STRING,
     make_caption_from_image_comment => $OPT_IS_STRING,
@@ -517,7 +518,7 @@ Layout Options:
     --ctf <s>          timestamp format in captions
     --codeset <s>      change the codeset in HTML pages
     --con <s>          options to pass to convert (e.g. -quality N)
-    --exif <tags>      show exif tags on each slide
+    --exif [<tags>]    show exif tags on each slide
     -i <file>          name of the main thumbnail index file (index)
     -k                 use the image captions for the HTML slide titles
     -L                 list links outside of the table
@@ -785,7 +786,11 @@ sub parse_cmdline_options {
 	'ctf=s'		=> \$opts->{timestamp_format_in_caption},
 	'codeset=s'     => \$opts->{codeset},
 	'con=s'		=> sub { shift ; push (@{$opts->{convert_options}}, parse_convert_options (shift)) ; },
-	'exif=s'	=> sub { shift ; push (@{$opts->{show_exif_tags}}, split (/,/, shift)) ; },
+	'exif:s'	=> sub {
+	                        shift ; my $value = shift ;
+				if ($value eq "") { $opts->{show_all_exif_tags} = 1 ; }
+				else { push (@{$opts->{show_exif_tags}}, split (/,/, $value)) ; }
+			    },
 	'i=s'		=> \$opts->{index_filename},
 	'k'		=> \$opts->{make_slide_title_from_caption},
 	'L'		=> \$opts->{list_links},
