@@ -17,8 +17,9 @@
   * Fix image title and alternative in HTML slides.
   * Some fixes in the manpage.
   * Update captions.header with last caption entries.
-  * The How-To is now also included in the tarball.
-  * UPGRADE is now HTML'ized as upgrade.html.
+  * Add a doc/ subdirectory:
+    + The How-To is now also included in the tarball.
+    + UPGRADE is now HTML'ized as upgrade.html.
 
 
 llgal (0.13.3)
