@@ -38,7 +38,7 @@ binary-indep: build install
 	dh_testdir
 	dh_testroot
 	dh_installchangelogs Changes
-	dh_installdocs UPGRADE
+	dh_installdocs doc/howto.html doc/upgrade.html
 	dh_compress
 	dh_fixperms
 	dh_installdeb
