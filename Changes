@@ -13,6 +13,8 @@
     and index HTML pages.
     + More tiny optimizations of the HTML slide and index generation by
       precomputing more fields.
+  * Add link_between_last_and_first_slide configuration option to
+    disable the links between the last and first slides.
   * Fix generation of configuration file when an old has to be renamed.
   * Fix image title and alternative in HTML slides.
   * Some fixes in the manpage.

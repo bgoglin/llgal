@@ -856,6 +856,10 @@ sub finalize_entries {
 	    $entry->{slide_url} = make_safe_url_nowarn ($slide_filename) ;
 	}
 
+	# initialize to -1 for no link to prev/next slide
+	$entry->{prev} = -1 ;
+	$entry->{next} = -1 ;
+
 	# link to previous entry
 	if (defined $prev) {
 	    $entry->{prev} = $prev;
@@ -867,7 +871,7 @@ sub finalize_entries {
 	$first = $i unless defined $first ;
     }
 
-    if (defined $first) {
+    if (defined $first and $opts->{link_between_last_and_first_slide}) {
 	# link last to first
 	$entries[$prev]->{next} = $first ;
 	$entries[$first]->{prev} = $prev ;
@@ -1500,44 +1504,50 @@ sub generate_slides {
 	my $IMAGE_CAPTION = $entry->{caption} . $slide_counter . "&nbsp;&nbsp;&nbsp;$entry->{dimstring}" ;
 
 	# previous slide
-	my $prev = $entries[$entry->{prev}] ;
-	my $PREV_SLIDE_LINK_TEXT ;
-	if ($opts->{prev_slide_link_preview} and $prev->{thumb_url}) {
-	    $PREV_SLIDE_LINK_TEXT = "<img src=\"$prev->{thumb_url}\" "
-		."style=\"width: $prev->{thumb_xdim}px; height: $prev->{thumb_ydim}px;\" "
-		."alt=\"$opts->{prev_slide_link_text}\" />" ;
-	} elsif ($opts->{prev_slide_link_image}) {
-	    if ($opts->{prev_slide_link_image_location}) {
-		$PREV_SLIDE_LINK_TEXT = "<img src=\"$opts->{prev_slide_link_image_location}\" "
-		    ."alt=\"$opts->{prev_slide_link_text}\" class=\"image-link\" />" ;
+	my $PREV_SLIDE_LINK_TEXT = "" ;
+	my $PREV_SLIDE = "" ;
+	if ($entry->{prev} != -1) {
+	    my $prev = $entries[$entry->{prev}] ;
+	    if ($opts->{prev_slide_link_preview} and $prev->{thumb_url}) {
+		$PREV_SLIDE_LINK_TEXT = "<img src=\"$prev->{thumb_url}\" "
+		    ."style=\"width: $prev->{thumb_xdim}px; height: $prev->{thumb_ydim}px;\" "
+		    ."alt=\"$opts->{prev_slide_link_text}\" />" ;
+	    } elsif ($opts->{prev_slide_link_image}) {
+		if ($opts->{prev_slide_link_image_location}) {
+		    $PREV_SLIDE_LINK_TEXT = "<img src=\"$opts->{prev_slide_link_image_location}\" "
+			."alt=\"$opts->{prev_slide_link_text}\" class=\"image-link\" />" ;
+		} else {
+		    $PREV_SLIDE_LINK_TEXT = "<img src=\"$self->{local_llgal_dir}/". (make_safe_url $opts->{prev_slide_link_image_filename}) ."\" "
+			."alt=\"$opts->{prev_slide_link_text}\" class=\"image-link\" />" ;
+		}
 	    } else {
-		$PREV_SLIDE_LINK_TEXT = "<img src=\"$self->{local_llgal_dir}/". (make_safe_url $opts->{prev_slide_link_image_filename}) ."\" "
-		    ."alt=\"$opts->{prev_slide_link_text}\" class=\"image-link\" />" ;
+		$PREV_SLIDE_LINK_TEXT = $opts->{prev_slide_link_text} ;
 	    }
-	} else {
-	    $PREV_SLIDE_LINK_TEXT = $opts->{prev_slide_link_text} ;
+	    $PREV_SLIDE = "$prev->{slide_url}\" title=\"$opts->{over_prev_slide_link_text}$prev->{title}" ;
 	}
-	my $PREV_SLIDE = "$prev->{slide_url}\" title=\"$opts->{over_prev_slide_link_text}$prev->{title}" ;
 
 	# next slide
-	my $next = $entries[$entry->{next}] ;
-	my $NEXT_SLIDE_LINK_TEXT ;
-	if ($opts->{next_slide_link_preview} and $next->{thumb_url}) {
-	    $NEXT_SLIDE_LINK_TEXT = "<img src=\"$next->{thumb_url}\" "
-		."style=\"width: $next->{thumb_xdim}px; height: $next->{thumb_ydim}px;\" "
-		."alt=\"$opts->{next_slide_link_text}\" />" ;
-	} elsif ($opts->{next_slide_link_image}) {
-	    if ($opts->{next_slide_link_image_location}) {
-		$NEXT_SLIDE_LINK_TEXT = "<img src=\"". $opts->{next_slide_link_image_location} ."\" "
-		    ."alt=\"$opts->{next_slide_link_text}\" class=\"image-link\" />" ;
+	my $NEXT_SLIDE_LINK_TEXT = "" ;
+	my $NEXT_SLIDE = "" ;
+	if ($entry->{next} != -1) {
+	    my $next = $entries[$entry->{next}] ;
+	    if ($opts->{next_slide_link_preview} and $next->{thumb_url}) {
+		$NEXT_SLIDE_LINK_TEXT = "<img src=\"$next->{thumb_url}\" "
+		    ."style=\"width: $next->{thumb_xdim}px; height: $next->{thumb_ydim}px;\" "
+		    ."alt=\"$opts->{next_slide_link_text}\" />" ;
+	    } elsif ($opts->{next_slide_link_image}) {
+		if ($opts->{next_slide_link_image_location}) {
+		    $NEXT_SLIDE_LINK_TEXT = "<img src=\"". $opts->{next_slide_link_image_location} ."\" "
+			."alt=\"$opts->{next_slide_link_text}\" class=\"image-link\" />" ;
+		} else {
+		    $NEXT_SLIDE_LINK_TEXT = "<img src=\"$self->{local_llgal_dir}/". (make_safe_url $opts->{next_slide_link_image_filename}) ."\" "
+			."alt=\"$opts->{next_slide_link_text}\" class=\"image-link\" />" ;
+		}
 	    } else {
-		$NEXT_SLIDE_LINK_TEXT = "<img src=\"$self->{local_llgal_dir}/". (make_safe_url $opts->{next_slide_link_image_filename}) ."\" "
-		    ."alt=\"$opts->{next_slide_link_text}\" class=\"image-link\" />" ;
+		$NEXT_SLIDE_LINK_TEXT = $opts->{next_slide_link_text} ;
 	    }
-	} else {
-	    $NEXT_SLIDE_LINK_TEXT = $opts->{next_slide_link_text} ;
+	    $NEXT_SLIDE = "$next->{slide_url}\" title=\"$opts->{over_next_slide_link_text}$next->{title}" ;
 	}
-	my $NEXT_SLIDE = "$next->{slide_url}\" title=\"$opts->{over_next_slide_link_text}$next->{title}" ;
 
 	# exif information
 	my $EXIF_TABLE = "" ;

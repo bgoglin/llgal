@@ -166,6 +166,9 @@
 # Generate slide titles from captions [-k]
 # make_slide_title_from_caption = 0
 
+# Generate links between last and first slides.
+# link_between_last_and_first_slide = 1
+
 # Display a table of EXIF tags under each image slide [--exif]
 # The tags are given with their name in exiftool -list and separated
 # with a comma.

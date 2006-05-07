@@ -138,6 +138,7 @@ my $normal_opts_type = {
     next_slide_link_image => $OPT_IS_NUMERIC,
     prev_slide_link_preview => $OPT_IS_NUMERIC,
     next_slide_link_preview => $OPT_IS_NUMERIC,
+    link_between_last_and_first_slide => $OPT_IS_NUMERIC,
     make_slide_title_from_caption => $OPT_IS_NUMERIC,
     show_all_exif_tags => $OPT_IS_NUMERIC,
 # Captions
@@ -355,6 +356,8 @@ sub add_defaults {
 # use an image preview for link from a slide to the previous or next slide
 	prev_slide_link_preview => 0,
 	next_slide_link_preview => 0,
+# do not link between last and first slide
+	link_between_last_and_first_slide => 1,
 # use captions as slide titles (-k)
 	make_slide_title_from_caption => 0,
 # show a table of exif tags
