@@ -1,0 +1,140 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+ "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+<head>
+ <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+ <title>How-to upgrade a gallery from igal to llgal?</title>
+ <link rel="stylesheet" type="text/css" href="main.css"/>
+</head>
+<body>
+
+<h1 class="title">How-to upgrade a gallery from igal to llgal?</h1>
+
+<p><em>
+ This upgrade documentation is available <a href="http://home.gna.org/llgal/">on-line</a>
+ and in the tarball and distribution packages.
+</em></p>
+
+
+
+<h2 class="part" id="filelocation">File location</h2>
+
+<p>
+ <tt>igal</tt> places all files in the working directory with existing images.
+</p>
+<ul>
+ <li><tt>.captions</tt></li>
+ <li><tt>.indextemplate.html</tt></li>
+ <li><tt>.slidetemplate.html</tt></li>
+ <li><tt>.slide_&lt;image&gt;</tt></li>
+ <li><tt>.thumb_&lt;image&gt;</tt></li>
+ <li><tt>.tile.png</tt></li>
+ <li><tt>igal.css</tt></li>
+</ul>
+
+<p>
+ <tt>llgal</tt> moves all these files in a .llgal, making the starting dot useless.
+ <tt>.slide_&lt;image&gt;</tt> is also replaced by <tt>.scaled_&lt;image&gt;</tt>.
+</p>
+<ul>
+ <li><tt>.llgal/captions</tt></li>
+ <li><tt>.llgal/indextemplate.html</tt></li>
+ <li><tt>.llgal/slidetemplate.html</tt></li>
+ <li><tt>.llgal/scaled_&lt;image&gt;</tt></li>
+ <li><tt>.llgal/thumb_&lt;image&gt;</tt></li>
+ <li><tt>.llgal/tile.png</tt></li>
+ <li><tt>.llgal/llgal.css</tt></li>
+</ul>
+
+<p>
+ Note that earlier versions of <tt>llgal</tt> use <tt>.llgal.files</tt> instead of <tt>.llgal</tt>.
+</p>
+
+
+
+<h2 class="part">CSS style sheet</h2>
+
+<p>
+ The CSS style sheet has been updated. If you modified it, you should probably
+ diff against the original <tt>igal.css</tt>, and apply the difference (by hand)
+ to <tt>llgal.css</tt>.
+</p>
+
+
+
+<h2 class="part">Command line options</h2>
+
+<ul>
+<li>
+ All long options (more than one character) now requires a double dash.
+</li>
+<li>
+ <tt>igal -clean</tt> is now <tt>llgal --cleanall</tt>
+ since <tt>llgal --clean</tt> only removes file that have not been modified.
+</li>
+<li>
+ Captions generation uses <tt>--gc</tt> instead of <tt>-c</tt>.
+ The caption is automatically used if it exists, <tt>-c</tt> is not used anymore.
+ Captions generation from filename is <tt>--cf</tt> instead of <tt>-C</tt>.
+</li>
+<li>
+ Do not show image counter in captions is now <tt>--nc</tt> instead of <tt>-x</tt>.
+</li>
+<li>
+ Do not show film effect in the index is now <tt>--nf</tt> instead of <tt>-r</tt>.
+</li>
+<li>
+ <tt>--sp</tt> and <tt>--tp</tt> options got removed.
+ But <tt>scaled_image_filenameprefix</tt> and <tt>thumbnail_image_filenameprefix</tt>
+ configuration options allow prefix modification.
+</li>
+<li>
+ <tt>-bigy</tt> (limit image height in slides) is replaced with <tt>--sy</tt>.
+ <tt>-y</tt> (limit thumbnail height) is replaced with <tt>--ty</tt>.
+</li>
+<li>
+ <tt>-t</tt> has been removed, the user just need to modify the <tt>tile.png</tt> image
+ to get an updated layout.
+</li>
+</ul>
+
+
+
+<h2 class="part">How-to upgrade</h2>
+
+<p>
+ If you don't care about processing time:
+</p>
+<ul>
+ <li>Save your <tt>.captions</tt> file if it exists</li>
+ <li>Note the command line you used when creating the gallery
+     (see in the header of <tt>index.html</tt>)</li>
+ <li>Remove everything but the images with <tt>igal -clean</tt></li>
+ <li>Create a <tt>.llgal</tt> directory and move your captions files inside
+    (remember it is now named <tt>captions</tt> instead of <tt>.captions</tt>)</li>
+ <li>Run <tt>llgal</tt> with same options (see section 3 for details)</li>
+</ul>
+
+<p>
+ Recomputing the whole gallery might be long, especially if you have tons of images,
+ since thumbnails (and scaled images if <tt>--bigy</tt>/<tt>--bigxy</tt> is passed)
+ have to be generated.
+</p>
+<p>
+ If you don't want to regenerate these, see section <a href="#filelocation">File location</a>
+ and move <tt>.thumb_*</tt> and <tt>.slide_*</tt> files
+ to <tt>.llgal/thumb_*</tt> and <tt>scaled_*</tt> so that llgal uses them.
+</p>
+
+
+
+<hr />
+
+If you have any question, contact the <a href="mailto:llgal-users AT gna.org">llgal team</a>.
+
+<div id="modif">
+ $Id: upgrade.html,v 1.1 2006/05/07 09:21:15 bgoglin Exp $
+</div>
+
+</body>
+</html>

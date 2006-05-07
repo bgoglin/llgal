@@ -55,7 +55,8 @@ tarball::
 	cp llgal.1 /tmp/$(TARBALL)
 	cp Makefile /tmp/$(TARBALL)
 	cp Changes /tmp/$(TARBALL)
-	cp COPYING README UPGRADE howto.html VERSION /tmp/$(TARBALL)
+	cp COPYING README VERSION /tmp/$(TARBALL)
+	cp howto.html upgrade.html /tmp/$(TARBALL)
 	cp -a $(DATA_SUBDIR)/ /tmp/$(TARBALL)
 	cp -a $(LIB_SUBDIR) /tmp/$(TARBALL)
 	mkdir /tmp/$(TARBALL)/$(PO_SUBDIR)/
