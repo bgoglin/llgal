@@ -1,0 +1,394 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+ "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+<head>
+ <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+ <title>llgal - On-line gallery generator - How-To?</title>
+ <link rel="stylesheet" type="text/css" href="main.css"/>
+</head>
+<body>
+
+<h1 class="title">llgal How-To?</h1>
+
+<em>
+ This How-To is available <a href="http://home.gna.org/llgal/">on-line</a>
+ and in the tarball and distribution packages.
+</em>
+
+<div class="howto">
+
+
+
+<h2 class="section">Basics</h2>
+
+
+
+<h3 class="question">How do I use llgal?</h3>
+
+Place some images and movies in a directory and simply run
+<tt>llgal</tt> inside it.
+It will generate an index file and some slides.
+
+
+
+<h3 class="question">How do I modify a gallery?</h3>
+
+You may add or remove some images in the working directory, and re-run
+<tt>llgal</tt> with different options to update the gallery contents
+or layout.
+
+If an image has been modified, you may have to force the regeneration
+of thumbnails and scaled images with <tt>-f</tt>.
+
+
+
+<h3 class="question">How do I reduce the size of the slides?</h3>
+
+If your images are large, you should try
+<pre>
+  llgal --sy 480
+</pre>
+to limit the height of the image to 480 pixels in slides.
+
+Note that a click on the slide will actually open the
+original full-size image.
+
+
+
+<h3 class="question">How do I set the title and captions?</h3>
+
+You may set the title on the command line through:
+<pre>
+  llgal --title "My title"
+</pre>
+
+To change captions, the easiest way is to ask <tt>llgal</tt>
+to generate captions first, with:
+<pre>
+  llgal --gc
+</pre>
+Then, you may edit the captions file (<tt>.llgal/captions</tt>)
+to update all captions.
+You then run <tt>llgal</tt> again, it will detect the existence
+of the captions file and use it.
+<pre>
+  llgal
+</pre>
+
+
+
+<h2 class="section">Captions and special slides</h2>
+
+
+
+<h3 class="question">How do I generate captions from images?</h3>
+
+When generating the captions file with <tt>--gc</tt>, <tt>llgal</tt>
+may automatically generate several fields for each image.
+Available fields are <b>image comments</b>, <b>filename</b> and
+<b>image timestamp</b>.
+<tt>llgal</tt> will try to generate each field and concat them
+to create the caption.
+
+To generate captions from the filename only, run:
+<pre>
+  llgal --gc --cf
+</pre>
+
+To generate captions from the image timestamp (extracted from
+Exif tags when existing) and filename:
+<pre>
+  llgal --gc --cf --ct
+</pre>
+
+To generate captions from the image comments (extract from
+JFIF or Exif), timestamp and filename:
+<pre>
+  llgal --gc --cc --cf --ct
+</pre>
+
+These commands will generate a captions file that you might then
+use when generating the gallery.
+You might also directly generate captions during the gallery
+generation through something like:
+<pre>
+  llgal --cc --ct
+</pre>
+
+Note that if a captions file exists, command line options about
+captions generation are omitted.
+
+
+
+<h3 class="question">How do I add a slide containing some text or link?</h3>
+
+After generating the captions file with <tt>--gc</tt>, you might add
+a special slide containing only some text by inserting the following
+line in the file:
+<pre>
+TXT: the text that is shown in the slide ---- the caption under the slide
+</pre>
+
+Regenerating the gallery will then add this slide.
+
+The following line add a special slide with a link instead of plain text:
+<pre>
+LNK: the url ---- the label of the link in the slide ---- the caption under the slide
+</pre>
+
+If you do not want those slide containing a single link or text to appear like this,
+you may use <tt>-L</tt> so that they will be listed as a text line in the index
+and they will not appear in any slide at all (except the TXT slides).
+
+
+
+<h3 class="question">How do I add new entries to a captions file?</h3>
+
+Re-running <tt>llgal</tt> with <tt>--gc</tt> will rescan the existing files and
+add the missing ones at the end of the captions file.
+You then re-run <tt>llgal</tt> to update the gallery regarding the new captions file.
+
+
+
+<h3 class="question">How do I keep the list of images involved in a gallery?</h3>
+
+The captions file may also be used to keep track of the contents of a gallery.
+Even if you do not add some captions or title in the captions file, you may use
+it to list the exact set of images that you want to appear in the gallery.
+
+
+
+<h2 class="section">Managing slides</h2>
+
+
+
+<h3 class="question">How do I change the order of the slides?</h3>
+
+The order of the slides might be changed with the <tt>sort</tt> option
+on command-line.
+For instance, <tt>--sort=iname</tt> sorts by name case insensitively,
+while <tt>--sort=revdate</tt> sorts by date, in reverse order.
+
+It is also possible to set the order by changing captions positions
+in the captions file.
+
+
+
+<h3 class="question">How do I select which files are included in a gallery?</h3>
+
+By default, <tt>llgal</tt> does only include images and movies in the
+gallery.
+It is possible to force it to use all existing files in the directory
+(except <tt>*.html</tt> and <tt>.*</tt>) with:
+<pre>
+  llgal -A
+</pre>
+
+It is also possible to exclude some files with <tt>--exclude regexp</tt>
+where <tt>regexp</tt> is a Perl regexp. For instance, to exclude all
+<tt>AVI</tt> files starting with <tt>MVI</tt>:
+<pre>
+  llgal --exclude 'MVI.*\.AVI'
+</pre>
+
+File that were excluded might be reincluded by using the similar
+<tt>--include</tt> option.
+
+Finally, it is always possible to exclude files by generating a captions
+file and removing some entries.
+
+Note that the captions file is a good way to keep the list of images that
+are involved in the gallery, even if you do not want any caption.
+
+
+
+<h2 class="section">Layout</h2>
+
+
+
+<h3 class="question">How do I change the layout of the slides and index?</h3>
+
+The main layout of generated webpages is based on HTML templates
+(<tt>indextemplate.html</tt> and <tt>slidetemplate.html</tt>)
+and a CSS style-sheet (<tt>llgal.css</tt>).
+
+It is possible to place modified versions of these files in the <tt>.llgal</tt>
+directory (or in <tt>$HOME/.llgal/</tt>) to change the layout.
+
+
+
+<h3 class="question">How do I change the text that llgal generates in slides and index?</h3>
+
+All text that appears in generated slides might be configured through configuration
+options.
+
+One day, there might be a full internationalization support through <tt>gettext</tt>.
+
+
+
+<h3 class="question">How do I set a thumbnail for a video or a subgallery?</h3>
+
+All non-image slides and thumbnails are usually basic text.
+It is possible to force <tt>llgal</tt> to use a special thumbnail or scaled image
+by adding a special file in the local <tt>.llgal</tt> directory.
+
+<tt>mythumb_foo.jpg</tt> will be used as a thumbnail for the entry called <tt>foo</tt>
+while <tt>myscaled_bar.jpg</tt> will be used as a scaled image for <tt>bar</tt>.
+The extension may be any image extension that <tt>llgal</tt> recognizes.
+
+
+
+<h3 class="question">How do I get image EXIF tags in my slides?</h3>
+
+Most images contains some meta-data called EXIF tags that may be useful to some people.
+<tt>llgal</tt> can display a table of some EXIF values under each image slide.
+The name of the tags correspond to what the <tt>exiftool</tt> program uses
+(see for instance <tt>exiftool --list</tt>).
+
+<pre>
+  llgal --exif Aperture,FocalLength,ImageHeight,ImageWidth,FileModifyDate
+</pre>
+
+
+
+<h2 class="section">Configuration</h2>
+
+
+
+<h3 class="question">How do I save/restore a configuration?</h3>
+
+If you like using the same options for all your galleries and don't
+want to remember the option, you may ask <tt>llgal</tt> to generate
+a configuration file with:
+<pre>
+  llgal --gencfg my_llgalrc
+</pre>
+
+This file might be used later with
+<pre>
+  llgal --config my_llgalrc
+</pre>
+
+It may also be placed in the user llgal configuration file
+<tt>$HOME/.llgal/llgalrc</tt>.
+
+The configuration file contains a list of configuration lines.
+All command line options, and even much more, are available by
+this way.
+
+It is possible to pass any configuration option on the
+command line with <tt>--option</tt>.
+For instance, to set which file extensions <tt>llgal</tt> will
+match to find movies, use:
+<pre>
+  llgal --option 'movie_extensions="mpe?g|avi|mov|ogm"'
+</pre>
+
+
+
+<h2 class="section">Multiple directories and subdirectories</h2>
+
+
+
+<h3 class="question">How do I include several subdirectories in a unique gallery?</h3>
+
+If your photos are organized in several subdirectories of the working directory,
+you can use <tt>-P</tt> to take the photos from them instead of from the working
+directory.
+
+<pre>
+  llgal -P subdir1 -P subdir2 -P subdir3
+</pre>
+
+If you want these subdirectories to appear as sections, <tt>llgal</tt> can generate
+a horizontal line between each subdirectory and add a title in the index with <tt>--Ps</tt>.
+Additionaly, <tt>llgal</tt> can display the title as regular text in the index instead
+of a text thumbnail with <tt>-L</tt>.
+
+<pre>
+  llgal -P subdir1 -P subdir2 -P subdir3 --Ps -L
+</pre>
+
+As usual, these horizontal lines and titles are generated as TXT and LINE entries
+are processed from the captions file. Thus, you may start by creating a captions file,
+edit it and then generate the gallery.
+
+<pre>
+  llgal -P subdir1 -P subdir2 -P subdir3 --Ps --gc
+  vi .llgal/captions
+  llgal -L
+</pre>
+
+
+
+<h3 class="question">How do I add a new subdirectory contents to a gallery?</h3>
+
+You may a the list of files of a subdirectory to an existing gallery if its
+captions file if available, by regenerating it:
+
+<pre>
+  llgal -P newsubdir --gc
+</pre>
+
+The directory contents is added at the end of the captions file, which may
+be reordered by the user.
+The gallery may then be regenerated from the new captions file by re-running
+<tt>llgal</tt>.
+
+
+
+<h3 class="question">How do I create multiple subgalleries at once?</h3>
+
+If your directory contains subdirectories, you might use <tt>-S</tt>
+to create slides linking to these subgalleries.
+
+With <tt>-R</tt>, the subgalleries will even be generated right after
+the main gallery.
+
+The list of subgalleries might be changed by modifying <tt>DIR:</tt>
+entries in the captions file.
+
+
+
+<h3 class="question">How do I modify a single gallery in a set of subgalleries?</h3>
+
+Galleries that were created recursively (with <tt>-R</tt>) may be
+linked with their parents, children and brothers.
+
+If you plan to regenerate some galleries independently, you should
+take care of saving the configuration with <tt>--gencfg</tt> or
+generating a captions file.
+All linking information is stored inside these files.
+
+Regeneration is then easy (with <tt>--config</tt> in the first case).
+
+
+
+</div>
+
+<hr />
+
+<p style="text-align: center">
+<a href="http://validator.w3.org/check/referer">
+ <img src="http://www.w3.org/Icons/valid-xhtml11" alt="Valid XHTML 1.1!" class="icon" />
+</a>
+
+<a href="http://jigsaw.w3.org/css-validator/check/referer">
+ <img src="http://jigsaw.w3.org/css-validator/images/vcss" alt="Valid CSS!" class="icon" />
+</a>
+
+<a href="http://validator.loulous.org/check?uri=referer">
+ <img style="border:0;width:88px;height:31px;" src="http://loulous.org/loulous.png" alt="Loulous Compliant" />
+</a>
+</p>
+
+<address id="addr">
+ The <a href="mailto:llgal-users AT gna.org">llgal team</a>.
+</address>
+
+<div id="modif">
+ $Id: howto.html,v 1.1 2006/05/07 00:46:01 bgoglin Exp $
+</div>
+
+</body>
+</html>

@@ -17,6 +17,7 @@
   * Fix image title and alternative in HTML slides.
   * Some fixes in the manpage.
   * Update captions.header with last caption entries.
+  * The How-To is now also included in the tarball.
 
 
 llgal (0.13.3)
