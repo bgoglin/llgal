@@ -8,6 +8,7 @@ endif
 DATA_SUBDIR	=	data
 LIB_SUBDIR	=	lib
 PO_SUBDIR	=	po
+DOC_SUBDIR	=	doc
 
 DESTDIR	=	
 PREFIX	=	/usr/local
@@ -55,7 +56,8 @@ tarball::
 	cp llgal.1 /tmp/$(TARBALL)
 	cp Makefile /tmp/$(TARBALL)
 	cp Changes /tmp/$(TARBALL)
-	cp COPYING README UPGRADE VERSION /tmp/$(TARBALL)
+	cp COPYING README VERSION /tmp/$(TARBALL)
+	cp -a $(DOC_SUBDIR)/ /tmp/$(TARBALL)
 	cp -a $(DATA_SUBDIR)/ /tmp/$(TARBALL)
 	cp -a $(LIB_SUBDIR) /tmp/$(TARBALL)
 	mkdir /tmp/$(TARBALL)/$(PO_SUBDIR)/

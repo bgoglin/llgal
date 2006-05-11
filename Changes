@@ -1,3 +1,33 @@
+llgal (0.13.4)
+
+  * --exif without argument shows all exif tags that exist in the image.
+  * Add --Pall (and recursive_sections) to create a section of images
+    for each subdirectory as if -P was used for each of them.
+  * Add entitle_sections configuration option to explicitely enable the
+    generation of a title for each section. separate_sections now only
+    configures the generation of a horizontal line.
+    --Ps still enables both.
+  * Add REPLACE keyword in the captions for a configurable replacement
+    in the HTML pages (requested by Alexandre Buisse).
+  * -v is now --verbose (and verbose configuration option has been added).
+    + Add/convert some messages to be printed when --verbose is passed.
+    + --version is now -V.
+  * Improve replacement of <!--FOO--> fields when generating the slides
+    and index HTML pages.
+    + More tiny optimizations of the HTML slide and index generation by
+      precomputing more fields.
+  * Add link_between_last_and_first_slide configuration option to
+    disable the links between the last and first slides.
+  * Fix generation of configuration file when an old has to be renamed.
+  * Fix image title and alternative in HTML slides.
+  * Some fixes in the manpage.
+  * Update captions.header with last caption entry types.
+  * Add a doc/ subdirectory:
+    + The How-To is now also included in the tarball.
+    + UPGRADE is now HTML'ized as upgrade.html.
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Thu, 11 May 2006 11:40:00 +0200
+
 llgal (0.13.3)
 
   * Add -P (and section_dir) to use photos in a special subdirectory
@@ -19,7 +49,7 @@ llgal (0.13.3)
     actually filling the template.
   * Improve percentage printing for progression.
 
- -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Thu, 30 Apr 2006 23:31:00 +0200
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Sun, 30 Apr 2006 23:31:00 +0200
 
 llgal (0.13.2)
 

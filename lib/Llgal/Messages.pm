@@ -15,6 +15,7 @@ sub new {
     $self->{percentage_total} = 0 ;
     $self->{delayed_warning} = 0 ;
     $self->{pending_warnings} = "" ;
+    $self->{verbose} = 0 ;
     return $self ;
 }
 
@@ -42,6 +43,14 @@ sub print {
 sub indent {
     my $self = shift ;
     $self->{indent} .= "  " ;
+}
+
+# notice (verbose mode only)
+
+sub notice {
+    my $self = shift ;
+    print @_
+	if $self->{verbose} ;
 }
 
 # Warnings are shown after each step of processing to avoid

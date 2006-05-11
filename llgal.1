@@ -140,7 +140,7 @@ for details about template files.
 Display brief help.
 
 .TP
-.B -v, --version
+.B -V, --version
 Display llgal version.
 
 
@@ -237,6 +237,10 @@ will
 check whether a subdirectory is in the captions file.
 All not-dot-begining subdirectories will be cleaned.
 
+.TP
+.B -v, --verbose
+Display notice messages.
+
 
 .SH SELECTING FILES
 
@@ -271,9 +275,15 @@ The path of the subdirectory must be given as a relative path
 .BR . " or to the path given to " -d ")."
 
 .TP
+.B --Pall
+Use photos in all subdirectories all the working directory as if
+.B -P
+was used for all of them.
+
+.TP
 .BI --Ps
-Add a separation line and the subdirectory name at the begining of
-each title.
+Add a horizontal line and the subdirectory name as a title at
+the begining of each section.
 
 .TP
 .B -S
@@ -387,15 +397,16 @@ or go crazy with
 may be used several times on the same command line.
 
 .TP
-.BI --exif " <tag1,tag2,...>"
+.BI --exif " [<tag1,tag2,...>]"
 Display a table of EXIF tags under each image slide.
+If an argument is given, it contains a comma-separated list
+of tags.
+The tag names have to be passed as shown by
+.BR "exiftool -list" .
+If no argument is given, all available Exif tags are displayed.
+
 The tags are displayed using their description as given by
 .BR "exiftool -s myimage" .
-But, they have to be passed to
-.B llgal
-using their tag name as shown by
-.B exiftool -list
-and separated with a comma.
 
 .TP
 .BI -i " <file>"
@@ -740,7 +751,10 @@ defines the label of the link to the previous gallery located by
 defines the label of the link to the next gallery located by
 .IR <url> .
 .RE
-
+.B REPLACE: <text> ---- <replacement>
+.RS
+adds a substitution to be applied to generated HTML pages.
+.RE
 .TP
 Note that you can use whatever HTML syntax in the captions.
 .RE
@@ -1083,6 +1097,12 @@ next slide
 Default is
 .BR 0 " (" disabled ).
 .RE
+.I link_between_last_and_first_slide = <0/1>
+.RS
+Generate links between last and first slides.
+Default is
+.BR 1 " (" enabled ).
+.RE
 .I make_slide_title_from_caption = <0/1>
 .RS
 Generate slide titles from captions
@@ -1090,13 +1110,19 @@ Generate slide titles from captions
 Default is
 .BR 0 " (" disabled ).
 .RE
-.I show_exif_tags = <tag1,tag2,...>"
+.I show_exif_tags = <tag1,tag2,...>
 .RS
 Display a table of EXIF tags under each image slide
 .RB [ --exif ].
 The tags are given with their name in
 .B exiftool -list
 and separated with a comma.
+.RE
+.I show_all_exif_tags = <0/1>
+.RS
+Display a table of all available EXIF tags under each image slide
+.RB [ --exif ].
+.RE
 
 .B Captions:
 
@@ -1330,10 +1356,16 @@ This option may be used several times.
 Subdirectory path must be given relatively to the working directory.
 Default is to use the content of the working directory.
 .RE
+.I entitle_sections = <0/1>
+.RS
+Add the subdirectory name as a title at the begining each section
+.RB [ --Ps ].
+Default is
+.BR 0 " (" disabled ).
+.RE
 .I separate_sections = <0/1>
 .RS
-Add a separation line and the subdirectory name at the begining of
-each section
+Add a horizontal line at the begining of each section in the index
 .RB [ --Ps ].
 Default is
 .BR 0 " (" disabled ).
@@ -1437,7 +1469,14 @@ Default is \fB""\fR.
 Force regeneration of thumbnails and scaled images
 .RB [ -f ].
 Default is
-.BR 0 .
+.BR 0 " (" disabled ).
+.RE
+.I verbose = <0/1>
+.RS
+Print notice messages
+.RB [ -v ].
+Default is
+.BR 0 " (" disabled ).
 .RE
 .I www_access_rights = <0/1>
 .RS
@@ -1459,6 +1498,10 @@ Default is \fB"html"\fR.
 When generation web pages, the following fields will be replaced
 from the templates by the associated value (computed by llgal).
 
+.B <!--TITLE-->
+.RS
+The title of the index.
+.RE
 .B <!--CSS-->
 .RS
 The CSS style-sheet.
@@ -1469,19 +1512,28 @@ The credits line given by
 .I credits_text
 configuration option.
 .RE
+.B <!--INDEX-FILE-->
+.RS
+The filename of the index.
+.RE
+.B <!--INDEX-LINK-TEXT-->
+.RS
+The label of the link to the index (might be an image).
+.RE
 .B LLGAL-CODESET
 .RS
 The character encoding, usually set to iso-8859-1 or utf-8.
+.RE
+.B LLGAL-OPTIONS
+.RS
+The options that were passed to llgal on the command line
+to generate the gallery.
 .RE
 
 When generating the index from template
 .IR indextemplate.html ,
 the following additional fields will also be replaced.
 
-.B <!--TITLE-->
-.RS
-The title of the index.
-.RE
 .B <!--HEADERS-->
 .RS
 The list of headers that are given in the captions file.
@@ -1489,10 +1541,6 @@ The list of headers that are given in the captions file.
 .B <!--FOOTERS-->
 .RS
 The list of footers that are given in the captions file.
-.RE
-.B LLGAL-OPTIONS
-.RS
-The command line that was used to generate the gallery.
 .RE
 
 When generating slides from template
@@ -1502,26 +1550,6 @@ the following additional fields will also be replaced.
 .B <!--SLIDE-TITLE-->
 .RS
 The title of the slide.
-.RE
-.B <!--INDEX-FILE-->
-.RS
-The filename of the index.
-.RE
-.B <!--INDEX-LINK-TEXT-->
-.RS
-The label of the link to the index (might be an image).
-.RE
-.BR <!--PREV-SLIDE--> and <!--NEXT-SLIDE-->
-.RS
-The filename of the previous and next slides.
-.RE
-.BR <!--NEXT-SLIDE-LINK-TEXT--> and <!--PREV-SLIDE-LINK-TEXT-->
-.RS
-The label of the link to previous and next slides (might be an image).
-.RE
-.B <!--THIS-SLIDE-->
-.RS
-The actual contents of the slide (might be an image).
 .RE
 .B <!--THIS-SLIDE-STYLE-->
 .RS
@@ -1535,6 +1563,26 @@ The caption of the slide.
 .RS
 The table of EXIF tags.
 .RE
+.B <!--THIS-SLIDE-->
+.RS
+The actual contents of the slide (might be an image).
+.RE
+.BR <!--PREV-SLIDE--> and <!--NEXT-SLIDE-->
+.RS
+The filename of the previous and next slides.
+.RE
+.BR <!--NEXT-SLIDE-LINK-TEXT--> and <!--PREV-SLIDE-LINK-TEXT-->
+.RS
+The label of the link to previous and next slides (might be an image).
+.RE
+
+Additionally, it is possible to define use custom fields in the
+templates and define their replacement with some
+.B REPLACE
+entries in the captions file.
+See
+.B CAPTIONS
+for details.
 
 
 .SH LANGUAGE

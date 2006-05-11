@@ -166,10 +166,16 @@
 # Generate slide titles from captions [-k]
 # make_slide_title_from_caption = 0
 
+# Generate links between last and first slides.
+# link_between_last_and_first_slide = 1
+
 # Display a table of EXIF tags under each image slide [--exif]
 # The tags are given with their name in exiftool -list and separated
 # with a comma.
 # show_exif_tags = ""
+
+# Display a table of all available EXIF tags under each image slide [--exif]
+# show_all_exif_tags = 0
 
 ##### Captions #####
 
@@ -301,7 +307,9 @@
 # Add a new subdirectory to the list of sections [-P]
 # section_dir = "subdir"
 
-# Add a separation line and the subdirectory name at the begining of each section [--Ps]
+# Add the subdirectory name as a title at the begining of each section [--Ps]
+
+# Add a horizontal line at the begining of each section in the index [--Ps]
 # separate_sections = 0
 
 ##### Recursion #####
@@ -351,6 +359,9 @@
 
 # Force regeneration of thumbnails and scaled images [-f].
 # force_image_regeneration = 0
+
+# Print notice messages [-v]
+# verbose = 0
 
 # Give access rights for www access [--www]
 # www_access_rights = 0
