@@ -2,6 +2,8 @@
   * Add REPLACE keyword in the captions for a configurable replacement
     in the HTML pages (requested by Alexandre Buisse).
   * --exif without argument shows all exif tags that exist in the image.
+  * Add --Pall (and recursive_sections) to create a section of images
+    for each subdirectory as if -P was used for each of them.
   * Add entitle_sections configuration option to explicitely enable the
     generation of a title for each section. separate_sections now only
     configures the generation of a horizontal line.

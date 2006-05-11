@@ -31,8 +31,8 @@ my $self = {
     local_llgal_dir => ".llgal",
     # look in current directory "."
     destination_dir => ".",
-    # no subsection by default
-    # subsection_dirs => (),
+    # no section by default
+    # section_dirs => (),
 
     # some variable may only be modified when by system
     # or user-wide configuration files only
@@ -881,48 +881,61 @@ sub finalize_entries {
 #######################################################################
 # Generating entry table from files in target directory
 
+sub sort_entries {
+    if ($opts->{sort_criteria} eq "name") {
+	return sort @_ ;
+    } elsif ($opts->{sort_criteria} eq "revname") {
+	return sort { $b cmp $a } @_ ;
+
+    } elsif ($opts->{sort_criteria} eq "iname") {
+	return sort { uc($a) cmp uc($b) } @_ ;
+    } elsif ($opts->{sort_criteria} eq "reviname") {
+	return sort { uc($b) cmp uc($a) } @_ ;
+
+    } elsif ($opts->{sort_criteria} eq "date" or $opts->{sort_criteria} eq "time") {
+	return sort { (-M $a) <=> (-M $b) } @_ ;
+    } elsif ($opts->{sort_criteria} eq "revdate" or $opts->{sort_criteria} eq "revtime") {
+	return sort { (-M $b) <=> (-M $a) } @_ ;
+
+    } elsif ($opts->{sort_criteria} eq "size") {
+	return sort { (-s $a) <=> (-s $b) } @_ ;
+    } elsif ($opts->{sort_criteria} eq "revsize") {
+	return sort { (-s $b) <=> (-s $a) } @_ ;
+
+    } elsif ($opts->{sort_criteria} eq "none" or $opts->{sort_criteria} eq "") {
+	return @_
+    } else {
+	die "Unknown sort criteria '$opts->{sort_criteria}'.\n" ;
+    }
+}
+
 sub get_entries_from_directory {
     my $dir = shift ;
-    my $dir_string = shift ;
     my $subdir = shift ;
     my $add_subdirs = shift ;
     my $add_others = shift ;
     my @entries = () ;
 
-    opendir DIR, "$dir$subdir"
-	or die "Can't open $dir_string$subdir ($!)\n" ;
+    my $destdir = "$dir$subdir" ;
+    my $destdir_string = "directory $dir$subdir" ;
+    if (!$destdir) {
+	$destdir = "." ;
+	$destdir_string = "current directory" ;
+    }
+
+    my $subdir_string = $subdir ;
+    $subdir_string = "." unless $subdir_string ;
+
+    opendir DIR, $destdir
+	or die "Can't open $destdir_string ($!)\n" ;
     # get all files, except dot-starting ones and webpages
-    my @filenames = map { "$subdir$_" } (grep ((!/\.$opts->{www_extension}$/i and !/^\./), readdir DIR)) ;
+    my @filenames = map { ($subdir ? "$subdir/" : "").$_ } (grep ((!/\.$opts->{www_extension}$/i and !/^\./), readdir DIR)) ;
     closedir DIR ;
 
     # sort now so that slide numbering doesn't become wrong later
-    if ($opts->{sort_criteria} eq "name") {
-	@filenames = sort @filenames ;
-    } elsif ($opts->{sort_criteria} eq "revname") {
-	@filenames = sort { $b cmp $a } @filenames ;
+    @filenames = sort_entries @filenames ;
 
-    } elsif ($opts->{sort_criteria} eq "iname") {
-	@filenames = sort { uc($a) cmp uc($b) } @filenames ;
-    } elsif ($opts->{sort_criteria} eq "reviname") {
-	@filenames = sort { uc($b) cmp uc($a) } @filenames ;
-
-    } elsif ($opts->{sort_criteria} eq "date" or $opts->{sort_criteria} eq "time") {
-	@filenames = sort { (-M $a) <=> (-M $b) } @filenames ;
-    } elsif ($opts->{sort_criteria} eq "revdate" or $opts->{sort_criteria} eq "revtime") {
-	@filenames = sort { (-M $b) <=> (-M $a) } @filenames ;
-
-    } elsif ($opts->{sort_criteria} eq "size") {
-	@filenames = sort { (-s $a) <=> (-s $b) } @filenames ;
-    } elsif ($opts->{sort_criteria} eq "revsize") {
-	@filenames = sort { (-s $b) <=> (-s $a) } @filenames ;
-
-    } elsif ($opts->{sort_criteria} eq "none" or $opts->{sort_criteria} eq "") {
-	# do not sort
-    } else {
-	die "Unknown sort criteria '$opts->{sort_criteria}'.\n" ;
-    }
-
-    $messages->print ("Listing entries".($subdir ? " in $subdir " : "").": ") ;
+    $messages->print ("Listing entries in $subdir_string : ") ;
     $messages->init_percentage (scalar @filenames) ;
 
     for(my $i = 0; $i < @filenames; $i++) {
@@ -972,35 +985,76 @@ sub get_entries_from_directory {
     return @entries ;
 }
 
+sub get_subdir_tree {
+    my @processed_dirs = () ;
+    my @remaining_dirs = ("") ;
+
+    while (@remaining_dirs) {
+	my $current_dir = shift @remaining_dirs ;
+	my $destdir = "$self->{destination_dir}$current_dir" ;
+	my $destdir_string = "directory $destdir" ;
+	if (!$destdir) {
+	    $destdir = "." ;
+	    $destdir_string = "current directory" ;
+	}
+
+	# enqueue subdirectories
+	opendir DIR, $destdir
+	    or die "Can't open $destdir_string ($!)\n" ;
+	unshift @remaining_dirs, ( sort_entries
+				   # add subdirectories only
+				   ( grep { -d "$self->{destination_dir}$_" }
+				     ( map { "$current_dir$_/" }
+				       # except those starting with a dot
+				       ( grep ((!/^\./),
+					       ( readdir DIR ) ) ) ) ) ) ;
+	closedir DIR ;
+
+	# this directory is done
+	push @processed_dirs, $current_dir ;
+    }
+    return @processed_dirs ;
+}
+
 sub get_entries {
     my $opts = shift ;
     my @entries = () ;
-    my $dir = $self->{destination_dir} ? $self->{destination_dir} : "./" ; # destination is empty for './'
-    if (defined $opts->{section_dirs} and @{$opts->{section_dirs}}) {
-	foreach my $subdir (@{$opts->{section_dirs}}) {
+
+    if ($opts->{recursive_sections}
+	or (defined $opts->{section_dirs} and @{$opts->{section_dirs}})) {
+	my @subdirs ;
+	if ($opts->{recursive_sections}) {
+	    @subdirs = get_subdir_tree () ;
+	} else {
+	    @subdirs = @{$opts->{section_dirs}} ;
+	}
+	foreach my $subdir (@subdirs) {
 	    # remove ending slashes
 	    $subdir =~ s/\/*$//g ;
 	    # separation line and title
 	    push @entries, (create_nofile_entry $TYPE_LINE, undef, undef, undef)
 		if $opts->{separate_sections} ;
-	    push @entries, (create_nofile_entry $TYPE_TEXT, undef, $opts->{section_text}.$subdir, $opts->{section_text}.$subdir)
-		if $opts->{entitle_sections} ;
+	    if ($opts->{entitle_sections}) {
+		my $text = $opts->{section_text}.($subdir ? $subdir : ".") ;
+		push @entries, (create_nofile_entry $TYPE_TEXT, undef, $text, $text) ;
+	    }
 	    # section entries
 	    push @entries, get_entries_from_directory
-		$dir,
-		$destination_string,
-		"$subdir/",
+		$self->{destination_dir},
+		$subdir,
 		($opts->{add_subdirs} or $opts->{recursive}),
 		$opts->{add_all_files} ;
 	}
+
     } else {
 	@entries = get_entries_from_directory
-	    $dir,
-	    $destination_string,
+	    $self->{destination_dir},
 	    "",
 	    ($opts->{add_subdirs} or $opts->{recursive}),
 	    $opts->{add_all_files} ;
+
     }
+
     return @entries ;
 }
 

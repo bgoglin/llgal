@@ -181,6 +181,7 @@ my $normal_opts_type = {
 # Sections
     entitle_sections => $OPT_IS_NUMERIC,
     separate_sections => $OPT_IS_NUMERIC,
+    recursive_sections => $OPT_IS_NUMERIC,
 # Recursion
     parent_gallery_link => $OPT_IS_NUMERIC,
     prev_gallery_link => $OPT_IS_NUMERIC,
@@ -444,6 +445,8 @@ sub add_defaults {
 	entitle_sections => 0,
 # do we separate sections in the gallery
 	separate_sections => 0,
+# do we create sections for all subdirectories
+	recursive_sections => 0,
 
 # Recursion
 # add links between subgalleries
@@ -512,6 +515,9 @@ Selecting files:
     -A                 add all non-image non-video files to the list of slides
     --exclude <s>      exclude matching files
     --include <s>      include matching files that were excluded
+    -P <dir>           add a section with images in subdirectory <dir>
+    --Pall             add sections and images from all subdirectories
+    --Ps               separate sections in the index with a line and a title
     -S                 add subdirectories to the list of slides
 Layout Options:
     -a                 write image sizes under thumbnails on index page
@@ -534,8 +540,6 @@ Layout Options:
     -n                 use image file names for the HTML slide files
     --nc               omit the image count from the captions
     --nf               omit the film effect altogether
-    -P <dir>           use images in <dir> subdirectory of the working directory
-    -Ps                separate sections in the index with a line and a title
     -p <n>             cellpadding value of thumbnail index tables (3)
     --php              use php extension for generated webpages
     --Rl               add links between subgalleries
@@ -808,6 +812,7 @@ sub parse_cmdline_options {
 	'nf'		=> \$opts->{show_no_film_effect},
 	'option=s'	=> sub { shift ; process_option $self, $opts, shift ; },
 	'P=s'		=> \@{$opts->{section_dirs}},
+	'Pall'		=> \$opts->{recursive_sections},
 	'Ps'		=> sub { $opts->{entitle_sections} = 1 ; $opts->{separate_sections} = 1 ; },
 	'p=i'		=> \$opts->{index_cellpadding},
 	'php'		=> sub { $opts->{www_extension} = "php" ; },
