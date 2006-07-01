@@ -1,6 +1,8 @@
   * When linking to galleries, add the index filename to the URL so
     that these links work even without a web server
     (thanks to Michael Waschbüsch for the patch).
+  * Document how to add keyboard shortcuts to the gallery with
+    HTML accesskeys (see the How-To file).
   * Document --parent/prev/next-gal options in the usage since they
     are not internal anymore (reported by Samuel Thibault).
 

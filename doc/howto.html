@@ -375,6 +375,38 @@ Regeneration is then easy (with <tt>--config</tt> in the first case).
 
 
 
+<h2 class="section">Basics</h2>
+
+
+
+<h3 class="question">How do I add keyboard shortcuts to my gallery?</h3>
+
+The HTML accesskey feature may be use to navigate in <tt>llgal</tt>'s
+galleries with keyboard shortcuts. But as this feature is very browser
+dependant and might conflict with some regular shortcuts in certain
+browsers, it is not enabled by default in <tt>llgal</tt>.
+
+Access keys can be configured by changing the templates and adding
+<tt>accesskey=&lt;letter&gt;</tt> to links.
+For instance, changing the <tt>slidetemplate.html</tt> code to the
+following one will define <tt>p</tt>, <tt>n</tt> and <tt>i</tt> as
+accesskeys to previous slide, next slide and return to the index.
+It means that <tt>Alt+p</tt>, <tt>Alt+n</tt> and <tt>Alt+i</tt> will
+be the actual shortcuts in Mozilla Firefox.
+
+<pre>
+      &lt;a href="&lt;!--PREV-SLIDE--&gt;" accesskey=p&gt;&lt;!--PREV-SLIDE-LINK-TEXT--&gt;&lt;/a&gt;
+      &amp;nbsp; &amp;nbsp; &amp;nbsp;
+      &lt;a href="&gt;!--INDEX-FILE--&gt;" accesskey=i&gt;&lt;!--INDEX-LINK-TEXT--&gt;&lt;/a&gt;
+      &amp;nbsp; &amp;nbsp; &amp;nbsp;
+      &lt;a href="&lt;!--NEXT-SLIDE--&gt;" accesskey=n&gt;&lt;!--NEXT-SLIDE-LINK-TEXT--&gt;&lt;/a&gt;
+</pre>
+
+Note that the slide template might be modified by getting a copy with
+in the local or user-wide configuration directory using <tt>--gt</tt>.
+
+
+
 </div>
 
 <hr />
