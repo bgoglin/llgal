@@ -1,3 +1,8 @@
+  * When linking to galleries, add the index filename to the URL so
+    that these links work even without a web server
+    (thanks to Michael Waschbüsch for the patch).
+
+
 llgal (0.13.4)
 
   * --exif without argument shows all exif tags that exist in the image.

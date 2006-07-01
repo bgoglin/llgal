@@ -420,6 +420,9 @@ sub create_file_entry {
     }
     $entry->{linktext} = $linktext ;
 
+    $entry->{url} = $entry->{url}."/".$opts->{index_filename}.".".$opts->{www_extension}
+	if $type == $TYPE_DIR ;
+
     # for images, extract required exif infos
     if ($type == $TYPE_IMAGE) {
 	my @exif_tags = () ;
@@ -1392,7 +1395,7 @@ sub add_headers_footers {
 	if $opts->{next_gallery_link} ;
     unshift @headers, "<a href=\"$opts->{prev_gallery_link_target}\">$opts->{prev_gallery_link_text}$opts->{prev_gallery_link_target}</a>"
 	if $opts->{prev_gallery_link} ;
-    unshift @headers, "<a href=\"..\">$opts->{parent_gallery_link_text}</a>"
+    unshift @headers, "<a href=\"../$opts->{index_filename}.$opts->{www_extension}\">$opts->{parent_gallery_link_text}</a>"
 	if $opts->{parent_gallery_link} ;
 
     # prev, next and parent
@@ -1400,7 +1403,7 @@ sub add_headers_footers {
 	if $opts->{prev_gallery_link} ;
     push @footers, "<div style=\"text-align: right;\"><a href=\"$opts->{next_gallery_link_target}\">$opts->{next_gallery_link_text}$opts->{next_gallery_link_target}</a></div>"
 	if $opts->{next_gallery_link} ;
-    push @footers, "<a href=\"..\">$opts->{parent_gallery_link_text}</a>"
+    push @footers, "<a href=\"../$opts->{index_filename}.$opts->{www_extension}\">$opts->{parent_gallery_link_text}</a>"
 	if $opts->{parent_gallery_link} ;
 
     @{$gallery->{headers}} = @headers ;
