@@ -1,6 +1,8 @@
   * When linking to galleries, add the index filename to the URL so
     that these links work even without a web server
     (thanks to Michael Waschbüsch for the patch).
+  * Document --parent/prev/next-gal options in the usage since they
+    are not internal anymore (reported by Samuel Thibault).
 
 
 llgal (0.13.4)

@@ -541,6 +541,9 @@ Layout Options:
     --nc               omit the image count from the captions
     --nf               omit the film effect altogether
     -p <n>             cellpadding value of thumbnail index tables (3)
+    --parent-gal       add links to the parent gallery
+    --prev-gal <url>   add links to the previous gallery in <url>
+    --next-gal <url>   add links to the next gallery in <url>
     --php              use php extension for generated webpages
     --Rl               add links between subgalleries
     -s                 make no HTML slides, link thumbnails to images
