@@ -5,6 +5,8 @@
     HTML accesskeys (see the How-To file).
   * Document --parent/prev/next-gal options in the usage since they
     are not internal anymore (reported by Samuel Thibault).
+  * Fix links to prev/next galleries when the current gallery current
+    both some subdirectories and regular files.
 
 
 llgal (0.13.4)

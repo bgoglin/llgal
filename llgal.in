@@ -2201,11 +2201,12 @@ sub main_process {
 
 	if ($opts->{recursive}) {
 	    # list subdir entries
-	    my @entries = grep { $_->{type} == $TYPE_DIR } @{$gallery->{entries}} ;
+	    my @entries = @{$gallery->{entries}} ;
 	    # process recursively
 	    print "\n" if @entries ;
 	    for (my $i = 0; $i < @entries; $i++) {
 	        my $entry = $entries[$i] ;
+		next if $entry->{type} != $TYPE_DIR ;
 		my $dir = $entry->{filename} ;
 		my $revdir = back_path $dir ;
 
