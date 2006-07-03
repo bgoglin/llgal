@@ -184,10 +184,6 @@ my $normal_opts_type = {
     recursive_sections => $OPT_IS_NUMERIC,
 # Recursion
     parent_gallery_link => $OPT_IS_NUMERIC,
-    prev_gallery_link => $OPT_IS_NUMERIC,
-    prev_gallery_link_target => $OPT_IS_STRING,
-    next_gallery_link => $OPT_IS_NUMERIC,
-    next_gallery_link_target => $OPT_IS_STRING,
     link_subgalleries => $OPT_IS_NUMERIC,
 # Various
     codeset => $OPT_IS_STRING,
@@ -453,12 +449,6 @@ sub add_defaults {
 	link_subgalleries => 0,
 # generate header and footer for link to parent gallery
 	parent_gallery_link => 0,
-# generate header and footer for link to previous subgallery
-	prev_gallery_link => 0,
-	prev_gallery_link_target => "",
-# generate header and footer for link to next subgallery
-	next_gallery_link => 0,
-	next_gallery_link_target => "",
 
 # Various
 # codeset to be set in HTML headers (--codeset)
@@ -542,8 +532,6 @@ Layout Options:
     --nf               omit the film effect altogether
     -p <n>             cellpadding value of thumbnail index tables (3)
     --parent-gal       add links to the parent gallery
-    --prev-gal <url>   add links to the previous gallery in <url>
-    --next-gal <url>   add links to the next gallery in <url>
     --php              use php extension for generated webpages
     --Rl               add links between subgalleries
     -s                 make no HTML slides, link thumbnails to images
@@ -855,8 +843,6 @@ sub parse_cmdline_options {
 				push @{$opts->{excludes}}, $entry ;
 				},
 	'parent-gal'	=> \$opts->{parent_gallery_link},
-	'prev-gal=s'	=> sub { shift ; $opts->{prev_gallery_link_target} = shift ; $opts->{prev_gallery_link} = 1 ; },
-	'next-gal=s'	=> sub { shift ; $opts->{next_gallery_link_target} = shift ; $opts->{next_gallery_link} = 1 ; },
     )) {
 	# there has been an error during command line parsing
 	if ($no_usage_on_getoptions_error) {

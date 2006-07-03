@@ -3,10 +3,16 @@
     (thanks to Michael Waschbüsch for the patch).
   * Document how to add keyboard shortcuts to the gallery with
     HTML accesskeys (see the How-To file).
-  * Document --parent/prev/next-gal options in the usage since they
-    are not internal anymore (reported by Samuel Thibault).
+  * Only keep the last part of the path to generate the name that is
+    used in links to prev/next galleries.
+  * Fix broken PREV/NEXT: entry generation in the gallery.
   * Fix links to prev/next galleries when the current gallery current
     both some subdirectories and regular files.
+  * Document --parent-gal options in the usage since it is
+    not internal anymore (reported by Samuel Thibault).
+  * Drop --prev/next-gal and {prev,next}_gallery_link{,_target} since
+    only the captions file is more suited to configure this.
+    {prev,next}_gallery_link_text remains to configure the link text prefix.
 
 
 llgal (0.13.4)

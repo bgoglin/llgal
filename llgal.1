@@ -472,14 +472,6 @@ and so on.
 Omit the image count from the captions.
 
 .TP
-.BI --next-gal " <url>"
-Add links to the previous gallery located by
-.IR <url> .
-This option is used internally for recursive galleries, and
-thus not documented in
-.BR --help .
-
-.TP
 .B --nf
 Omit the film effect altogether.  For a simpler look you
 can also set the thumbnail background to be the same as the main
@@ -514,14 +506,6 @@ These links are stored as a header and a footer for the index.
 The text in the links might be changed through the
 .B parent_gallery_link_text
 configuration option.
-
-.TP
-.BI --prev-gal " <url>"
-Add links to the previous gallery located by
-.IR <url> .
-This option is used internally for recursive galleries, and
-thus not documented in
-.BR --help .
 
 .TP
 .B --Rl
@@ -1393,30 +1377,6 @@ Add links to the parent directory
 .RB [ --parent ].
 Default is
 .BR 0 " (" disabled ).
-.RE
-.I prev_gallery_link = <0/1>
-.RS
-Add links to the previous subgallery
-.RB [ "--prev-gal <url>" ].
-Default is
-.BR 0 " (" disabled ).
-.RE
-.I prev_gallery_link_target = \fI"string"
-.RS
-Target of the link to the previous subgallery
-.RB [ "--prev-gal <url>" ].
-.RE
-.I next_gallery_link = <0/1>
-.RS
-Add links to the next subgallery
-.RB [ "--next-gal <url>" ].
-Default is
-.BR 0 " (" disabled ).
-.RE
-.I next_gallery_link_target = \fI"string"
-.RS
-Target of the link to the next subgallery
-.RB [ "--next-gal <url>" ].
 .RE
 
 .B Various:
