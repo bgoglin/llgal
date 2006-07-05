@@ -420,6 +420,17 @@ sub create_file_entry {
     }
     $entry->{linktext} = $linktext ;
 
+    if ($type == $TYPE_DIR) {
+	# subgallery specific fields
+
+	# add index.html so that it works without a web server
+	$entry->{url} = $entry->{url}."/".$opts->{index_filename}.".".$opts->{www_extension} ;
+
+	# generate a name for links from prev/next gallery
+	my @parts = split /\//, $filename ;
+	$entry->{gallery_name} = pop @parts ;
+    }
+
     # for images, extract required exif infos
     if ($type == $TYPE_IMAGE) {
 	my @exif_tags = () ;
@@ -1119,9 +1130,10 @@ sub setup_destination {
 # Generate captions file
 
 sub generate_captions_entries {
+    my $gallery = shift ;
     my $opts = shift ;
 
-    my @entries = get_entries $opts ;
+    my @entries = @{$gallery->{entries}} ;
 
     $messages->print ("Found ". (scalar @entries) ." entries in $destination_string\n") ;
 
@@ -1133,11 +1145,9 @@ sub generate_captions_entries {
     my $old_parent_gallery_link = 0 ;
     my $old_parent_gallery_link_text ;
 
-    my $old_prev_gallery_link = 0 ;
     my $old_prev_gallery_link_target ;
     my $old_prev_gallery_link_text ;
 
-    my $old_next_gallery_link = 0 ;
     my $old_next_gallery_link_target ;
     my $old_next_gallery_link_text ;
 
@@ -1155,11 +1165,9 @@ sub generate_captions_entries {
 		$old_parent_gallery_link = 1 ;
 		$old_parent_gallery_link_text = $1 ;
 	    } elsif ($line =~ /^PREV:\s*(.+)\s+----\s+(.+)\s*/) {
-		$old_prev_gallery_link = 1 ;
 		$old_prev_gallery_link_target = $2 ;
 		$old_prev_gallery_link_text = $1 ;
 	    } elsif ($line =~ /^NEXT:\s*(.+)\s+----\s+(.+)\s*/) {
-		$old_next_gallery_link = 1 ;
 		$old_next_gallery_link_target = $2 ;
 		$old_next_gallery_link_text = $1 ;
 	    }
@@ -1191,20 +1199,22 @@ sub generate_captions_entries {
     print CAP "TITLE: $opts->{index_title}\n"
 	if !defined $old_title
 	    or $old_title ne $opts->{index_title} ;
-    print CAP "PARENT: $opts->{parent_gallery_link_text}\n"
-	if $opts->{parent_gallery_link} and
-	    ( !$old_parent_gallery_link
-	    or $old_parent_gallery_link_text ne $opts->{parent_gallery_link_text} ) ;
-    print CAP "PREV: $opts->{prev_gallery_link_text} ---- $opts->{prev_gallery_link_target}\n"
-	if $opts->{prev_gallery_link} and
-	    ( !$old_prev_gallery_link
-	    or $old_prev_gallery_link_target ne $opts->{prev_gallery_link_target}
-	    or $old_prev_gallery_link_text ne $opts->{prev_gallery_link_text} ) ;
-    print CAP "NEXT: $opts->{next_gallery_link_text} ---- $opts->{next_gallery_link_target}\n"
-	if $opts->{next_gallery_link} and
-	    ( !$old_next_gallery_link
-	    or $old_next_gallery_link_target ne $opts->{next_gallery_link_target}
-	    or $old_next_gallery_link_text ne $opts->{next_gallery_link_text} ) ;
+    print CAP "PARENT: $gallery->{parent_gallery_link_text}\n"
+	if ( defined $gallery->{parent_gallery_link_target}
+	     and ( !$old_parent_gallery_link
+		   or $old_parent_gallery_link_text ne $gallery->{parent_gallery_link_text} ) ) ;
+    print CAP "PREV: $gallery->{prev_gallery_link_text} ---- $gallery->{prev_gallery_link_target}\n"
+	if ( defined $gallery->{prev_gallery_link_target}
+	     and ( !defined $old_prev_gallery_link_target
+		   or $old_prev_gallery_link_target ne $gallery->{prev_gallery_link_target}
+		   or !defined $old_prev_gallery_link_text
+		   or $old_prev_gallery_link_text ne $gallery->{prev_gallery_link_text} ) ) ;
+    print CAP "NEXT: $gallery->{next_gallery_link_text} ---- $gallery->{next_gallery_link_target}\n"
+	if ( defined $gallery->{next_gallery_link_target}
+	     and ( !defined $old_next_gallery_link_target
+		   or $old_next_gallery_link_target ne $gallery->{next_gallery_link_target}
+		   or !defined $old_next_gallery_link_text
+		   or $old_next_gallery_link_text ne $gallery->{next_gallery_link_text} ) ) ;
     print CAP "\n" ;
 
     $messages->init_percentage (scalar @entries) ;
@@ -1259,8 +1269,6 @@ sub generate_captions_entries {
     $messages->end_percentage () ;
 
     close CAP ;
-
-    return @entries ;
 }
 
 #######################################################################
@@ -1300,21 +1308,21 @@ sub read_captions_file {
 		# footer for the index
 		push @footers, $1 ;
 
-# TODO move these to $gallery
 	    } elsif ($line =~ m/^PARENT:\s*(.*)\s*$/) {
 		# parent gallery link label
-		$opts->{parent_gallery_link} = 1 ;
-		$opts->{parent_gallery_link_text} = $1 ;
+		$gallery->{parent_gallery_link} = 1 ;
+		$gallery->{parent_gallery_link_text} = $1 ;
+		$gallery->{parent_gallery_link_target} = "../$opts->{index_filename}.$opts->{www_extension}" ;
 
 	    } elsif ($line =~ m/^PREV:\s*(.*)\s+----\s+(.*)\s*$/) {
 		# prev gallery link label
-		$opts->{prev_gallery_link_text} = $1 ;
-		$opts->{prev_gallery_link} = $2 ;
+		$gallery->{prev_gallery_link_text} = $1 ;
+		$gallery->{prev_gallery_link_target} = $2 ;
 
 	    } elsif ($line =~ m/^NEXT:\s*(.*)\s+----\s+(.*)\s*$/) {
 		# next gallery link label
-		$opts->{next_gallery_link_text} = $1 ;
-		$opts->{next_gallery_link} = $2 ;
+		$gallery->{next_gallery_link_text} = $1 ;
+		$gallery->{next_gallery_link_target} = $2 ;
 
 	    } elsif ($line =~ m/^REPLACE:\s*(.+)\s+----\s+(.*)\s*$/) {
 		# replacing
@@ -1380,6 +1388,71 @@ sub read_captions_file {
 }
 
 #######################################################################
+# Links to add in a subgallery
+
+# revert a path into ..
+sub back_path {
+    my $dir = shift ;
+    $dir =~ s/([^\/]+)/../g ;
+    return $dir ;
+}
+
+# store data about how a subgallery will be linked to parent/prev/next
+sub create_subgallery_family {
+    my $entry = shift ;
+    my $opts = shift ;
+    my $nentries = shift ;
+    my $prev = shift ;
+    my $next = shift ;
+
+    my $dir = $entry->{filename} ;
+    my $revdir = back_path $dir ;
+
+    # contents of links in the subgallery
+    my $family = () ;
+    # additional opts to generate the subgallery
+    my $subdir_opts = {} ;
+
+    # link to the parent gallery
+    $subdir_opts->{parent_gallery_link} = 1 ;
+
+    if ($opts->{link_subgalleries} and $nentries > 1) {
+	# link to the previous gallery
+	if ($prev->{type} == $TYPE_DIR) {
+	    $family->{prev_gallery_link_target} = "$revdir/$prev->{url}" ;
+	    $family->{prev_gallery_link_text} = $prev->{gallery_name} ;
+	}
+	# link to the next gallery
+	if ($next->{type} == $TYPE_DIR) {
+	    $family->{next_gallery_link_target} = "$revdir/$next->{url}" ;
+	    $family->{next_gallery_link_text} = $next->{gallery_name} ;
+	}
+    }
+
+    return ($subdir_opts, $family) ;
+}
+
+# convert family data from parent to the current gallery
+sub process_gallery_family {
+    my $gallery = shift ;
+    my $family = shift ;
+    my $opts = shift ;
+
+    if ($opts->{parent_gallery_link}) {
+	$gallery->{parent_gallery_link_text} = $opts->{parent_gallery_link_text} ;
+	$gallery->{parent_gallery_link_target} = "../$opts->{index_filename}.$opts->{www_extension}" ;
+    }
+    if (defined $family->{prev_gallery_link_text}) {
+	$gallery->{prev_gallery_link_text} = $opts->{prev_gallery_link_text} . $family->{prev_gallery_link_text} ;
+	$gallery->{prev_gallery_link_target} = $family->{prev_gallery_link_target} ;
+    }
+    if (defined $family->{next_gallery_link_text}) {
+	$gallery->{next_gallery_link_text} = $opts->{next_gallery_link_text} . $family->{next_gallery_link_text} ;
+	$gallery->{next_gallery_link_target} = $family->{next_gallery_link_target} ;
+    }
+}
+
+#######################################################################
 # Add recursion header and footer
 
 sub add_headers_footers {
@@ -1387,21 +1460,33 @@ sub add_headers_footers {
     my @headers = @{$gallery->{headers}} ;
     my @footers = @{$gallery->{footers}} ;
 
-    # parent, prev and next, in reverse order
-    unshift @headers, "<div style=\"text-align: right;\"><a href=\"$opts->{next_gallery_link_target}\">$opts->{next_gallery_link_text}$opts->{next_gallery_link_target}</a></div>"
-	if $opts->{next_gallery_link} ;
-    unshift @headers, "<a href=\"$opts->{prev_gallery_link_target}\">$opts->{prev_gallery_link_text}$opts->{prev_gallery_link_target}</a>"
-	if $opts->{prev_gallery_link} ;
-    unshift @headers, "<a href=\"..\">$opts->{parent_gallery_link_text}</a>"
+    my $prev_text ;
+    $prev_text = "<a href=\"$gallery->{prev_gallery_link_target}\">$gallery->{prev_gallery_link_text}</a>"
+	if $gallery->{prev_gallery_link_target} ;
+
+    my $next_text ;
+    $next_text = "<div style=\"text-align: right;\"><a href=\"$gallery->{next_gallery_link_target}\">$gallery->{next_gallery_link_text}</a></div>"
+	if $gallery->{next_gallery_link_target} ;
+
+    my $parent_text ;
+    $parent_text = "<a href=\"$gallery->{parent_gallery_link_target}\">$gallery->{parent_gallery_link_text}</a>"
 	if $opts->{parent_gallery_link} ;
 
-    # prev, next and parent
-    push @footers, "<a href=\"$opts->{prev_gallery_link_target}\">$opts->{prev_gallery_link_text}$opts->{prev_gallery_link_target}</a>"
-	if $opts->{prev_gallery_link} ;
-    push @footers, "<div style=\"text-align: right;\"><a href=\"$opts->{next_gallery_link_target}\">$opts->{next_gallery_link_text}$opts->{next_gallery_link_target}</a></div>"
-	if $opts->{next_gallery_link} ;
-    push @footers, "<a href=\"..\">$opts->{parent_gallery_link_text}</a>"
-	if $opts->{parent_gallery_link} ;
+    # index, prev, next in headers
+    unshift @headers, $next_text
+	if $next_text ;
+    unshift @headers, $prev_text
+	if $prev_text ;
+    unshift @headers, $parent_text
+	if $parent_text ;
+
+    # prev, next, index in footers
+    push @footers, $prev_text
+	if $prev_text ;
+    push @footers, $next_text
+	if $next_text ;
+    push @footers, $parent_text
+	if $parent_text ;
 
     @{$gallery->{headers}} = @headers ;
     @{$gallery->{footers}} = @footers ;
@@ -2032,13 +2117,6 @@ die "This is llgal version $self->{version}.\n"
 # we may check the destination directory
 check_destination ;
 
-# revert a path into ..
-sub back_path {
-    my $dir = shift ;
-    $dir =~ s/([^\/]+)/../g ;
-    return $dir ;
-}
-
 # forward declaration
 sub main_process ;
 
@@ -2046,6 +2124,7 @@ sub main_process ;
 sub subdir_process {
     my $dir = shift ;
     my $subdir_opts = shift ;
+    my $subdir_family = shift ;
     $messages->print ("Entering subdirectory '$dir'...\n") ;
     # save context
     my $saved_destination_dir = $self->{destination_dir};
@@ -2058,7 +2137,7 @@ sub subdir_process {
     $self->{destination_dir} .= $dir."/" ;
     @ARGV = @llgal_options ;
     # recursive call
-    my $subgallery = main_process $subdir_opts ;
+    my $subgallery = main_process $subdir_opts, $subdir_family ;
     # restore context
     $self->{destination_dir} = $saved_destination_dir;
     $destination_string = $saved_destination_string;
@@ -2071,8 +2150,28 @@ sub subdir_process {
     return $subgallery ;
 }
 
+sub recurse_into_gallery {
+    my $gallery = shift ;
+    my $opts = shift ;
+
+    # list subdir entries
+    my @entries = @{$gallery->{entries}} ;
+    # process recursively
+    print "\n" if @entries ;
+    for (my $i = 0; $i < @entries; $i++) {
+	my $entry = $entries[$i] ;
+	next if $entry->{type} != $TYPE_DIR ;
+	my $prev = $entries[$entry->{prev}] ;
+	my $next = $entries[$entry->{next}] ;
+	my ($subdir_opts, $subdir_family) = create_subgallery_family $entry, $opts, (scalar @entries), $prev, $next ;
+	my $subgallery = subdir_process $entry->{filename}, $subdir_opts, $subdir_family ;
+	$entry->{gallery} = $subgallery ;
+    }
+}
+
 sub main_process {
     my $recursive_opts = shift ;
+    my $family = shift ;
 
     # setup the destination directory
     setup_destination ;
@@ -2140,16 +2239,18 @@ sub main_process {
 
 	Llgal::Config::prepare_captions_variables ($self, $opts) ;
 
-	my @entries = generate_captions_entries $opts ;
+	my $gallery = init_gallery () ;
+	my @entries = get_entries $opts ;
+	@{$gallery->{entries}} = @entries ;
+	finalize_entries $gallery, $opts ;
+	process_gallery_family $gallery, $family, $opts ;
+
+	generate_captions_entries $gallery, $opts ;
+
 	$messages->print ("Now edit the $self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename} file to your liking and run llgal\n") ;
 
-	if ($opts->{recursive}) {
-	    # list subdir entries
-	    my @dir_entries = grep { $_->{type} == $TYPE_DIR } @entries ;
-	    # process recursively
-	    print "\n" if @dir_entries ;
-	    map { subdir_process $_->{filename}, {} } @dir_entries ;
-	}
+	recurse_into_gallery $gallery, $opts
+	    if $opts->{recursive} ;
 
     } else {
 	# main gallery creation and recurse in entries only
@@ -2171,6 +2272,8 @@ sub main_process {
 	}
 
 	finalize_entries $gallery, $opts ;
+
+	process_gallery_family $gallery, $family, $opts ;
 
 	add_headers_footers $gallery ;
 
@@ -2196,48 +2299,15 @@ sub main_process {
 	    Llgal::Config::generate_config ($self, "$self->{destination_dir}$self->{local_llgal_dir}/$self->{generic_configuration_filename}", $opts_without_defaults) ;
 	}
 
-	if ($opts->{recursive}) {
-	    # list subdir entries
-	    my @entries = grep { $_->{type} == $TYPE_DIR } @{$gallery->{entries}} ;
-	    # process recursively
-	    print "\n" if @entries ;
-	    for (my $i = 0; $i < @entries; $i++) {
-	        my $entry = $entries[$i] ;
-		my $dir = $entry->{filename} ;
-		my $revdir = back_path $dir ;
-
-		# additional opts to generate the subgallery
-		my $subdir_opts = {} ;
-
-		# link to the parent gallery
-		$subdir_opts->{parent_gallery_link} = 1 ;
-
-		if ($opts->{link_subgalleries} and @entries > 1) {
-		    # link to the previous gallery
-		    my $prev = $entries[$entry->{prev}] ;
-		    if ($prev->{type} == $TYPE_DIR) {
-			$subdir_opts->{prev_gallery_link_target} = "$revdir/$prev->{url}" ;
-			$subdir_opts->{prev_gallery_link} = 1 ;
-		    }
-		    # link to the next gallery
-		    my $next = $entries[$entry->{next}] ;
-		    if ($next->{type} == $TYPE_DIR) {
-			$subdir_opts->{next_gallery_link_target} = "$revdir/$next->{url}" ;
-			$subdir_opts->{next_gallery_link} = 1 ;
-		    }
-		}
-
-		my $subgallery = subdir_process $dir, $subdir_opts ;
-		$entry->{gallery} = $subgallery ;
-	    }
-	}
+	recurse_into_gallery $gallery, $opts
+	    if $opts->{recursive} ;
 
 	return $gallery ;
     }
 }
 
 # generate main gallery
-my $root_gallery = main_process {} ;
+my $root_gallery = main_process {}, {} ;
 
 # only generate a config once
 if (defined $self->{generate_config} and not $self->{generate_config} eq "local") {

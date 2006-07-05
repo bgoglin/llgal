@@ -1,3 +1,24 @@
+llgal (0.13.5)
+
+  * When linking to galleries, add the index filename to the URL so
+    that these links work even without a web server
+    (thanks to Michael Waschbüsch for the patch).
+  * Document how to add keyboard shortcuts to the gallery with
+    HTML accesskeys (see the How-To file).
+  * Various fix for links to previous/next galleries:
+    + Only keep the last part of the path to generate the name that
+      is used in links to prev/next galleries.
+    + Fix broken PREV/NEXT: entry generation in the gallery.
+    + Fix links to prev/next galleries when the current gallery current
+      both some subdirectories and regular files.
+    + Drop --prev/next-gal and {prev,next}_gallery_link{,_target} since
+      only the captions file is more suited to configure this.
+      {prev,next}_gallery_link_text remains to configure the link text prefix.
+  * Document --parent-gal options in the usage since it is
+    not internal anymore (reported by Samuel Thibault).
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Thu, 04 Jul 2006 23:41:00 -0400
+
 llgal (0.13.4)
 
   * --exif without argument shows all exif tags that exist in the image.
