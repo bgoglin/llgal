@@ -407,6 +407,26 @@ in the local or user-wide configuration directory using <tt>--gt</tt>.
 
 
 
+<h3 class="question">How do I prevent llgal from erasing my captions file?</h3>
+
+<tt>llgal --clean</tt> erases all files that have not been modified regarding to their
+original template. The <tt>captions</tt> file does not have a template, so <tt>llgal</tt>
+will only erase it if it contains the following line:
+<pre>
+# REMOVE THIS LINE IF LLGAL SHOULD NOT REMOVE THIS FILE
+</pre>
+
+When the user generates the <tt>captions</tt> file himself, he is not supposed
+to add this line, which means <tt>llgal</tt> won't erase the file.
+But, when the captions are generated with <tt>llgal --gc</tt>, this line will be added
+automatically. Hence, if the user modifies the <tt>captions</tt> file, he should start
+by removing this line first to protect his modifications from future erasing.
+<br />
+Note that <tt>llgal --cleanall</tt> erases ALL files, even if you kept the above line
+in the <tt>captions</tt> file.
+
+
+
 </div>
 
 <hr />

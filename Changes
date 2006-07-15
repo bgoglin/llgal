@@ -5,6 +5,8 @@
   * Fix verbose configuration option definition in recursive mode since
     it was breaking generated config file (reported by Gerfried Fuchs).
   * Fix configuration option line parsing error handling and displaying.
+  * Document how to prevent llgal from erasing the captions file
+    (see the How-To file).
 
 
 llgal (0.13.5)
