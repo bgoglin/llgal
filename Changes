@@ -1,6 +1,7 @@
 
   * Fix verbose configuration option definition in recursive mode since
     it was breaking generated config file (reported by Gerfried Fuchs).
+  * Fix configuration option line parsing error message.
 
 
 llgal (0.13.5)

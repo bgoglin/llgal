@@ -682,7 +682,7 @@ sub process_option {
 		$messages->{verbose} = $1 ;
 
 	    } else {
-		die "Unknown special inconfig option $optname.\n" ;
+		die "Unrecognized configuration option line '$line'.\n" ;
 	    }
 
 	} else {
