@@ -1,3 +1,8 @@
+
+  * Fix verbose configuration option definition in recursive mode since
+    it was breaking generated config file (reported by Gerfried Fuchs).
+
+
 llgal (0.13.5)
 
   * When linking to galleries, add the index filename to the URL so

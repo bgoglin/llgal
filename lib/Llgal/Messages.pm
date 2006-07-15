@@ -27,6 +27,7 @@ sub copy {
 	percentage_in_progress => $self->{percentage_in_progress},
 	delayed_warning => $self->{delayed_warning},
 	pending_warnings => $self->{pending_warnings},
+	verbose => $self->{verbose},
     } ;
     bless $new_self ;
     return $new_self ;
