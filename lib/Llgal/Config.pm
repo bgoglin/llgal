@@ -1066,7 +1066,7 @@ sub prepare_gallery_variables {
     # convert options for thumbnails
     my @thumbnail_scale_options ;
     if ($opts->{thumbnail_width_max} > 0) {
-	@thumbnail_scale_options = ("-scale", $opts->{thumbnail_width_max}."x".$opts->{thumbnail_height_max}.">") ;
+	@thumbnail_scale_options = ("-scale", $opts->{thumbnail_width_max}."x".$opts->{thumbnail_height_max}) ;
     } else {
 	@thumbnail_scale_options = ("-scale", "x".$opts->{thumbnail_height_max}) ;
     }
