@@ -682,7 +682,7 @@ sub process_option {
 		$messages->{verbose} = $1 ;
 
 	    } else {
-		die "Unrecognized configuration option line '$line'.\n" ;
+		process_option_error "Unrecognized configuration option line <$line>" ;
 	    }
 
 	} else {
