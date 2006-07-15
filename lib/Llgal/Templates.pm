@@ -53,8 +53,8 @@ sub find_template_file {
     my $opts = shift ;
     my $filename = shift ;
     my $check = shift ;
-    return $self->{local_llgal_dir}
-	if -e "$self->{local_llgal_dir}/$filename" ;
+    return "$self->{destination_dir}$self->{local_llgal_dir}"
+	if -e "$self->{destination_dir}$self->{local_llgal_dir}/$filename" ;
     return find_generic_template_file $self, $opts, $filename, $check ;
 }
 
