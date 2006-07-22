@@ -1192,6 +1192,7 @@ sub generate_captions_entries {
 	} else {
 	    $messages->warning ("Failed to open $opts->{captions_header_filename}\n") ;
 	}
+	print CAP "\n" ;
 	print CAP "# $opts->{captions_removal_line}\n" ;
 	print CAP "\n" ;
     }
