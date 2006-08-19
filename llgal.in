@@ -1182,19 +1182,33 @@ sub generate_captions_entries {
 	print CAP "# invoked with ". (join " ", @llgal_options) ."\n" ;
 	print CAP "\n" ;
     } else {
+	# find the captions headers
+	my $headers = (Llgal::Templates::find_template_file ($self, $opts, $opts->{captions_header_filename}, 1))
+	    . "/$opts->{captions_header_filename}" ;
+	$messages->notice ("Using '$headers' as a header for the captions file...\n") ;
+
+	# copy its content
+	my @captions_header = () ;
+	if (open CAPHEADER, $headers) {
+	    @captions_header = <CAPHEADER> ;
+	    close CAPHEADER ;
+	} else {
+	    $messages->warning ("Failed to open $headers\n") ;
+	}
+
+	# create the captions file
 	$messages->print ("Creating the $opts->{captions_filename} file: ") ;
 	open (CAP, ">$self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename}")
 	    or die "Can't create $self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename} file\n" ;
 
 	print CAP "# This is llgal's $opts->{captions_filename} file, first generated on ", scalar localtime, "\n" ;
 	print CAP "# invoked with ". (join " ", @llgal_options) ."\n" ;
-	print CAP "\n" ;
-	if (open CAPHEADER, "$self->{llgal_share_dir}/$opts->{captions_header_filename}") {
-	    while (my $line = <CAPHEADER>) { print CAP $line ; }
-	    close CAPHEADER ;
-	} else {
-	    $messages->warning ("Failed to open $opts->{captions_header_filename}\n") ;
-	}
+
+	# append the header
+	map { print CAP $_ ; } @captions_header ;
+	# ends with a blank line
+
+	# append the captions removal line
 	print CAP "\n" ;
 	print CAP "# $opts->{captions_removal_line}\n" ;
 	print CAP "\n" ;

@@ -15,6 +15,9 @@
     captions file.
   * Add the command line options to the generated slides, and to the
     captions file (on both creation and appending)
+  * Get captions.header from any template directory so that it works
+    when installed anywhere. Add a notice message, and be sure messages
+    don't mess up with the on-going caption generation percentage.
 
 
 llgal (0.13.5)
