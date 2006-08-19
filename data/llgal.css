@@ -90,6 +90,12 @@ table.index td.thumb-caption {
   background: none;
 }
 
+hr.index {
+  width: 80%;
+  height: 0px;
+  border-width: 2px;
+}
+
 /* Slides */
 
 table.slide {
@@ -114,12 +120,6 @@ table.slide td.text-slide {
   vertical-align: middle;
   font-size: 200%;
   font-style: italic;
-}
-
-hr.index {
-  width: 80%;
-  height: 0px;
-  border-width: 2px;
 }
 
 /* Headers and footers */
