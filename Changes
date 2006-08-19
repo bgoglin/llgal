@@ -7,8 +7,10 @@
   * Fix configuration option line parsing error handling and displaying.
   * Document how to prevent llgal from erasing the captions file
     (see the How-To file).
-  * Add an empty line between the captions headers and the captions removal
-    line.
+  * Add empty lines between around the captions headers in the generated
+    captions file.
+  * Add the command line options to the generated slides, and to the
+    captions file (on both creation and appending)
 
 
 llgal (0.13.5)

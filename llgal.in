@@ -1178,14 +1178,17 @@ sub generate_captions_entries {
 	    or die "Can't open $self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename} file to append\n" ;
 
 	print CAP "\n" ;
-	print CAP "# Appended new captions (". (scalar localtime) .").\n" ;
+	print CAP "# Appended new captions on ". (scalar localtime) ."\n" ;
+	print CAP "# invoked with ". (join " ", @llgal_options) ."\n" ;
 	print CAP "\n" ;
     } else {
 	$messages->print ("Creating the $opts->{captions_filename} file: ") ;
 	open (CAP, ">$self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename}")
 	    or die "Can't create $self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename} file\n" ;
 
-	print CAP "# This is llgal's $opts->{captions_filename} file, first generated ", scalar localtime, ".\n" ;
+	print CAP "# This is llgal's $opts->{captions_filename} file, first generated on ", scalar localtime, "\n" ;
+	print CAP "# invoked with ". (join " ", @llgal_options) ."\n" ;
+	print CAP "\n" ;
 	if (open CAPHEADER, "$self->{llgal_share_dir}/$opts->{captions_header_filename}") {
 	    while (my $line = <CAPHEADER>) { print CAP $line ; }
 	    close CAPHEADER ;
