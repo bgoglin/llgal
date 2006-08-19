@@ -1,4 +1,5 @@
 
+  * Add a CSS style for captions (requested by Alexandre Buisse).
   * Do not take templates in the parent .llgal directory when running in
     recursive mode, use the local ones instead (reported by Gerfried Fuchs).
     To take the parent one, --template <parent/.llgal> may be used.

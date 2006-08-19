@@ -122,6 +122,10 @@ table.slide td.text-slide {
   font-style: italic;
 }
 
+p.caption {
+  text-align: center;
+}
+
 /* Headers and footers */
 
 .header {
