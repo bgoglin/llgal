@@ -1,3 +1,9 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: llgal\n"
+"Content-Type: text/plain; charset=ISO-8859-15\n"
+"Content-Transfer-Encoding: 8-bit\n"
+
 domain "llgal"
 
 msgid "index_title|Index of pictures"
