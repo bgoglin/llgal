@@ -1949,8 +1949,13 @@ sub generate_index {
 		# not IMG, without thumbnail
 		print IXW "    <td class=\"text-thumb\" style=\"width: ${box_width}px; height: ${box_height}px;\">\n" ;
 		if ($type == $TYPE_TEXT) {
-		    # thumbnail linking to the slide
-		    print IXW "      <a href=\"$entry->{slide_url}\" title=\"$title\">$entry->{linktext}</a>\n" ;
+		    if ($opts->{make_no_slides}) {
+			# thumbnail with basic text and that's it
+			print IXW "      $entry->{linktext}\n" ;
+		    } else {
+			# thumbnail linking to the slide
+			print IXW "      <a href=\"$entry->{slide_url}\" title=\"$title\">$entry->{linktext}</a>\n" ;
+		    }
 		} else {
 		    # thumbnail directly linking to the target
 		    print IXW "      <a href=\"$entry->{url}\" title=\"$title $entry->{dimstring}\">$entry->{linktext}</a>\n" ;
