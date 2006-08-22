@@ -1602,10 +1602,12 @@ sub generate_slides {
 	# titles
 	my $SLIDE_TITLE = $entry->{title} ;
 
-	# this style contents and style
+	# this slide style
 	my $THIS_SLIDE_STYLE = "image-slide" ;
 	$THIS_SLIDE_STYLE = "text-slide\" style=\"width: $opts->{text_slide_width}px; height: $opts->{text_slide_height}px;"
-	    if !$entry->{scaled_url} ;
+	    unless defined $entry->{scaled_url} or $type == $TYPE_IMAGE ;
+
+	# slide contents
 	my $THIS_SLIDE ;
 	if ($type == $TYPE_IMAGE) {
 	    # image slide

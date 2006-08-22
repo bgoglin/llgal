@@ -2,6 +2,8 @@
   * Fix the locale of gettext translations (such as "Précédent" in French)
     by adding missing headers in the po files (thanks to Samuel Thibault
     for the fix and Nicolas Guénot for the report).
+  * Fix a major bug in slides' layout, which led to always use text-slide
+    style even for images, making the margins wrong.
   * Add a CSS style for captions (requested by Alexandre Buisse).
   * Do not take templates in the parent .llgal directory when running in
     recursive mode, use the local ones instead (reported by Gerfried Fuchs).
