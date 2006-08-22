@@ -709,6 +709,8 @@ sub fill_file_entry {
 	} else {
 	    $entry->{scaled_dimstring} = $entry->{dimstring} ;
 	}
+    } else {
+	$entry->{scaled_dimstring} = $entry->{dimstring} ;
     }
     return $entry ;
 }
