@@ -1856,14 +1856,19 @@ sub generate_index {
 	while ($i + $num < @entries) {
 	    # stop if this is listed instead of having a slide
 	    last if defined $entries[$i+$num]->{no_thumb} ;
+
 	    # stop if there's too much thumbnail on this row
 	    last if $opts->{thumbnails_per_row}
 	    and $num + 1 > $opts->{thumbnails_per_row} ;
+
 	    # stop if these thumbnail are too large
+	    my $box_width = $entries[$i+$num]->{thumb_xdim} ;
+	    $box_width = $opts->{thumbnail_width_max} if $opts->{thumbnail_width_max} ;
 	    last if $opts->{pixels_per_row}
-	    and $width + $entries[$i+$num]->{thumb_xdim} + $opts->{index_cellpadding} > $opts->{pixels_per_row} ;
+		and $width + $box_width + $opts->{index_cellpadding} > $opts->{pixels_per_row} ;
+
 	    # compute the new num and width
-	    $width += $entries[$i+$num]->{thumb_xdim} + $opts->{index_cellpadding} ;
+	    $width += $box_width + $opts->{index_cellpadding} ;
 	    $num++ ;
 	}
 	# check whether a single thumbnail was already too large
