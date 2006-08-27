@@ -118,6 +118,9 @@ generation through something like:
 Note that if a captions file exists, command line options about
 captions generation are omitted.
 
+Also note that <tt>--cc</tt> and <tt>--ct</tt> require the
+Image::ExifTool Perl module to be installed.
+
 
 
 <h3 class="question">How do I add a slide containing some text or link?</h3>
@@ -248,6 +251,8 @@ The name of the tags correspond to what the <tt>exiftool</tt> program uses
 <pre>
   llgal --exif Aperture,FocalLength,ImageHeight,ImageWidth,FileModifyDate
 </pre>
+
+Note that <tt>--exif</tt> requires the Image::ExifTool Perl module to be installed.
 
 
 
