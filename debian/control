@@ -7,7 +7,8 @@ Standards-Version: 3.7.2
 
 Package: llgal
 Architecture: all
-Depends: imagemagick, ${perl:Depends}, libimage-exiftool-perl, libimage-size-perl, liburi-perl, liblocale-gettext-perl
+Depends: imagemagick, ${perl:Depends}, libimage-size-perl, liburi-perl, liblocale-gettext-perl
+Recommends: libimage-exiftool-perl
 Description: Command-line online gallery generator
  llgal is a online gallery generator for images, videos, ...
  It is based on igal and adds multiple features including:

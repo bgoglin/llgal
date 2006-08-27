@@ -1,3 +1,12 @@
+
+  * New upstream release.
+  * Move libimage-exiftool-perl from Depends to Recommends since llgal
+    now dynamically loads it only when required (not in the common case),
+    and fails gracefully if not installed.
+  * Add README.Debian to explain why libimage-exiftool-perl is only
+    recommended.
+
+
 llgal (0.13.5-1) unstable; urgency=low
 
   * New upstream release.

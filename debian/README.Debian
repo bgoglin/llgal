@@ -1,0 +1,14 @@
+Debian README for llgal package
+===============================
+
+llgal recommends libimage-exiftool-perl. It does not depend on it
+since most usages won't actually need it.
+
+libimage-exiftool-perl provides extraction of tags from images,
+including Exif tags (used when llgal is passed --exif) and basic
+comments and timestamps (used when --cc or --ct is passed).
+
+When none of these features are used, llgal may safely be used
+without libimage-exiftool-perl installed. If those feature are
+used, llgal will fail gracefully and advice the user to install
+libimage-exiftool-perl.
