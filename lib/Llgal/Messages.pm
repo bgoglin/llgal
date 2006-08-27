@@ -106,5 +106,10 @@ sub end_percentage {
     $self->show_delayed_warnings () ;
 }
 
+sub abort_percentage {
+    my $self = shift ;
+    print "\n" ;
+    $self->show_delayed_warnings () ;
+}
 
 1 ;

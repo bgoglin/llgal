@@ -87,7 +87,7 @@ sub clean_files {
     }
 
     opendir DIR, "$self->{destination_dir}$self->{local_llgal_dir}"
-	or die "Can't open directory $self->{destination_dir}$self->{local_llgal_dir} ($!)\n" ;
+	or die "Can't open directory $self->{destination_dir}$self->{local_llgal_dir} ($!).\n" ;
     while ($_ = readdir DIR) {
 	if (/^$opts->{thumbnail_image_filenameprefix}/ or /^$opts->{scaled_image_filenameprefix}/) {
 	    unlink "$self->{destination_dir}$self->{local_llgal_dir}/$_" ;
@@ -247,7 +247,8 @@ sub check_image {
 	  "identify", $filename ) ;
     if ($status == -1) {
 	$messages->warning (@output) ;
-	die "Failed to check \"$filename\" validity\n" ;
+	$messages->abort_percentage ;
+	die "Failed to check \"$filename\" validity.\n" ;
     } elsif ($status) {
 	# do not show actual identify output
 	$messages->warning ("Bad image file '$filename', skipping it.") ;
@@ -327,7 +328,8 @@ sub generate_caption_from_image_comment {
 		push (@texts, $comment)
 		    if $comment ;
 	    } else {
-		die "Unrecognized image comment type '$type'\n" ;
+		$messages->abort_percentage ;
+		die "Unrecognized image comment type '$type'.\n" ;
 	    }
 	}
 	return @texts
@@ -593,9 +595,10 @@ sub fill_file_entry {
 		      @{$opts->{thumbnail_create_command}}, $real_filename, $real_thumb_filename ) ;
 		if ($status == -1) {
 		    $messages->warning (@output) ;
-		    die "Failed to create '$filename' thumbnail\n" ;
+		    $messages->abort_percentage ;
+		    die "Failed to create '$real_filename' thumbnail.\n" ;
 		} elsif ($status) {
-		    $messages->warning ("Failed to create '$real_filename' thumbnail") ;
+		    $messages->warning ("Failed to create '$real_filename' thumbnail.") ;
 		    $messages->warning (@output) ;
 		    return undef ;
 		}
@@ -684,9 +687,10 @@ sub fill_file_entry {
 			  @{$opts->{scaled_create_command}}, $real_filename, $real_scaled_filename ) ;
 		    if ($status == -1) {
 			$messages->warning (@output) ;
-			die "Failed to create '$filename' scaled image\n" ;
+			$messages->abort_percentage ;
+			die "Failed to create '$real_filename' scaled image.\n" ;
 		    } elsif ($status) {
-			$messages->warning ("Failed to create '$real_filename' scaled image") ;
+			$messages->warning ("Failed to create '$real_filename' scaled image.") ;
 			$messages->warning (@output) ;
 			return undef ;
 		    }
@@ -940,7 +944,7 @@ sub get_entries_from_directory {
     $subdir_string = "." unless $subdir_string ;
 
     opendir DIR, $destdir
-	or die "Can't open $destdir_string ($!)\n" ;
+	or die "Can't open $destdir_string ($!).\n" ;
     # get all files, except dot-starting ones and webpages
     my @filenames = map { ($subdir ? "$subdir/" : "").$_ } (grep ((!/\.$opts->{www_extension}$/i and !/^\./), readdir DIR)) ;
     closedir DIR ;
@@ -1013,7 +1017,7 @@ sub get_subdir_tree {
 
 	# enqueue subdirectories
 	opendir DIR, $destdir
-	    or die "Can't open $destdir_string ($!)\n" ;
+	    or die "Can't open $destdir_string ($!).\n" ;
 	unshift @remaining_dirs, ( sort_entries
 				   # add subdirectories only
 				   ( grep { -d "$self->{destination_dir}$_" }
@@ -1122,7 +1126,7 @@ sub setup_destination {
     # Create or check the local llgal directory
     if (! -e "$self->{destination_dir}$self->{local_llgal_dir}") {
 	mkdir "$self->{destination_dir}$self->{local_llgal_dir}"
-	    or die "Failed to create $self->{destination_dir}$self->{local_llgal_dir} directory ($!)" ;
+	    or die "Failed to create $self->{destination_dir}$self->{local_llgal_dir} directory ($!).\n" ;
     }
     die "Local llgal $self->{destination_dir}$self->{local_llgal_dir} is not a directory.\n"
 	if ! -d "$self->{destination_dir}$self->{local_llgal_dir}" ;
@@ -1156,7 +1160,7 @@ sub generate_captions_entries {
     if (-e "$self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename}") {
 	$messages->print ("Reading existing captions from $opts->{captions_filename}.\n") ;
 	open (CAP, "$self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename}")
-	    or die "Can't open $self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename} for reading\n" ;
+	    or die "Can't open $self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename} for reading ($!).\n" ;
 	@captions = <CAP> ;
 	close CAP ;
 
@@ -1175,9 +1179,9 @@ sub generate_captions_entries {
 	    }
 	}
 
-	$messages->print ("Appending new captions to $opts->{captions_filename}: ") ;
 	open (CAP, ">>$self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename}")
-	    or die "Can't open $self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename} file to append\n" ;
+	    or die "Can't open $self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename} file to append ($!).\n" ;
+	$messages->print ("Appending new captions to $opts->{captions_filename}: ") ;
 
 	print CAP "\n" ;
 	print CAP "# Appended new captions on ". (scalar localtime) ."\n" ;
@@ -1199,9 +1203,9 @@ sub generate_captions_entries {
 	}
 
 	# create the captions file
-	$messages->print ("Creating the $opts->{captions_filename} file: ") ;
 	open (CAP, ">$self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename}")
-	    or die "Can't create $self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename} file\n" ;
+	    or die "Can't create $self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename} file ($!).\n" ;
+	$messages->print ("Creating the $opts->{captions_filename} file: ") ;
 
 	print CAP "# This is llgal's $opts->{captions_filename} file, first generated on ", scalar localtime, "\n" ;
 	print CAP "# invoked with ". (join " ", @llgal_options) ."\n" ;
@@ -1280,7 +1284,8 @@ sub generate_captions_entries {
 	    print CAP "BREAK\n" ;
 
 	} else {
-	    die "Unrecognized entry type $type.\n" ;
+	    $messages->abort_percentage ;
+	    die "Unrecognized entry type '$type'.\n" ;
 	}
 
 	$messages->update_percentage ($i+1) ;
@@ -1304,7 +1309,7 @@ sub read_captions_file {
     $messages->print ("Reading entries in the $opts->{captions_filename} file: ") ;
 
     open(CAP,"$self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename}")
-	or die "Can't open $self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename} file\n" ;
+	or die "Can't open $self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename} file ($!).\n" ;
 
     my $size = (-s CAP) ;
     $messages->init_percentage ($size) ;
@@ -1388,7 +1393,8 @@ sub read_captions_file {
 		    $entry = create_file_entry ($TYPE_IMAGE, $1, undef, $2) ;
 
 		} else {
-		    die "Unrecognized line #$. in captions file: \"$line\"\n" ;
+		    $messages->abort_percentage ;
+		    die "Unrecognized line #$. in captions file: \"$line\".\n" ;
 		}
 
 		# really add this entry
@@ -1579,7 +1585,7 @@ sub generate_slides {
     # keep the slidetemplate in memory instead of always reopening it
     my @slidetemplate_text ;
     open(SR,"$slidetemplate")
-	or die "Can't open the slide template file '$slidetemplate'\n" ;
+	or die "Can't open the slide template file '$slidetemplate' ($!).\n" ;
     @slidetemplate_text = <SR> ;
     close SR ;
 
@@ -1592,8 +1598,10 @@ sub generate_slides {
 
 	next if defined $entry->{no_slide} ;
 
-	open(SW, ">$self->{destination_dir}$entry->{slide_filename}")
-	    or die "Can't create slide file\n" ;
+	if (not open(SW, ">$self->{destination_dir}$entry->{slide_filename}")) {
+	    $messages->abort_percentage ;
+	    die "Can't create slide file ($!).\n" ;
+	}
 	my $type = $entry->{type} ;
 
 	##############################
@@ -1781,9 +1789,9 @@ sub generate_index {
     # open the template and the destination
     $messages->print ("Creating the $opts->{index_filename}.$opts->{www_extension} file: ") ;
     open(IXR, "$indextemplate")
-	or die "Can't open the index template file '$indextemplate'\n" ;
+	or die "Can't open the index template file '$indextemplate' ($!).\n" ;
     open(IXW, ">$self->{destination_dir}$opts->{index_filename}.$opts->{www_extension}")
-	or die "Can't create main $opts->{index_filename}.$opts->{www_extension} file\n" ;
+	or die "Can't create main $opts->{index_filename}.$opts->{www_extension} file ($!).\n" ;
 
     # headers
     my $line ;
@@ -2279,7 +2287,7 @@ sub main_process {
 
 	generate_captions_entries $gallery, $opts ;
 
-	$messages->print ("Now edit the $self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename} file to your liking and run llgal\n") ;
+	$messages->print ("Now edit the $self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename} file to your liking and run llgal!\n") ;
 
 	recurse_into_gallery $gallery, $opts
 	    if $opts->{recursive} ;

@@ -14,6 +14,8 @@
   * Do not link text thumbnails to a slide when not generating any slide.
   * Fix verbose configuration option definition in recursive mode since
     it was breaking generated config file (reported by Gerfried Fuchs).
+  * Fix error reporting mixed with unfinished lines (especially during
+    percentage progression), and add missing errno printing and ending dot.
   * Fix configuration option line parsing error handling and displaying.
   * Document how to prevent llgal from erasing the captions file
     (see the How-To file).
