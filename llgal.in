@@ -9,7 +9,6 @@ require Llgal::Utils ;
 
 use FileHandle ;
 use Image::Size ;
-use Image::ExifTool ;
 use Cwd ;
 use Locale::gettext ;
 use POSIX qw (setlocale) ;
@@ -445,6 +444,11 @@ sub create_file_entry {
 	}
 	if (@exif_tags or $opts->{show_all_exif_tags}) {
 	    if (not defined $opts->{exif_info}) {
+		# only load Image::ExifTool when really required
+		if (not eval { require Image::ExifTool ; }) {
+		    $messages->abort_percentage ();
+		    die "Perl module Image::ExifTool not found, please install it if you wish to extract tags from images.\n" ;
+		}
 		# ExifTool initialization
 		$opts->{exiftool} = new Image::ExifTool;
 		# Accept unknown tags, just in case...

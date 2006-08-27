@@ -26,12 +26,19 @@ llgal requirements
 
 llgal requires perl and imagemagick packages.
 The following perl libraries are also needed:
-* Image::ExifTool
 * Image::Size
 * URI
 * Locale::gettext
 These dependencies are automatically installed when installing
 Debian or Gentoo prepackaged versions.
+
+Additionaly, some options (--cc, --ct and --exfi) require the following
+library to extract tags from images:
+* Image::ExifTool
+If not installed, llgal with work fine as long as none of these options
+is used. When on is called, llgal will issue an error message advicing
+to install the library.
+
 
 If you need to install these libraries by yourself, you may
 for instance find them on CPAN:
