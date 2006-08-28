@@ -28,6 +28,8 @@
   * Get captions.header from any template directory so that it works
     when installed anywhere. Add a notice message, and be sure messages
     don't mess up with the on-going caption generation percentage.
+  * Add <!--VERSION--> to the list of replaced fields, without immediately
+    using it for now.
 
 
 llgal (0.13.5)

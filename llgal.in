@@ -1566,6 +1566,9 @@ sub precompute_common_html_fields
     # credits text
     $common_fields->{"<!--CREDITS-->"} = $opts->{credits_text} ;
 
+    # version
+    $common_fields->{"<!--VERSION-->"} = $self->{version} ;
+
     $gallery->{common_fields} = $common_fields ;
 }
 
