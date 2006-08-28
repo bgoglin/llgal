@@ -30,6 +30,7 @@
     don't mess up with the on-going caption generation percentage.
   * Add <!--VERSION--> to the list of replaced fields, without immediately
     using it for now.
+  * Add the date to the program name when compiling it from SVN.
 
 
 llgal (0.13.5)
