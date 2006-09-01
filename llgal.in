@@ -822,10 +822,8 @@ sub finalize_entries {
     if ($opts->{list_links}) {
 	map {
 	    my $type = $_->{type} ;
-	    if ($type == $TYPE_LINK or $type == $TYPE_DIR or $type == $TYPE_MOVIE or $type == $TYPE_FILE) {
-		$_->{no_thumb} = 1 ;
-		$_->{no_slide} = 1 ;
-	    } elsif ($type == $TYPE_TEXT) {
+	    if ($type == $TYPE_LINK or $type == $TYPE_DIR or $type == $TYPE_MOVIE
+		or $type == $TYPE_FILE or $type == $TYPE_TEXT) {
 		$_->{no_thumb} = 1 ;
 	    }
 	} @entries ;

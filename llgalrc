@@ -101,7 +101,8 @@
 # Must be >= 0, setting to < 0 resets to default
 # index_cellpadding = 3
 
-# List links after the main gallery thumbnail index [-L]
+# Display links and text as regular text instead of thumbnails
+# in the main gallery thumbnail index [-L]
 # list_links = 0
 
 # Pixels per row of thumbnails in index [--wx <n>]
