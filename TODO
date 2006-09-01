@@ -1,0 +1,83 @@
+FOR NEXT RELEASE
+================
+* fix links to prev/next gallery when -s => special case
+* -L -s in the howto
+
+PENDING
+=======
+* mv index_cellpadding, text_thumb_width/height et text_slide_width/height dans css
+
+* identify movies ? tags ?
+* do not hardcode thumbnail extraction, only propose several types (--transcode ?)
+* transcoded (suggested and test availibility)
+* totem-video-thumbnailer -s size input output (totem-xine suggested and test availibility)
+* gst-thumbnail (nautilus-media suggested and test availibility)
+
+* debtags
+
+* dimstring in alt and title adds a useless space at the end ?
+
+* use camera/exif thumbnails
+
+* change the prev/next link text depending on the target slide
+
+* need gettext en.po ?
+
+* no_thumbnail_for_texts_and_links
+* no_slide_for_links
+* no_thumbnail_for_<type> no_slide_for_<type>
+* T and S in captions file for no_thumb or no_slide
+
+* conversion of exif tags descripton
+* --exif takes description instead of exiftool tag names
+* add space before capitals in exiftool tag names
+
+* rename -s into --ns
+
+* do not require quotes around string options ?
+* needs llgal_configuration_type = 2 to help backward compatibilty ?
+
+* support mythumb with -L ?
+* pass possible slide number as an argument of fill_entry
+
+* drop --parent-gal since captions is enough ?
+
+* use symlinks when copying from the same tree, for instance if templates are copied from the parent
+  (Gerfried Fuchs)
+
+* not always verbose in gencfg ?
+
+* move VERSION in CREDITS, requires recursive replacing of fields ?
+
+* index instead of slide for subgallery
+* do something to generate with -s when only subdirs and nothing else (especially with -L ?)
+
+* link_between_last_and_first_subgallery (Gerfried Fuchs)
+* link_slides_between_galleries, needs to traverse all and generate all afterwards (Gerfried Fuchs)
+* generate all title recursively, and take them in parent prev/next
+
+* german translation from Gerfried Fuchs, put him in the translator author list ?
+
+* check the date and update the CSS
+* do not update the CSS if their is no captions removal-like line (Estelle Desarnaud)
+
+OBSOLETE
+========
+* add quotes around command line arguments when printing the command line in generated file? boring...
+* --parent with level
+* limit depth with -R
+* support dynamic values in config file
+* support reversed command line options
+* support --option-with-config-file-name
+* use jhead
+* --genwholeconfig includes default values
+* --add-url, LNK if http/ftp, FIL if local file, LNK else, with LNK_default_text, with option for protocol list
+* --add-txt <file> to create TXT
+* force_image_regeneration is useless ? -f is enough ? or only not a per-gallery opts ?
+* text-thumb border is a little bit too big
+* llgal-style to change the css instead of having all crap in the main llgal
+* --PC/Px/Py to copy/reduce photos from other directory
+* indent warnings
+* limit ho many times the same warning may appear
+* --dry-run for gencfg only
+* -d creates the index.html in $PWD
