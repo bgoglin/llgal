@@ -1851,7 +1851,11 @@ sub generate_index {
 	    # output a line with this text
 	    print IXW "<div class=\"header\">" ;
 	    if ($type == $TYPE_TEXT) {
-		print IXW $entry->{linktext} ;
+		if ($opts->{make_no_slides}) {
+		    print IXW $entry->{linktext} ;
+		} else {
+		    print IXW "<a href=\"$entry->{slide_url}\" title=\"$entry->{title} $entry->{dimstring}\">$entry->{linktext}</a>" ;
+		}
 	    } else {
 		print IXW "<a href=\"$entry->{url}\" title=\"$entry->{title} $entry->{dimstring}\">$entry->{linktext}</a>" ;
 	    }

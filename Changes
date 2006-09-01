@@ -20,6 +20,8 @@
   * Fix error reporting mixed with unfinished lines (especially during
     percentage progression), and add missing errno printing and ending dot.
   * Fix configuration option line parsing error handling and displaying.
+  * Fix missing link from listed text in the index to the corresponding
+    text slide when -L is passed.
   * Do not load Image::ExifTool unless required by --exif, --cc or --ct
     (requested by Alexandra Buisse).
   * Document how to prevent llgal from erasing the captions file
