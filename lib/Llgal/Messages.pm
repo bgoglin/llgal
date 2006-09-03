@@ -27,6 +27,7 @@ sub copy {
 	percentage_in_progress => $self->{percentage_in_progress},
 	delayed_warning => $self->{delayed_warning},
 	pending_warnings => $self->{pending_warnings},
+	verbose => $self->{verbose},
     } ;
     bless $new_self ;
     return $new_self ;
@@ -105,5 +106,10 @@ sub end_percentage {
     $self->show_delayed_warnings () ;
 }
 
+sub abort_percentage {
+    my $self = shift ;
+    print "\n" ;
+    $self->show_delayed_warnings () ;
+}
 
 1 ;

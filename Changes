@@ -1,3 +1,51 @@
+llgal (0.13.6)
+
+  * Fix a major bug in slides' layout, which led to always use text-slide
+    style even for images, making the margins wrong.
+  * Fix the locale of gettext translations (such as "Précédent" in French)
+    by adding missing headers in the po files (thanks to Samuel Thibault
+    for the fix and Nicolas Guénot for the report).
+  * Fix linking between subgalleries when making no slides.
+  * Fix computing of thumbnail row width when deciding how many thumbnails
+    to output on a row, use the correct width for padded thumbnail boxes.
+  * Fix missing link from listed text in the index to the corresponding
+    text slide when -L is passed (reported by Émilie Le Roux).
+  * Fix uninitialized dimensions string when not generating any slide.
+  * Fix verbose configuration option definition in recursive mode since
+    it was breaking generated config file (reported by Gerfried Fuchs).
+  * Fix error reporting mixed with unfinished lines (especially during
+    percentage progression), and add missing errno printing and ending dot.
+  * Fix configuration option line parsing error handling and displaying.
+  * -L only suppresses thumbnails, not slides since the main goal was
+    to create a list of subgallery links without slides, but it may be
+    achieved with -L -s anyway.
+    + Document how to use -L -s to create a text menu of sub-galleries
+      (see the How-To file).
+  * Replace link_between_last_and_first_slide with link_between_last_and_first
+    and make it work with subgallery linking too
+    (requested by Gerfried Fuchs in Debian bug #377780).
+  * Do not link text thumbnails to a slide when not generating any slide.
+  * Do not take templates in the parent .llgal directory when running in
+    recursive mode, use the local ones instead (reported by Gerfried Fuchs).
+    To take the parent one, --template <parent/.llgal> may be used.
+  * Get captions.header from any template directory so that it works
+    when installed anywhere. Add a notice message, and be sure messages
+    don't mess up with the on-going caption generation percentage.
+  * Do not load Image::ExifTool unless required by --exif, --cc or --ct
+    (requested by Alexandra Buisse).
+  * Add a CSS style for captions (requested by Alexandre Buisse).
+  * Add the command line options to the generated slides, and to the
+    captions file (on both creation and appending)
+  * Add <!--VERSION--> to the list of replaced fields, without immediately
+    using it for now.
+  * Add empty lines around the captions headers in the generated captions
+    file.
+  * Document how to prevent llgal from erasing the captions file
+    (see the How-To file).
+  * Add the date to the program name when compiling it from SVN.
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Sun, 03 Sep 2006 11:26:00 -0400
+
 llgal (0.13.5)
 
   * When linking to galleries, add the index filename to the URL so

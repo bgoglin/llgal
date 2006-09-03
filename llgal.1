@@ -428,12 +428,10 @@ The default behavior is to use the image names.
 
 .TP
 .B -L
-Do not create slides and thumbnails for links (including video, file and url),
-but list them as a text line between thumbnails row in the main gallery index.
-Text entries are also listed as a text line in the index, but they still
-appear as a slide.
+Do not create thumbnails for text and links (including video, file and url),
+but list them as a text line between thumbnail rows in the main gallery index.
 Might be used when the directory only contains subgalleries and thus does
-not need any slide or thumbnail.
+not need any thumbnail.
 
 .TP
 .BI --lang " locale"
@@ -941,7 +939,8 @@ Default is
 .RE
 .I list_links = <0/1>
 .RS
-List links after the main gallery thumbnail index
+Display links and text as regular text instead of thumbnails in the main
+gallery thumbnail index
 .RB [ -L ].
 Default is
 .BR 0 " (" disabled ).
@@ -1081,9 +1080,9 @@ next slide
 Default is
 .BR 0 " (" disabled ).
 .RE
-.I link_between_last_and_first_slide = <0/1>
+.I link_between_last_and_first = <0/1>
 .RS
-Generate links between last and first slides.
+Generate links between last and first slides or galleries.
 Default is
 .BR 1 " (" enabled ).
 .RE
@@ -1115,7 +1114,7 @@ Display a table of all available EXIF tags under each image slide
 This line will be added to the caption file llgal will generate when
 called with
 .BR --gc .
-If the user doesn't want igal to remove this caption file when called
+If the user doesn't want llgal to remove this caption file when called
 with
 .BR --clean ,
 he just needs to remove this line from the file.
@@ -1471,6 +1470,10 @@ The CSS style-sheet.
 The credits line given by
 .I credits_text
 configuration option.
+.RE
+.B <!--VERSION-->
+.RS
+The version of the program used to generate the gallery.
 .RE
 .B <!--INDEX-FILE-->
 .RS

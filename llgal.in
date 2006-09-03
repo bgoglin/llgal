@@ -9,7 +9,6 @@ require Llgal::Utils ;
 
 use FileHandle ;
 use Image::Size ;
-use Image::ExifTool ;
 use Cwd ;
 use Locale::gettext ;
 use POSIX qw (setlocale) ;
@@ -87,7 +86,7 @@ sub clean_files {
     }
 
     opendir DIR, "$self->{destination_dir}$self->{local_llgal_dir}"
-	or die "Can't open directory $self->{destination_dir}$self->{local_llgal_dir} ($!)\n" ;
+	or die "Can't open directory $self->{destination_dir}$self->{local_llgal_dir} ($!).\n" ;
     while ($_ = readdir DIR) {
 	if (/^$opts->{thumbnail_image_filenameprefix}/ or /^$opts->{scaled_image_filenameprefix}/) {
 	    unlink "$self->{destination_dir}$self->{local_llgal_dir}/$_" ;
@@ -247,7 +246,8 @@ sub check_image {
 	  "identify", $filename ) ;
     if ($status == -1) {
 	$messages->warning (@output) ;
-	die "Failed to check \"$filename\" validity\n" ;
+	$messages->abort_percentage ;
+	die "Failed to check \"$filename\" validity.\n" ;
     } elsif ($status) {
 	# do not show actual identify output
 	$messages->warning ("Bad image file '$filename', skipping it.") ;
@@ -327,7 +327,8 @@ sub generate_caption_from_image_comment {
 		push (@texts, $comment)
 		    if $comment ;
 	    } else {
-		die "Unrecognized image comment type '$type'\n" ;
+		$messages->abort_percentage ;
+		die "Unrecognized image comment type '$type'.\n" ;
 	    }
 	}
 	return @texts
@@ -443,6 +444,11 @@ sub create_file_entry {
 	}
 	if (@exif_tags or $opts->{show_all_exif_tags}) {
 	    if (not defined $opts->{exif_info}) {
+		# only load Image::ExifTool when really required
+		if (not eval { require Image::ExifTool ; }) {
+		    $messages->abort_percentage ();
+		    die "Perl module Image::ExifTool not found, please install it if you wish to extract tags from images.\n" ;
+		}
 		# ExifTool initialization
 		$opts->{exiftool} = new Image::ExifTool;
 		# Accept unknown tags, just in case...
@@ -593,9 +599,10 @@ sub fill_file_entry {
 		      @{$opts->{thumbnail_create_command}}, $real_filename, $real_thumb_filename ) ;
 		if ($status == -1) {
 		    $messages->warning (@output) ;
-		    die "Failed to create '$filename' thumbnail\n" ;
+		    $messages->abort_percentage ;
+		    die "Failed to create '$real_filename' thumbnail.\n" ;
 		} elsif ($status) {
-		    $messages->warning ("Failed to create '$real_filename' thumbnail") ;
+		    $messages->warning ("Failed to create '$real_filename' thumbnail.") ;
 		    $messages->warning (@output) ;
 		    return undef ;
 		}
@@ -684,9 +691,10 @@ sub fill_file_entry {
 			  @{$opts->{scaled_create_command}}, $real_filename, $real_scaled_filename ) ;
 		    if ($status == -1) {
 			$messages->warning (@output) ;
-			die "Failed to create '$filename' scaled image\n" ;
+			$messages->abort_percentage ;
+			die "Failed to create '$real_filename' scaled image.\n" ;
 		    } elsif ($status) {
-			$messages->warning ("Failed to create '$real_filename' scaled image") ;
+			$messages->warning ("Failed to create '$real_filename' scaled image.") ;
 			$messages->warning (@output) ;
 			return undef ;
 		    }
@@ -709,6 +717,8 @@ sub fill_file_entry {
 	} else {
 	    $entry->{scaled_dimstring} = $entry->{dimstring} ;
 	}
+    } else {
+	$entry->{scaled_dimstring} = $entry->{dimstring} ;
     }
     return $entry ;
 }
@@ -812,10 +822,8 @@ sub finalize_entries {
     if ($opts->{list_links}) {
 	map {
 	    my $type = $_->{type} ;
-	    if ($type == $TYPE_LINK or $type == $TYPE_DIR or $type == $TYPE_MOVIE or $type == $TYPE_FILE) {
-		$_->{no_thumb} = 1 ;
-		$_->{no_slide} = 1 ;
-	    } elsif ($type == $TYPE_TEXT) {
+	    if ($type == $TYPE_LINK or $type == $TYPE_DIR or $type == $TYPE_MOVIE
+		or $type == $TYPE_FILE or $type == $TYPE_TEXT) {
 		$_->{no_thumb} = 1 ;
 	    }
 	} @entries ;
@@ -836,6 +844,9 @@ sub finalize_entries {
 
 	# entries without a slide are not taken into account
 	next if defined $entry->{no_slide} ;
+
+	# if making no slides, only subgallery may be linked together
+	next if $opts->{make_no_slides} and $entry->{type} != $TYPE_DIR and $opts->{link_subgalleries} ;
 
 	# slide counter
 	$indix++;
@@ -882,7 +893,7 @@ sub finalize_entries {
 	$first = $i unless defined $first ;
     }
 
-    if (defined $first and $opts->{link_between_last_and_first_slide}) {
+    if (defined $first and $opts->{link_between_last_and_first}) {
 	# link last to first
 	$entries[$prev]->{next} = $first ;
 	$entries[$first]->{prev} = $prev ;
@@ -938,7 +949,7 @@ sub get_entries_from_directory {
     $subdir_string = "." unless $subdir_string ;
 
     opendir DIR, $destdir
-	or die "Can't open $destdir_string ($!)\n" ;
+	or die "Can't open $destdir_string ($!).\n" ;
     # get all files, except dot-starting ones and webpages
     my @filenames = map { ($subdir ? "$subdir/" : "").$_ } (grep ((!/\.$opts->{www_extension}$/i and !/^\./), readdir DIR)) ;
     closedir DIR ;
@@ -1011,7 +1022,7 @@ sub get_subdir_tree {
 
 	# enqueue subdirectories
 	opendir DIR, $destdir
-	    or die "Can't open $destdir_string ($!)\n" ;
+	    or die "Can't open $destdir_string ($!).\n" ;
 	unshift @remaining_dirs, ( sort_entries
 				   # add subdirectories only
 				   ( grep { -d "$self->{destination_dir}$_" }
@@ -1120,7 +1131,7 @@ sub setup_destination {
     # Create or check the local llgal directory
     if (! -e "$self->{destination_dir}$self->{local_llgal_dir}") {
 	mkdir "$self->{destination_dir}$self->{local_llgal_dir}"
-	    or die "Failed to create $self->{destination_dir}$self->{local_llgal_dir} directory ($!)" ;
+	    or die "Failed to create $self->{destination_dir}$self->{local_llgal_dir} directory ($!).\n" ;
     }
     die "Local llgal $self->{destination_dir}$self->{local_llgal_dir} is not a directory.\n"
 	if ! -d "$self->{destination_dir}$self->{local_llgal_dir}" ;
@@ -1154,7 +1165,7 @@ sub generate_captions_entries {
     if (-e "$self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename}") {
 	$messages->print ("Reading existing captions from $opts->{captions_filename}.\n") ;
 	open (CAP, "$self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename}")
-	    or die "Can't open $self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename} for reading\n" ;
+	    or die "Can't open $self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename} for reading ($!).\n" ;
 	@captions = <CAP> ;
 	close CAP ;
 
@@ -1173,25 +1184,43 @@ sub generate_captions_entries {
 	    }
 	}
 
-	$messages->print ("Appending new captions to $opts->{captions_filename}: ") ;
 	open (CAP, ">>$self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename}")
-	    or die "Can't open $self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename} file to append\n" ;
+	    or die "Can't open $self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename} file to append ($!).\n" ;
+	$messages->print ("Appending new captions to $opts->{captions_filename}: ") ;
 
 	print CAP "\n" ;
-	print CAP "# Appended new captions (". (scalar localtime) .").\n" ;
+	print CAP "# Appended new captions on ". (scalar localtime) ."\n" ;
+	print CAP "# invoked with ". (join " ", @llgal_options) ."\n" ;
 	print CAP "\n" ;
     } else {
-	$messages->print ("Creating the $opts->{captions_filename} file: ") ;
-	open (CAP, ">$self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename}")
-	    or die "Can't create $self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename} file\n" ;
+	# find the captions headers
+	my $headers = (Llgal::Templates::find_template_file ($self, $opts, $opts->{captions_header_filename}, 1))
+	    . "/$opts->{captions_header_filename}" ;
+	$messages->notice ("Using '$headers' as a header for the captions file...\n") ;
 
-	print CAP "# This is llgal's $opts->{captions_filename} file, first generated ", scalar localtime, ".\n" ;
-	if (open CAPHEADER, "$self->{llgal_share_dir}/$opts->{captions_header_filename}") {
-	    while (my $line = <CAPHEADER>) { print CAP $line ; }
+	# copy its content
+	my @captions_header = () ;
+	if (open CAPHEADER, $headers) {
+	    @captions_header = <CAPHEADER> ;
 	    close CAPHEADER ;
 	} else {
-	    $messages->warning ("Failed to open $opts->{captions_header_filename}\n") ;
+	    $messages->warning ("Failed to open $headers\n") ;
 	}
+
+	# create the captions file
+	open (CAP, ">$self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename}")
+	    or die "Can't create $self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename} file ($!).\n" ;
+	$messages->print ("Creating the $opts->{captions_filename} file: ") ;
+
+	print CAP "# This is llgal's $opts->{captions_filename} file, first generated on ", scalar localtime, "\n" ;
+	print CAP "# invoked with ". (join " ", @llgal_options) ."\n" ;
+
+	# append the header
+	map { print CAP $_ ; } @captions_header ;
+	# ends with a blank line
+
+	# append the captions removal line
+	print CAP "\n" ;
 	print CAP "# $opts->{captions_removal_line}\n" ;
 	print CAP "\n" ;
     }
@@ -1260,7 +1289,8 @@ sub generate_captions_entries {
 	    print CAP "BREAK\n" ;
 
 	} else {
-	    die "Unrecognized entry type $type.\n" ;
+	    $messages->abort_percentage ;
+	    die "Unrecognized entry type '$type'.\n" ;
 	}
 
 	$messages->update_percentage ($i+1) ;
@@ -1284,7 +1314,7 @@ sub read_captions_file {
     $messages->print ("Reading entries in the $opts->{captions_filename} file: ") ;
 
     open(CAP,"$self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename}")
-	or die "Can't open $self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename} file\n" ;
+	or die "Can't open $self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename} file ($!).\n" ;
 
     my $size = (-s CAP) ;
     $messages->init_percentage ($size) ;
@@ -1368,7 +1398,8 @@ sub read_captions_file {
 		    $entry = create_file_entry ($TYPE_IMAGE, $1, undef, $2) ;
 
 		} else {
-		    die "Unrecognized line #$. in captions file: \"$line\"\n" ;
+		    $messages->abort_percentage ;
+		    die "Unrecognized line #$. in captions file: \"$line\".\n" ;
 		}
 
 		# really add this entry
@@ -1536,6 +1567,9 @@ sub precompute_common_html_fields
     # credits text
     $common_fields->{"<!--CREDITS-->"} = $opts->{credits_text} ;
 
+    # version
+    $common_fields->{"<!--VERSION-->"} = $self->{version} ;
+
     $gallery->{common_fields} = $common_fields ;
 }
 
@@ -1559,7 +1593,7 @@ sub generate_slides {
     # keep the slidetemplate in memory instead of always reopening it
     my @slidetemplate_text ;
     open(SR,"$slidetemplate")
-	or die "Can't open the slide template file '$slidetemplate'\n" ;
+	or die "Can't open the slide template file '$slidetemplate' ($!).\n" ;
     @slidetemplate_text = <SR> ;
     close SR ;
 
@@ -1572,8 +1606,10 @@ sub generate_slides {
 
 	next if defined $entry->{no_slide} ;
 
-	open(SW, ">$self->{destination_dir}$entry->{slide_filename}")
-	    or die "Can't create slide file\n" ;
+	if (not open(SW, ">$self->{destination_dir}$entry->{slide_filename}")) {
+	    $messages->abort_percentage ;
+	    die "Can't create slide file ($!).\n" ;
+	}
 	my $type = $entry->{type} ;
 
 	##############################
@@ -1582,10 +1618,12 @@ sub generate_slides {
 	# titles
 	my $SLIDE_TITLE = $entry->{title} ;
 
-	# this style contents and style
+	# this slide style
 	my $THIS_SLIDE_STYLE = "image-slide" ;
 	$THIS_SLIDE_STYLE = "text-slide\" style=\"width: $opts->{text_slide_width}px; height: $opts->{text_slide_height}px;"
-	    if !$entry->{scaled_url} ;
+	    unless defined $entry->{scaled_url} or $type == $TYPE_IMAGE ;
+
+	# slide contents
 	my $THIS_SLIDE ;
 	if ($type == $TYPE_IMAGE) {
 	    # image slide
@@ -1759,9 +1797,9 @@ sub generate_index {
     # open the template and the destination
     $messages->print ("Creating the $opts->{index_filename}.$opts->{www_extension} file: ") ;
     open(IXR, "$indextemplate")
-	or die "Can't open the index template file '$indextemplate'\n" ;
+	or die "Can't open the index template file '$indextemplate' ($!).\n" ;
     open(IXW, ">$self->{destination_dir}$opts->{index_filename}.$opts->{www_extension}")
-	or die "Can't create main $opts->{index_filename}.$opts->{www_extension} file\n" ;
+	or die "Can't create main $opts->{index_filename}.$opts->{www_extension} file ($!).\n" ;
 
     # headers
     my $line ;
@@ -1816,7 +1854,11 @@ sub generate_index {
 	    # output a line with this text
 	    print IXW "<div class=\"header\">" ;
 	    if ($type == $TYPE_TEXT) {
-		print IXW $entry->{linktext} ;
+		if ($opts->{make_no_slides}) {
+		    print IXW $entry->{linktext} ;
+		} else {
+		    print IXW "<a href=\"$entry->{slide_url}\" title=\"$entry->{title} $entry->{dimstring}\">$entry->{linktext}</a>" ;
+		}
 	    } else {
 		print IXW "<a href=\"$entry->{url}\" title=\"$entry->{title} $entry->{dimstring}\">$entry->{linktext}</a>" ;
 	    }
@@ -1834,14 +1876,19 @@ sub generate_index {
 	while ($i + $num < @entries) {
 	    # stop if this is listed instead of having a slide
 	    last if defined $entries[$i+$num]->{no_thumb} ;
+
 	    # stop if there's too much thumbnail on this row
 	    last if $opts->{thumbnails_per_row}
 	    and $num + 1 > $opts->{thumbnails_per_row} ;
+
 	    # stop if these thumbnail are too large
+	    my $box_width = $entries[$i+$num]->{thumb_xdim} ;
+	    $box_width = $opts->{thumbnail_width_max} if $opts->{thumbnail_width_max} ;
 	    last if $opts->{pixels_per_row}
-	    and $width + $entries[$i+$num]->{thumb_xdim} + $opts->{index_cellpadding} > $opts->{pixels_per_row} ;
+		and $width + $box_width + $opts->{index_cellpadding} > $opts->{pixels_per_row} ;
+
 	    # compute the new num and width
-	    $width += $entries[$i+$num]->{thumb_xdim} + $opts->{index_cellpadding} ;
+	    $width += $box_width + $opts->{index_cellpadding} ;
 	    $num++ ;
 	}
 	# check whether a single thumbnail was already too large
@@ -1929,8 +1976,13 @@ sub generate_index {
 		# not IMG, without thumbnail
 		print IXW "    <td class=\"text-thumb\" style=\"width: ${box_width}px; height: ${box_height}px;\">\n" ;
 		if ($type == $TYPE_TEXT) {
-		    # thumbnail linking to the slide
-		    print IXW "      <a href=\"$entry->{slide_url}\" title=\"$title\">$entry->{linktext}</a>\n" ;
+		    if ($opts->{make_no_slides}) {
+			# thumbnail with basic text and that's it
+			print IXW "      $entry->{linktext}\n" ;
+		    } else {
+			# thumbnail linking to the slide
+			print IXW "      <a href=\"$entry->{slide_url}\" title=\"$title\">$entry->{linktext}</a>\n" ;
+		    }
 		} else {
 		    # thumbnail directly linking to the target
 		    print IXW "      <a href=\"$entry->{url}\" title=\"$title $entry->{dimstring}\">$entry->{linktext}</a>\n" ;
@@ -2247,7 +2299,7 @@ sub main_process {
 
 	generate_captions_entries $gallery, $opts ;
 
-	$messages->print ("Now edit the $self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename} file to your liking and run llgal\n") ;
+	$messages->print ("Now edit the $self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename} file to your liking and run llgal!\n") ;
 
 	recurse_into_gallery $gallery, $opts
 	    if $opts->{recursive} ;

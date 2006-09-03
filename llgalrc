@@ -101,7 +101,8 @@
 # Must be >= 0, setting to < 0 resets to default
 # index_cellpadding = 3
 
-# List links after the main gallery thumbnail index [-L]
+# Display links and text as regular text instead of thumbnails
+# in the main gallery thumbnail index [-L]
 # list_links = 0
 
 # Pixels per row of thumbnails in index [--wx <n>]
@@ -166,8 +167,8 @@
 # Generate slide titles from captions [-k]
 # make_slide_title_from_caption = 0
 
-# Generate links between last and first slides.
-# link_between_last_and_first_slide = 1
+# Generate links between last and first slides or galleries.
+# link_between_last_and_first = 1
 
 # Display a table of EXIF tags under each image slide [--exif]
 # The tags are given with their name in exiftool -list and separated
@@ -180,7 +181,7 @@
 ##### Captions #####
 
 # This line will be added to the captions file llgal will generate when
-# called with --gc. If the user doesn't want igal to remove this captions
+# called with --gc. If the user doesn't want llgal to remove this captions
 # file when called with --clean, it just needs to remove this line from
 # the file.
 # captions_removal_line = "REMOVE THIS LINE IF LLGAL SHOULD NOT REMOVE THIS FILE"

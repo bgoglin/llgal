@@ -138,7 +138,7 @@ my $normal_opts_type = {
     next_slide_link_image => $OPT_IS_NUMERIC,
     prev_slide_link_preview => $OPT_IS_NUMERIC,
     next_slide_link_preview => $OPT_IS_NUMERIC,
-    link_between_last_and_first_slide => $OPT_IS_NUMERIC,
+    link_between_last_and_first => $OPT_IS_NUMERIC,
     make_slide_title_from_caption => $OPT_IS_NUMERIC,
     show_all_exif_tags => $OPT_IS_NUMERIC,
 # Captions
@@ -353,8 +353,8 @@ sub add_defaults {
 # use an image preview for link from a slide to the previous or next slide
 	prev_slide_link_preview => 0,
 	next_slide_link_preview => 0,
-# do not link between last and first slide
-	link_between_last_and_first_slide => 1,
+# do not link between last and first slides or galleries
+	link_between_last_and_first => 1,
 # use captions as slide titles (-k)
 	make_slide_title_from_caption => 0,
 # show a table of exif tags
@@ -682,7 +682,7 @@ sub process_option {
 		$messages->{verbose} = $1 ;
 
 	    } else {
-		die "Unknown special inconfig option $optname.\n" ;
+		process_option_error "Unrecognized configuration option line <$line>" ;
 	    }
 
 	} else {
@@ -1066,7 +1066,7 @@ sub prepare_gallery_variables {
     # convert options for thumbnails
     my @thumbnail_scale_options ;
     if ($opts->{thumbnail_width_max} > 0) {
-	@thumbnail_scale_options = ("-scale", $opts->{thumbnail_width_max}."x".$opts->{thumbnail_height_max}.">") ;
+	@thumbnail_scale_options = ("-scale", $opts->{thumbnail_width_max}."x".$opts->{thumbnail_height_max}) ;
     } else {
 	@thumbnail_scale_options = ("-scale", "x".$opts->{thumbnail_height_max}) ;
     }
