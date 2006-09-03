@@ -1,3 +1,4 @@
+llgal (0.13.6)
 
   * Fix a major bug in slides' layout, which led to always use text-slide
     style even for images, making the margins wrong.
@@ -43,6 +44,7 @@
     (see the How-To file).
   * Add the date to the program name when compiling it from SVN.
 
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Sun, 03 Sep 2006 11:26:00 -0400
 
 llgal (0.13.5)
 
