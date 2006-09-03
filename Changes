@@ -23,6 +23,9 @@
   * Fix configuration option line parsing error handling and displaying.
   * Fix missing link from listed text in the index to the corresponding
     text slide when -L is passed (reported by Émilie Le Roux).
+  * Replace link_between_last_and_first_slide with link_between_last_and_first
+    and make it work with subgallery linking too
+    (requested by Gerfried Fuchs in Debian bug #377780).
   * Do not load Image::ExifTool unless required by --exif, --cc or --ct
     (requested by Alexandra Buisse).
   * Document how to prevent llgal from erasing the captions file

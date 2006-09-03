@@ -893,7 +893,7 @@ sub finalize_entries {
 	$first = $i unless defined $first ;
     }
 
-    if (defined $first and $opts->{link_between_last_and_first_slide}) {
+    if (defined $first and $opts->{link_between_last_and_first}) {
 	# link last to first
 	$entries[$prev]->{next} = $first ;
 	$entries[$first]->{prev} = $prev ;
