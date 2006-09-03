@@ -1,5 +1,7 @@
 
   * New upstream release.
+  * Replace link_between_last_and_first_slide with link_between_last_and_first
+    and make it work with subgallery linking too, closes: #377780.
   * Move libimage-exiftool-perl from Depends to Recommends since llgal
     now dynamically loads it only when required (not in the common case),
     and fails gracefully if not installed.
