@@ -1,3 +1,4 @@
+llgal (0.13.6-1) unstable; urgency=low
 
   * New upstream release.
   * Replace link_between_last_and_first_slide with link_between_last_and_first
@@ -8,6 +9,7 @@
   * Add README.Debian to explain why libimage-exiftool-perl is only
     recommended.
 
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Sun,  3 Sep 2006 11:34:40 -0400
 
 llgal (0.13.5-1) unstable; urgency=low
 
