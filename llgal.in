@@ -845,6 +845,9 @@ sub finalize_entries {
 	# entries without a slide are not taken into account
 	next if defined $entry->{no_slide} ;
 
+	# if making no slides, only subgallery may be linked together
+	next if $opts->{make_no_slides} and $entry->{type} != $TYPE_DIR and $opts->{link_subgalleries} ;
+
 	# slide counter
 	$indix++;
 	$entry->{counter} = $indix ;

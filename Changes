@@ -11,6 +11,7 @@
   * -L only suppresses thumbnails, not slides since the main goal was
     to create a list of subgallery links without slides, but it may be
     achieved with -L -s anyway.
+  * Fix linking between subgalleries when making no slides.
   * Fix computing of thumbnail row width when deciding how many thumbnails
     to output on a row, use the correct width for padded thumbnail boxes.
   * Fix uninitialized dimensions string when not generating any slide.
