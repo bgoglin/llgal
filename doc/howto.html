@@ -379,6 +379,29 @@ Regeneration is then easy (with <tt>--config</tt> in the first case).
 
 
 
+<h3 class="question">How do I create a text menu linking to multiple galleries?</h3>
+
+Assuming you have a main directory containing multiple subdirectories where you
+<b>already</b> created sub-galleries, you may do:
+
+<pre>
+  llgal -L -s
+</pre>
+
+Using <tt>-L</tt> will create text links instead of thumbnails linking to sub-galleries,
+while <tt>-s</tt> will avoid any slide to be created.
+<br />
+As you may want slides in the sub-galleries, adding <tt>-R</tt> is not recommended here
+since <tt>-s</tt> would remove slides from both the main gallery and the sub-galleries.
+If you need <tt>-R</tt> anyway, you may for instance avoid this problem by dropping
+<tt>-s</tt> on the command and inserting <tt>make_no_slides=1</tt> in the main gallery
+configuration file (<tt>.llgal/llgalrc</tt>).
+Since the local configuration file is used for the local gallery and not for
+sub-galleries (even with <tt>-R</tt>), <tt>make_no_slides=1</tt> won't
+affect sub-galleries.
+
+
+
 <h2 class="section">Miscellaneous</h2>
 
 
