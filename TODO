@@ -1,9 +1,11 @@
 FOR NEXT RELEASE
 ================
+* Adapt the ExifTool missing error to the distrib
+* Prefetch next slide/image
 
 PENDING
 =======
-* mv index_cellpadding, text_thumb_width/height et text_slide_width/height dans css
+* mv index_cellpadding, text_thumb_width/height et text_slide_width/height in css
 
 * identify movies ? tags ?
 * do not hardcode thumbnail extraction, only propose several types (--transcode ?)
@@ -50,7 +52,6 @@ PENDING
 * index instead of slide for subgallery
 * do something to generate with -s when only subdirs and nothing else (especially with -L ?)
 
-* link_between_last_and_first_subgallery (Gerfried Fuchs)
 * link_slides_between_galleries, needs to traverse all and generate all afterwards (Gerfried Fuchs)
 * generate all title recursively, and take them in parent prev/next
 
