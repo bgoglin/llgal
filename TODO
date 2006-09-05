@@ -1,7 +1,9 @@
 FOR NEXT RELEASE
 ================
 * Adapt the ExifTool missing error to the distrib
+* Make po/Makefile configurable by passing LANGUAGES="fr de"
 * Prefetch next slide/image
+* Use !~ and =~ m@@ and s@@@ when there are a lot of slashes
 
 PENDING
 =======
