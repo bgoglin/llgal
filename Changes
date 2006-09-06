@@ -1,3 +1,7 @@
+
+  * Include TODO in the tarball.
+
+
 llgal (0.13.6)
 
   * Fix a major bug in slides' layout, which led to always use text-slide
