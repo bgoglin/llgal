@@ -1,27 +1,38 @@
 .PHONY: all update clean install uninstall
 
-PO_FILES	=	$(wildcard *.po)
-MO_FILES	=	$(subst .po,.mo,$(PO_FILES))
-LANGUAGES	=	$(subst .po,,$(PO_FILES))
+# To change the locales that are generated, you have to pass
+# something like LOCALES="fr de" on the command line
 
-$(MO_FILES): %.mo: %.po
-	msgfmt $< -o $@
+# locales that are supported
+SUPPORTED_PO_FILES	=	$(wildcard *.po)
+SUPPORTED_LOCALES	=	$(patsubst %.po,%,$(SUPPORTED_PO_FILES))
+
+# by default, build all supported locales
+LOCALES	=	$(SUPPORTED_LOCALES)
+
+# locales that actually have to be built/installed
+# (needed to drop the unsupported/duplicated ones that the user requests)
+BUILT_LOCALES	=	$(sort $(filter $(SUPPORTED_LOCALES),$(LOCALES)))
+BUILT_MO_FILES	=	$(patsubst %,%.mo,$(BUILT_LOCALES))
 
 all: update
 
-update:: $(MO_FILES)
+update:: $(BUILT_MO_FILES)
+
+$(BUILT_MO_FILES): %.mo: %.po
+	msgfmt $< -o $@
 
 clean::
-	$(RM) $(MO_FILES)
+	$(RM) $(BUILT_MO_FILES)
 
 install::
-	for lang in $(LANGUAGES) ; do \
+	for lang in $(BUILT_LOCALES) ; do \
 		install -d -m 0755 $(LOCALEDIR)/$${lang}/LC_MESSAGES/ ; \
 		install -m 0644 $${lang}.mo $(LOCALEDIR)/$${lang}/LC_MESSAGES/llgal.mo ; \
 	done
 
 uninstall::
-	for lang in $(LANGUAGES) ; do \
+	for lang in $(BUILT_LOCALES) ; do \
 		rm $(LOCALEDIR)/$${lang}/LC_MESSAGES/llgal.mo ; \
 		rmdir $(LOCALEDIR)/$${lang}/LC_MESSAGES/ ; \
 		rmdir $(LOCALEDIR)/$${lang}/ ; \

@@ -1,4 +1,7 @@
 
+  * Support building/installing only some locales by passing something
+    like LOCALES="fr de" on the make command line
+    (requested by Alexandre buisse).
   * Include TODO in the tarball.
 
 
