@@ -164,6 +164,7 @@ my $normal_opts_type = {
     alt_full_text => $OPT_IS_STRING,
     alt_scaled_text => $OPT_IS_STRING,
     alt_thumbnail_text => $OPT_IS_STRING,
+    alt_film_tile_text => $OPT_IS_STRING,
     over_scaled_text => $OPT_IS_STRING,
     over_thumbnail_text => $OPT_IS_STRING,
     over_index_link_text => $OPT_IS_STRING,
@@ -404,6 +405,8 @@ sub add_defaults {
 	alt_scaled_text => llgal_gettext ("alt_scaled_text|Scaled image "),
 # alternative text for thumbnails in the index
 	alt_thumbnail_text => llgal_gettext ("alt_thumbnail_text|Thumbnail "),
+# alternative text for film tile
+	alt_film_tile_text => llgal_gettext ("alt_film_tile_text|Film Tile"),
 # text shown when the mouse pointer is over a scaled image in a slide
 	over_scaled_text => llgal_gettext ("over_scaled_text|Click to see full size "),
 # text shown when the mouse pointer is over a thumbnail

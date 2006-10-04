@@ -48,6 +48,9 @@ msgstr "alt_scaled_text|Diapositive "
 msgid "alt_thumbnail_text|Thumbnail "
 msgstr "alt_thumbnail_text|Vignette "
 
+msgid "alt_film_tile_text|Film Tile"
+msgstr "alt_film_tile_text|Pellicule de film"
+
 msgid "over_scaled_text|Click to see full size "
 msgstr "over_scaled_text|Cliquer pour voir en taille originale "
 

@@ -252,6 +252,9 @@
 # Text shown as image alternative for thumbnails in the index
 # alt_thumbnail_text = "Thumbnail "
 
+# Text shown as an image alternative for the film tile in the index
+# alt_film_tile_text = "Film tile"
+
 # Text shown when the mouse pointer is over a scaled image in a slide
 # over_scaled_text = "Click to see full size "
 

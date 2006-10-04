@@ -1,5 +1,7 @@
 
   * Fix W3C compliance of the film tile (reported by Jean-Claude Noel).
+    + Add alt_film_tile_text configuration options to change the film
+      alternative text.
   * Fix W3C compliance of horizontal lines generated with LINE entries.
   * Support building/installing only some locales by passing something
     like LOCALES="fr de" on the make command line
