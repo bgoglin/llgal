@@ -1,0 +1,17 @@
+---
+ llgal.in |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+Index: debian/llgal.in
+===================================================================
+--- debian.orig/llgal.in	2006-10-04 19:44:21.000000000 +0200
++++ debian/llgal.in	2006-10-04 19:45:15.000000000 +0200
+@@ -447,7 +447,7 @@
+ 		# only load Image::ExifTool when really required
+ 		if (not eval { require Image::ExifTool ; }) {
+ 		    $messages->abort_percentage ();
+-		    die "Perl module Image::ExifTool not found, please install it if you wish to extract tags from images.\n" ;
++		    die "Perl module Image::ExifTool not found, please install the package 'libimage-exiftool-perl' if you wish to extract tags from images.\n" ;
+ 		}
+ 		# ExifTool initialization
+ 		$opts->{exiftool} = new Image::ExifTool;
