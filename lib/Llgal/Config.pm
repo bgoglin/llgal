@@ -10,23 +10,6 @@ use I18N::Langinfo qw(langinfo CODESET) ;
 use Locale::gettext ;
 use POSIX qw(strftime) ;
 
-use vars qw(@EXPORT) ;
-
-@EXPORT = qw (
-	      early_parse_cmdline_options
-	      init_llgal_gettext
-	      parse_cmdline_options
-	      parse_generic_config_file
-	      parse_custom_config_file
-	      merge_opts
-	      merge_opts_into
-	      add_defaults
-	      prepare_captions_variables
-	      prepare_gallery_variables
-	      generate_config
-	      die_usage
-	      ) ;
-
 ######################################################################
 # default values that will be restored if the associated option is set to -1
 

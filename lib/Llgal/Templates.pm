@@ -4,15 +4,6 @@ use strict ;
 
 use Llgal::Utils ;
 
-use vars qw(@EXPORT) ;
-
-@EXPORT = qw (
-	      find_generic_template_file
-	      find_template_file
-	      get_llgal_files
-	      give_templates
-	      ) ;
-
 # copy a file
 sub copy_file {
     my $self = shift ;
