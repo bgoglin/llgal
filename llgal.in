@@ -1842,7 +1842,7 @@ sub generate_index {
 	if ($type == $TYPE_LINE or $type == $TYPE_BREAK) {
 	    if ($type == $TYPE_LINE) {
 		# output a horizontal line
-		print IXW "<hr class=\"index\">" ;
+		print IXW "<hr class=\"index\" />\n" ;
 	    }
 	    # next line, next entry
 	    $messages->update_percentage ($i+1) ;
