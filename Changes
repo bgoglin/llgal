@@ -44,7 +44,7 @@ llgal (0.13.6)
     when installed anywhere. Add a notice message, and be sure messages
     don't mess up with the on-going caption generation percentage.
   * Do not load Image::ExifTool unless required by --exif, --cc or --ct
-    (requested by Alexandra Buisse).
+    (requested by Alexandre Buisse).
   * Add a CSS style for captions (requested by Alexandre Buisse).
   * Add the command line options to the generated slides, and to the
     captions file (on both creation and appending)
