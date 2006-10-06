@@ -229,7 +229,7 @@ sub check_file {
     my $excluded = 0 ;
     for(my $i = 0; $i < @{$opts->{excludes}}; $i++) {
 	my $entry = @{$opts->{excludes}}[$i] ;
-	if ($filename =~ /^(.*\/)*$entry->{filter}$/) {
+	if ($filename =~ m@^(.*/)*$entry->{filter}$@) {
 	    $excluded = $entry->{excluded}
 	}
     }
@@ -316,12 +316,12 @@ sub generate_caption_from_image_comment {
     foreach my $types (split (/,/, $opts->{make_caption_from_image_comment})) {
 	# types is a + separated string of types
 	foreach my $type (split (/\+/, $types)) {
-	    if ($type =~ /^std$/i) {
+	    if ($type =~ m/^std$/i) {
 		# Standard comment such as JFIF or GIF
 		my $comment = $exif_infos->{Comment} ;
 		push (@texts, $comment)
 		    if $comment ;
-	    } elsif ($type =~ /^exif$/i) {
+	    } elsif ($type =~ m/^exif$/i) {
 		# Exif comment
 		my $comment = $exif_infos->{UserComment} ;
 		push (@texts, $comment)
@@ -371,7 +371,7 @@ sub make_safe_url {
     my $safe = make_safe_url_nowarn ($file) ;
 
     $messages->warning ("Non-ascii characters were escaped in filename '$file'.")
-	if $safe ne $file and $file =~ /[\x80-\xFF]/ ;
+	if $safe ne $file and $file =~ m/[\x80-\xFF]/ ;
 
     return $safe ;
 }
@@ -574,7 +574,7 @@ sub fill_file_entry {
 
 	# filename and url
 	$thumb_filename = "$opts->{thumbnail_image_filenameprefix}$filename" ;
-	$thumb_filename =~ s/\//$opts->{path_separator_replacement}/g ;
+	$thumb_filename =~ s@/@$opts->{path_separator_replacement}@g ;
 	$entry->{thumb_filename} = "$self->{local_llgal_dir}/$thumb_filename" ;
 	$entry->{thumb_url} = "$local_llgal_url/". make_safe_url_nowarn ($thumb_filename) ;
 
@@ -666,7 +666,7 @@ sub fill_file_entry {
 
 	    # filename and url
 	    $scaled_filename = "$opts->{scaled_image_filenameprefix}$filename" ;
-	    $scaled_filename =~ s/\//$opts->{path_separator_replacement}/g ;
+	    $scaled_filename =~ s@/@$opts->{path_separator_replacement}@g ;
 	    $entry->{scaled_filename} = "$self->{local_llgal_dir}/$scaled_filename" ;
 	    $entry->{scaled_url} = "$local_llgal_url/". make_safe_url_nowarn ($scaled_filename) ;
 
@@ -975,14 +975,14 @@ sub get_entries_from_directory {
 	    # file
 	    my $entry = undef ;
 
-	    if ($filename =~ /($opts->{image_extensions})$/i) {
+	    if ($filename =~ m/($opts->{image_extensions})$/i) {
 		# image
 		my $entry = create_file_entry ($TYPE_IMAGE, $filename, undef, undef) ;
 		goto JUST_A_FILE
 		    if not defined $entry ;
 		push @entries, $entry ;
 
-	    } elsif ($filename =~ /($opts->{movie_extensions})$/i) {
+	    } elsif ($filename =~ m/($opts->{movie_extensions})$/i) {
 		# movie
 		my $entry = create_file_entry ($TYPE_MOVIE, $filename, undef, undef) ;
 		goto JUST_A_FILE
@@ -1052,7 +1052,7 @@ sub get_entries {
 	}
 	foreach my $subdir (@subdirs) {
 	    # remove ending slashes
-	    $subdir =~ s/\/*$//g ;
+	    $subdir =~ s@/*$@@g ;
 	    # separation line and title
 	    push @entries, (create_nofile_entry $TYPE_LINE, undef, undef, undef)
 		if $opts->{separate_sections} ;
@@ -1096,7 +1096,7 @@ sub check_destination {
     $self->{destination_dir} .= "/"
 	unless $self->{destination_dir} =~ m@/$@ ;
     # remove starting ./
-    $self->{destination_dir} =~ s/^(\.\/+)+// ;
+    $self->{destination_dir} =~ s@^(\./+)+@@ ;
 
     # Are we in .llgal ? just check the last part of the path by concatening
     # pwd and destination_dir even if destination_dir is an absolute path
@@ -1170,15 +1170,15 @@ sub generate_captions_entries {
 	close CAP ;
 
 	foreach my $line (@captions) {
-	    if ($line =~ /^TITLE:\s*(.*)\s*$/) {
+	    if ($line =~ m/^TITLE:\s*(.*)\s*$/) {
 		$old_title = $1 ;
-	    } elsif ($line =~ /^PARENT:\s*(.*)\s*$/) {
+	    } elsif ($line =~ m/^PARENT:\s*(.*)\s*$/) {
 		$old_parent_gallery_link = 1 ;
 		$old_parent_gallery_link_text = $1 ;
-	    } elsif ($line =~ /^PREV:\s*(.+)\s+----\s+(.+)\s*/) {
+	    } elsif ($line =~ m/^PREV:\s*(.+)\s+----\s+(.+)\s*/) {
 		$old_prev_gallery_link_target = $2 ;
 		$old_prev_gallery_link_text = $1 ;
-	    } elsif ($line =~ /^NEXT:\s*(.+)\s+----\s+(.+)\s*/) {
+	    } elsif ($line =~ m/^NEXT:\s*(.+)\s+----\s+(.+)\s*/) {
 		$old_next_gallery_link_target = $2 ;
 		$old_next_gallery_link_text = $1 ;
 	    }
@@ -1325,7 +1325,7 @@ sub read_captions_file {
 	$line =~ s/^\s*// ;
 	$line =~ s/\s\(\s*\)$/$1/ ;
 	# only lines that don't start with # and are not empty
-	if (!($line =~ m/^\#/) and !($line =~ /^$/)) {
+	if ($line !~ m/^\#/ and $line !~ m/^$/) {
 	    if ($line =~ m/^TITLE:\s*(.*)\s*/) {
 		# title
 		$opts->{index_title} = $1 ;
@@ -1424,7 +1424,7 @@ sub read_captions_file {
 # revert a path into ..
 sub back_path {
     my $dir = shift ;
-    $dir =~ s/([^\/]+)/../g ;
+    $dir =~ s@([^/]+)@..@g ;
     return $dir ;
 }
 
@@ -2282,7 +2282,7 @@ sub main_process {
 	    my @dir_entries = () ;
 	    while (my $dir = readdir DIR) {
 		push @dir_entries, $dir
-		    if $dir =~ /^[^.]/ and -d "$self->{destination_dir}$dir" ;
+		    if $dir =~ m/^[^.]/ and -d "$self->{destination_dir}$dir" ;
 	    }
 	    closedir DIR ;
 	    # process recursively
