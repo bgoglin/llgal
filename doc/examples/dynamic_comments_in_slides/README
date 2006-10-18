@@ -1,0 +1,21 @@
+How do I let people add comments to my slides dynamically?
+==========================================================
+
+Some PHP code may be used to handle dynamic comments in slides.
+The slide template in this directory should be used together with
+llgal --php. It will generate PHP slides with comments stuff at the
+bottom:
+* slide_<x>.php displays the contents of comments_<x>.txt if it exists
+* a form is available to add new comments in comments_<x>.txt
+
+The PHP script add_comments.php in this directory is executed when
+the form Submit button is clicked. It will format the comment text,
+add it to the corresponding comments_<x>.php, and go back to the
+slide.
+
+Of course, this is just a very simple example. It may be improved
+a lot by adding other fields in the form (especially the name and
+email of the author of the comment) and the date.
+Right now, formatting is done when the comment is added. But some
+people might want to keep comments_<x>.txt unformatted and have
+slide_<x>.php format the text when displaying it.

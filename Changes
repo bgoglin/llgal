@@ -10,6 +10,10 @@
     leading zeros), <--SLIDE-COUNTER--> to be replaced with the slide
     counter according to slide_counter_format as in the caption, and
     <!--SLIDE-TOTAL--> to be replaced by the number of slides.
+  * Addition of doc/examples/ for various examples:
+    + dynamic_comments_in_slides/ contains some files to explain
+      "How do I let people add comments to my slides dynamically?"
+      (also added to the How-To).
   * Disable the film effect by default (requested by lots of people)
     and thus change --nf to --fe to reenable it.
   * Minor fixes in the manpage.
