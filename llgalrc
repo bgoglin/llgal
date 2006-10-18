@@ -124,8 +124,8 @@
 # Write captions under thumbnails [-u]
 # show_caption_under_thumbnails = 0
 
-# Omit film effect [--nf]
-# show_no_film_effect = 0
+# Show a film effect in the index of thumbnails [--fe]
+# show_film_effect = 0
 
 ##### Slides #####
 

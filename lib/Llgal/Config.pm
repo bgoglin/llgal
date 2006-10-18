@@ -107,7 +107,7 @@ my $normal_opts_type = {
     thumbnail_height_max => $OPT_IS_NUMERIC, # > 0, -1 for default
     thumbnail_width_max => $OPT_IS_NUMERIC, # > 0, 0 for unlimited, -1 for default
     show_caption_under_thumbnails => $OPT_IS_NUMERIC,
-    show_no_film_effect => $OPT_IS_NUMERIC,
+    show_film_effect => $OPT_IS_NUMERIC,
 # Slides
     make_no_slides => $OPT_IS_NUMERIC,
     make_slide_filename_from_filename => $OPT_IS_NUMERIC,
@@ -312,8 +312,8 @@ sub add_defaults {
 	thumbnail_width_max => $thumbnail_width_max_default,
 # write captions under thumbnails on index page (-u)
 	show_caption_under_thumbnails => 0,
-# omit the film effect altogether (--nf)
-	show_no_film_effect => 0,
+# show the film effect in the index of thumbnails (--fe)
+	show_film_effect => 0,
 
 # Slides
 # make no slides, just thumbnail links to images (-s)
@@ -507,6 +507,7 @@ Layout Options:
     --codeset <s>      change the codeset in HTML pages
     --con <s>          options to pass to convert (e.g. -quality N)
     --exif [<tags>]    show exif tags on each slide
+    --fe               show a film effect in the indexof thumbnails
     -i <file>          name of the main thumbnail index file (index)
     -k                 use the image captions for the HTML slide titles
     -L                 list links outside of the table
@@ -515,7 +516,6 @@ Layout Options:
     --lt               use thumbnail preview for links in slides
     -n                 use image file names for the HTML slide files
     --nc               omit the image count from the captions
-    --nf               omit the film effect altogether
     -p <n>             cellpadding value of thumbnail index tables (3)
     --parent-gal       add links to the parent gallery
     --php              use php extension for generated webpages
@@ -778,6 +778,7 @@ sub parse_cmdline_options {
 				if ($value eq "") { $opts->{show_all_exif_tags} = 1 ; }
 				else { push (@{$opts->{show_exif_tags}}, split (/,/, $value)) ; }
 			    },
+	'fe'		=> \$opts->{show_film_effect},
 	'i=s'		=> \$opts->{index_filename},
 	'k'		=> \$opts->{make_slide_title_from_caption},
 	'L'		=> \$opts->{list_links},
@@ -786,7 +787,6 @@ sub parse_cmdline_options {
 	'lt'		=> sub { $opts->{prev_slide_link_preview} = 1 ; $opts->{next_slide_link_preview} = 1 ; },
 	'n'		=> \$opts->{make_slide_filename_from_filename},
 	'nc'		=> sub { $opts->{slide_counter_format} = "" ; },
-	'nf'		=> \$opts->{show_no_film_effect},
 	'option=s'	=> sub { shift ; process_option $self, $opts, shift ; },
 	'P=s'		=> \@{$opts->{section_dirs}},
 	'Pall'		=> \$opts->{recursive_sections},

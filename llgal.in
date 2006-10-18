@@ -1903,10 +1903,10 @@ sub generate_index {
 	}
 
 	# Table header
-	if ($opts->{show_no_film_effect}) {
-	    print IXW "<table class=\"index\" style=\"border-spacing: ", $opts->{index_cellpadding}, "px 0px;\">\n" ;
-	} else {
+	if ($opts->{show_film_effect}) {
 	    print IXW "<table class=\"index with-tile\" style=\"border-spacing: ", $opts->{index_cellpadding}, "px 0px;\">\n" ;
+	} else {
+	    print IXW "<table class=\"index\" style=\"border-spacing: ", $opts->{index_cellpadding}, "px 0px;\">\n" ;
 	}
 
 	# Row header
@@ -1914,10 +1914,10 @@ sub generate_index {
 	print IXW "  <tr><td class=\"tiled\" colspan=\"". ($num+2) ."\">"
 	    ."<img src=\"$self->{local_llgal_dir}/$opts->{filmtile_filename}\" alt=\"$opts->{alt_film_tile_text}\" />"
 	    ."</td></tr>\n"
-	    unless $opts->{show_no_film_effect} ;
+	    if $opts->{show_film_effect} ;
 	print IXW "  <tr>\n" ;
 	print IXW "    <td class=\"thumb\">&nbsp;</td>\n"
-	    unless $opts->{show_no_film_effect} ;
+	    if $opts->{show_film_effect} ;
 
 	# Actual row of thumbnails
 	for (my $j = 0; $j < $num; $j++) {
@@ -2003,24 +2003,24 @@ sub generate_index {
 
 	# Row footer
 	print IXW "    <td class=\"thumb\">&nbsp;</td>\n"
-	    unless $opts->{show_no_film_effect} ;
+	    if $opts->{show_film_effect} ;
 	print IXW "  </tr>\n" ;
 	print IXW "  <tr><td class=\"tiled\" colspan=\"". ($num+2) ."\">"
 	    ."<img src=\"$self->{local_llgal_dir}/$opts->{filmtile_filename}\" alt=\"$opts->{alt_film_tile_text}\" />"
 	    ."</td></tr>\n"
-	    unless $opts->{show_no_film_effect} ;
+	    if $opts->{show_film_effect} ;
 
 	# Dimensions and filesizes
 	if ($opts->{show_dimensions} or $opts->{show_size}) {
 	    print IXW "  <tr>\n" ;
 	    print IXW "    <td>&nbsp;</td>\n"
-		unless $opts->{show_no_film_effect} ;
+		if $opts->{show_film_effect} ;
 	    for (my $j = 0; $j < $num; $j++) {
 		my $entry = $entries[$i+$j] ;
 		print IXW "    <td class=\"thumb-dim\">$entry->{scaled_dimstring}</td>\n" ;
 	    }
 	    print IXW "    <td>&nbsp;</td>\n"
-		unless $opts->{show_no_film_effect} ;
+		if $opts->{show_film_effect} ;
 	    print IXW "  </tr>\n" ;
 	}
 
@@ -2028,7 +2028,7 @@ sub generate_index {
 	if ($opts->{show_caption_under_thumbnails}) {
 	    print IXW "  <tr>\n" ;
 	    print IXW "<td>&nbsp;</td>\n"
-		unless $opts->{show_no_film_effect} ;
+		if $opts->{show_film_effect} ;
 	    for (my $j = 0; $j < $num; $j++) {
 		my $entry = $entries[$i+$j] ;
 		print IXW "    <td class=\"thumb-caption\">$entry->{caption}</td>\n" ;
@@ -2114,7 +2114,7 @@ sub make_www_rights {
     make_readable "$self->{destination_dir}$self->{local_llgal_dir}/$opts->{css_filename}" ;
     # filmtile
     make_readable "$self->{destination_dir}$self->{local_llgal_dir}/$opts->{filmtile_filename}"
-	if ! $opts->{show_no_film_effect} ;
+	if $opts->{show_film_effect} ;
     # index link image
     make_readable "$self->{destination_dir}$self->{local_llgal_dir}/$opts->{index_link_image_filename}"
  	if $opts->{index_link_image} ;

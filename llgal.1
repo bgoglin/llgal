@@ -409,6 +409,13 @@ The tags are displayed using their description as given by
 .BR "exiftool -s myimage" .
 
 .TP
+.B --fe
+Show a film effect in the index of thumbnails. The aspect of this
+effect may be configured by replacing the tile file that llgal
+puts in
+.IR .llgal .
+
+.TP
 .BI -i " <file>"
 Name of the main thumbnail index file.  The default is
 .BR index ,
@@ -468,13 +475,6 @@ and so on.
 .TP
 .B --nc
 Omit the image count from the captions.
-
-.TP
-.B --nf
-Omit the film effect altogether.  For a simpler look you
-can also set the thumbnail background to be the same as the main
-index page background with the tile background-color option in the
-.IR llgal.css " file."
 
 .TP
 .BI -p " <n>"
@@ -986,12 +986,12 @@ Write captions under thumbnails
 Default is
 .BR 0 " (" disabled ).
 .RE
-.I show_no_film_effect = <0/1>
+.I show_film_effect = <0/1>
 .RS
-Omit film effect
-.RB [ --nf ].
+Show film effect
+.RB [ --fe ].
 Default is
-.BR 1 " (" enabled ).
+.BR 0 " (" disabled ).
 .RE
 
 .B Slides:
