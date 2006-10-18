@@ -192,6 +192,7 @@ sub init_gallery {
 
 # - slide_filename (name of the HTML slide filename)
 # - slide_url (url of the HTML slide filename)
+# - counter_with_zeros (stringified counter used in slide's filename)
 
 # - thumb_xdim, thumb_ydim (details about the thumbnail image)
 # - thumb_dimstring (string containing dimensions)
@@ -1672,13 +1673,15 @@ sub generate_slides {
 	    $THIS_SLIDE = "<a href=\"$entry->{url}\" title=\"$entry->{title} $entry->{dimstring}\">$entry->{linktext}</a>" ;
 	}
 
-	# slide counter
-	my $slide_counter = $opts->{slide_counter_format} ;
-	$slide_counter =~ s/%n/$entry->{counter}/ ;
-	$slide_counter =~ s/%0n/$entry->{counter_with_zeros}/ ;
-	$slide_counter =~ s/%t/$gallery->{nslides}/ ;
+	# slide number, counter and total
+	my $SLIDE_NUMBER = $entry->{counter_with_zeros} ;
+	my $SLIDE_TOTAL = $gallery->{nslides} ;
+	my $SLIDE_COUNTER = $opts->{slide_counter_format} ;
+	$SLIDE_COUNTER =~ s/%n/$entry->{counter}/ ;
+	$SLIDE_COUNTER =~ s/%0n/$SLIDE_NUMBER/ ;
+	$SLIDE_COUNTER =~ s/%t/$SLIDE_TOTAL/ ;
 	# caption
-	my $IMAGE_CAPTION = $entry->{caption} . $slide_counter . "&nbsp;&nbsp;&nbsp;$entry->{dimstring}" ;
+	my $IMAGE_CAPTION = $entry->{caption} . $SLIDE_COUNTER . "&nbsp;&nbsp;&nbsp;$entry->{dimstring}" ;
 
 	# previous slide
 	my $PREV_SLIDE_LINK_TEXT = "" ;
@@ -1761,6 +1764,9 @@ sub generate_slides {
 
 	    # slide specific fields
 	    $line =~ s/<!--SLIDE-TITLE-->/$SLIDE_TITLE/g ;
+	    $line =~ s/<!--SLIDE-NUMBER-->/$SLIDE_NUMBER/g ;
+	    $line =~ s/<!--SLIDE-TOTAL-->/$SLIDE_TOTAL/g ;
+	    $line =~ s/<!--SLIDE-COUNTER-->/$SLIDE_COUNTER/g ;
 	    $line =~ s/<!--THIS-SLIDE-STYLE-->/$THIS_SLIDE_STYLE/g ;
 	    $line =~ s/<!--THIS-SLIDE-->/$THIS_SLIDE/ ;
 	    $line =~ s/<!--IMAGE-CAPTION-->/$IMAGE_CAPTION/g ;
