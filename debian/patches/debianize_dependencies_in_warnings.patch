@@ -6,7 +6,7 @@ Index: debian/llgal.in
 ===================================================================
 --- debian.orig/llgal.in	2006-10-04 19:44:21.000000000 +0200
 +++ debian/llgal.in	2006-10-04 19:45:15.000000000 +0200
-@@ -447,7 +447,7 @@
+@@ -448,7 +448,7 @@
  		# only load Image::ExifTool when really required
  		if (not eval { require Image::ExifTool ; }) {
  		    $messages->abort_percentage ();
