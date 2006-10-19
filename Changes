@@ -1,11 +1,5 @@
+llgal (0.13.7)
 
-  * Fix W3C compliance of the film tile (reported by Jean-Claude Noel).
-    + Add alt_film_tile_text configuration options to change the film
-      alternative text.
-  * Fix W3C compliance of horizontal lines generated with LINE entries.
-  * Support building/installing only some locales by passing something
-    like LOCALES="fr de" on the make command line
-    (requested by Alexandre buisse).
   * Add <--SLIDE-NUMBER--> to be replaced with the slide number (with
     leading zeros), <--SLIDE-COUNTER--> to be replaced with the slide
     counter according to slide_counter_format as in the caption, and
@@ -16,12 +10,20 @@
       (also added to the How-To).
   * Disable the film effect by default (requested by lots of people)
     and thus change --nf to --fe to reenable it.
+  * Fix W3C compliance of the film tile (reported by Jean-Claude Noel).
+    + Add alt_film_tile_text configuration options to change the film
+      alternative text.
+  * Fix W3C compliance of horizontal lines generated with LINE entries.
+  * Support building/installing only some locales by passing something
+    like LOCALES="fr de" on the make command line
+    (requested by Alexandre buisse).
   * Minor fixes in the manpage.
   * Fix missing Perl use (*convert_options were broken).
   * Cleanup Perl regexps.
   * Fix Perl modularization, no need to use Exporter module since we
     access modular functions by prefixing with the module name.
 
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Thu, 19 Sep 2006 21:47:00 -0400
 
 llgal (0.13.6)
 
