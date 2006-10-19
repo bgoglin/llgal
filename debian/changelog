@@ -1,6 +1,7 @@
 llgal (0.13.7-1) unstable; urgency=low
 
   * New upstream release.
+  * Install doc/examples/.
   * Include /usr/share/quilt/quilt.make in debian/rules to manage
     patches and add quilt (>= 0.40) to Build-Depends.
   * Add debianize_dependencies_in_warnings.patch to talk about
