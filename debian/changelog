@@ -1,11 +1,12 @@
-llgal (xxx) unstable; urgency=low
+llgal (0.13.7-1) unstable; urgency=low
 
+  * New upstream release.
   * Include /usr/share/quilt/quilt.make in debian/rules to manage
     patches and add quilt (>= 0.40) to Build-Depends.
   * Add debianize_dependencies_in_warnings.patch to talk about
     libimage-exiftool-perl when recommending Image::ExifTool.
 
- -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Wed,  4 Oct 2006 19:41:21 +0200
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Thu, 19 Oct 2006 21:50:00 +0200
 
 llgal (0.13.6-1) unstable; urgency=low
 
