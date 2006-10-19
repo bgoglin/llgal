@@ -17,6 +17,7 @@
   * Disable the film effect by default (requested by lots of people)
     and thus change --nf to --fe to reenable it.
   * Minor fixes in the manpage.
+  * Fix missing Perl use (*convert_options were broken).
   * Cleanup Perl regexps.
   * Fix Perl modularization, no need to use Exporter module since we
     access modular functions by prefixing with the module name.

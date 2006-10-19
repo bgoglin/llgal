@@ -9,6 +9,7 @@ use Getopt::Long ;
 use I18N::Langinfo qw(langinfo CODESET) ;
 use Locale::gettext ;
 use POSIX qw(strftime) ;
+use Text::ParseWords ;
 
 ######################################################################
 # default values that will be restored if the associated option is set to -1
