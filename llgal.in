@@ -192,6 +192,7 @@ sub init_gallery {
 
 # - slide_filename (name of the HTML slide filename)
 # - slide_url (url of the HTML slide filename)
+# - counter_with_zeros (stringified counter used in slide's filename)
 
 # - thumb_xdim, thumb_ydim (details about the thumbnail image)
 # - thumb_dimstring (string containing dimensions)
@@ -229,7 +230,7 @@ sub check_file {
     my $excluded = 0 ;
     for(my $i = 0; $i < @{$opts->{excludes}}; $i++) {
 	my $entry = @{$opts->{excludes}}[$i] ;
-	if ($filename =~ /^(.*\/)*$entry->{filter}$/) {
+	if ($filename =~ m@^(.*/)*$entry->{filter}$@) {
 	    $excluded = $entry->{excluded}
 	}
     }
@@ -316,12 +317,12 @@ sub generate_caption_from_image_comment {
     foreach my $types (split (/,/, $opts->{make_caption_from_image_comment})) {
 	# types is a + separated string of types
 	foreach my $type (split (/\+/, $types)) {
-	    if ($type =~ /^std$/i) {
+	    if ($type =~ m/^std$/i) {
 		# Standard comment such as JFIF or GIF
 		my $comment = $exif_infos->{Comment} ;
 		push (@texts, $comment)
 		    if $comment ;
-	    } elsif ($type =~ /^exif$/i) {
+	    } elsif ($type =~ m/^exif$/i) {
 		# Exif comment
 		my $comment = $exif_infos->{UserComment} ;
 		push (@texts, $comment)
@@ -371,7 +372,7 @@ sub make_safe_url {
     my $safe = make_safe_url_nowarn ($file) ;
 
     $messages->warning ("Non-ascii characters were escaped in filename '$file'.")
-	if $safe ne $file and $file =~ /[\x80-\xFF]/ ;
+	if $safe ne $file and $file =~ m/[\x80-\xFF]/ ;
 
     return $safe ;
 }
@@ -574,7 +575,7 @@ sub fill_file_entry {
 
 	# filename and url
 	$thumb_filename = "$opts->{thumbnail_image_filenameprefix}$filename" ;
-	$thumb_filename =~ s/\//$opts->{path_separator_replacement}/g ;
+	$thumb_filename =~ s@/@$opts->{path_separator_replacement}@g ;
 	$entry->{thumb_filename} = "$self->{local_llgal_dir}/$thumb_filename" ;
 	$entry->{thumb_url} = "$local_llgal_url/". make_safe_url_nowarn ($thumb_filename) ;
 
@@ -666,7 +667,7 @@ sub fill_file_entry {
 
 	    # filename and url
 	    $scaled_filename = "$opts->{scaled_image_filenameprefix}$filename" ;
-	    $scaled_filename =~ s/\//$opts->{path_separator_replacement}/g ;
+	    $scaled_filename =~ s@/@$opts->{path_separator_replacement}@g ;
 	    $entry->{scaled_filename} = "$self->{local_llgal_dir}/$scaled_filename" ;
 	    $entry->{scaled_url} = "$local_llgal_url/". make_safe_url_nowarn ($scaled_filename) ;
 
@@ -975,14 +976,14 @@ sub get_entries_from_directory {
 	    # file
 	    my $entry = undef ;
 
-	    if ($filename =~ /($opts->{image_extensions})$/i) {
+	    if ($filename =~ m/($opts->{image_extensions})$/i) {
 		# image
 		my $entry = create_file_entry ($TYPE_IMAGE, $filename, undef, undef) ;
 		goto JUST_A_FILE
 		    if not defined $entry ;
 		push @entries, $entry ;
 
-	    } elsif ($filename =~ /($opts->{movie_extensions})$/i) {
+	    } elsif ($filename =~ m/($opts->{movie_extensions})$/i) {
 		# movie
 		my $entry = create_file_entry ($TYPE_MOVIE, $filename, undef, undef) ;
 		goto JUST_A_FILE
@@ -1052,7 +1053,7 @@ sub get_entries {
 	}
 	foreach my $subdir (@subdirs) {
 	    # remove ending slashes
-	    $subdir =~ s/\/*$//g ;
+	    $subdir =~ s@/*$@@g ;
 	    # separation line and title
 	    push @entries, (create_nofile_entry $TYPE_LINE, undef, undef, undef)
 		if $opts->{separate_sections} ;
@@ -1096,7 +1097,7 @@ sub check_destination {
     $self->{destination_dir} .= "/"
 	unless $self->{destination_dir} =~ m@/$@ ;
     # remove starting ./
-    $self->{destination_dir} =~ s/^(\.\/+)+// ;
+    $self->{destination_dir} =~ s@^(\./+)+@@ ;
 
     # Are we in .llgal ? just check the last part of the path by concatening
     # pwd and destination_dir even if destination_dir is an absolute path
@@ -1170,15 +1171,15 @@ sub generate_captions_entries {
 	close CAP ;
 
 	foreach my $line (@captions) {
-	    if ($line =~ /^TITLE:\s*(.*)\s*$/) {
+	    if ($line =~ m/^TITLE:\s*(.*)\s*$/) {
 		$old_title = $1 ;
-	    } elsif ($line =~ /^PARENT:\s*(.*)\s*$/) {
+	    } elsif ($line =~ m/^PARENT:\s*(.*)\s*$/) {
 		$old_parent_gallery_link = 1 ;
 		$old_parent_gallery_link_text = $1 ;
-	    } elsif ($line =~ /^PREV:\s*(.+)\s+----\s+(.+)\s*/) {
+	    } elsif ($line =~ m/^PREV:\s*(.+)\s+----\s+(.+)\s*/) {
 		$old_prev_gallery_link_target = $2 ;
 		$old_prev_gallery_link_text = $1 ;
-	    } elsif ($line =~ /^NEXT:\s*(.+)\s+----\s+(.+)\s*/) {
+	    } elsif ($line =~ m/^NEXT:\s*(.+)\s+----\s+(.+)\s*/) {
 		$old_next_gallery_link_target = $2 ;
 		$old_next_gallery_link_text = $1 ;
 	    }
@@ -1325,7 +1326,7 @@ sub read_captions_file {
 	$line =~ s/^\s*// ;
 	$line =~ s/\s\(\s*\)$/$1/ ;
 	# only lines that don't start with # and are not empty
-	if (!($line =~ m/^\#/) and !($line =~ /^$/)) {
+	if ($line !~ m/^\#/ and $line !~ m/^$/) {
 	    if ($line =~ m/^TITLE:\s*(.*)\s*/) {
 		# title
 		$opts->{index_title} = $1 ;
@@ -1424,7 +1425,7 @@ sub read_captions_file {
 # revert a path into ..
 sub back_path {
     my $dir = shift ;
-    $dir =~ s/([^\/]+)/../g ;
+    $dir =~ s@([^/]+)@..@g ;
     return $dir ;
 }
 
@@ -1672,13 +1673,15 @@ sub generate_slides {
 	    $THIS_SLIDE = "<a href=\"$entry->{url}\" title=\"$entry->{title} $entry->{dimstring}\">$entry->{linktext}</a>" ;
 	}
 
-	# slide counter
-	my $slide_counter = $opts->{slide_counter_format} ;
-	$slide_counter =~ s/%n/$entry->{counter}/ ;
-	$slide_counter =~ s/%0n/$entry->{counter_with_zeros}/ ;
-	$slide_counter =~ s/%t/$gallery->{nslides}/ ;
+	# slide number, counter and total
+	my $SLIDE_NUMBER = $entry->{counter_with_zeros} ;
+	my $SLIDE_TOTAL = $gallery->{nslides} ;
+	my $SLIDE_COUNTER = $opts->{slide_counter_format} ;
+	$SLIDE_COUNTER =~ s/%n/$entry->{counter}/ ;
+	$SLIDE_COUNTER =~ s/%0n/$SLIDE_NUMBER/ ;
+	$SLIDE_COUNTER =~ s/%t/$SLIDE_TOTAL/ ;
 	# caption
-	my $IMAGE_CAPTION = $entry->{caption} . $slide_counter . "&nbsp;&nbsp;&nbsp;$entry->{dimstring}" ;
+	my $IMAGE_CAPTION = $entry->{caption} . $SLIDE_COUNTER . "&nbsp;&nbsp;&nbsp;$entry->{dimstring}" ;
 
 	# previous slide
 	my $PREV_SLIDE_LINK_TEXT = "" ;
@@ -1761,6 +1764,9 @@ sub generate_slides {
 
 	    # slide specific fields
 	    $line =~ s/<!--SLIDE-TITLE-->/$SLIDE_TITLE/g ;
+	    $line =~ s/<!--SLIDE-NUMBER-->/$SLIDE_NUMBER/g ;
+	    $line =~ s/<!--SLIDE-TOTAL-->/$SLIDE_TOTAL/g ;
+	    $line =~ s/<!--SLIDE-COUNTER-->/$SLIDE_COUNTER/g ;
 	    $line =~ s/<!--THIS-SLIDE-STYLE-->/$THIS_SLIDE_STYLE/g ;
 	    $line =~ s/<!--THIS-SLIDE-->/$THIS_SLIDE/ ;
 	    $line =~ s/<!--IMAGE-CAPTION-->/$IMAGE_CAPTION/g ;
@@ -1842,7 +1848,7 @@ sub generate_index {
 	if ($type == $TYPE_LINE or $type == $TYPE_BREAK) {
 	    if ($type == $TYPE_LINE) {
 		# output a horizontal line
-		print IXW "<hr class=\"index\">" ;
+		print IXW "<hr class=\"index\" />\n" ;
 	    }
 	    # next line, next entry
 	    $messages->update_percentage ($i+1) ;
@@ -1897,19 +1903,21 @@ sub generate_index {
 	}
 
 	# Table header
-	if ($opts->{show_no_film_effect}) {
-	    print IXW "<table class=\"index\" style=\"border-spacing: ", $opts->{index_cellpadding}, "px 0px;\">\n" ;
-	} else {
+	if ($opts->{show_film_effect}) {
 	    print IXW "<table class=\"index with-tile\" style=\"border-spacing: ", $opts->{index_cellpadding}, "px 0px;\">\n" ;
+	} else {
+	    print IXW "<table class=\"index\" style=\"border-spacing: ", $opts->{index_cellpadding}, "px 0px;\">\n" ;
 	}
 
 	# Row header
 	# include the image to force the height of the line. we could do it in the css but IE css support sucks a lot
-	print IXW "  <tr><td class=\"tiled\" colspan=\"", $num+2, "\"><img src=\"$self->{local_llgal_dir}/$opts->{filmtile_filename}\" /></td></tr>\n"
-	    unless $opts->{show_no_film_effect} ;
+	print IXW "  <tr><td class=\"tiled\" colspan=\"". ($num+2) ."\">"
+	    ."<img src=\"$self->{local_llgal_dir}/$opts->{filmtile_filename}\" alt=\"$opts->{alt_film_tile_text}\" />"
+	    ."</td></tr>\n"
+	    if $opts->{show_film_effect} ;
 	print IXW "  <tr>\n" ;
 	print IXW "    <td class=\"thumb\">&nbsp;</td>\n"
-	    unless $opts->{show_no_film_effect} ;
+	    if $opts->{show_film_effect} ;
 
 	# Actual row of thumbnails
 	for (my $j = 0; $j < $num; $j++) {
@@ -1995,22 +2003,24 @@ sub generate_index {
 
 	# Row footer
 	print IXW "    <td class=\"thumb\">&nbsp;</td>\n"
-	    unless $opts->{show_no_film_effect} ;
+	    if $opts->{show_film_effect} ;
 	print IXW "  </tr>\n" ;
-	print IXW "  <tr><td class=\"tiled\" colspan=\"", $num+2, "\"><img src=\"$self->{local_llgal_dir}/$opts->{filmtile_filename}\" /></td></tr>\n"
-	    unless $opts->{show_no_film_effect} ;
+	print IXW "  <tr><td class=\"tiled\" colspan=\"". ($num+2) ."\">"
+	    ."<img src=\"$self->{local_llgal_dir}/$opts->{filmtile_filename}\" alt=\"$opts->{alt_film_tile_text}\" />"
+	    ."</td></tr>\n"
+	    if $opts->{show_film_effect} ;
 
 	# Dimensions and filesizes
 	if ($opts->{show_dimensions} or $opts->{show_size}) {
 	    print IXW "  <tr>\n" ;
 	    print IXW "    <td>&nbsp;</td>\n"
-		unless $opts->{show_no_film_effect} ;
+		if $opts->{show_film_effect} ;
 	    for (my $j = 0; $j < $num; $j++) {
 		my $entry = $entries[$i+$j] ;
 		print IXW "    <td class=\"thumb-dim\">$entry->{scaled_dimstring}</td>\n" ;
 	    }
 	    print IXW "    <td>&nbsp;</td>\n"
-		unless $opts->{show_no_film_effect} ;
+		if $opts->{show_film_effect} ;
 	    print IXW "  </tr>\n" ;
 	}
 
@@ -2018,7 +2028,7 @@ sub generate_index {
 	if ($opts->{show_caption_under_thumbnails}) {
 	    print IXW "  <tr>\n" ;
 	    print IXW "<td>&nbsp;</td>\n"
-		unless $opts->{show_no_film_effect} ;
+		if $opts->{show_film_effect} ;
 	    for (my $j = 0; $j < $num; $j++) {
 		my $entry = $entries[$i+$j] ;
 		print IXW "    <td class=\"thumb-caption\">$entry->{caption}</td>\n" ;
@@ -2104,7 +2114,7 @@ sub make_www_rights {
     make_readable "$self->{destination_dir}$self->{local_llgal_dir}/$opts->{css_filename}" ;
     # filmtile
     make_readable "$self->{destination_dir}$self->{local_llgal_dir}/$opts->{filmtile_filename}"
-	if ! $opts->{show_no_film_effect} ;
+	if $opts->{show_film_effect} ;
     # index link image
     make_readable "$self->{destination_dir}$self->{local_llgal_dir}/$opts->{index_link_image_filename}"
  	if $opts->{index_link_image} ;
@@ -2278,7 +2288,7 @@ sub main_process {
 	    my @dir_entries = () ;
 	    while (my $dir = readdir DIR) {
 		push @dir_entries, $dir
-		    if $dir =~ /^[^.]/ and -d "$self->{destination_dir}$dir" ;
+		    if $dir =~ m/^[^.]/ and -d "$self->{destination_dir}$dir" ;
 	    }
 	    closedir DIR ;
 	    # process recursively

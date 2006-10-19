@@ -409,6 +409,13 @@ The tags are displayed using their description as given by
 .BR "exiftool -s myimage" .
 
 .TP
+.B --fe
+Show a film effect in the index of thumbnails. The aspect of this
+effect may be configured by replacing the tile file that llgal
+puts in
+.IR .llgal .
+
+.TP
 .BI -i " <file>"
 Name of the main thumbnail index file.  The default is
 .BR index ,
@@ -468,13 +475,6 @@ and so on.
 .TP
 .B --nc
 Omit the image count from the captions.
-
-.TP
-.B --nf
-Omit the film effect altogether.  For a simpler look you
-can also set the thumbnail background to be the same as the main
-index page background with the tile background-color option in the
-.IR llgal.css " file."
 
 .TP
 .BI -p " <n>"
@@ -986,12 +986,12 @@ Write captions under thumbnails
 Default is
 .BR 0 " (" disabled ).
 .RE
-.I show_no_film_effect = <0/1>
+.I show_film_effect = <0/1>
 .RS
-Omit film effect
-.RB [ --nf ].
+Show film effect
+.RB [ --fe ].
 Default is
-.BR 1 " (" enabled ).
+.BR 0 " (" disabled ).
 .RE
 
 .B Slides:
@@ -1239,6 +1239,11 @@ Default is \fB"Scaled image "\fR.
 .RS
 Text shown as an image alternative for thumbnails in the index.
 Default is \fB"Thumbnail "\fR.
+.RE
+.I alt_film_tile_text = \fI"string"
+.RS
+Text shown as an image alternative for the film tile in the index.
+Default is \fB"Film Tile"\fR.
 .RE
 .I over_scaled_text = \fI"string"
 .RS
@@ -1518,6 +1523,18 @@ The title of the slide.
 .RS
 The style of the slide contents (is defined in the CSS style-sheet).
 .RE
+.B <!--SLIDE-NUMBER-->
+.RS
+The index of the slide, with leading zeros.
+.RE
+.B <!--SLIDE-TOTAL-->
+.RS
+The amount of slides.
+.RE
+.B <!--SLIDE-COUNTER-->
+.RS
+The slide counter according to slide_counter_format as in the caption.
+.RE
 .B <!--IMAGE-CAPTION-->
 .RS
 The caption of the slide.
@@ -1530,11 +1547,11 @@ The table of EXIF tags.
 .RS
 The actual contents of the slide (might be an image).
 .RE
-.BR <!--PREV-SLIDE--> and <!--NEXT-SLIDE-->
+.BR <!--PREV-SLIDE--> " and " <!--NEXT-SLIDE-->
 .RS
 The filename of the previous and next slides.
 .RE
-.BR <!--NEXT-SLIDE-LINK-TEXT--> and <!--PREV-SLIDE-LINK-TEXT-->
+.BR <!--NEXT-SLIDE-LINK-TEXT--> " and " <!--PREV-SLIDE-LINK-TEXT-->
 .RS
 The label of the link to previous and next slides (might be an image).
 .RE

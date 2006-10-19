@@ -1,0 +1,72 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=LLGAL-CODESET" />
+    <meta name="generator" content="llgal LLGAL-OPTIONS" />
+    <title><!--SLIDE-TITLE--></title>
+    <link rel="stylesheet" type="text/css" href="<!--CSS-->" />
+    <link rel="contents" href="<!--INDEX-FILE-->" />
+    <link rel="next" href="<!--NEXT-SLIDE-->" />
+    <link rel="previous" href="<!--PREV-SLIDE-->" />
+  </head>
+
+  <body>
+    <!-- Please note that the comments in ALL CAPS are the places where llgal
+         inserts the appropriate file names.  You may move them around (or
+         remove them) to customize your slides at will.  To see how this
+         works just compare the template file with a generated slide. -->
+
+    <p class="center">
+      <a href="<!--PREV-SLIDE-->"><!--PREV-SLIDE-LINK-TEXT--></a>
+      &nbsp; &nbsp; &nbsp;
+      <a href="<!--INDEX-FILE-->"><!--INDEX-LINK-TEXT--></a>
+      &nbsp; &nbsp; &nbsp;
+      <a href="<!--NEXT-SLIDE-->"><!--NEXT-SLIDE-LINK-TEXT--></a>
+    </p>
+
+    <div class="center"><table class="slide"><tr><td class="<!--THIS-SLIDE-STYLE-->">
+      <!--THIS-SLIDE-->
+    </td></tr></table></div>
+
+    <p class="caption">
+      <!--IMAGE-CAPTION-->
+    </p>
+
+    <p class="center">
+      <a href="<!--PREV-SLIDE-->"><!--PREV-SLIDE-LINK-TEXT--></a>
+      &nbsp; &nbsp; &nbsp;
+      <a href="<!--INDEX-FILE-->"><!--INDEX-LINK-TEXT--></a>
+      &nbsp; &nbsp; &nbsp;
+      <a href="<!--NEXT-SLIDE-->"><!--NEXT-SLIDE-LINK-TEXT--></a>
+    </p>
+
+    <div class="center">
+      <!--EXIF-TABLE-->
+    </div>
+
+
+<!-- STUFF TO LET PEOPLE DYNAMICALLY ADD COMMENTS TO THE SLIDE -->
+
+<p>
+ Comments:
+ <br />
+ <?php system('cat comments_<!--SLIDE-NUMBER-->.txt'); ?>
+</p>
+
+<hr />
+
+<p>
+ Add a comment:<br />
+ <form method="get" action="add_comment.php">
+  <input type="hidden" name="comment_file" value="comments_<!--SLIDE-NUMBER-->.txt" />
+  <input type="hidden" name="slide_url" value="slide_<!--SLIDE-NUMBER-->.php" />
+  <textarea rows="5" cols="80" name="new_comment"></textarea>
+  <input type="submit" />
+ </form>
+</p>
+
+<!-- END OF STUFF TO LET PEOPLE DYNAMICALLY ADD COMMENTS TO THE SLIDE -->
+
+  </body>
+</html>

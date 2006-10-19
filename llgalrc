@@ -124,8 +124,8 @@
 # Write captions under thumbnails [-u]
 # show_caption_under_thumbnails = 0
 
-# Omit film effect [--nf]
-# show_no_film_effect = 0
+# Show a film effect in the index of thumbnails [--fe]
+# show_film_effect = 0
 
 ##### Slides #####
 
@@ -251,6 +251,9 @@
 
 # Text shown as image alternative for thumbnails in the index
 # alt_thumbnail_text = "Thumbnail "
+
+# Text shown as an image alternative for the film tile in the index
+# alt_film_tile_text = "Film tile"
 
 # Text shown when the mouse pointer is over a scaled image in a slide
 # over_scaled_text = "Click to see full size "

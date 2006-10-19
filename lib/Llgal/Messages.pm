@@ -2,10 +2,6 @@ package Llgal::Messages ;
 
 use strict ;
 
-use vars qw(@EXPORT) ;
-
-@EXPORT = qw (new) ;
-
 # messaging context
 
 sub new {

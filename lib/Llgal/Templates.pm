@@ -4,15 +4,6 @@ use strict ;
 
 use Llgal::Utils ;
 
-use vars qw(@EXPORT) ;
-
-@EXPORT = qw (
-	      find_generic_template_file
-	      find_template_file
-	      get_llgal_files
-	      give_templates
-	      ) ;
-
 # copy a file
 sub copy_file {
     my $self = shift ;
@@ -107,12 +98,12 @@ sub get_llgal_files {
     my $messages = $self->{messages} ;
 
     # Get the film tile for the index
-    if ($opts->{show_no_film_effect}) {
-	$messages->print ("Omitting film effect.\n") ;
-    } elsif ($opts->{filmtile_location}) {
-	$messages->print ("Using the film tile that is available on $opts->{filmtile_location}.\n") ;
-    } else {
-	get_template_file $self, $opts, $opts->{filmtile_filename} ;
+    if ($opts->{show_film_effect}) {
+	if ($opts->{filmtile_location}) {
+	    $messages->print ("Using the film tile that is available on $opts->{filmtile_location}.\n") ;
+	} else {
+	    get_template_file $self, $opts, $opts->{filmtile_filename} ;
+	}
     }
 
     # Get link images

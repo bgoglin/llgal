@@ -9,23 +9,7 @@ use Getopt::Long ;
 use I18N::Langinfo qw(langinfo CODESET) ;
 use Locale::gettext ;
 use POSIX qw(strftime) ;
-
-use vars qw(@EXPORT) ;
-
-@EXPORT = qw (
-	      early_parse_cmdline_options
-	      init_llgal_gettext
-	      parse_cmdline_options
-	      parse_generic_config_file
-	      parse_custom_config_file
-	      merge_opts
-	      merge_opts_into
-	      add_defaults
-	      prepare_captions_variables
-	      prepare_gallery_variables
-	      generate_config
-	      die_usage
-	      ) ;
+use Text::ParseWords ;
 
 ######################################################################
 # default values that will be restored if the associated option is set to -1
@@ -124,7 +108,7 @@ my $normal_opts_type = {
     thumbnail_height_max => $OPT_IS_NUMERIC, # > 0, -1 for default
     thumbnail_width_max => $OPT_IS_NUMERIC, # > 0, 0 for unlimited, -1 for default
     show_caption_under_thumbnails => $OPT_IS_NUMERIC,
-    show_no_film_effect => $OPT_IS_NUMERIC,
+    show_film_effect => $OPT_IS_NUMERIC,
 # Slides
     make_no_slides => $OPT_IS_NUMERIC,
     make_slide_filename_from_filename => $OPT_IS_NUMERIC,
@@ -164,6 +148,7 @@ my $normal_opts_type = {
     alt_full_text => $OPT_IS_STRING,
     alt_scaled_text => $OPT_IS_STRING,
     alt_thumbnail_text => $OPT_IS_STRING,
+    alt_film_tile_text => $OPT_IS_STRING,
     over_scaled_text => $OPT_IS_STRING,
     over_thumbnail_text => $OPT_IS_STRING,
     over_index_link_text => $OPT_IS_STRING,
@@ -328,8 +313,8 @@ sub add_defaults {
 	thumbnail_width_max => $thumbnail_width_max_default,
 # write captions under thumbnails on index page (-u)
 	show_caption_under_thumbnails => 0,
-# omit the film effect altogether (--nf)
-	show_no_film_effect => 0,
+# show the film effect in the index of thumbnails (--fe)
+	show_film_effect => 0,
 
 # Slides
 # make no slides, just thumbnail links to images (-s)
@@ -404,6 +389,8 @@ sub add_defaults {
 	alt_scaled_text => llgal_gettext ("alt_scaled_text|Scaled image "),
 # alternative text for thumbnails in the index
 	alt_thumbnail_text => llgal_gettext ("alt_thumbnail_text|Thumbnail "),
+# alternative text for film tile
+	alt_film_tile_text => llgal_gettext ("alt_film_tile_text|Film Tile"),
 # text shown when the mouse pointer is over a scaled image in a slide
 	over_scaled_text => llgal_gettext ("over_scaled_text|Click to see full size "),
 # text shown when the mouse pointer is over a thumbnail
@@ -521,6 +508,7 @@ Layout Options:
     --codeset <s>      change the codeset in HTML pages
     --con <s>          options to pass to convert (e.g. -quality N)
     --exif [<tags>]    show exif tags on each slide
+    --fe               show a film effect in the indexof thumbnails
     -i <file>          name of the main thumbnail index file (index)
     -k                 use the image captions for the HTML slide titles
     -L                 list links outside of the table
@@ -529,7 +517,6 @@ Layout Options:
     --lt               use thumbnail preview for links in slides
     -n                 use image file names for the HTML slide files
     --nc               omit the image count from the captions
-    --nf               omit the film effect altogether
     -p <n>             cellpadding value of thumbnail index tables (3)
     --parent-gal       add links to the parent gallery
     --php              use php extension for generated webpages
@@ -592,7 +579,7 @@ sub process_option {
     my $line = shift ;
     chomp $line ;
 
-    if ($line =~ /^([^ ]+)\s*=.+$/) {
+    if ($line =~ m/^([^ ]+)\s*=.+$/) {
 	my $optname = $1 ;
 	my $type = $normal_opts_type->{$optname} ;
 	if (defined $type) {
@@ -600,7 +587,7 @@ sub process_option {
 
 	    if ($type == $OPT_IS_NUMERIC) {
 		# any match is fine
-		if ($line =~ /^[^ ]+\s*=\s*(\d+)$/) {
+		if ($line =~ m/^[^ ]+\s*=\s*(\d+)$/) {
 		    $opts->{$optname} = $1 ;
 		} else {
 		    process_option_error "Configuration option <$optname> value must be numeric (in <$line>)" ;
@@ -608,7 +595,7 @@ sub process_option {
 
 	    } elsif ($type == $OPT_IS_STRING) {
 		# value must be quoted
-		if ($line =~ /^[^ ]+\s*=\s*"(.*)"$/) {
+		if ($line =~ m/^[^ ]+\s*=\s*"(.*)"$/) {
 		    $opts->{$optname} = $1 ;
 		} else {
 		    process_option_error "Configuration option <$optname> value must be a string (in <$line>)" ;
@@ -616,7 +603,7 @@ sub process_option {
 
 	    } elsif ($type == $OPT_IS_NONEMPTY_STRING) {
 		# value must be quoted and non-empty
-		if ($line =~ /^[^ ]+\s*=\s*"(.+)"$/) {
+		if ($line =~ m/^[^ ]+\s*=\s*"(.+)"$/) {
 		    $opts->{$optname} = $1 ;
 		} else {
 		    process_option_error "Configuration option <$optname> value must be a non-empty string (in <$line>)" ;
@@ -627,7 +614,7 @@ sub process_option {
 	} elsif ($special_opts_with_input->{$optname}) {
 	    # not a normal option, must be special
 
-	    if ($line =~ /^local_llgal_dir\s*=\s*"(.*)"$/) {
+	    if ($line =~ m/^local_llgal_dir\s*=\s*"(.*)"$/) {
 		# the local llgal directory name may only be changed
 		# during early configuration
 		if ($self->{early_configuration}) {
@@ -637,19 +624,19 @@ sub process_option {
 		    $messages->warning ("system- and user-wide configuration files.") ;
 		}
 
-	    } elsif ($line =~ /^exclude\s*=\s*"(.+)"$/) {
+	    } elsif ($line =~ m/^exclude\s*=\s*"(.+)"$/) {
 		my $entry = () ;
 		$entry->{excluded} = 1 ;
 		$entry->{filter} = $1 ;
 		push (@{$opts->{excludes}}, $entry) ;
 
-	    } elsif ($line =~ /^exclude\s*=\s*"(.+)"$/) {
+	    } elsif ($line =~ m/^exclude\s*=\s*"(.+)"$/) {
 		my $entry = () ;
 		$entry->{excluded} = 0 ;
 		$entry->{filter} = $1 ;
 		push (@{$opts->{excludes}}, $entry) ;
 
-	    } elsif ($line =~ /^additional_configuration_file\s*=\s*"(.+)"$/) {
+	    } elsif ($line =~ m/^additional_configuration_file\s*=\s*"(.+)"$/) {
 		my $file = $1 ;
 		if ($recursive_included_configuration_file++ >= 10) {
 		    $no_usage_on_getoptions_error = 1 ;
@@ -660,25 +647,25 @@ sub process_option {
 		$current_configuration_file = $saved_current_configuration_file ;
 		$recursive_included_configuration_file-- ;
 
-	    } elsif ($line =~ /^additional_template_dir\s*=\s*"(.+)"$/) {
+	    } elsif ($line =~ m/^additional_template_dir\s*=\s*"(.+)"$/) {
 		push (@{$opts->{template_dirs}}, $1) ;
 
-	    } elsif ($line =~ /^convert_options\s*=\s*"(.*)"$/) {
+	    } elsif ($line =~ m/^convert_options\s*=\s*"(.*)"$/) {
 		push (@{$opts->{convert_options}}, parse_convert_options ($1)) ;
 
-	    } elsif ($line =~ /^scaled_convert_options\s*=\s*"(.*)"$/) {
+	    } elsif ($line =~ m/^scaled_convert_options\s*=\s*"(.*)"$/) {
 		push (@{$opts->{scaled_convert_options}}, parse_convert_options ($1)) ;
 
-	    } elsif ($line =~ /^thumbnail_convert_options\s*=\s*"(.*)"$/) {
+	    } elsif ($line =~ m/^thumbnail_convert_options\s*=\s*"(.*)"$/) {
 		push (@{$opts->{thumbnail_convert_options}}, $1) ;
 
-	    } elsif ($line =~ /^show_exif_tags\s*=\s*"(.*)"$/) {
+	    } elsif ($line =~ m/^show_exif_tags\s*=\s*"(.*)"$/) {
 		push (@{$opts->{show_exif_tags}}, split (/,/, $1));
 
-	    } elsif ($line =~ /^section_dir\s*=\s*"(.+)"$/) {
+	    } elsif ($line =~ m/^section_dir\s*=\s*"(.+)"$/) {
 		push (@{$opts->{section_dirs}}, $1) ;
 
-	    } elsif ($line =~ /^verbose\s*=\s*(\d+)$/) {
+	    } elsif ($line =~ m/^verbose\s*=\s*(\d+)$/) {
 		$messages->{verbose} = $1 ;
 
 	    } else {
@@ -704,8 +691,8 @@ sub parse_generic_config_file {
     # TODO: remove this one day (maybe on march 14th 2006, since it will be 6 month ?)
     # warn on obsolete file
     my $oldconffile = $file ;
-    $oldconffile =~ s/$self->{local_llgal_dir}\/llgalrc$/.llgalrc/ ;
-    $oldconffile =~ s/llgal\/llgalrc$/llgalrc/ ;
+    $oldconffile =~ s@$self->{local_llgal_dir}/llgalrc$@.llgalrc@ ;
+    $oldconffile =~ s@llgal/llgalrc$@llgalrc@ ;
     $messages->warning ("Obsolete configuration file $oldconffile skipped, should be moved to $file.")
 	if -e $oldconffile ;
 
@@ -792,6 +779,7 @@ sub parse_cmdline_options {
 				if ($value eq "") { $opts->{show_all_exif_tags} = 1 ; }
 				else { push (@{$opts->{show_exif_tags}}, split (/,/, $value)) ; }
 			    },
+	'fe'		=> \$opts->{show_film_effect},
 	'i=s'		=> \$opts->{index_filename},
 	'k'		=> \$opts->{make_slide_title_from_caption},
 	'L'		=> \$opts->{list_links},
@@ -800,7 +788,6 @@ sub parse_cmdline_options {
 	'lt'		=> sub { $opts->{prev_slide_link_preview} = 1 ; $opts->{next_slide_link_preview} = 1 ; },
 	'n'		=> \$opts->{make_slide_filename_from_filename},
 	'nc'		=> sub { $opts->{slide_counter_format} = "" ; },
-	'nf'		=> \$opts->{show_no_film_effect},
 	'option=s'	=> sub { shift ; process_option $self, $opts, shift ; },
 	'P=s'		=> \@{$opts->{section_dirs}},
 	'Pall'		=> \$opts->{recursive_sections},
@@ -872,7 +859,7 @@ sub prepare_common_variables {
 
     # check a few string that have to be non-empty and may need to be single file without path
     die "Please give a non-empty directory name without path as a local llgal directory\n"
-	if $self->{local_llgal_dir} eq "" or $self->{local_llgal_dir} =~ /\// ;
+	if $self->{local_llgal_dir} eq "" or $self->{local_llgal_dir} =~ m@/@ ;
 }
 
 # various checks and definitions to process the captions
@@ -884,7 +871,7 @@ sub prepare_captions_variables {
 
     # check a few string that have to be non-empty and may need to be single file without path
     die "Please give a non-empty filename without path as a caption filename\n"
-	if $opts->{captions_filename} eq "" or $opts->{captions_filename} =~ /\// ;
+	if $opts->{captions_filename} eq "" or $opts->{captions_filename} =~ m@/@ ;
     die "Please give a non-empty caption removal line\n"
 	if $opts->{captions_removal_line} eq "" ;
 }
@@ -899,47 +886,47 @@ sub prepare_gallery_variables {
 
     # check a few string that have to be non-empty and may need to be single file without path
     die "Please give a non-empty filename without path as a CSS filename\n"
-	if $opts->{css_filename} eq "" or $opts->{css_filename} =~ /\// ;
+	if $opts->{css_filename} eq "" or $opts->{css_filename} =~ m@/@ ;
     die "Please give a non-empty filename without path as a film tile filename\n"
-	if $opts->{filmtile_filename} eq "" or $opts->{filmtile_filename} =~ /\// ;
+	if $opts->{filmtile_filename} eq "" or $opts->{filmtile_filename} =~ m@/@ ;
     die "Please give a non-empty filename without path as a index link image filename\n"
-	if $opts->{index_link_image_filename} eq "" or $opts->{index_link_image_filename} =~ /\// ;
+	if $opts->{index_link_image_filename} eq "" or $opts->{index_link_image_filename} =~ m@/@ ;
     die "Please give a non-empty filename without path as a previous slide link image filename\n"
-	if $opts->{prev_slide_link_image_filename} eq "" or $opts->{prev_slide_link_image_filename} =~ /\// ;
+	if $opts->{prev_slide_link_image_filename} eq "" or $opts->{prev_slide_link_image_filename} =~ m@/@ ;
     die "Please give a non-empty filename without path as a next slide link image filename\n"
-	if $opts->{next_slide_link_image_filename} eq "" or $opts->{next_slide_link_image_filename} =~ /\// ;
+	if $opts->{next_slide_link_image_filename} eq "" or $opts->{next_slide_link_image_filename} =~ m@/@ ;
     die "Please give a non-empty filename without path as a index template filename\n"
-	if $opts->{indextemplate_filename} eq "" or $opts->{indextemplate_filename} =~ /\// ;
+	if $opts->{indextemplate_filename} eq "" or $opts->{indextemplate_filename} =~ m@/@ ;
     die "Please give a non-empty filename without path as a slide template filename\n"
-	if $opts->{slidetemplate_filename} eq "" or $opts->{slidetemplate_filename} =~ /\// ;
+	if $opts->{slidetemplate_filename} eq "" or $opts->{slidetemplate_filename} =~ m@/@ ;
 
     die "Please give a non-empty string without path as a slide filename prefix\n"
-	if $opts->{scaled_image_filenameprefix} eq "" or $opts->{scaled_image_filenameprefix} =~ /\// ;
+	if $opts->{scaled_image_filenameprefix} eq "" or $opts->{scaled_image_filenameprefix} =~ m@/@ ;
     die "Please give a non-empty string without path as a thumbnail filename prefix\n"
-	if $opts->{thumbnail_image_filenameprefix} eq "" or $opts->{thumbnail_image_filenameprefix} =~ /\// ;
+	if $opts->{thumbnail_image_filenameprefix} eq "" or $opts->{thumbnail_image_filenameprefix} =~ m@/@ ;
     die "Please give a non-empty filename without path as a index filename\n"
-	if $opts->{index_filename} eq "" or $opts->{index_filename} =~ /\// ;
+	if $opts->{index_filename} eq "" or $opts->{index_filename} =~ m@/@ ;
     die "Please give a non-empty string without path as a user-given scaled image prefix\n"
-	if $opts->{user_scaled_image_filenameprefix} eq "" or $opts->{user_scaled_image_filenameprefix} =~ /\// ;
+	if $opts->{user_scaled_image_filenameprefix} eq "" or $opts->{user_scaled_image_filenameprefix} =~ m@/@ ;
     die "Please give a non-empty string without path as a user-given thumbnail image prefix\n"
-	if $opts->{user_thumbnail_image_filenameprefix} eq "" or $opts->{user_thumbnail_image_filenameprefix} =~ /\// ;
+	if $opts->{user_thumbnail_image_filenameprefix} eq "" or $opts->{user_thumbnail_image_filenameprefix} =~ m@/@ ;
 
     # css location
-    if ($opts->{css_location} =~ /^(.*\/)$/) {
+    if ($opts->{css_location} =~ m@^(.*/)$@) {
 	$opts->{css_location} .= $opts->{css_filename} ;
     }
 
     # images location
-    if ($opts->{filmtile_location} =~ /^(.*)\/$/) {
+    if ($opts->{filmtile_location} =~ m@^(.*)/$@) {
 	$opts->{filmtile_location} .= $opts->{filmtile_filename} ;
     }
-    if ($opts->{index_link_image_location} =~ /^(.*\/)$/) {
+    if ($opts->{index_link_image_location} =~ m@^(.*/)$@) {
 	$opts->{index_link_image_location} .= $opts->{index_link_image_filename} ;
     }
-    if ($opts->{prev_slide_link_image_location} =~ /^(.*\/)$/) {
+    if ($opts->{prev_slide_link_image_location} =~ m@^(.*/)$@) {
 	$opts->{prev_slide_link_image_location} .= $opts->{prev_slide_link_image_filename} ;
     }
-    if ($opts->{next_slide_link_image_location} =~ /^(.*\/)$/) {
+    if ($opts->{next_slide_link_image_location} =~ m@^(.*/)$@) {
 	$opts->{next_slide_link_image_location} .= $opts->{next_slide_link_image_filename} ;
     }
 

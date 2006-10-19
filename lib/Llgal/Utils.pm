@@ -2,12 +2,6 @@ package Llgal::Utils ;
 
 use strict ;
 
-use vars qw(@EXPORT) ;
-
-@EXPORT = qw (
-    system_with_output
-) ;
-
 # system routine which:
 # - takes a description followed by cmdline arguments
 # - returns a table composed of the status followed by STDERR and STDOUT lines
