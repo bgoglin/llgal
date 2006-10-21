@@ -1,7 +1,12 @@
+llgal (0.13.7-2) unstable; urgency=low
+
+  * Install doc/examples/.
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Sat, 21 Oct 2006 17:42:21 +0200
+
 llgal (0.13.7-1) unstable; urgency=low
 
   * New upstream release.
-  * Install doc/examples/.
   * Include /usr/share/quilt/quilt.make in debian/rules to manage
     patches and add quilt (>= 0.40) to Build-Depends.
   * Add debianize_dependencies_in_warnings.patch to talk about
