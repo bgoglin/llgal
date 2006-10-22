@@ -18,6 +18,7 @@ DATADIR	=	$(PREFIX)/share
 SYSCONFDIR	=	$(PREFIX)/etc
 MANDIR	=	$(PREFIX)/man
 LOCALEDIR	=	$(DATADIR)/locale
+DOCDIR	=	$(DATADIR)/doc
 PERL_INSTALLDIRS	=	
 
 TARBALL	=	$(NAME)-$(VERSION)
@@ -106,3 +107,12 @@ install-po:
 
 uninstall-po:
 	$(MAKE) -C $(PO_SUBDIR) uninstall LOCALEDIR=$(DESTDIR)$(LOCALEDIR)
+
+# Install the doc, only called on-demand by distrib-specific Makefile
+.PHONY: install-doc uninstall-doc
+
+install-doc:
+	$(MAKE) -C $(DOC_SUBDIR) install DOCDIR=$(DESTDIR)$(DOCDIR)
+
+uninstall-doc:
+	$(MAKE) -C $(DOC_SUBDIR) uninstall DOCDIR=$(DESTDIR)$(DOCDIR)

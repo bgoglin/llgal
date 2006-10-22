@@ -1,3 +1,8 @@
+
+  * Add install-doc and uninstall-doc in the Makefile to help distrib
+    to install documentation (requested and fixed by Alexandre Buisse).
+
+
 llgal (0.13.7)
 
   * Add <--SLIDE-NUMBER--> to be replaced with the slide number (with
