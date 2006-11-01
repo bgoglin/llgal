@@ -465,6 +465,28 @@ dynamic comments that people may add to your slides.
 
 
 
+<h3 class="question">Why is llgal so slow?</h3>
+
+<tt>llgal</tt> uses <tt>ImageMagick</tt> (and especially <tt>convert</tt>) to generate
+thumbnails (and scaled images if <tt>--sx</tt> or <tt>--sy</tt> was passed). It can be
+pretty long if you have lots of large images.
+To avoid being slow everytime you re-run <tt>llgal</tt>, thumbnails and scaled images
+are only generated once
+(except when the original has been modified since or when <tt>-f</tt> is passed).
+There might be some way to improve the overall speed of thumbnails and scaled images
+generation by changing the corresponding command line.
+
+
+
+<h3 class="question">Why does not llgal provide any feature do rotate or modify images?</h3>
+
+<tt>llgal</tt> is only a gallery generator. Adding features to rotate images (for instance
+using Exif tags) or modify images (for instance to apply some filters) would open the door
+for ten thousands options that <tt>llgal</tt> does not really require. We prefer keeping
+those features in other softwares that the user runs before using <tt>llgal</tt>.
+
+
+
 </div>
 
 <hr />

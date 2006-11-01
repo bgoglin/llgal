@@ -1,4 +1,6 @@
 
+  * Add questions about speed and images-modification-features in the
+    How-To.
   * Add install-doc and uninstall-doc in the Makefile to help distrib
     to install documentation (requested and fixed by Alexandre Buisse).
 
