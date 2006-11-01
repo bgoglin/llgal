@@ -1072,10 +1072,6 @@ sub prepare_gallery_variables {
 	    push (@{$opts->{scaled_create_command}}, ("-scale", "$opts->{slide_width_max}x")) ;
 	}
     }
-
-    # create scaled/thumbnails by copying the original
-    @{$opts->{scaled_copy_command}} = ("cp", "-f") ;
-    @{$opts->{thumbnail_copy_command}} = ("cp", "-f") ;
 }
 
 #######################################################################
