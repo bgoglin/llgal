@@ -1,6 +1,8 @@
 
   * Add questions about speed and images-modification-features in the
     How-To.
+  * Fix the command line that is inserted in the HTML headers by
+    replacing double-quotes.
   * Add install-doc and uninstall-doc in the Makefile to help distrib
     to install documentation (requested and fixed by Alexandre Buisse).
 
