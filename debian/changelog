@@ -1,3 +1,10 @@
+llgal (xxx) unstable; urgency=low
+
+  * New upstream release.
+  * Add homepage to the description.
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Tue,  7 Nov 2006 20:09:33 +0100
+
 llgal (0.13.7-2) unstable; urgency=low
 
   * Install doc/examples/.
