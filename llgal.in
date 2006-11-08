@@ -595,9 +595,10 @@ sub fill_file_entry {
 		$real_thumb_filename = $real_filename ;
 	    } else {
 		# scale down
-		($status, @output) = Llgal::Utils::system_with_output
-		    ( "create '$filename' thumbnail",
-		      @{$opts->{thumbnail_create_command}}, $real_filename, $real_thumb_filename ) ;
+		my $cmdline = $opts->{thumbnail_create_command} ;
+		$cmdline =~ s/<IN>/$real_filename/g ;
+		$cmdline =~ s/<OUT>/$real_thumb_filename/g ;
+		($status, @output) = Llgal::Utils::system_with_output ( "create '$filename' thumbnail", $cmdline ) ;
 		if ($status == -1) {
 		    $messages->warning (@output) ;
 		    $messages->abort_percentage ;
@@ -687,9 +688,10 @@ sub fill_file_entry {
 		    $real_scaled_filename = $real_filename ;
 		} else {
 		    # scale down
-		    ($status, @output) = Llgal::Utils::system_with_output
-			( "create '$filename' scaled image",
-			  @{$opts->{scaled_create_command}}, $real_filename, $real_scaled_filename ) ;
+		    my $cmdline = $opts->{scaled_create_command} ;
+		    $cmdline =~ s/<IN>/$real_filename/g ;
+		    $cmdline =~ s/<OUT>/$real_scaled_filename/g ;
+		    ($status, @output) = Llgal::Utils::system_with_output ( "create '$filename' scaled image", $cmdline ) ;
 		    if ($status == -1) {
 			$messages->warning (@output) ;
 			$messages->abort_percentage ;

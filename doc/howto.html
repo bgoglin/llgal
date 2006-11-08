@@ -460,7 +460,7 @@ The <tt>--php</tt> option of <tt>llgal</tt> enables generation of PHP slides
 instead of HTML. By default, no PHP code is inserted. But, you may change the
 templates to add some PHP code to do whatever you want, including handle
 dynamic comments that people may add to your slides.
-<tt>llgal</tt> comes with some example, including the directory
+<tt>llgal</tt> comes with some examples, including the directory
 <tt>dynamic_comments_in_slides/</tt> which describes how exactely to do so.
 
 
@@ -473,8 +473,13 @@ pretty long if you have lots of large images.
 To avoid being slow everytime you re-run <tt>llgal</tt>, thumbnails and scaled images
 are only generated once
 (except when the original has been modified since or when <tt>-f</tt> is passed).
+
 There might be some way to improve the overall speed of thumbnails and scaled images
-generation by changing the corresponding command line.
+generation by changing the corresponding command line with <tt>scaled_create_command</tt>
+and <tt>thumbnail_create_command</tt> in the configuration file. You may for instance use
+another conversion program which is more optimized than <tt>ImageMagick</tt> to process
+your specific images.
+See tweak_image_generation.txt in the examples in the documentation for details.
 
 
 

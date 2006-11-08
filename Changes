@@ -1,4 +1,13 @@
 
+  * Drop --con and *convert_options, and replace them with more generic
+    options (scaled/thumbnail_create_command) where special fields are
+    replaced.
+    + See the new section THUMBNAILS AND SCALED IMAGES GENERATION in
+      the manpage for details.
+    + Add tweak_image_generation.txt in doc/examples/ to show how to
+      use it to replace convert with another image processing library
+      (requested by Emmanuel Jeandel) or apply effects during image
+      generation (requested somehow by Alexandre Buisse).
   * Add questions about speed and images-modification-features in the
     How-To.
   * Fix the command line that is inserted in the HTML headers by
