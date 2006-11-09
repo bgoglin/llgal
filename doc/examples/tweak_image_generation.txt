@@ -1,0 +1,10 @@
+By default, llgal uses convert to generate thumbnails and scaled images
+from your original images. You may change how the generation is done
+in order to either:
+  * replace convert with a specific image processing library that might be more
+    optimized for your specific images.
+  * apply some effects, for instance drop a shadow.
+
+It may be achieved by changing the values of scaled_create_command and
+thumbnail_create_command options in a configuration file. See the section
+THUMBNAILS AND SCALED IMAGES GENERATION in the manpage for details.

@@ -176,7 +176,7 @@ is given.  Otherwise llgal will not regenerate these files if they
 already exist, and you may end up with stale copies.  Definitely use
 .B -f
 between two runs where you've changed the value of
-.BR --sx ", " --sy " or " --con "."
+.BR --sx " or " --sy "."
 
 .TP
 .BI --gencfg " <file>"
@@ -380,21 +380,6 @@ format.
 .BI --codeset " codeset"
 Change the encoding in the header of the generated HTML pages.
 By default, the encoding is got from the locale configuration.
-.TP
-.BI --con " options"
-Command line options to pass on to
-.B convert
-internally (see its man page).  This affects all thumbnails
-and, if
-.BR --sx " or " --sy
-is given, the medium-size slides too.  You can set the
-.B -quality
-or go crazy with
-.BR -negate ", " -noise ", etc."
-(the last two only work with
-.BR convert " if " ImageMagick " is installed)."
-.B --con
-may be used several times on the same command line.
 
 .TP
 .BI --exif " [<tag1,tag2,...>]"
@@ -1411,22 +1396,21 @@ If set, the
 .B LANGUAGE
 environment variable might prevent this option from working.
 .RE
-.I convert_options = \fI"string"
+.I scaled_create_command = \fI"string"
 .RS
-Options to pass to convert
-.RB [ "--con <s>" ].
-This option may be used several times.
-Default is \fB""\fR.
+Command to use to create scaled images for slides.
+Default is \fB"convert -scale <MAXW>x<MAXH> <IN> <OUT>"\fR.
+See 
+.B THUMBNAILS AND SCALED IMAGES GENERATION
+for details.
 .RE
-.I scaled_convert_options = \fI"string"
+.I thumbnail_create_command = \fI"string"
 .RS
-Additional options to pass to convert when creating slides.
-Default is \fB""\fR.
-.RE
-.I thumbnail_convert_options = \fI"string"
-.RS
-Additional options to pass to convert when creating thumbnails.
-Default is \fB""\fR.
+Command to use to create thumbnails for the index.
+Default is \fB"convert -scale <MAXW>x<MAXH> <IN> <OUT>"\fR.
+See 
+.B THUMBNAILS AND SCALED IMAGES GENERATION
+for details.
 .RE
 .I force_image_regeneration = <0/1>
 .RS
@@ -1455,6 +1439,43 @@ Extension of generated webpages
 .RB [ --php ].
 Default is \fB"html"\fR.
 .RE
+
+
+
+.SH THUMBNAILS AND SCALED IMAGES GENERATION
+
+By default, llgal uses convert to create thumbnails and scaled images
+(the ones that appear in the slides when
+.IR --sx " or " --sy
+was passed).
+The command lines used to generate those images from your original images
+are defined by the following configuration options:
+.RS
+.I scaled_create_command = "convert -scale <MAXW>x<MAXH> <IN> <OUT>"
+.RE
+.RS
+.I thumbnail_create_command = "convert -scale <MAXW>x<MAXH> <IN> <OUT>"
+.RE
+
+You may change the value of these options to change the way the generation
+is done.
+.BR <IN> " and " <OUT>
+will be replaced by
+.B llgal
+at runtime with the filename of the original and generated target images.
+
+.BR <MAXW> " and " <MAXH>
+will be replaced by the maximal width and length of the generated images.
+Note that one of them might not be limited (depending on other configuration
+variable), making it be replaced by an empty string.
+If your program does not like that, you might want to create a wrapper shell
+script which will take care of accepting empty maximal dimensions.
+Another solution would be to replace
+.I unlimited
+with
+.I limited by a huge value
+in your configuration and adapt your program to deal with it.
+
 
 
 .SH TEMPLATES

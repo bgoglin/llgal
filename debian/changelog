@@ -1,9 +1,9 @@
-llgal (xxx) unstable; urgency=low
+llgal (0.13.8-1) unstable; urgency=low
 
   * New upstream release.
   * Add homepage to the description.
 
- -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Tue,  7 Nov 2006 20:09:33 +0100
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Thu,  9 Nov 2006 11:07:40 +0100
 
 llgal (0.13.7-2) unstable; urgency=low
 

@@ -344,14 +344,9 @@
 # If set, the LANGUAGE environment variable might prevent this option from working.
 # language = "locale"
 
-# Options to pass to convert [--con <s>]
-# This option may be used multiple times.
-# convert_options = ""
-
-# Additional options to pass to convert for
-# slide or thumbnail creation.
-# scaled_convert_options = ""
-# thumbnail_convert_options = ""
+# Command to be used to generate scaled images and thumbnails
+# thumbnail_command = "convert -scale <MAXW>x<MAXH> <IN> <OUT>"
+# scaled_create_command = "convert -scale <MAXW>x<MAXH> <IN> <OUT>"
 
 # Force regeneration of thumbnails and scaled images [-f].
 # force_image_regeneration = 0

@@ -54,20 +54,6 @@ sub llgal_gettext {
 }
 
 ######################################################################
-# a few routines that are required early
-
-# split at each space, except between quotes
-sub parse_convert_options {
-    my $line = shift ;
-    return parse_line (' +', 0, $line) ;
-}
-
-# join with spaces, and protect spaces
-sub join_convert_options {
-    return join (' ', map { my $val = $_ ; $val =~ s/( +)/\'$1\'/g ; $val } @_) ;
-}
-
-######################################################################
 # configuration variables characteristics
 
 # normal option characteristics
@@ -173,11 +159,12 @@ my $normal_opts_type = {
 # Various
     codeset => $OPT_IS_STRING,
     language => $OPT_IS_STRING,
+    scaled_create_command =>  $OPT_IS_STRING,
+    thumbnail_create_command =>  $OPT_IS_STRING,
     force_image_regeneration => $OPT_IS_NUMERIC,
     recursive => $OPT_IS_NUMERIC,
     www_access_rights => $OPT_IS_NUMERIC,
     www_extension => $OPT_IS_NONEMPTY_STRING,
-# Internal options, not parseable, not exportable
 } ;
 
 # options whose input or output is non-trivial:
@@ -189,9 +176,6 @@ my $special_opts_with_input = {
     include => 1,
     additional_configuration_file => 1,
     additional_template_dir => 1,
-    convert_options => 1,
-    scaled_convert_options => 1,
-    thumbnail_convert_options => 1,
     show_exif_tags => 1,
     section_dir => 1,
     verbose => 1,
@@ -201,9 +185,6 @@ my $special_opts_with_input = {
 my $special_opts_with_output = {
     excludes => 1,
     template_dirs => 1,
-    convert_options => 1,
-    scaled_convert_options => 1,
-    thumbnail_convert_options => 1,
     show_exif_tags => 1,
     section_dirs => 1,
 } ;
@@ -218,17 +199,12 @@ my $special_nonopts_with_output = {
 my $special_opts_without_output = {
     default_thumb_xdim => 1,
     default_thumb_ydim => 1,
-    scaled_create_command => 1,
-    thumbnail_create_command => 1,
 } ;
 
 # options whose merging is done as array
 my $special_opts_merging_as_array = {
     excludes => 1,
     template_dirs => 1,
-    convert_options => 1,
-    scaled_convert_options => 1,
-    thumbnail_convert_options => 1,
 } ;
 
 ######################################################################
@@ -445,10 +421,9 @@ sub add_defaults {
 	language => "",
 # user-added directories where templates might be found
 	template_dirs => [],
-# options to be passed to convert (--con)
-	convert_options => [],
-	scaled_convert_options => [],
-	thumbnail_convert_options => [],
+# commands to generate thumbnails and scaled images
+	scaled_create_command => "convert -scale <MAXW>x<MAXH> <IN> <OUT>",
+	thumbnail_create_command => "convert -scale <MAXW>x<MAXH> <IN> <OUT>",
 # force thumbnails and scaled images regeneration
 	force_image_regeneration => 0,
 # makes everything world-readable (--www)
@@ -506,7 +481,6 @@ Layout Options:
     --ct               use image timestamps as captions
     --ctf <s>          timestamp format in captions
     --codeset <s>      change the codeset in HTML pages
-    --con <s>          options to pass to convert (e.g. -quality N)
     --exif [<tags>]    show exif tags on each slide
     --fe               show a film effect in the indexof thumbnails
     -i <file>          name of the main thumbnail index file (index)
@@ -650,15 +624,6 @@ sub process_option {
 	    } elsif ($line =~ m/^additional_template_dir\s*=\s*"(.+)"$/) {
 		push (@{$opts->{template_dirs}}, $1) ;
 
-	    } elsif ($line =~ m/^convert_options\s*=\s*"(.*)"$/) {
-		push (@{$opts->{convert_options}}, parse_convert_options ($1)) ;
-
-	    } elsif ($line =~ m/^scaled_convert_options\s*=\s*"(.*)"$/) {
-		push (@{$opts->{scaled_convert_options}}, parse_convert_options ($1)) ;
-
-	    } elsif ($line =~ m/^thumbnail_convert_options\s*=\s*"(.*)"$/) {
-		push (@{$opts->{thumbnail_convert_options}}, $1) ;
-
 	    } elsif ($line =~ m/^show_exif_tags\s*=\s*"(.*)"$/) {
 		push (@{$opts->{show_exif_tags}}, split (/,/, $1));
 
@@ -773,7 +738,6 @@ sub parse_cmdline_options {
 	'ct'		=> \$opts->{make_caption_from_image_timestamp},
 	'ctf=s'		=> \$opts->{timestamp_format_in_caption},
 	'codeset=s'     => \$opts->{codeset},
-	'con=s'		=> sub { shift ; push (@{$opts->{convert_options}}, parse_convert_options (shift)) ; },
 	'exif:s'	=> sub {
 	                        shift ; my $value = shift ;
 				if ($value eq "") { $opts->{show_all_exif_tags} = 1 ; }
@@ -1051,31 +1015,16 @@ sub prepare_gallery_variables {
     }
 
     # convert options for thumbnails
-    my @thumbnail_scale_options ;
-    if ($opts->{thumbnail_width_max} > 0) {
-	@thumbnail_scale_options = ("-scale", $opts->{thumbnail_width_max}."x".$opts->{thumbnail_height_max}) ;
-    } else {
-	@thumbnail_scale_options = ("-scale", "x".$opts->{thumbnail_height_max}) ;
-    }
-    @{$opts->{thumbnail_create_command}} = ("convert", "+profile", "*", @{$opts->{convert_options}}, @{$opts->{thumbnail_convert_options}}, @thumbnail_scale_options) ;
+    my $thumb_MAXH = $opts->{thumbnail_height_max} ;
+    my $thumb_MAXW = $opts->{thumbnail_width_max} > 0 ? $opts->{thumbnail_width_max} : "" ;
+    $opts->{thumbnail_create_command} =~ s/<MAXH>/$thumb_MAXH/g ;
+    $opts->{thumbnail_create_command} =~ s/<MAXW>/$thumb_MAXW/g ;
 
     # convert options for slides
-    @{$opts->{scaled_create_command}} = ("convert", "+profile", "*", @{$opts->{convert_options}}, @{$opts->{scaled_convert_options}} ) ;
-    if ($opts->{slide_height_max} > 0) {
-	if ($opts->{slide_width_max} > 0) {
-	    push (@{$opts->{scaled_create_command}}, ("-scale", "$opts->{slide_width_max}x$opts->{slide_height_max}")) ;
-	} else {
-	    push (@{$opts->{scaled_create_command}}, ("-scale", "x$opts->{slide_height_max}")) ;
-	}
-    } else {
-	if ($opts->{slide_width_max} > 0) {
-	    push (@{$opts->{scaled_create_command}}, ("-scale", "$opts->{slide_width_max}x")) ;
-	}
-    }
-
-    # create scaled/thumbnails by copying the original
-    @{$opts->{scaled_copy_command}} = ("cp", "-f") ;
-    @{$opts->{thumbnail_copy_command}} = ("cp", "-f") ;
+    my $scaled_MAXH = $opts->{slide_height_max} > 0 ? $opts->{slide_height_max} : "" ;
+    my $scaled_MAXW = $opts->{slide_width_max} > 0 ? $opts->{slide_width_max} : "" ;
+    $opts->{scaled_create_command} =~ s/<MAXH>/$scaled_MAXH/g ;
+    $opts->{scaled_create_command} =~ s/<MAXW>/$scaled_MAXW/g ;
 }
 
 #######################################################################
@@ -1120,16 +1069,7 @@ sub generate_config {
 	    next if not defined $opts->{$optname} ;
 	    # special options that need special output
 
-	    if ($optname eq "convert_options") {
-		print NEWCFG "convert_options = \"". (join_convert_options (@{$opts->{convert_options}})) ."\"\n" ;
-
-	    } elsif ($optname eq "scaled_convert_options") {
-		print NEWCFG "scaled_convert_options = \"". (join_convert_options (@{$opts->{scaled_convert_options}})) ."\"\n" ;
-
-	    } elsif ($optname eq "thumbnail_convert_options") {
-		print NEWCFG "thumbnail_convert_options = \"". (join_convert_options (@{$opts->{thumbnail_convert_options}})) ."\"\n" ;
-
-	    } elsif ($optname eq "show_exif_tags") {
+	    if ($optname eq "show_exif_tags") {
 		print NEWCFG "show_exif_tags = \"". (join (",", @{$opts->{show_exif_tags}})) ."\"\n" ;
 
 	    } elsif ($optname eq "template_dirs") {

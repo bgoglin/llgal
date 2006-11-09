@@ -56,8 +56,8 @@ my $self = {
     messages => Llgal::Messages::new (),
 } ;
 
-# store command-line options upfront to write in the index <HEAD>
-my @llgal_options = @ARGV ;
+# store command-line options to write in the index <head>
+my $llgal_cmdline = join (" ", @ARGV) ;
 
 # parse early command line options
 Llgal::Config::early_parse_cmdline_options ($self) ;
@@ -595,9 +595,10 @@ sub fill_file_entry {
 		$real_thumb_filename = $real_filename ;
 	    } else {
 		# scale down
-		($status, @output) = Llgal::Utils::system_with_output
-		    ( "create '$filename' thumbnail",
-		      @{$opts->{thumbnail_create_command}}, $real_filename, $real_thumb_filename ) ;
+		my $cmdline = $opts->{thumbnail_create_command} ;
+		$cmdline =~ s/<IN>/$real_filename/g ;
+		$cmdline =~ s/<OUT>/$real_thumb_filename/g ;
+		($status, @output) = Llgal::Utils::system_with_output ( "create '$filename' thumbnail", $cmdline ) ;
 		if ($status == -1) {
 		    $messages->warning (@output) ;
 		    $messages->abort_percentage ;
@@ -687,9 +688,10 @@ sub fill_file_entry {
 		    $real_scaled_filename = $real_filename ;
 		} else {
 		    # scale down
-		    ($status, @output) = Llgal::Utils::system_with_output
-			( "create '$filename' scaled image",
-			  @{$opts->{scaled_create_command}}, $real_filename, $real_scaled_filename ) ;
+		    my $cmdline = $opts->{scaled_create_command} ;
+		    $cmdline =~ s/<IN>/$real_filename/g ;
+		    $cmdline =~ s/<OUT>/$real_scaled_filename/g ;
+		    ($status, @output) = Llgal::Utils::system_with_output ( "create '$filename' scaled image", $cmdline ) ;
 		    if ($status == -1) {
 			$messages->warning (@output) ;
 			$messages->abort_percentage ;
@@ -1191,7 +1193,7 @@ sub generate_captions_entries {
 
 	print CAP "\n" ;
 	print CAP "# Appended new captions on ". (scalar localtime) ."\n" ;
-	print CAP "# invoked with ". (join " ", @llgal_options) ."\n" ;
+	print CAP "# invoked with $llgal_cmdline\n" ;
 	print CAP "\n" ;
     } else {
 	# find the captions headers
@@ -1214,7 +1216,7 @@ sub generate_captions_entries {
 	$messages->print ("Creating the $opts->{captions_filename} file: ") ;
 
 	print CAP "# This is llgal's $opts->{captions_filename} file, first generated on ", scalar localtime, "\n" ;
-	print CAP "# invoked with ". (join " ", @llgal_options) ."\n" ;
+	print CAP "# invoked with $llgal_cmdline\n" ;
 
 	# append the header
 	map { print CAP $_ ; } @captions_header ;
@@ -1563,7 +1565,8 @@ sub precompute_common_html_fields
     $common_fields->{"LLGAL-CODESET"} = $opts->{codeset} ;
 
     # command line
-    $common_fields->{"LLGAL-OPTIONS"} = join " ", @llgal_options ;
+    $common_fields->{"LLGAL-OPTIONS"} = $llgal_cmdline ;
+    $common_fields->{"LLGAL-OPTIONS"} =~ s/\"/\'/g ;
 
     # credits text
     $common_fields->{"<!--CREDITS-->"} = $opts->{credits_text} ;
@@ -2197,7 +2200,6 @@ sub subdir_process {
     $messages->indent () ;
     # setup new gallery context
     $self->{destination_dir} .= $dir."/" ;
-    @ARGV = @llgal_options ;
     # recursive call
     my $subgallery = main_process $subdir_opts, $subdir_family ;
     # restore context
