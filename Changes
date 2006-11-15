@@ -1,3 +1,9 @@
+
+  * Add missing double-quotes in command-lines when generating scaled
+    images and thumbnails so that filenames with spaces are supported
+    (reported by Florian Schlichting in Debian bug #398814).
+
+
 llgal (0.13.8)
 
   * Drop --con and *convert_options, and replace them with more generic
