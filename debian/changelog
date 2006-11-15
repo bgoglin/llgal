@@ -1,3 +1,11 @@
+llgal (xxx) unstable; urgency=low
+
+  * New upstream release.
+  * Add missing double-quotes in command lines to support spaces in
+    filenames, closes #398814.
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Wed, 15 Nov 2006 21:05:56 +0100
+
 llgal (0.13.8-1) unstable; urgency=low
 
   * New upstream release.
