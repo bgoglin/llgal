@@ -11,6 +11,8 @@
   * Add a manpage for llgalrc and move configuration file options from
     the main manpage into it.
   * Add missing options in the manpage and in the comments in llgalrc.
+  * Add install-man and uninstall-man in the Makefile to install man-
+    pages on demand.
   * Minor fix in the comments in llgalrc.
 
 
