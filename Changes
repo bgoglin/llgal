@@ -8,6 +8,8 @@
   * Add a note in the manpage (in CONFIGURATION) about how config
     files are used during recursive gallery generation with -R
     (somehow requested by Florian Schlichting in Debian bug #398826).
+  * Add a manpage for llgalrc and move configuration file options from
+    the main manpage into it.
   * Add missing options in the manpage and in the comments in llgalrc.
   * Minor fix in the comments in llgalrc.
 
