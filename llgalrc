@@ -311,7 +311,11 @@
 # Add a new subdirectory to the list of sections [-P]
 # section_dir = "subdir"
 
+# Add all subdirectories to the list of sections [--Pall]
+# recursive_sections = 0
+
 # Add the subdirectory name as a title at the begining of each section [--Ps]
+# entitle_sections = 0
 
 # Add a horizontal line at the begining of each section in the index [--Ps]
 # separate_sections = 0
