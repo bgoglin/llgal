@@ -550,7 +550,7 @@ sub fill_file_entry {
 	$entry->{thumb_filename} = "$self->{local_llgal_dir}/$thumb_filename" ;
 	$entry->{thumb_url} = "$local_llgal_url/". make_safe_url_nowarn ($thumb_filename) ;
 
-	# thumbnails dimensions
+	# thumbnail dimensions
 	my ($x, $y) = imgsize ("$self->{destination_dir}$self->{local_llgal_dir}/$thumb_filename") ;
 	if ($y > $opts->{thumbnail_height_max}) {
 	    $x = $x * ($opts->{thumbnail_height_max} / $y) ;
@@ -596,8 +596,8 @@ sub fill_file_entry {
 	    } else {
 		# scale down
 		my $cmdline = $opts->{thumbnail_create_command} ;
-		$cmdline =~ s/<IN>/$real_filename/g ;
-		$cmdline =~ s/<OUT>/$real_thumb_filename/g ;
+		$cmdline =~ s/<IN>/\"$real_filename\"/g ;
+		$cmdline =~ s/<OUT>/\"$real_thumb_filename\"/g ;
 		($status, @output) = Llgal::Utils::system_with_output ( "create '$filename' thumbnail", $cmdline ) ;
 		if ($status == -1) {
 		    $messages->warning (@output) ;
@@ -638,7 +638,7 @@ sub fill_file_entry {
 	    $entry->{scaled_filename} = "$self->{local_llgal_dir}/$scaled_filename" ;
 	    $entry->{scaled_url} = "$local_llgal_url/". make_safe_url_nowarn ($scaled_filename) ;
 
-	    # thumbnails dimensions
+	    # scaled image dimensions
 	    my ($x, $y) = imgsize ("$self->{destination_dir}$self->{local_llgal_dir}/$scaled_filename") ;
 	    if ($opts->{slide_height_max} > 0 and $y > $opts->{slide_height_max}) {
 		$x = $x * ($opts->{slide_height_max} / $y) ;
@@ -689,8 +689,8 @@ sub fill_file_entry {
 		} else {
 		    # scale down
 		    my $cmdline = $opts->{scaled_create_command} ;
-		    $cmdline =~ s/<IN>/$real_filename/g ;
-		    $cmdline =~ s/<OUT>/$real_scaled_filename/g ;
+		    $cmdline =~ s/<IN>/\"$real_filename\"/g ;
+		    $cmdline =~ s/<OUT>/\"$real_scaled_filename\"/g ;
 		    ($status, @output) = Llgal::Utils::system_with_output ( "create '$filename' scaled image", $cmdline ) ;
 		    if ($status == -1) {
 			$messages->warning (@output) ;
