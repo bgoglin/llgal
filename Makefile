@@ -42,19 +42,17 @@ install:: install-lib install-po
 	install -m 0755 llgal $(DESTDIR)$(BINDIR)/llgal
 	install -m 0644 $(DATA_SUBDIR)/* $(DESTDIR)$(DATADIR)/llgal/
 	install -m 0644 llgalrc $(DESTDIR)$(SYSCONFDIR)/llgal/
-	install -m 0644 llgal.1 $(DESTDIR)$(MANDIR)/man1/
 
 uninstall:: uninstall-lib uninstall-po
 	rm $(DESTDIR)$(BINDIR)/llgal
 	rm -rf $(DESTDIR)$(DATADIR)/llgal/
 	rm -rf $(DESTDIR)$(SYSCONFDIR)/llgal/
-	rm $(DESTDIR)$(MANDIR)/man1/llgal.1
 
 tarball::
 	mkdir /tmp/$(TARBALL)/
 	cp llgal.in /tmp/$(TARBALL)
 	cp llgalrc /tmp/$(TARBALL)
-	cp llgal.1 /tmp/$(TARBALL)
+	cp llgal.1 llgalrc.5 /tmp/$(TARBALL)
 	cp Makefile /tmp/$(TARBALL)
 	cp Changes /tmp/$(TARBALL)
 	cp COPYING README VERSION /tmp/$(TARBALL)
@@ -116,3 +114,15 @@ install-doc:
 
 uninstall-doc:
 	$(MAKE) -C $(DOC_SUBDIR) uninstall DOCDIR=$(DESTDIR)$(DOCDIR)
+
+# Install the manpages, only called on-demand by distrib-specific Makefile
+.PHONY: install-man uninstall-man
+
+install-man::
+	install -m 0644 llgal.1 $(DESTDIR)$(MANDIR)/man1/
+	install -m 0644 llgalrc.5 $(DESTDIR)$(MANDIR)/man5/
+
+uninstall-man::
+	rm $(DESTDIR)$(MANDIR)/man1/llgal.1
+	rm $(DESTDIR)$(MANDIR)/man5/llgalrc.5
+
