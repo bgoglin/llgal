@@ -1,20 +1,23 @@
+llgal (0.13.9)
 
   * Add missing double-quotes in command-lines when generating scaled
     images and thumbnails so that filenames with spaces are supported
     (reported by Florian Schlichting in Debian bug #398814).
-  * Add the configuration file option name near the corresponding
-    command-line option in the manpage
-    (requested by Florian Schlichting in Debian bug #398826).
-  * Add a note in the manpage (in CONFIGURATION) about how config
-    files are used during recursive gallery generation with -R
-    (somehow requested by Florian Schlichting in Debian bug #398826).
-  * Add a manpage for llgalrc and move configuration file options from
-    the main manpage into it.
-  * Add missing options in the manpage and in the comments in llgalrc.
-  * Add install-man and uninstall-man in the Makefile to install man-
-    pages on demand.
-  * Minor fix in the comments in llgalrc.
+  * Some improvements regarding the manpage:
+    + Add configuration file option names near the corresponding
+      command-line options
+      (requested by Florian Schlichting in Debian bug #398826).
+    + Add a note in CONFIGURATION about how configuration files are
+      used during recursive gallery generation with -R
+      (caused by Florian Schlichting's Debian bug #398826).
+    + Add a manpage for llgalrc and move configuration file options
+      from the main manpage into it.
+    + Add install-man and uninstall-man in the Makefile to install
+      manpages on demand.
+    + A few fixes.
+  * Some minor fixes in the comments in llgalrc.
 
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Thu, 16 Nov 2006 21:47:00 +0100
 
 llgal (0.13.8)
 
