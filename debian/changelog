@@ -1,4 +1,4 @@
-llgal (xxx) unstable; urgency=low
+llgal (0.13.9-1) unstable; urgency=low
 
   * New upstream release.
   * Add missing double-quotes in command lines to support spaces in
@@ -6,7 +6,7 @@ llgal (xxx) unstable; urgency=low
   * Install llgal.1 and the new llgalrc.5 with dh_installman instead
     of relying on the upstream Makefile.
 
- -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Wed, 15 Nov 2006 21:05:56 +0100
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Thu, 16 Nov 2006 21:50:09 +0100
 
 llgal (0.13.8-1) unstable; urgency=low
 
