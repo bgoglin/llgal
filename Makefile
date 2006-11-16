@@ -38,7 +38,7 @@ clean:: clean-lib clean-po
 	rm -f llgal
 
 install:: install-lib install-po
-	install -d -m 0755 $(DESTDIR)$(BINDIR)/ $(DESTDIR)$(DATADIR)/llgal/ $(DESTDIR)$(MANDIR)/man1/ $(DESTDIR)$(SYSCONFDIR)/llgal/
+	install -d -m 0755 $(DESTDIR)$(BINDIR)/ $(DESTDIR)$(DATADIR)/llgal/ $(DESTDIR)$(SYSCONFDIR)/llgal/
 	install -m 0755 llgal $(DESTDIR)$(BINDIR)/llgal
 	install -m 0644 $(DATA_SUBDIR)/* $(DESTDIR)$(DATADIR)/llgal/
 	install -m 0644 llgalrc $(DESTDIR)$(SYSCONFDIR)/llgal/
@@ -119,10 +119,10 @@ uninstall-doc:
 .PHONY: install-man uninstall-man
 
 install-man::
+	install -d -m 0755 $(DESTDIR)$(MANDIR)/man1/ $(DESTDIR)$(MANDIR)/man5/
 	install -m 0644 llgal.1 $(DESTDIR)$(MANDIR)/man1/
 	install -m 0644 llgalrc.5 $(DESTDIR)$(MANDIR)/man5/
 
 uninstall-man::
 	rm $(DESTDIR)$(MANDIR)/man1/llgal.1
 	rm $(DESTDIR)$(MANDIR)/man5/llgalrc.5
-
