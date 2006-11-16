@@ -753,6 +753,23 @@ These will be parsed during command-line parsing, when
 .B --config
 is met.
 
+In case of recursive generation (with
+.B -R
+) in multiple subdirectories, the system- and user-wide configuration
+files and those passed to
+.B --config
+are taken in account for all galleries.
+However, only the local 
+.I .llgal/llgalrc
+file is used for each gallery.
+Especially, the one in the root gallery directory is only taken in
+account when generating the root gallery, not when generating those
+in subdirectories.
+To use a same specific configuration file for the root gallery and all
+subgalleries, the
+.B --config
+option may be used.
+
 All these files may change llgal configuration in the same way command
 line options do, and even more.
 All following options may also be used on the command line through
