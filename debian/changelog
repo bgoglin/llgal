@@ -6,7 +6,7 @@ llgal (0.13.9-1) unstable; urgency=low
 
   * New upstream release.
   * Add missing double-quotes in command lines to support spaces in
-    filenames, closes #398814.
+    filenames, closes: #398814.
   * Install llgal.1 and the new llgalrc.5 with dh_installman instead
     of relying on the upstream Makefile.
 
