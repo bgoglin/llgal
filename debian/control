@@ -16,8 +16,8 @@ Description: Command-line online gallery generator
   - addition of headers, footers, links and separators in generated HTML files;
   - automatic generation of captions from JFIF, GIF or EXIF tags;
   - highly configurable layout.
- llgal interface is command line only. Its purpose is to generates nice
- web-pages quickly, using very simple but standard XHTML/CSS code, without
- requiring anything like php or javascript.
+ The llgal interface is command line only. Its purpose is to generates
+ nice web-pages quickly, using very simple but standard XHTML/CSS code,
+ without requiring anything like php or javascript.
  .
   Homepage: http://home.gna.org/llgal/

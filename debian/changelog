@@ -1,6 +1,8 @@
 llgal (xxx) unstable; urgency=low
 
   * Update Standards-Version to 3.7.2.2.
+  * Fix missing word in the description, thanks to
+    Christoph Berg.
 
 llgal (0.13.9-1) unstable; urgency=low
 
