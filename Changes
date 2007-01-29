@@ -5,7 +5,7 @@ llgal (0.13.10)
     (thanks to Jeremie Koenig for the patch in Debian bug #408873).
   * Fix typo in llgalrc.5.
 
- -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Mon, 29 Jan 2007 00:12:00 +0100
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Mon, 29 Jan 2007 21:21:00 +0100
 
 llgal (0.13.9)
 
