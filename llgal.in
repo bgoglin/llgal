@@ -13,6 +13,7 @@ use Cwd ;
 use Locale::gettext ;
 use POSIX qw (setlocale) ;
 use URI::Escape ;
+use Text::ParseWords ;
 
 Getopt::Long::Configure('noignorecase', 'noautoabbrev', 'bundling') ;
 STDOUT->autoflush("1") ;
@@ -595,10 +596,12 @@ sub fill_file_entry {
 		$real_thumb_filename = $real_filename ;
 	    } else {
 		# scale down
-		my $cmdline = $opts->{thumbnail_create_command} ;
-		$cmdline =~ s/<IN>/\"$real_filename\"/g ;
-		$cmdline =~ s/<OUT>/\"$real_thumb_filename\"/g ;
-		($status, @output) = Llgal::Utils::system_with_output ( "create '$filename' thumbnail", $cmdline ) ;
+		my @cmdline = map {
+			s/<IN>/$real_filename/g ;
+			s/<OUT>/$real_thumb_filename/g ;
+			$_ ;
+		} Text::ParseWords::parse_line('\s+', 0, $opts->{thumbnail_create_command}) ;
+		($status, @output) = Llgal::Utils::system_with_output ( "create '$filename' thumbnail", @cmdline ) ;
 		if ($status == -1) {
 		    $messages->warning (@output) ;
 		    $messages->abort_percentage ;
@@ -688,10 +691,12 @@ sub fill_file_entry {
 		    $real_scaled_filename = $real_filename ;
 		} else {
 		    # scale down
-		    my $cmdline = $opts->{scaled_create_command} ;
-		    $cmdline =~ s/<IN>/\"$real_filename\"/g ;
-		    $cmdline =~ s/<OUT>/\"$real_scaled_filename\"/g ;
-		    ($status, @output) = Llgal::Utils::system_with_output ( "create '$filename' scaled image", $cmdline ) ;
+		    my @cmdline = map {
+			s/<IN>/$real_filename/g ;
+			s/<OUT>/$real_scaled_filename/g ;
+			$_ ;
+		    } Text::ParseWords::parse_line('\s+', 0, $opts->{scaled_create_command}) ;
+		    ($status, @output) = Llgal::Utils::system_with_output ( "create '$filename' scaled image", @cmdline ) ;
 		    if ($status == -1) {
 			$messages->warning (@output) ;
 			$messages->abort_percentage ;
@@ -1585,9 +1590,14 @@ sub generate_slides {
     my @entries = @{$gallery->{entries}} ;
 
     # remove old webpages
-    system ("rm -f $self->{destination_dir}$opts->{slide_filenameprefix}*.$opts->{www_extension}") ;
-    die "Failed to remove existing webpages.\n"
-	if $? ;
+    opendir DIR, $self->{destination_dir} ? $self->{destination_dir} : "./" ; # destination is empty for './'
+    while ($_ = readdir DIR ) {
+	if (/^$opts->{slide_filenameprefix}.*\.$opts->{www_extension}$/) {
+	    unlink "$self->{destination_dir}$_"
+		or die "Failed to remove existing webpage '$_' ($!).\n" ;
+	}
+    }
+    closedir DIR ;
 
     # find the slidetemplate
     my $slidetemplate = (Llgal::Templates::find_template_file ($self, $opts, $opts->{slidetemplate_filename}, 1))

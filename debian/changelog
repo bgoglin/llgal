@@ -1,8 +1,13 @@
-llgal (xxx) unstable; urgency=low
+llgal (0.13.10-1) unstable; urgency=low
 
-  * Update Standards-Version to 3.7.2.2.
-  * Fix missing word in the description, thanks to
-    Christoph Berg.
+  * New upstream release.
+  * Call external commands as a list of arguments instead of as a
+    shell command-line so that special character are well supported
+    in path and filenames, closes: #408873.
+  * Update Standards-Version to 3.7.2.2, no change required.
+  * Fix missing word in the description, thanks to Christoph Berg.
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Mon, 29 Jan 2007 21:28:06 +0100
 
 llgal (0.13.9-1) unstable; urgency=low
 
