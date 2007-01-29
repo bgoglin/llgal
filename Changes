@@ -1,5 +1,11 @@
+llgal (0.13.10)
+
+  * Fix removing of old www-pages and generation of thumbnails and
+    scaled images when target directory contains special characters
+    (thanks to Jeremie Koenig for the patch in Debian bug #408873).
   * Fix typo in llgalrc.5.
 
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Mon, 29 Jan 2007 00:12:00 +0100
 
 llgal (0.13.9)
 

@@ -986,9 +986,10 @@ at runtime with the filename of the original and generated target images.
 .BR <MAXW> " and " <MAXH>
 will be replaced by the maximal width and length of the generated images.
 Note that one of them might not be limited (depending on other configuration
-variable), making it be replaced by an empty string.
+variable), making it be replaced by an empty string, eventually leading to
+empty parameters being passed to your program.
 If your program does not like that, you might want to create a wrapper shell
-script which will take care of accepting empty maximal dimensions.
+script which will take care of accepting these.
 Another solution would be to replace
 .I unlimited
 with
