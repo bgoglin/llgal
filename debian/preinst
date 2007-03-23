@@ -2,8 +2,8 @@
 set -e
 #DEBHELPER#
 
-# Prepare to move a conffile without triggering a dpkg question
-prep_mv_conffile() {
+# Remove the conffile unless modified
+rm_unchanged_conffile() {
     CONFFILE="$1"
 
     if [ -e "$CONFFILE" ]; then
@@ -15,9 +15,16 @@ prep_mv_conffile() {
     fi
 }
 
+# Prepare to move a conffile without triggering a dpkg question
+prep_mv_conffile() {
+    rm_unchanged_conffile "$1"
+}
+
 case "$1" in
 install|upgrade)
     if dpkg --compare-versions "$2" le "0.11-1"; then
 	prep_mv_conffile "/etc/llgalrc"
-    fi
+    else if dpkg --compare-versions "$2" le "0.13.10-1"; then
+	rm_unchanged_conffile "/etc/llgal/llgalrc"
+    fi fi
 esac

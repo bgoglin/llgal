@@ -3,13 +3,14 @@ set -e
 #DEBHELPER#
 
 # Move a conffile without triggering a dpkg question
+# No need to rename the default into .dpkg-new since no default
+# config file installed anymore
 mv_conffile() {
     OLDCONFFILE="$1"
     NEWCONFFILE="$2"
 
     if [ -e "$OLDCONFFILE" ]; then
 	echo "Preserving user changes to $NEWCONFFILE ..."
-	mv -f "$NEWCONFFILE" "$NEWCONFFILE".dpkg-new
 	mv -f "$OLDCONFFILE" "$NEWCONFFILE"
     fi
 }
