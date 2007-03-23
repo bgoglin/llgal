@@ -41,17 +41,15 @@ install:: install-lib install-po
 	install -d -m 0755 $(DESTDIR)$(BINDIR)/ $(DESTDIR)$(DATADIR)/llgal/ $(DESTDIR)$(SYSCONFDIR)/llgal/
 	install -m 0755 llgal $(DESTDIR)$(BINDIR)/llgal
 	install -m 0644 $(DATA_SUBDIR)/* $(DESTDIR)$(DATADIR)/llgal/
-	install -m 0644 llgalrc $(DESTDIR)$(SYSCONFDIR)/llgal/
 
 uninstall:: uninstall-lib uninstall-po
 	rm $(DESTDIR)$(BINDIR)/llgal
 	rm -rf $(DESTDIR)$(DATADIR)/llgal/
-	rm -rf $(DESTDIR)$(SYSCONFDIR)/llgal/
+	rmdir $(DESTDIR)$(SYSCONFDIR)/llgal/ || true
 
 tarball::
 	mkdir /tmp/$(TARBALL)/
 	cp llgal.in /tmp/$(TARBALL)
-	cp llgalrc /tmp/$(TARBALL)
 	cp llgal.1 llgalrc.5 /tmp/$(TARBALL)
 	cp Makefile /tmp/$(TARBALL)
 	cp Changes /tmp/$(TARBALL)

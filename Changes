@@ -6,6 +6,9 @@ llgal (0.13.10)
     scaled images when target directory contains special characters
     (thanks to Jeremie Koenig for the patch in Debian bug #408873).
   * Fix typo in llgalrc.5.
+  * Install the config file in the doc/ directory instead of /etc/llgal/
+    since it only contains documentation, no actual configuration.
+    + Point to it in the SEE ALSO section of llgalrc manpage.
 
  -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Mon, 29 Jan 2007 21:21:00 +0100
 
