@@ -1,5 +1,7 @@
 llgal (0.13.10)
 
+  * Fix sorting of entries (with criteria {rev,}{time,date,size})
+    in recursive mode (reported by Sebastien Mei).
   * Fix removing of old www-pages and generation of thumbnails and
     scaled images when target directory contains special characters
     (thanks to Jeremie Koenig for the patch in Debian bug #408873).

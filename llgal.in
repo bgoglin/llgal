@@ -912,6 +912,8 @@ sub finalize_entries {
 # Generating entry table from files in target directory
 
 sub sort_entries {
+    my $path = shift ;
+
     if ($opts->{sort_criteria} eq "name") {
 	return sort @_ ;
     } elsif ($opts->{sort_criteria} eq "revname") {
@@ -923,14 +925,14 @@ sub sort_entries {
 	return sort { uc($b) cmp uc($a) } @_ ;
 
     } elsif ($opts->{sort_criteria} eq "date" or $opts->{sort_criteria} eq "time") {
-	return sort { (-M $a) <=> (-M $b) } @_ ;
+	return sort { (-M "$path/$a") <=> (-M "$path/$b") } @_ ;
     } elsif ($opts->{sort_criteria} eq "revdate" or $opts->{sort_criteria} eq "revtime") {
-	return sort { (-M $b) <=> (-M $a) } @_ ;
+	return sort { (-M "$path/$b") <=> (-M "$path/$a") } @_ ;
 
     } elsif ($opts->{sort_criteria} eq "size") {
-	return sort { (-s $a) <=> (-s $b) } @_ ;
+	return sort { (-s "$path/$a") <=> (-s "$path/$b") } @_ ;
     } elsif ($opts->{sort_criteria} eq "revsize") {
-	return sort { (-s $b) <=> (-s $a) } @_ ;
+	return sort { (-s "$path/$b") <=> (-s "$path/$a") } @_ ;
 
     } elsif ($opts->{sort_criteria} eq "none" or $opts->{sort_criteria} eq "") {
 	return @_
@@ -963,7 +965,7 @@ sub get_entries_from_directory {
     closedir DIR ;
 
     # sort now so that slide numbering doesn't become wrong later
-    @filenames = sort_entries @filenames ;
+    @filenames = sort_entries $dir, @filenames ;
 
     $messages->print ("Listing entries in $subdir_string : ") ;
     $messages->init_percentage (scalar @filenames) ;
@@ -1032,6 +1034,8 @@ sub get_subdir_tree {
 	opendir DIR, $destdir
 	    or die "Can't open $destdir_string ($!).\n" ;
 	unshift @remaining_dirs, ( sort_entries
+				   # base directory for sorting
+				   $self->{destination_dir},
 				   # add subdirectories only
 				   ( grep { -d "$self->{destination_dir}$_" }
 				     ( map { "$current_dir$_/" }
