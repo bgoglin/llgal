@@ -3,8 +3,9 @@ llgal (xxx) unstable; urgency=low
   * Update preinst and postinst to drop /etc/llgal/llgalrc (or the old
     /etc/llgalrc) unless it has been modified since it is not installed
     in /etc by upstream anymore.
+  * Install the llgalrc template as documentation.
 
- -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Fri, 23 Mar 2007 23:03:00 +0100
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Fri, 23 Mar 2007 23:37:54 +0100
 
 llgal (0.13.10-1) unstable; urgency=low
 
