@@ -4,6 +4,10 @@
   * Install the config file in the doc/ directory instead of /etc/llgal/
     since it only contains documentation, no actual configuration.
     + Point to it in the SEE ALSO section of llgalrc manpage.
+  * Hack the parameters that are passed during Perl modules installation
+    to deal with MakeMaker not using PREFIX in the common way. Without
+    this change, setting PREFIX=/usr/local on the make install command
+    line was installing in /usr/local/local/perl.
 
 
 llgal (0.13.10)
