@@ -925,14 +925,14 @@ sub sort_entries {
 	return sort { uc($b) cmp uc($a) } @_ ;
 
     } elsif ($opts->{sort_criteria} eq "date" or $opts->{sort_criteria} eq "time") {
-	return sort { (-M "$path/$a") <=> (-M "$path/$b") } @_ ;
+	return sort { (-M "$path$a") <=> (-M "$path$b") } @_ ;
     } elsif ($opts->{sort_criteria} eq "revdate" or $opts->{sort_criteria} eq "revtime") {
-	return sort { (-M "$path/$b") <=> (-M "$path/$a") } @_ ;
+	return sort { (-M "$path$b") <=> (-M "$path$a") } @_ ;
 
     } elsif ($opts->{sort_criteria} eq "size") {
-	return sort { (-s "$path/$a") <=> (-s "$path/$b") } @_ ;
+	return sort { (-s "$path$a") <=> (-s "$path$b") } @_ ;
     } elsif ($opts->{sort_criteria} eq "revsize") {
-	return sort { (-s "$path/$b") <=> (-s "$path/$a") } @_ ;
+	return sort { (-s "$path$b") <=> (-s "$path$a") } @_ ;
 
     } elsif ($opts->{sort_criteria} eq "none" or $opts->{sort_criteria} eq "") {
 	return @_
