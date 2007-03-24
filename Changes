@@ -1,8 +1,9 @@
+llgal (0.13.11)
 
   * Fix sorting of entries (with criteria {rev,}{time,date,size})
     in recursive mode (reported by Sebastien Mei).
   * Restore the prefetch header in the slide template.
-  * Add index and contents headers to both slides and index template.
+  * Add index and contents headers to both slides and index templates.
   * Install the config file in the doc/ directory instead of /etc/llgal/
     since it only contains documentation, no actual configuration.
     + Point to it in the SEE ALSO section of llgalrc manpage.
@@ -11,6 +12,7 @@
     this change, setting PREFIX=/usr/local on the make install command
     line was installing in /usr/local/local/perl.
 
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Sat, 24 Mar 2007 01:54:00 +0100
 
 llgal (0.13.10)
 
