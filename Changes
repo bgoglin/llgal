@@ -2,6 +2,7 @@
   * Fix sorting of entries (with criteria {rev,}{time,date,size})
     in recursive mode (reported by Sebastien Mei).
   * Restore the prefetch header in the slide template.
+  * Add index and contents headers to both slides and index template.
   * Install the config file in the doc/ directory instead of /etc/llgal/
     since it only contains documentation, no actual configuration.
     + Point to it in the SEE ALSO section of llgalrc manpage.
