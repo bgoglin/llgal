@@ -1,3 +1,8 @@
+
+  * Fix --lang which did not work when current locale and --lang
+    argument have different encodings (UTF-8 versus no UTF-8).
+
+
 llgal (0.13.11)
 
   * Fix sorting of entries (with criteria {rev,}{time,date,size})

@@ -2267,13 +2267,14 @@ sub main_process {
 
     # set the locale before getting the defaults
     if (defined $opts_without_defaults->{language}) {
-	setlocale (LC_MESSAGES, $opts_without_defaults->{language}) ;
-    } else {
-	setlocale (LC_MESSAGES, "") ;
+	setlocale (LC_ALL, $opts_without_defaults->{language}) ;
     }
 
     # set defaults values for all uninitialized values
     $opts = Llgal::Config::add_defaults ($opts_without_defaults) ;
+
+    # restore the current locale
+    setlocale (LC_ALL, "") ;
 
     if ($self->{clean_asked} or $self->{cleanall_asked} or $self->{give_templates}) {
 	# complex special behaviors that need full configuration, and recurse in all subdirectories
