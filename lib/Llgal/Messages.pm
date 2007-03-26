@@ -98,7 +98,7 @@ sub update_percentage {
 
 sub end_percentage {
     my $self = shift ;
-    print "\b\b\b\b\b\b\b\b 100.00%\n" ;
+    printf "\b\b\b\b\b\b\b\b% 7.2f%%\n", 100 ;
     $self->show_delayed_warnings () ;
 }
 
