@@ -1,0 +1,76 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: llgal\n"
+"Content-Type: text/plain; charset=ISO-8859-15\n"
+"Content-Transfer-Encoding: 8-bit\n"
+
+domain "llgal"
+
+msgid "index_title|Index of pictures"
+msgstr "index_title|Index of pictures"
+
+msgid "parent_gallery_link_text|Back to parent gallery"
+msgstr "parent_gallery_link_text|Back to parent gallery"
+
+msgid "prev_gallery_link_text|Previous gallery "
+msgstr "prev_gallery_link_text|Previous gallery "
+
+msgid "next_gallery_link_text|Next gallery "
+msgstr "next_gallery_link_text|Next gallery "
+
+msgid "index_link_text|Index"
+msgstr "index_link_text|Index"
+
+msgid "prev_slide_link_text|&lt;&lt;Prev"
+msgstr "prev_slide_link_text|&lt;&lt;Prev"
+
+msgid "next_slide_link_text|Next&gt;&gt;"
+msgstr "next_slide_link_text|Next&gt;&gt;"
+
+msgid "section_text|Section "
+msgstr "section_text|Section "
+
+msgid "MVI_link_text|Open movie "
+msgstr "MVI_link_text|Open movie "
+
+msgid "FIL_link_text|Download file "
+msgstr "FIL_link_text|Download file "
+
+msgid "DIR_link_text|Open subgallery "
+msgstr "DIR_link_text|Open subgallery "
+
+msgid "alt_full_text|"
+msgstr "alt_full_text|"
+
+msgid "alt_scaled_text|Scaled image "
+msgstr "alt_scaled_text|Scaled image "
+
+msgid "alt_thumbnail_text|Thumbnail "
+msgstr "alt_thumbnail_text|Thumbnail "
+
+msgid "alt_film_tile_text|Film Tile"
+msgstr "alt_film_tile_text|Film Tile"
+
+msgid "over_scaled_text|Click to see full size "
+msgstr "over_scaled_text|Click to see full size "
+
+msgid "over_thumbnail_text|Click to enlarge "
+msgstr "over_thumbnail_text|Click to enlarge "
+
+msgid "over_index_link_text|Return to the index"
+msgstr "over_index_link_text|Return to the index"
+
+msgid "over_prev_slide_link_text|Previous slide "
+msgstr "over_prev_slide_link_text|Previous slide "
+
+msgid "over_next_slide_link_text|Next slide "
+msgstr "over_next_slide_link_text|Next slide "
+
+msgid "show_size_unit|kB"
+msgstr "show_size_unit|kB"
+
+msgid "timestamp_format_in_caption|%y-%m-%d %H:%M:%S"
+msgstr "timestamp_format_in_caption|%y-%m-%d %H:%M:%S"
+
+msgid "credits_text|created with <a href=\"http://home.gna.org/llgal\">llgal</a>"
+msgstr "credits_text|created with <a href=\"http://home.gna.org/llgal\">llgal</a>"

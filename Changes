@@ -2,6 +2,8 @@
   * Fix --lang which did not work when current locale and --lang
     argument have different encodings (UTF-8 versus no UTF-8).
   * Add a warning then the LANGUAGE environment variable is defined.
+    + Ship a dummy english translation so that LANGUAGE is correctly
+      used when it contains an english locale.
   * Howto improvements:
     + Add how-to jump to the next slide when clicking on the current one
       (requested by Elmar Eberhardt and others).
