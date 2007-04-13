@@ -2,9 +2,11 @@
   * Fix --lang which did not work when current locale and --lang
     argument have different encodings (UTF-8 versus no UTF-8).
   * Add a warning then the LANGUAGE environment variable is defined.
-  * Add a paragraph about scaling images and dropping original images
-    in the howto.
-  * Fixes in the howto.
+  * Howto improvements:
+    + Add how-to jump to the next slide when clicking on the current one
+      (requested by Elmar Eberhardt and others).
+    + Add how-to scale images and drop the originals.
+    + Minor fixes.
 
 
 llgal (0.13.11)

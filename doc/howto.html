@@ -252,6 +252,29 @@ One day, there might be a full internationalization support through <tt>gettext<
 
 
 
+<a name="layout_click_to_next_slide">
+<h3 class="question">How can I go the next slide when clicking on the current one?</h3>
+<a>
+
+By default, you need to click on <tt>Next</tt> to go to the next slide.
+If you passed <tt>--sx</tt> or <tt>--sy</tt>, clicking on the slide will lead you to the
+original image. If not, clicking does nothing.
+If you want this click to jump to the next slide, you just need to modify the slidetemplate
+and replace
+<pre>
+       &lt;!--THIS-SLIDE--&gt;
+</pre>
+with
+<pre>
+       &lt;a href="&lt;!--NEXT-SLIDE--&gt;"&gt;&lt;!--THIS-SLIDE--&gt;&lt;/a&gt;
+</pre>
+and regenerate the gallery.
+
+Of course, if you keep using <tt>--sx</tt> or <tt>--sy</tt>, you will get into problems
+since there will be 2 hyperlinks on each slide.
+
+
+
 <a name="layout_thumnail_video_subdir">
 <h3 class="question">How do I set a thumbnail for a video or a subgallery?</h3>
 </a>
