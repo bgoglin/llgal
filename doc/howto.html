@@ -496,6 +496,26 @@ than <tt>llgal</tt>.
 
 
 
+<h3 class="question">How do I scale my images to a smaller size and drop the originals?</h3>
+
+<tt>llgal</tt> is not supposed to be used for this
+(see <em>Why does llgal not provide any feature to rotate or modify images?</em>).
+You should use an external tool earlier and then apply llgal on the scaled images.
+If you really want to use <tt>llgal</tt> to scale images down, you should use <tt>--sx</tt>
+and/or <tt>--sy</tt>. The scaled images will be placed in <tt>.llgal/scaled_*</tt>.
+
+To drop the originals and use the scaled images directly, you should first remove the
+originals from the main directory. Then move the scaled images from <tt>.llgal</tt> to
+the main directory and remove the <tt>scaled_</tt> suffix
+(<tt>rename 's@^\.llgal/scaled_@@' .llgal/scaled_*</tt> should do the trick).
+
+Finally, re-run the same <tt>llgal</tt> command line without <tt>--sx</tt> and/or
+<tt>--sy</tt>.
+You should get the same gallery as before, without the links from the slides to the
+original images.
+
+
+
 
 </div>
 
