@@ -2267,6 +2267,8 @@ sub main_process {
 
     # set the locale before getting the defaults
     if (defined $opts_without_defaults->{language}) {
+	$messages->warning ("The LANGUAGE environment variable ($ENV{LANGUAGE}) overrides your language configuration ($opts_without_defaults->{language}).")
+	    if exists $ENV{LANGUAGE} ;
 	setlocale (LC_ALL, $opts_without_defaults->{language}) ;
     }
 
