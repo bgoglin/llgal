@@ -8,6 +8,10 @@
     + Add how-to jump to the next slide when clicking on the current one
       (requested by Elmar Eberhardt and others).
     + Add how-to scale images and drop the originals.
+    + Add a paragraph about why changing --tx without --ty (or the
+      contrary) might not give the expected results since changing
+      one does not affect the other one.
+      - Also document all this in the manpages and llgalrc example.
     + Minor fixes.
 
 
