@@ -1638,8 +1638,11 @@ sub generate_slides {
 
 	# this slide style
 	my $THIS_SLIDE_STYLE = "image-slide" ;
-	$THIS_SLIDE_STYLE = "text-slide\" style=\"width: $opts->{text_slide_width}px; height: $opts->{text_slide_height}px;"
-	    unless defined $entry->{scaled_url} or $type == $TYPE_IMAGE ;
+	if (!defined $entry->{scaled_url} and $type != $TYPE_IMAGE) {
+	    $THIS_SLIDE_STYLE = "text-slide" ;
+	    $THIS_SLIDE_STYLE .= "\" style=\"width: $opts->{text_slide_width}px; height: $opts->{text_slide_height}px;"
+		unless $opts->{slide_dimensions_from_css} ;
+	}
 
 	# slide contents
 	my $THIS_SLIDE ;
@@ -1649,17 +1652,19 @@ sub generate_slides {
 	    if (defined $entry->{scaled_filename}) {
 		# scaled image with link to the real image
 		$THIS_SLIDE = "<a href=\"$entry->{url}\" "
-		    ."title=\"$opts->{over_scaled_text}$entry->{title} $entry->{dimstring}\">" ;
-		$THIS_SLIDE .= "<img src=\"$entry->{scaled_url}\" "
-		    ."style=\"width: $entry->{scaled_xdim}px; height: $entry->{scaled_ydim}px;\" "
-		    ."alt=\"$opts->{alt_scaled_text}$entry->{title} $entry->{scaled_dimstring}\" />" ;
-		$THIS_SLIDE .= "</a>" ;
+		    ."title=\"$opts->{over_scaled_text}$entry->{title} $entry->{dimstring}\">"
+		    ."<img src=\"$entry->{scaled_url}\" " ;
+		$THIS_SLIDE .= "style=\"width: $entry->{scaled_xdim}px; height: $entry->{scaled_ydim}px;\" "
+		    unless $opts->{slide_dimensions_from_css} ;
+		$THIS_SLIDE .= "alt=\"$opts->{alt_scaled_text}$entry->{title} $entry->{scaled_dimstring}\" />"
+		    ."</a>" ;
 
 	    } else {
 		# real image
-		$THIS_SLIDE = "<img src=\"$entry->{url}\" "
-		    ."style=\"width: $entry->{scaled_xdim}px; height: $entry->{scaled_ydim}px;\" "
-		    ."alt=\"$opts->{alt_full_text}$entry->{title} $entry->{dimstring}\" "
+		$THIS_SLIDE = "<img src=\"$entry->{url}\" " ;
+		$THIS_SLIDE .= "style=\"width: $entry->{scaled_xdim}px; height: $entry->{scaled_ydim}px;\" "
+		    unless $opts->{slide_dimensions_from_css} ;
+		$THIS_SLIDE .= "alt=\"$opts->{alt_full_text}$entry->{title} $entry->{dimstring}\" "
 		    ."title=\"$entry->{title} $entry->{dimstring}\" />" ;
 
 	    }
@@ -1667,19 +1672,21 @@ sub generate_slides {
 	    # another type, with a user-given scaled image
 	    if ($type == $TYPE_TEXT) {
 		# text with scaled image ? ok...
-		$THIS_SLIDE = "<img src=\"$entry->{scaled_url}\" "
-		    ."style=\"width: $entry->{scaled_xdim}px; height: $entry->{scaled_ydim}px;\" "
-		    ."title=\"$entry->{title} $entry->{dimstring}\" "
+		$THIS_SLIDE = "<img src=\"$entry->{scaled_url}\" " ;
+		$THIS_SLIDE .= "style=\"width: $entry->{scaled_xdim}px; height: $entry->{scaled_ydim}px;\" "
+		    unless $opts->{slide_dimensions_from_css} ;
+		$THIS_SLIDE .= "title=\"$entry->{title} $entry->{dimstring}\" "
 		    ."alt=\"$entry->{linktext} $entry->{scaled_dimstring}\" />" ;
 
 	    } else {
 		# another type with scaled image linking to the target
 		$THIS_SLIDE = "<a href=\"$entry->{url}\" "
-		    ."title=\"$entry->{title} $entry->{dimstring}\">" ;
-		$THIS_SLIDE .= "<img src=\"$entry->{scaled_url}\" "
-		    ."style=\"width: $entry->{scaled_xdim}px; height: $entry->{scaled_ydim}px;\" "
-		    ."alt=\"$entry->{linktext} $entry->{scaled_dimstring}\" />" ;
-		$THIS_SLIDE .= "</a>" ;
+		    ."title=\"$entry->{title} $entry->{dimstring}\">"
+		    ."<img src=\"$entry->{scaled_url}\" " ;
+		$THIS_SLIDE .= "style=\"width: $entry->{scaled_xdim}px; height: $entry->{scaled_ydim}px;\" "
+		    unless $opts->{slide_dimensions_from_css} ;
+		$THIS_SLIDE .= "alt=\"$entry->{linktext} $entry->{scaled_dimstring}\" />"
+		    ."</a>" ;
 	    }
 
 	} elsif ($type == $TYPE_TEXT) {

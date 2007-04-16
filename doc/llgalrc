@@ -141,6 +141,10 @@
 # slide filename of images that have same filenames.
 # make_slide_filename_from_extension = 0
 
+# Do not output any absolute image size in the HTML code and assume the
+# CSS style sheet will take care of it (in table.slide td.image-slide img)
+# slide_dimensions_from_css = 0
+
 # Maximal width of slides [--sx <n>]
 # Must be > 0, 0 means unlimited, setting to < 0 resets to default
 # slide_width_max = 0

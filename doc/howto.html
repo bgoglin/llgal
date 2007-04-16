@@ -269,6 +269,20 @@ Note that changing one of these options requires to
 
 
 
+<a name-"layout_slide_dimensions_from_css">
+<h3 class="question">How can I get the images in slides to adapt their size to the window?</h3>
+</a>
+
+<tt>llgal</tt> has been designed to create fixed-size slides. If, instead, you would like your
+images in slides to follow the size of the window, you may use the <tt>slide_dimensions_from_css</tt>
+option, either from a configuration file or with <tt>--option</tt> on the command line.
+
+<tt>llgal</tt> will then remove all absolute dimensions for images in HTML slides.
+Finally, you will be able to set the image width through the CSS slide sheet (<tt>llgal.css</tt>),
+for instance by adding <tt>width: 100%</tt> in <tt>table.slide td.image-slide img</tt>.
+
+
+
 <a name="layout_text">
 <h3 class="question">How do I change the text that llgal generates in slides and index?</h3>
 </a>

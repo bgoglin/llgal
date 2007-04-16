@@ -1,4 +1,7 @@
 
+  * Add configuration file option slide_dimensions_from_css to remove
+    absolute image sizes in slides and let the user configure it from
+    the CSS (requested by Olivier Schwander).
   * Fix --lang which did not work when current locale and --lang
     argument have different encodings (UTF-8 versus no UTF-8).
   * Add a warning then the LANGUAGE environment variable is defined.
@@ -14,6 +17,8 @@
       - Also document all this in the manpages and llgalrc example.
     + Add a paragraph about when thumbnails or scaled images are
       regenerated and how to force it.
+    + Add a paragraph about having the images in slides adapt to the
+      window size using the new slide_dimensions_from_css option.
     + Minor fixes.
 
 
