@@ -1,3 +1,4 @@
+llgal (0.13.12)
 
   * Add configuration file option slide_dimensions_from_css to remove
     absolute image sizes in slides and let the user configure it from
@@ -21,6 +22,7 @@
       window size using the new slide_dimensions_from_css option.
     + Minor fixes.
 
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Tue, 17 Apr 2007 00:01:00 +0200
 
 llgal (0.13.11)
 
