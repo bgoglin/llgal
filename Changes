@@ -12,6 +12,8 @@
       contrary) might not give the expected results since changing
       one does not affect the other one.
       - Also document all this in the manpages and llgalrc example.
+    + Add a paragraph about when thumbnails or scaled images are
+      regenerated and how to force it.
     + Minor fixes.
 
 

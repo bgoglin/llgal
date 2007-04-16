@@ -241,6 +241,20 @@ directory (or in <tt>$HOME/.llgal/</tt>) to change the layout.
 
 
 
+<a name="layout_image_size">
+<h3 class="question">Why does llgal ignore the image dimension limits that I give?</h3>
+</a>
+
+Since <a href="#misc_slow">converting images might be slow</a>, <tt>llgal</tt> does
+not always regenerate thumbnails and scaled images. By default, it only does if the
+original images has been changed since last generation.
+
+To force regeneration, for instance if you changed the thumbnails (with <tt>--tx</tt>
+or <tt>--ty</tt>) or scaled images dimensions (with <tt>--sx</tt> or <tt>--sy</tt>),
+you may use <tt>-f</tt> (or <tt>force_image_regeneration</tt>).
+
+
+
 <a name="layout_thumbnail_size">
 <h3 class="question">Does changing the maximal thumbnail dimensions really work?</h3>
 </a>
@@ -249,6 +263,9 @@ By default, the width and height of thumbnails are both limited. Both dimension
 limits may be changed with <tt>--tx</tt> or <tt>--ty</tt>, but changing a single
 one does affect the other one. It means that the other should be changed too in
 most of the circumstances.
+
+Note that changing one of these options requires to
+<a href="#layout_image_size">force regeneration of thumbnails</a>.
 
 
 
@@ -556,7 +573,8 @@ thumbnails (and scaled images if <tt>--sx</tt> or <tt>--sy</tt> was passed). It 
 pretty long if you have lots of large images.
 To avoid being slow everytime you re-run <tt>llgal</tt>, thumbnails and scaled images
 are only generated once
-(except when the original has been modified since or when <tt>-f</tt> is passed).
+(except when the original has been modified since or when <tt>-f</tt> is passed, see
+<a href="#layout_image_size"><em>Why does llgal ignore the image dimension limits that I give?</em></a>).
 
 There might be some way to improve the overall speed of thumbnails and scaled images
 generation by changing the corresponding command line with <tt>scaled_create_command</tt>
