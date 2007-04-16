@@ -99,6 +99,7 @@ my $normal_opts_type = {
     make_no_slides => $OPT_IS_NUMERIC,
     make_slide_filename_from_filename => $OPT_IS_NUMERIC,
     make_slide_filename_from_extension => $OPT_IS_NUMERIC,
+    slide_dimensions_from_css => $OPT_IS_NUMERIC,
     slide_width_max => $OPT_IS_NUMERIC, # > 0, 0 for unlimited, -1 for default
     slide_height_max => $OPT_IS_NUMERIC, # > 0, 0 for unlimited, -1 for default
     text_slide_width => $OPT_IS_NUMERIC, # > 0, -1 for default
@@ -299,6 +300,8 @@ sub add_defaults {
 	make_slide_filename_from_filename => 0,
 # also use image extension in the slide names
 	make_slide_filename_from_extension => 0,
+# do not output dimensions for slides, let the css do it
+	slide_dimensions_from_css => 0,
 # max width of the slides (--sx)
 	slide_width_max => $slide_width_max_default,
 # max height of the slides (--sy)

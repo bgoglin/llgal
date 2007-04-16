@@ -1,3 +1,29 @@
+llgal (0.13.12)
+
+  * Add configuration file option slide_dimensions_from_css to remove
+    absolute image sizes in slides and let the user configure it from
+    the CSS (requested by Olivier Schwander).
+  * Fix --lang which did not work when current locale and --lang
+    argument have different encodings (UTF-8 versus no UTF-8).
+  * Add a warning then the LANGUAGE environment variable is defined.
+    + Ship a dummy english translation so that LANGUAGE is correctly
+      used when it contains an english locale.
+  * Howto improvements:
+    + Add how-to jump to the next slide when clicking on the current one
+      (requested by Elmar Eberhardt and others).
+    + Add how-to scale images and drop the originals.
+    + Add a paragraph about why changing --tx without --ty (or the
+      contrary) might not give the expected results since changing
+      one does not affect the other one.
+      - Also document all this in the manpages and llgalrc example.
+    + Add a paragraph about when thumbnails or scaled images are
+      regenerated and how to force it.
+    + Add a paragraph about having the images in slides adapt to the
+      window size using the new slide_dimensions_from_css option.
+    + Minor fixes.
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Tue, 17 Apr 2007 00:01:00 +0200
+
 llgal (0.13.11)
 
   * Fix sorting of entries (with criteria {rev,}{time,date,size})
