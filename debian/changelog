@@ -4,6 +4,8 @@ llgal (0.13.13-1) unstable; urgency=low
   * Do not call identify on every image, check their validity by looking
     at their dimensions instead (closes: #431939).
   * Refresh debianize_dependencies_in_warnings.patch.
+  * Use dpkg-query instead of parsing /var/lib/dpkg/status in preinst
+    (lintian error maintainer-script-uses-dpkg-status-directly).
 
  -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Sun, 08 Jul 2007 16:47:16 +0200
 
