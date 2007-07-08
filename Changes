@@ -1,19 +1,21 @@
+llgal (0.13.13)
 
-  * Stop checking image validity with identify, checking irs dimensions
-    will be enough is the vast majority of cases, and it is much faster
-    (reported by Martin Ferrari in Debian bug #431939).
-  * Retrieve image dimensions while listing entries, either with
-    ExifTool is needed for something else, or with Image::Size,
-    and check their validity.
-  * Check thumbnail and scaled image validity when retrieving their
-    dimensions too, so that bad user-given ones are ignored, while
-    bad generated ones lead to skip the whole entry.
-  * Retrieve original image dimensions only once.
-  * A couple minor optimizations by caching values computed multiple times.
+  * Improve the speed to 'Listing entries...' dramatically
+    (reported by Martin Ferrari in Debian bug #431939):
+    + Retrieve image dimensions while listing entries, either with Exiftool
+      if it is already needed for something else, or with Image::Size.
+    + Check image validity by looking at its dimensions instead of calling
+      the very slow 'identify' command.
+  * Check the validity of thumbnail and scaled images too, also by looking
+    at their dimensions:
+    + bad user-given thumbnails or scaled images are ignored;
+    + bad llgal-generated ones lead to skipping the whole entry.
+  * A couple minor optimizations by caching values computed multiple times
+    (image dimensions, filenames, exif tags list, ...).
   * Make sure --www changes the access rights of original images too.
-  * Do not warn when the LANGUAGE environment variable is defined
-    but empty.
+  * Do not warn when the LANGUAGE environment variable is defined but empty.
 
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Sun, 08 Jul 2007 16:37:00 +0200
 
 llgal (0.13.12)
 
