@@ -414,34 +414,40 @@ sub create_file_entry {
     if ($type == $TYPE_IMAGE) {
 	my ($x,$y) ;
 
-	# generate the list of exif_tags only once, empty if $opts->{show_all_exif_tags}
-	if (not exists $opts->{cached_exif_tags_list}) {
-	    my @exif_tags = () ;
-	    if (!$opts->{show_all_exif_tags}) {
-		# use the user provided Exif tags, and add ImageWidth/Height for ourself
-		@exif_tags = ('ImageWidth', 'ImageHeight', @{$opts->{show_exif_tags}}) ;
-		@exif_tags = (@exif_tags, 'DateTimeOriginal')
-		    if $opts->{make_caption_from_image_timestamp} ;
-		@exif_tags = (@exif_tags, 'UserComment', 'Comment')
-		    if $opts->{make_caption_from_image_comment} ;
-	    }
-	    @{$opts->{cached_exif_tags_list}} = @exif_tags ;
-	}
+	# if showing some exif flags, or using some options that require Exif,
+	# use ExifTool for both these and image dimensions validity checking
+	if ($opts->{show_all_exif_tags}
+	    or @{$opts->{show_exif_tags}}
+	    or $opts->{make_caption_from_image_timestamp}
+	    or $opts->{make_caption_from_image_comment}) {
 
-	# if showing all, or showing at least one
-	if ($opts->{show_all_exif_tags} or @{$opts->{cached_exif_tags_list}}) {
+	    # only load Image::ExifTool when really required
 	    if (not defined $opts->{exif_info}) {
-		# only load Image::ExifTool when really required
+
+		# Try to load the module
 		if (not eval { require Image::ExifTool ; }) {
 		    $messages->abort_percentage ();
 		    die "Perl module Image::ExifTool not found, please install it if you wish to extract tags from images.\n" ;
 		}
+
 		# ExifTool initialization
 		$opts->{exiftool} = new Image::ExifTool;
 		# accept unknown tags, just in case...
 		$opts->{exiftool}->Options(Unknown => 1) ;
 		# dateFormat should be initialized with whatever the user said to --ctf
 		$opts->{exiftool}->Options(DateFormat => $opts->{timestamp_format_in_caption}) ;
+
+		# initialize the list of tags, empty for all
+		my @exif_tags = () ;
+		if (!$opts->{show_all_exif_tags}) {
+		    # use the user provided Exif tags, and add ImageWidth/Height for ourself
+		    @exif_tags = ('ImageWidth', 'ImageHeight', @{$opts->{show_exif_tags}}) ;
+		    @exif_tags = (@exif_tags, 'DateTimeOriginal')
+			if $opts->{make_caption_from_image_timestamp} ;
+		    @exif_tags = (@exif_tags, 'UserComment', 'Comment')
+			if $opts->{make_caption_from_image_comment} ;
+		}
+		@{$opts->{cached_exif_tags_list}} = @exif_tags ;
 	    }
 
 	    # do the actual exif tag retrieval
@@ -453,8 +459,8 @@ sub create_file_entry {
 	    $y = $exif_infos->{ImageHeight} ;
 
 	} else {
-
 	    # if not using Exif at all, just retrieve dimensions for ourself
+
 	    ($x,$y) = imgsize ($real_filename) ;
 	}
 
