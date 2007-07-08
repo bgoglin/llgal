@@ -241,28 +241,6 @@ sub check_file {
     return 0 ;
 }
 
-sub check_image {
-    my $filename = shift ;
-    my ($status, @output) = Llgal::Utils::system_with_output
-	( "check \"$filename\" validity",
-	  "identify", $filename ) ;
-    if ($status == -1) {
-	$messages->warning (@output) ;
-	$messages->abort_percentage ;
-	die "Failed to check \"$filename\" validity.\n" ;
-    } elsif ($status) {
-	# do not show actual identify output
-	$messages->warning ("Bad image file '$filename', skipping it.") ;
-	return -1 ;
-    }
-    return 0 ;
-}
-
-sub check_movie {
-    # TODO
-    return 0 ;
-}
-
 ###################################################################################
 # returns a filename that the user provided in the llgal directory
 # to be used as a thumbnail or scaled image
@@ -388,16 +366,12 @@ sub create_file_entry {
     my $linktext = shift ;
     my $caption = shift ;
 
+    # cache real filename for later
+    my $real_filename = "$self->{destination_dir}$filename" ;
+
     # check file
     return undef
-	if check_file ("$self->{destination_dir}$filename") < 0 ;
-    if ($type == $TYPE_IMAGE) {
-	return undef
-	    if check_image ("$self->{destination_dir}$filename") < 0 ;
-    } elsif ($type == $TYPE_MOVIE) {
-	return undef
-	    if check_movie ("$self->{destination_dir}$filename") < 0 ;
-    }
+	if check_file ($real_filename) < 0 ;
 
     # set the type
     $entry->{type} = $type ;
@@ -434,17 +408,28 @@ sub create_file_entry {
 	$entry->{gallery_name} = pop @parts ;
     }
 
-    # for images, extract required exif infos
+    # for images, we need at least the dimensions (and check their validity) and possibly some Exif info
+    # if some Exif are needed, retrieve dimensions with ExifTool too
+    # if not, just retrieve dimensions with imgsize
     if ($type == $TYPE_IMAGE) {
-	my @exif_tags = () ;
-	if (!$opts->{show_all_exif_tags}) {
-	    @exif_tags = @{$opts->{show_exif_tags}} ;
-	    @exif_tags = (@exif_tags, 'DateTimeOriginal')
-		if $opts->{make_caption_from_image_timestamp} ;
-	    @exif_tags = (@exif_tags, 'UserComment', 'Comment')
-		if $opts->{make_caption_from_image_comment} ;
+	my ($x,$y) ;
+
+	# generate the list of exif_tags only once, empty if $opts->{show_all_exif_tags}
+	if (not exists $opts->{cached_exif_tags_list}) {
+	    my @exif_tags = () ;
+	    if (!$opts->{show_all_exif_tags}) {
+		# use the user provided Exif tags, and add ImageWidth/Height for ourself
+		@exif_tags = ('ImageWidth', 'ImageHeight', @{$opts->{show_exif_tags}}) ;
+		@exif_tags = (@exif_tags, 'DateTimeOriginal')
+		    if $opts->{make_caption_from_image_timestamp} ;
+		@exif_tags = (@exif_tags, 'UserComment', 'Comment')
+		    if $opts->{make_caption_from_image_comment} ;
+	    }
+	    @{$opts->{cached_exif_tags_list}} = @exif_tags ;
 	}
-	if (@exif_tags or $opts->{show_all_exif_tags}) {
+
+	# if showing all, or showing at least one
+	if ($opts->{show_all_exif_tags} or @{$opts->{cached_exif_tags_list}}) {
 	    if (not defined $opts->{exif_info}) {
 		# only load Image::ExifTool when really required
 		if (not eval { require Image::ExifTool ; }) {
@@ -453,13 +438,34 @@ sub create_file_entry {
 		}
 		# ExifTool initialization
 		$opts->{exiftool} = new Image::ExifTool;
-		# Accept unknown tags, just in case...
+		# accept unknown tags, just in case...
 		$opts->{exiftool}->Options(Unknown => 1) ;
-		# DateFormat should be initialized with whatever the user said to --ctf
+		# dateFormat should be initialized with whatever the user said to --ctf
 		$opts->{exiftool}->Options(DateFormat => $opts->{timestamp_format_in_caption}) ;
 	    }
-	    $entry->{exif_infos} = $opts->{exiftool}->ImageInfo ("$self->{destination_dir}$filename", @exif_tags) ;
+
+	    # do the actual exif tag retrieval
+	    my $exif_infos = $opts->{exiftool}->ImageInfo ($real_filename, @{$opts->{cached_exif_tags_list}}) ;
+	    $entry->{exif_infos} = $exif_infos ;
+
+	    # get image dimensions
+	    $x = $exif_infos->{ImageWidth} ;
+	    $y = $exif_infos->{ImageHeight} ;
+
+	} else {
+
+	    # if not using Exif at all, just retrieve dimensions for ourself
+	    ($x,$y) = imgsize ($real_filename) ;
 	}
+
+	# check dimensions validity
+	if (not defined $x or not defined $y) {
+	    $messages->warning ("Bad image file '$filename', cannot retrieve its dimensions, skipping it.") ;
+	    return undef ;
+	}
+
+	$entry->{xdim} = $x ;
+	$entry->{ydim} = $y ;
     }
 
     # the caption (will be web-safe after caption file generation)
@@ -503,20 +509,17 @@ sub fill_file_entry {
     my $type = $entry->{type} ;
     my $filename = $entry->{filename} ;
 
-    # keep real filename for later
+    # cache real filename for later
     my $real_filename = "$self->{destination_dir}$filename" ;
 
     # xdim, ydim, kbytes of the image or movie
     if ($type == $TYPE_IMAGE) {
-	my ($x,$y) = imgsize ("$self->{destination_dir}$filename") ;
-	$entry->{xdim} = $x ;
-	$entry->{ydim} = $y ;
 	# initialize here so that we can use it even when scaled are not used
-	$entry->{scaled_xdim} = $x ;
-	$entry->{scaled_ydim} = $y ;
+	$entry->{scaled_xdim} = $entry->{xdim} ;
+	$entry->{scaled_ydim} = $entry->{ydim} ;
     }
     if ($type == $TYPE_IMAGE or $type == $TYPE_MOVIE or $type == $TYPE_FILE) {
-	my $kbytes = (-s "$self->{destination_dir}$filename") >> 10 ;
+	my $kbytes = (-s $real_filename) >> 10 ;
 	$entry->{kbytes} = $kbytes ;
 	# initialize here so that we can use it even when scaled are not used
 	$entry->{scaled_kbytes} = $kbytes ;
@@ -543,35 +546,49 @@ sub fill_file_entry {
 	$entry->{dimstring} = "" ;
     }
 
+    ####################################
     # thumbnail, its url and dimensions
     my $thumb_filename = find_user_thumbnail ($entry) ;
     if ($thumb_filename) {
 	# there's a user provided thumbnail, just use it
 
+	# cache real thumb filename for later
+	my $real_thumb_filename = "$self->{destination_dir}$self->{local_llgal_dir}/$thumb_filename" ;
+
 	$entry->{thumb_filename} = "$self->{local_llgal_dir}/$thumb_filename" ;
 	$entry->{thumb_url} = "$local_llgal_url/". make_safe_url_nowarn ($thumb_filename) ;
 
 	# thumbnail dimensions
-	my ($x, $y) = imgsize ("$self->{destination_dir}$self->{local_llgal_dir}/$thumb_filename") ;
-	if ($y > $opts->{thumbnail_height_max}) {
-	    $x = $x * ($opts->{thumbnail_height_max} / $y) ;
-	    $y = $opts->{thumbnail_height_max} ;
-	}
-	if ($opts->{thumbnail_width_max} > 0 and $x > $opts->{thumbnail_width_max}) {
-	    $y = $y * ($opts->{thumbnail_width_max} / $x) ;
-	    $x = $opts->{thumbnail_width_max} ;
+	my ($tx, $ty) = imgsize ($real_thumb_filename) ;
+
+	# check thumbnail validity
+	if (not defined $tx or not defined $ty) {
+	    $messages->warning ("Bad user-given thumbnail file '$real_thumb_filename', cannot retrieve its dimensions, ignoring it.") ;
+	    goto NO_USER_THUMB ;
 	}
 
-	($entry->{thumb_xdim},$entry->{thumb_ydim}) = ($x, $y) ;
+	# resize in the gallery if necessary
+	if ($ty > $opts->{thumbnail_height_max}) {
+	    $tx = $tx * ($opts->{thumbnail_height_max} / $ty) ;
+	    $ty = $opts->{thumbnail_height_max} ;
+	}
+	if ($opts->{thumbnail_width_max} > 0 and $tx > $opts->{thumbnail_width_max}) {
+	    $ty = $ty * ($opts->{thumbnail_width_max} / $tx) ;
+	    $tx = $opts->{thumbnail_width_max} ;
+	}
+
+	# store values
+	($entry->{thumb_xdim},$entry->{thumb_ydim}) = ($tx, $ty) ;
 
 	# dimstring
 	if ($opts->{show_dimensions}) {
-	    $entry->{thumb_dimstring} = "(${x}x${y})" ;
+	    $entry->{thumb_dimstring} = "(${tx}x${ty})" ;
 	} else {
 	    $entry->{thumb_dimstring} = "" ;
 	}
 
     } elsif ($type == $TYPE_IMAGE) {
+     NO_USER_THUMB:
 	# no user provided thumbnail, generate one
 
 	# filename and url
@@ -580,16 +597,17 @@ sub fill_file_entry {
 	$entry->{thumb_filename} = "$self->{local_llgal_dir}/$thumb_filename" ;
 	$entry->{thumb_url} = "$local_llgal_url/". make_safe_url_nowarn ($thumb_filename) ;
 
-	# if the thumbnail does not exist, or is older than the image, or regeneration is forced
+	# cache real thumb filename for later
 	my $real_thumb_filename = "$self->{destination_dir}$entry->{thumb_filename}" ;
+
+	# if the thumbnail does not exist, or is older than the image, or regeneration is forced
 	if ((! -e $real_thumb_filename)
 	    or (-M $real_thumb_filename) > (-M $real_filename)
 	    or $opts->{force_image_regeneration}) {
 	    my ($status, @output) ;
 	    # only scale down, never up.
-	    my ($x,$y) = imgsize ($real_filename) ;
-	    if ($y <= $opts->{thumbnail_height_max}
-		and ($opts->{thumbnail_width_max} <= 0 or $x <= $opts->{thumbnail_width_max})) {
+	    if ($entry->{ydim} <= $opts->{thumbnail_height_max}
+		and ($opts->{thumbnail_width_max} <= 0 or $entry->{xdim} <= $opts->{thumbnail_width_max})) {
 		# the original is not large enough, keep it
 		$entry->{thumb_filename} = $entry->{filename} ;
 		$entry->{thumb_url} = $entry->{url} ;
@@ -613,11 +631,22 @@ sub fill_file_entry {
 		}
 	    }
 	}
-	($entry->{thumb_xdim},$entry->{thumb_ydim}) = imgsize ($real_thumb_filename) ;
+
+	# thumbnail dimensions
+	my ($tx,$ty) = imgsize ($real_thumb_filename) ;
+
+	# check thumbnail validity
+	if (not defined $tx or not defined $ty) {
+	    $messages->warning ("Bad thumbnail file '$real_thumb_filename', cannot retrieve its dimensions, skipping this entry.") ;
+	    return undef ;
+	}
+
+	# store values
+	($entry->{thumb_xdim},$entry->{thumb_ydim}) = ($tx,$ty) ;
 
 	# dimstring
 	if ($opts->{show_dimensions}) {
-	    $entry->{thumb_dimstring} = "($entry->{thumb_xdim}x$entry->{thumb_ydim})" ;
+	    $entry->{thumb_dimstring} = "(${tx}x${ty})" ;
 	} else {
 	    $entry->{thumb_dimstring} = "" ;
 	}
@@ -632,41 +661,56 @@ sub fill_file_entry {
     }
 
     if (!$opts->{make_no_slides}) {
+	#######################################
 	# scaled image, its url and dimensions
 
 	my $scaled_filename = find_user_scaled ($entry) ;
 	if ($scaled_filename) {
 	    # there's a user provided scaled, just use it
 
+	    # cache real thumb filename for later
+	    my $real_scaled_filename = "$self->{destination_dir}$self->{local_llgal_dir}/$scaled_filename" ;
+
 	    $entry->{scaled_filename} = "$self->{local_llgal_dir}/$scaled_filename" ;
 	    $entry->{scaled_url} = "$local_llgal_url/". make_safe_url_nowarn ($scaled_filename) ;
 
 	    # scaled image dimensions
-	    my ($x, $y) = imgsize ("$self->{destination_dir}$self->{local_llgal_dir}/$scaled_filename") ;
-	    if ($opts->{slide_height_max} > 0 and $y > $opts->{slide_height_max}) {
-		$x = $x * ($opts->{slide_height_max} / $y) ;
-		$y = $opts->{slide_height_max} ;
-	    }
-	    if ($opts->{slide_width_max} > 0 and $x > $opts->{slide_width_max}) {
-		$y = $y * ($opts->{slide_width_max} / $x) ;
-		$x = $opts->{slide_width_max} ;
+	    my ($sx, $sy) = imgsize ($real_scaled_filename) ;
+	    my $skbytes = (-s $real_scaled_filename) >> 10 ;
+
+	    # check scaled validity
+	    if (not defined $sx or not defined $sy) {
+		$messages->warning ("Bad user-given scaled image file '$real_scaled_filename', cannot retrieve its dimensions, ignoring it.") ;
+		goto NO_USER_SCALED ;
 	    }
 
-	    ($entry->{scaled_xdim},$entry->{scaled_ydim}) = ($x, $y) ;
-	    $entry->{scaled_kbytes} = (-s "$self->{destination_dir}$self->{local_llgal_dir}/$scaled_filename") >> 10 ;
+	    # resize in the gallery if necessary
+	    if ($opts->{slide_height_max} > 0 and $sy > $opts->{slide_height_max}) {
+		$sx = $sx * ($opts->{slide_height_max} / $sy) ;
+		$sy = $opts->{slide_height_max} ;
+	    }
+	    if ($opts->{slide_width_max} > 0 and $sx > $opts->{slide_width_max}) {
+		$sy = $sy * ($opts->{slide_width_max} / $sx) ;
+		$sx = $opts->{slide_width_max} ;
+	    }
+
+	    # store values
+	    ($entry->{scaled_xdim},$entry->{scaled_ydim}) = ($sx, $sy) ;
+	    $entry->{scaled_kbytes} = $skbytes ;
 
 	    # dimstring
 	    if ($opts->{show_dimensions} and $opts->{show_size}) {
-		$entry->{scaled_dimstring} = "($entry->{scaled_xdim}x$entry->{scaled_ydim}, $entry->{scaled_kbytes}$opts->{show_size_unit})" ;
+		$entry->{scaled_dimstring} = "(${sx}x${sy}, ${skbytes}$opts->{show_size_unit})" ;
 	    } elsif ($opts->{show_size}) {
-		$entry->{scaled_dimstring} = "($entry->{scaled_kbytes}$opts->{show_size_unit})" ;
+		$entry->{scaled_dimstring} = "(${skbytes}$opts->{show_size_unit})" ;
 	    } elsif ($opts->{show_dimensions}) {
-		$entry->{scaled_dimstring} = "($entry->{scaled_xdim}x$entry->{scaled_ydim})" ;
+		$entry->{scaled_dimstring} = "(${sx}x${sy})" ;
 	    } else {
 		$entry->{scaled_dimstring} = "" ;
 	    }
 
 	} elsif ($type == $TYPE_IMAGE and ($opts->{slide_width_max} > 0 or $opts->{slide_height_max} > 0)) {
+	 NO_USER_SCALED:
 	    # no user provided scaled, generate one
 
 	    # filename and url
@@ -675,16 +719,17 @@ sub fill_file_entry {
 	    $entry->{scaled_filename} = "$self->{local_llgal_dir}/$scaled_filename" ;
 	    $entry->{scaled_url} = "$local_llgal_url/". make_safe_url_nowarn ($scaled_filename) ;
 
-	    # if the thumbnail does not exist, or is older than the image, or regeneration is forced
+	    # cache real thumb filename for later
 	    my $real_scaled_filename = "$self->{destination_dir}$entry->{scaled_filename}" ;
+
+	    # if the thumbnail does not exist, or is older than the image, or regeneration is forced
 	    if ((! -e $real_scaled_filename)
 		or (-M $real_scaled_filename) > (-M $real_filename)
 		or $opts->{force_image_regeneration}) {
 		my ($status, @output) ;
 		# only scale down, never up.
-		my ($x,$y) = imgsize ($real_filename) ;
-		if (($opts->{slide_width_max} <= 0 or $x <= $opts->{slide_width_max})
-		    and ($opts->{slide_height_max} <= 0 or $y <= $opts->{slide_height_max})) {
+		if (($opts->{slide_width_max} <= 0 or $entry->{xdim} <= $opts->{slide_width_max})
+		    and ($opts->{slide_height_max} <= 0 or $entry->{ydim} <= $opts->{slide_height_max})) {
 		    # the original is not large enough, keep it
 		    $entry->{scaled_filename} = $entry->{filename} ;
 		    $entry->{scaled_url} = $entry->{url} ;
@@ -708,16 +753,28 @@ sub fill_file_entry {
 		    }
 		}
 	    }
-	    ($entry->{scaled_xdim},$entry->{scaled_ydim}) = imgsize ($real_scaled_filename) ;
-	    $entry->{scaled_kbytes} = (-s $real_scaled_filename) >> 10 ;
+
+	    # scaled dimensions
+	    my ($sx,$sy) = imgsize ($real_scaled_filename) ;
+	    my $skbytes = (-s $real_scaled_filename) >> 10 ;
+
+	    # check scaled validity
+	    if (not defined $sx or not defined $sy) {
+		$messages->warning ("Bad scaled image file '$real_scaled_filename', cannot retrieve its dimensions, skipping this entry.") ;
+		return undef ;
+	    }
+
+	    # store values
+	    ($entry->{scaled_xdim},$entry->{scaled_ydim}) = ($sx,$sy) ;
+	    $entry->{scaled_kbytes} = $skbytes ;
 
 	    # dimstring
 	    if ($opts->{show_dimensions} and $opts->{show_size}) {
-		$entry->{scaled_dimstring} = "($entry->{scaled_xdim}x$entry->{scaled_ydim}, $entry->{scaled_kbytes}$opts->{show_size_unit})" ;
+		$entry->{scaled_dimstring} = "(${sx}x${sy}, ${skbytes}$opts->{show_size_unit})" ;
 	    } elsif ($opts->{show_size}) {
-		$entry->{scaled_dimstring} = "($entry->{scaled_kbytes}$opts->{show_size_unit})" ;
+		$entry->{scaled_dimstring} = "(${skbytes}$opts->{show_size_unit})" ;
 	    } elsif ($opts->{show_dimensions}) {
-		$entry->{scaled_dimstring} = "($entry->{scaled_xdim}x$entry->{scaled_ydim})" ;
+		$entry->{scaled_dimstring} = "(${sx}x${sy})" ;
 	    } else {
 		$entry->{scaled_dimstring} = "" ;
 	    }
@@ -2156,7 +2213,7 @@ sub make_www_rights {
 	# target
 	if ($type == $TYPE_DIR) {
 	    make_readable_and_traversable "$self->{destination_dir}$entry->{filename}" ;
-	} elsif ($type == $TYPE_MOVIE or $type == $TYPE_FILE) {
+	} elsif ($type == $TYPE_IMAGE or $type == $TYPE_MOVIE or $type == $TYPE_FILE) {
 	    make_readable "$self->{destination_dir}$entry->{filename}" ;
 	}
 
@@ -2275,7 +2332,7 @@ sub main_process {
     # set the locale before getting the defaults
     if (defined $opts_without_defaults->{language}) {
 	$messages->warning ("The LANGUAGE environment variable ($ENV{LANGUAGE}) overrides your language configuration ($opts_without_defaults->{language}).")
-	    if exists $ENV{LANGUAGE} ;
+	    if exists $ENV{LANGUAGE} and $ENV{LANGUAGE} ;
 	setlocale (LC_ALL, $opts_without_defaults->{language}) ;
     }
 

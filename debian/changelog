@@ -1,3 +1,11 @@
+llgal (0.13.13-1) unstable; urgency=low
+
+  * New upstream release.
+  * Do not call identify on every image, check their validity by looking
+    at their dimensions instead (closes: #431939).
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Sun, 08 Jul 2007 16:47:16 +0200
+
 llgal (0.13.12-1) unstable; urgency=low
 
   * New upstream release.
