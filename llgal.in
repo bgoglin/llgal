@@ -415,7 +415,7 @@ sub create_file_entry {
 	my ($x,$y) ;
 
 	# generate the list of exif_tags only once, empty if $opts->{show_all_exif_tags}
-	if (not exists $opts->{exif_tags_list}) {
+	if (not exists $opts->{cached_exif_tags_list}) {
 	    my @exif_tags = () ;
 	    if (!$opts->{show_all_exif_tags}) {
 		# use the user provided Exif tags, and add ImageWidth/Height for ourself
@@ -425,11 +425,11 @@ sub create_file_entry {
 		@exif_tags = (@exif_tags, 'UserComment', 'Comment')
 		    if $opts->{make_caption_from_image_comment} ;
 	    }
-	    @{$opts->{exif_tags_list}} = @exif_tags ;
+	    @{$opts->{cached_exif_tags_list}} = @exif_tags ;
 	}
 
 	# if showing all, or showing at least one
-	if ($opts->{show_all_exif_tags} or @{$opts->{exif_tags_list}}) {
+	if ($opts->{show_all_exif_tags} or @{$opts->{cached_exif_tags_list}}) {
 	    if (not defined $opts->{exif_info}) {
 		# only load Image::ExifTool when really required
 		if (not eval { require Image::ExifTool ; }) {
@@ -445,7 +445,7 @@ sub create_file_entry {
 	    }
 
 	    # do the actual exif tag retrieval
-	    my $exif_infos = $opts->{exiftool}->ImageInfo ($real_filename, @{$opts->{exif_tags_list}}) ;
+	    my $exif_infos = $opts->{exiftool}->ImageInfo ($real_filename, @{$opts->{cached_exif_tags_list}}) ;
 	    $entry->{exif_infos} = $exif_infos ;
 
 	    # get image dimensions
