@@ -2156,7 +2156,7 @@ sub make_www_rights {
 	# target
 	if ($type == $TYPE_DIR) {
 	    make_readable_and_traversable "$self->{destination_dir}$entry->{filename}" ;
-	} elsif ($type == $TYPE_MOVIE or $type == $TYPE_FILE) {
+	} elsif ($type == $TYPE_IMAGE or $type == $TYPE_MOVIE or $type == $TYPE_FILE) {
 	    make_readable "$self->{destination_dir}$entry->{filename}" ;
 	}
 

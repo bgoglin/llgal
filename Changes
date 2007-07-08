@@ -1,4 +1,5 @@
 
+  * Make sure --www changes the access rights of original images too.
   * Do not warn when the LANGUAGE environment variable is defined
     but empty.
 
