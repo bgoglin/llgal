@@ -511,12 +511,9 @@ sub fill_file_entry {
 
     # xdim, ydim, kbytes of the image or movie
     if ($type == $TYPE_IMAGE) {
-	my ($x,$y) = imgsize ("$self->{destination_dir}$filename") ;
-	$entry->{xdim} = $x ;
-	$entry->{ydim} = $y ;
 	# initialize here so that we can use it even when scaled are not used
-	$entry->{scaled_xdim} = $x ;
-	$entry->{scaled_ydim} = $y ;
+	$entry->{scaled_xdim} = $entry->{xdim} ;
+	$entry->{scaled_ydim} = $entry->{ydim} ;
     }
     if ($type == $TYPE_IMAGE or $type == $TYPE_MOVIE or $type == $TYPE_FILE) {
 	my $kbytes = (-s "$self->{destination_dir}$filename") >> 10 ;
@@ -590,9 +587,8 @@ sub fill_file_entry {
 	    or $opts->{force_image_regeneration}) {
 	    my ($status, @output) ;
 	    # only scale down, never up.
-	    my ($x,$y) = imgsize ($real_filename) ;
-	    if ($y <= $opts->{thumbnail_height_max}
-		and ($opts->{thumbnail_width_max} <= 0 or $x <= $opts->{thumbnail_width_max})) {
+	    if ($entry->{ydim} <= $opts->{thumbnail_height_max}
+		and ($opts->{thumbnail_width_max} <= 0 or $entry->{xdim} <= $opts->{thumbnail_width_max})) {
 		# the original is not large enough, keep it
 		$entry->{thumb_filename} = $entry->{filename} ;
 		$entry->{thumb_url} = $entry->{url} ;
@@ -617,6 +613,7 @@ sub fill_file_entry {
 	    }
 	}
 	($entry->{thumb_xdim},$entry->{thumb_ydim}) = imgsize ($real_thumb_filename) ;
+	# TODO: check validity
 
 	# dimstring
 	if ($opts->{show_dimensions}) {
@@ -685,9 +682,8 @@ sub fill_file_entry {
 		or $opts->{force_image_regeneration}) {
 		my ($status, @output) ;
 		# only scale down, never up.
-		my ($x,$y) = imgsize ($real_filename) ;
-		if (($opts->{slide_width_max} <= 0 or $x <= $opts->{slide_width_max})
-		    and ($opts->{slide_height_max} <= 0 or $y <= $opts->{slide_height_max})) {
+		if (($opts->{slide_width_max} <= 0 or $entry->{xdim} <= $opts->{slide_width_max})
+		    and ($opts->{slide_height_max} <= 0 or $entry->{ydim} <= $opts->{slide_height_max})) {
 		    # the original is not large enough, keep it
 		    $entry->{scaled_filename} = $entry->{filename} ;
 		    $entry->{scaled_url} = $entry->{url} ;
@@ -712,6 +708,7 @@ sub fill_file_entry {
 		}
 	    }
 	    ($entry->{scaled_xdim},$entry->{scaled_ydim}) = imgsize ($real_scaled_filename) ;
+	    # TODO: check validity
 	    $entry->{scaled_kbytes} = (-s $real_scaled_filename) >> 10 ;
 
 	    # dimstring

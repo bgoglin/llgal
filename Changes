@@ -5,6 +5,7 @@
   * Retrieve image dimensions while listing entries, either with
     ExifTool is needed for something else, or with Image::Size,
     and check their validity.
+  * Retrieve original image dimensions only once.
   * Generate the internal list of Exif tags only once.
   * Make sure --www changes the access rights of original images too.
   * Do not warn when the LANGUAGE environment variable is defined
