@@ -434,14 +434,18 @@ sub create_file_entry {
 	$entry->{gallery_name} = pop @parts ;
     }
 
-    # for images, extract required exif infos
+    # for images, we need at least the dimensions (and check their validity) and possibly some Exif info
+    # if some Exif are needed, retrieve dimensions with ExifTool too
+    # if not, just retrieve dimensions with imgsize
     if ($type == $TYPE_IMAGE) {
+	my ($x,$y) ;
 
 	# generate the list of exif_tags only once, empty if $opts->{show_all_exif_tags}
 	if (not exists $opts->{exif_tags_list}) {
 	    my @exif_tags = () ;
 	    if (!$opts->{show_all_exif_tags}) {
-		@exif_tags = @{$opts->{show_exif_tags}} ;
+		# use the user provided Exif tags, and add ImageWidth/Height for ourself
+		@exif_tags = ('ImageWidth', 'ImageHeight', @{$opts->{show_exif_tags}}) ;
 		@exif_tags = (@exif_tags, 'DateTimeOriginal')
 		    if $opts->{make_caption_from_image_timestamp} ;
 		@exif_tags = (@exif_tags, 'UserComment', 'Comment')
@@ -467,8 +471,27 @@ sub create_file_entry {
 	    }
 
 	    # do the actual exif tag retrieval
-	    $entry->{exif_infos} = $opts->{exiftool}->ImageInfo ("$self->{destination_dir}$filename", @{$opts->{exif_tags_list}}) ;
+	    my $exif_infos = $opts->{exiftool}->ImageInfo ("$self->{destination_dir}$filename", @{$opts->{exif_tags_list}}) ;
+	    $entry->{exif_infos} = $exif_infos ;
+
+	    # get image dimensions
+	    $x = $exif_infos->{ImageWidth} ;
+	    $y = $exif_infos->{ImageHeight} ;
+
+	} else {
+
+	    # if not using Exif at all, just retrieve dimensions for ourself
+	    ($x,$y) = imgsize ("$self->{destination_dir}$filename") ;
 	}
+
+	# check dimensions validity
+	if (not defined $x or not defined $y) {
+	    $messages->warning ("Bad image file '$filename', cannot retrieve its dimensions, skipping it.") ;
+	    return undef ;
+	}
+
+	$entry->{xdim} = $x ;
+	$entry->{ydim} = $y ;
     }
 
     # the caption (will be web-safe after caption file generation)
