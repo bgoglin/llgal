@@ -241,28 +241,6 @@ sub check_file {
     return 0 ;
 }
 
-sub check_image {
-    my $filename = shift ;
-    my ($status, @output) = Llgal::Utils::system_with_output
-	( "check \"$filename\" validity",
-	  "identify", $filename ) ;
-    if ($status == -1) {
-	$messages->warning (@output) ;
-	$messages->abort_percentage ;
-	die "Failed to check \"$filename\" validity.\n" ;
-    } elsif ($status) {
-	# do not show actual identify output
-	$messages->warning ("Bad image file '$filename', skipping it.") ;
-	return -1 ;
-    }
-    return 0 ;
-}
-
-sub check_movie {
-    # TODO
-    return 0 ;
-}
-
 ###################################################################################
 # returns a filename that the user provided in the llgal directory
 # to be used as a thumbnail or scaled image
@@ -391,13 +369,6 @@ sub create_file_entry {
     # check file
     return undef
 	if check_file ("$self->{destination_dir}$filename") < 0 ;
-    if ($type == $TYPE_IMAGE) {
-	return undef
-	    if check_image ("$self->{destination_dir}$filename") < 0 ;
-    } elsif ($type == $TYPE_MOVIE) {
-	return undef
-	    if check_movie ("$self->{destination_dir}$filename") < 0 ;
-    }
 
     # set the type
     $entry->{type} = $type ;
