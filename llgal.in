@@ -436,15 +436,22 @@ sub create_file_entry {
 
     # for images, extract required exif infos
     if ($type == $TYPE_IMAGE) {
-	my @exif_tags = () ;
-	if (!$opts->{show_all_exif_tags}) {
-	    @exif_tags = @{$opts->{show_exif_tags}} ;
-	    @exif_tags = (@exif_tags, 'DateTimeOriginal')
-		if $opts->{make_caption_from_image_timestamp} ;
-	    @exif_tags = (@exif_tags, 'UserComment', 'Comment')
-		if $opts->{make_caption_from_image_comment} ;
+
+	# generate the list of exif_tags only once, empty if $opts->{show_all_exif_tags}
+	if (not exists $opts->{exif_tags_list}) {
+	    my @exif_tags = () ;
+	    if (!$opts->{show_all_exif_tags}) {
+		@exif_tags = @{$opts->{show_exif_tags}} ;
+		@exif_tags = (@exif_tags, 'DateTimeOriginal')
+		    if $opts->{make_caption_from_image_timestamp} ;
+		@exif_tags = (@exif_tags, 'UserComment', 'Comment')
+		    if $opts->{make_caption_from_image_comment} ;
+	    }
+	    @{$opts->{exif_tags_list}} = @exif_tags ;
 	}
-	if (@exif_tags or $opts->{show_all_exif_tags}) {
+
+	# if showing all, or showing at least one
+	if ($opts->{show_all_exif_tags} or @{$opts->{exif_tags_list}}) {
 	    if (not defined $opts->{exif_info}) {
 		# only load Image::ExifTool when really required
 		if (not eval { require Image::ExifTool ; }) {
@@ -453,12 +460,14 @@ sub create_file_entry {
 		}
 		# ExifTool initialization
 		$opts->{exiftool} = new Image::ExifTool;
-		# Accept unknown tags, just in case...
+		# accept unknown tags, just in case...
 		$opts->{exiftool}->Options(Unknown => 1) ;
-		# DateFormat should be initialized with whatever the user said to --ctf
+		# dateFormat should be initialized with whatever the user said to --ctf
 		$opts->{exiftool}->Options(DateFormat => $opts->{timestamp_format_in_caption}) ;
 	    }
-	    $entry->{exif_infos} = $opts->{exiftool}->ImageInfo ("$self->{destination_dir}$filename", @exif_tags) ;
+
+	    # do the actual exif tag retrieval
+	    $entry->{exif_infos} = $opts->{exiftool}->ImageInfo ("$self->{destination_dir}$filename", @{$opts->{exif_tags_list}}) ;
 	}
     }
 
