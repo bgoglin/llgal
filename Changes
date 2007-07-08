@@ -2,14 +2,14 @@ llgal (0.13.13)
 
   * Improve the speed to 'Listing entries...' dramatically
     (reported by Martin Ferrari in Debian bug #431939):
-    + Retrieve image dimensions while listing entries, either with Exiftool
+    + Retrieve image dimensions while listing entries, either with ExifTool
       if it is already needed for something else, or with Image::Size.
     + Check image validity by looking at its dimensions instead of calling
       the very slow 'identify' command.
-  * Check the validity of thumbnail and scaled images too, also by looking
+  * Check the validity of thumbnails and scaled images too, also by looking
     at their dimensions:
     + bad user-given thumbnails or scaled images are ignored;
-    + bad llgal-generated ones lead to skipping the whole entry.
+    + bad llgal-generated ones lead to skipping their whole entry.
   * A couple minor optimizations by caching values computed multiple times
     (image dimensions, filenames, exif tags list, ...).
   * Make sure --www changes the access rights of original images too.
