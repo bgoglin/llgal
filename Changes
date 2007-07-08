@@ -5,6 +5,9 @@
   * Retrieve image dimensions while listing entries, either with
     ExifTool is needed for something else, or with Image::Size,
     and check their validity.
+  * Check thumbnail and scaled image validity when retrieving their
+    dimensions too, so that bad user-given ones are ignored, while
+    bad generated ones lead to skip the whole entry.
   * Retrieve original image dimensions only once.
   * A couple minor optimizations by caching values computed multiple times.
   * Make sure --www changes the access rights of original images too.
