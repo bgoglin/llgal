@@ -366,9 +366,12 @@ sub create_file_entry {
     my $linktext = shift ;
     my $caption = shift ;
 
+    # cache real filename for later
+    my $real_filename = "$self->{destination_dir}$filename" ;
+
     # check file
     return undef
-	if check_file ("$self->{destination_dir}$filename") < 0 ;
+	if check_file ($real_filename) < 0 ;
 
     # set the type
     $entry->{type} = $type ;
@@ -442,7 +445,7 @@ sub create_file_entry {
 	    }
 
 	    # do the actual exif tag retrieval
-	    my $exif_infos = $opts->{exiftool}->ImageInfo ("$self->{destination_dir}$filename", @{$opts->{exif_tags_list}}) ;
+	    my $exif_infos = $opts->{exiftool}->ImageInfo ($real_filename, @{$opts->{exif_tags_list}}) ;
 	    $entry->{exif_infos} = $exif_infos ;
 
 	    # get image dimensions
@@ -452,7 +455,7 @@ sub create_file_entry {
 	} else {
 
 	    # if not using Exif at all, just retrieve dimensions for ourself
-	    ($x,$y) = imgsize ("$self->{destination_dir}$filename") ;
+	    ($x,$y) = imgsize ($real_filename) ;
 	}
 
 	# check dimensions validity
@@ -506,7 +509,7 @@ sub fill_file_entry {
     my $type = $entry->{type} ;
     my $filename = $entry->{filename} ;
 
-    # keep real filename for later
+    # cache real filename for later
     my $real_filename = "$self->{destination_dir}$filename" ;
 
     # xdim, ydim, kbytes of the image or movie
@@ -516,7 +519,7 @@ sub fill_file_entry {
 	$entry->{scaled_ydim} = $entry->{ydim} ;
     }
     if ($type == $TYPE_IMAGE or $type == $TYPE_MOVIE or $type == $TYPE_FILE) {
-	my $kbytes = (-s "$self->{destination_dir}$filename") >> 10 ;
+	my $kbytes = (-s $real_filename) >> 10 ;
 	$entry->{kbytes} = $kbytes ;
 	# initialize here so that we can use it even when scaled are not used
 	$entry->{scaled_kbytes} = $kbytes ;

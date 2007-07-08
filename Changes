@@ -6,7 +6,7 @@
     ExifTool is needed for something else, or with Image::Size,
     and check their validity.
   * Retrieve original image dimensions only once.
-  * Generate the internal list of Exif tags only once.
+  * A couple minor optimizations by caching values computed multiple times.
   * Make sure --www changes the access rights of original images too.
   * Do not warn when the LANGUAGE environment variable is defined
     but empty.
