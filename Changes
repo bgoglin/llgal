@@ -1,3 +1,10 @@
+llgal (0.13.14)
+
+  * Add German translation, thanks Thomas Heßling!
+  * Add Italian translation, thanks Gianelle Alessio!
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Sun, 18 Nov 2007 16:20:00 +0100
+
 llgal (0.13.13)
 
   * Improve the speed to 'Listing entries...' dramatically
