@@ -2035,54 +2035,61 @@ sub generate_index {
 		print IXW "      </a>\n" ;
 		print IXW "    </td>\n" ;
 
-	    } elsif ($entry->{thumb_url}) {
-		# not IMG, but with a user-given thumbnail
+	    } else {
+		my $link = $entry->{url} ;
+		# if making slide and not pointing to target, the thumbnail points to the slide
+		if (!$opts->{make_no_slides}
+		    and (
+			 ($type == $TYPE_MOVIE and !$opts->{MVI_thumb_link_to_target})
+			 or ($type == $TYPE_FILE and !$opts->{FIL_thumb_link_to_target})
+			 or ($type == $TYPE_LINK and !$opts->{LNK_thumb_link_to_target})
+			 or ($type == $TYPE_DIR and !$opts->{DIR_thumb_link_to_target})
+			 or ($type == $TYPE_TEXT)
+			 )
+		    ) {
+		    $link = $entry->{slide_url} ;
+		}
 
-		print IXW "    <td class=\"thumb\" style=\"width: ${box_width}px; height: ${box_height}px;\">\n" ;
-		if ($type == $TYPE_TEXT) {
-		    # TXT with a thumbnail ? ok...
-		    if ($opts->{make_no_slides}) {
+		if ($entry->{thumb_url}) {
+		    # not IMG, but with a user-given thumbnail
+
+		    print IXW "    <td class=\"thumb\" style=\"width: ${box_width}px; height: ${box_height}px;\">\n" ;
+
+		    if ($type == $TYPE_TEXT and $opts->{make_no_slides}) {
 			# thumbnail without any link
 			print IXW "      <img src=\"$entry->{thumb_url}\" "
-				."title=\"$title $entry->{scaled_dimstring}\" "
-				."style=\"width: ${thumb_width}px; height: ${thumb_height}px;\" "
-				."alt=\"$entry->{linktext} $entry->{thumb_dimstring}\" />\n" ;
-
-		    } else {
-			# thumbnail linking to the TXT slide
-			print IXW "      <a href=\"$entry->{slide_url}\" "
-				."title=\"$title $entry->{scaled_dimstring}\">\n" ;
-			print IXW "        <img src=\"$entry->{thumb_url}\" "
-				."style=\"width: ${thumb_width}px; height: ${thumb_height}px;\" "
-				."alt=\"$entry->{linktext} $entry->{thumb_dimstring}\" />\n" ;
-			print IXW "      </a>" ;
-		    }
-		} else {
-		    # other types directly link to the target instead of the slide
-		    print IXW "      <a href=\"$entry->{url}\" "
-		    	."title=\"$title $entry->{scaled_dimstring}\">\n" ;
-		    print IXW "        <img src=\"$entry->{thumb_url}\" "
-			."style=\"width: ${thumb_width}px; height: ${thumb_height}px;\" "
-			."alt=\"$entry->{linktext} $entry->{thumb_dimstring}\" />\n" ;
-		    print IXW "      </a>\n" ;
-		}
-		print IXW "    </td>\n" ;
-	    } else {
-		# not IMG, without thumbnail
-		print IXW "    <td class=\"text-thumb\" style=\"width: ${box_width}px; height: ${box_height}px;\">\n" ;
-		if ($type == $TYPE_TEXT) {
-		    if ($opts->{make_no_slides}) {
-			# thumbnail with basic text and that's it
-			print IXW "      $entry->{linktext}\n" ;
+			    ."title=\"$title $entry->{scaled_dimstring}\" "
+			    ."style=\"width: ${thumb_width}px; height: ${thumb_height}px;\" "
+			    ."alt=\"$entry->{linktext} $entry->{thumb_dimstring}\" />\n" ;
 		    } else {
 			# thumbnail linking to the slide
-			print IXW "      <a href=\"$entry->{slide_url}\" title=\"$title\">$entry->{linktext}</a>\n" ;
+			print IXW "      <a href=\"$link\" "
+			    ."title=\"$title $entry->{scaled_dimstring}\">\n" ;
+			print IXW "        <img src=\"$entry->{thumb_url}\" "
+			    ."style=\"width: ${thumb_width}px; height: ${thumb_height}px;\" "
+			    ."alt=\"$entry->{linktext} $entry->{thumb_dimstring}\" />\n" ;
+			print IXW "      </a>" ;
+
 		    }
+
+		    print IXW "    </td>\n" ;
+
 		} else {
-		    # thumbnail directly linking to the target
-		    print IXW "      <a href=\"$entry->{url}\" title=\"$title $entry->{dimstring}\">$entry->{linktext}</a>\n" ;
+		    # not IMG, without thumbnail
+
+		    print IXW "    <td class=\"text-thumb\" style=\"width: ${box_width}px; height: ${box_height}px;\">\n" ;
+
+		    if ($type == $TYPE_TEXT and $opts->{make_no_slides}) {
+			# thumbnail with basic text and that's it
+			print IXW "      $entry->{linktext}\n" ;
+
+		    } else {
+			# thumbnail directly linking to the target
+			print IXW "      <a href=\"$link\" title=\"$title $entry->{dimstring}\">$entry->{linktext}</a>\n" ;
+		    }
+
+		    print IXW "    </td>\n" ;
 		}
-		print IXW "    </td>\n" ;
 	    }
 
 	    $messages->update_percentage ($i+$j+1) ;

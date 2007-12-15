@@ -95,6 +95,10 @@ my $normal_opts_type = {
     thumbnail_width_max => $OPT_IS_NUMERIC, # > 0, 0 for unlimited, -1 for default
     show_caption_under_thumbnails => $OPT_IS_NUMERIC,
     show_film_effect => $OPT_IS_NUMERIC,
+    MVI_link_to_target => $OPT_IS_NUMERIC,
+    FIL_link_to_target => $OPT_IS_NUMERIC,
+    DIR_link_to_target => $OPT_IS_NUMERIC,
+    LNK_link_to_target => $OPT_IS_NUMERIC,
 # Slides
     make_no_slides => $OPT_IS_NUMERIC,
     make_slide_filename_from_filename => $OPT_IS_NUMERIC,
@@ -292,6 +296,11 @@ sub add_defaults {
 	show_caption_under_thumbnails => 0,
 # show the film effect in the index of thumbnails (--fe)
 	show_film_effect => 0,
+# link thumbnails to target instead of slide
+	MVI_link_to_target => 1,
+	FIL_link_to_target => 1,
+	DIR_link_to_target => 1,
+	LNK_link_to_target => 1,
 
 # Slides
 # make no slides, just thumbnail links to images (-s)

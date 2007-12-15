@@ -1,3 +1,9 @@
+  * Thumbnails now always point to the slide, even if it just contains
+    a link to a file, directory, movie or URL.
+    + Add MVI/FIL/DIR/LNK_link_to_target options to revert to the previous
+      behavior (thumbnail pointing to the target).
+
+
 llgal (0.13.14)
 
   * Add German translation, thanks Thomas Heßling!

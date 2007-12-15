@@ -129,6 +129,13 @@
 # Show a film effect in the index of thumbnails [--fe]
 # show_film_effect = 0
 
+# Make thumbnail links point to the target object instead of
+# the corresponding slide
+# MVI_link_to_target = 1
+# FIL_link_to_target = 1
+# DIR_link_to_target = 1
+# LNK_link_to_target = 1
+
 ##### Slides #####
 
 # Make no slides [-s]
