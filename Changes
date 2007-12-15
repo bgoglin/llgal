@@ -1,3 +1,5 @@
+llgal (0.13.15)
+
   * Thumbnails now always point to the slide, even if it just contains
     a link to a file, directory, movie or URL.
     + Add MVI/FIL/DIR/LNK_link_to_target options to revert to the previous
@@ -10,7 +12,10 @@
     + The index_title configuration options is replaced with
       index_title_default.
   * Do not escape URLs from LNK entries.
+  * Use internal Perl functions instead of calling external programs when
+    manipulating basic files.
 
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Sat, 15 Dec 2007 18:12:00 +0100
 
 llgal (0.13.14)
 
