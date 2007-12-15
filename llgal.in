@@ -2033,10 +2033,10 @@ sub generate_index {
 	    if (!$opts->{make_no_slides}
 		and (
 		     ($type == $TYPE_IMAGE)
-		     or ($type == $TYPE_MOVIE and !$opts->{MVI_thumb_link_to_target})
-		     or ($type == $TYPE_FILE and !$opts->{FIL_thumb_link_to_target})
-		     or ($type == $TYPE_LINK and !$opts->{LNK_thumb_link_to_target})
-		     or ($type == $TYPE_DIR and !$opts->{DIR_thumb_link_to_target})
+		     or ($type == $TYPE_MOVIE and !$opts->{MVI_link_to_target})
+		     or ($type == $TYPE_FILE and !$opts->{FIL_link_to_target})
+		     or ($type == $TYPE_LINK and !$opts->{LNK_link_to_target})
+		     or ($type == $TYPE_DIR and !$opts->{DIR_link_to_target})
 		     or ($type == $TYPE_TEXT)
 		     )
 		) {

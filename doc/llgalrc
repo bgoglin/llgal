@@ -131,10 +131,10 @@
 
 # Make thumbnail links point to the target object instead of
 # the corresponding slide
-# MVI_link_to_target = 1
-# FIL_link_to_target = 1
-# DIR_link_to_target = 1
-# LNK_link_to_target = 1
+# MVI_link_to_target = 0
+# FIL_link_to_target = 0
+# DIR_link_to_target = 0
+# LNK_link_to_target = 0
 
 ##### Slides #####
 

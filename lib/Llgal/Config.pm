@@ -297,10 +297,10 @@ sub add_defaults {
 # show the film effect in the index of thumbnails (--fe)
 	show_film_effect => 0,
 # link thumbnails to target instead of slide
-	MVI_link_to_target => 1,
-	FIL_link_to_target => 1,
-	DIR_link_to_target => 1,
-	LNK_link_to_target => 1,
+	MVI_link_to_target => 0,
+	FIL_link_to_target => 0,
+	DIR_link_to_target => 0,
+	LNK_link_to_target => 0,
 
 # Slides
 # make no slides, just thumbnail links to images (-s)
