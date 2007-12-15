@@ -3,6 +3,7 @@ Section: web
 Priority: optional
 Maintainer: Brice Goglin <bgoglin@debian.org>
 Build-Depends: debhelper (>= 4.0.2), quilt (>= 0.40)
+Homepage: http://home.gna.org/llgal/
 Standards-Version: 3.7.3
 
 Package: llgal
@@ -19,5 +20,3 @@ Description: Command-line online gallery generator
  The llgal interface is command line only. Its purpose is to generates
  nice web-pages quickly, using very simple but standard XHTML/CSS code,
  without requiring anything like php or javascript.
- .
-  Homepage: http://home.gna.org/llgal/
