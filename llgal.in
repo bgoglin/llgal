@@ -14,6 +14,7 @@ use Locale::gettext ;
 use POSIX qw (setlocale) ;
 use URI::Escape ;
 use Text::ParseWords ;
+use File::Compare ;
 
 Getopt::Long::Configure('noignorecase', 'noautoabbrev', 'bundling') ;
 STDOUT->autoflush("1") ;
@@ -100,15 +101,9 @@ sub clean_files {
 	    my @output ;
 	    # default is cleanall, which removes everything, as if file were not changed
 	    if (!$cleanall) {
-		($diff, @output) = Llgal::Utils::system_with_output
-		    ("compare $_ with its original",
-		     "cmp", "-s", "$self->{destination_dir}$self->{local_llgal_dir}/$_", "$original") ;
-		if ($diff == -1) {
-		    $messages->warning (@output) ;
-		    die "Failed to execute 'cmp' to check whether $self->{destination_dir}$self->{local_llgal_dir}/$_ has been modified ($!).\n" ;
-		}
-		$messages->warning (@output) ;
-		# on other errors, assume files are different ($diff != 0)
+		$diff = compare ("$self->{destination_dir}$self->{local_llgal_dir}/$_", "$original") ;
+		die "Failed to check whether $self->{destination_dir}$self->{local_llgal_dir}/$_ has been modified ($!).\n"
+		    if $diff == -1 ;
 	    }
 	    if ($diff) {
 		$messages->warning ("Preserved $self->{destination_dir}$self->{local_llgal_dir}/$_ since it seems to be modified.") ;
