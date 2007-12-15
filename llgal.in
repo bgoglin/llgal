@@ -813,7 +813,11 @@ sub create_nofile_entry {
 
     # make a safe url
     if (defined $url) {
-	$entry->{url} = make_safe_url ($url) ;
+	if ($type == $TYPE_LINK) {
+	    $entry->{url} = $url ;
+	} else {
+	    $entry->{url} = make_safe_url ($url) ;
+	}
     }
 
     # the link text (will be web-safe after caption file generation)

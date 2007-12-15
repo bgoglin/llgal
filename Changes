@@ -2,6 +2,7 @@
     a link to a file, directory, movie or URL.
     + Add MVI/FIL/DIR/LNK_link_to_target options to revert to the previous
       behavior (thumbnail pointing to the target).
+  * Do not escape URLs from LNK entries.
 
 
 llgal (0.13.14)
