@@ -440,19 +440,12 @@ The corresponding configuration file option is
 
 
 .TP
-.B --ct
-Add image timestamp tag to the generated captions.
-The corresponding configuration file option is
-.IR make_caption_from_image_timestamp .
-
-
-.TP
-.BI --ctf " strftime_format"
-Change timestamp in captions using a
-.B strftime
-format.
-The corresponding configuration file option is
-.IR timestamp_format_in_caption .
+.B --ct " [strftime_format]"
+Add image timestamp tag to the generated captions,
+and change its format if the optional argument is given
+(replaces the old --ctf option).
+The corresponding configuration file option are
+.IR make_caption_from_image_timestamp " and " timestamp_format_in_caption .
 
 
 .TP
@@ -699,8 +692,8 @@ for
 in the index.
 The default is
 .BR "Index of Pictures" .
-The corresponding configuration file option is
-.IR index_title .
+It overrides the configuration file option
+.IR index_title_default .
 
 
 .TP

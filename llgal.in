@@ -14,6 +14,7 @@ use Locale::gettext ;
 use POSIX qw (setlocale) ;
 use URI::Escape ;
 use Text::ParseWords ;
+use File::Compare ;
 
 Getopt::Long::Configure('noignorecase', 'noautoabbrev', 'bundling') ;
 STDOUT->autoflush("1") ;
@@ -97,18 +98,11 @@ sub clean_files {
 		 or /^$opts->{css_filename}$/) {
 	    my $original = (Llgal::Templates::find_generic_template_file ($self, $opts, $_, 0))."/".$_ ;
 	    my $diff = 0 ;
-	    my @output ;
 	    # default is cleanall, which removes everything, as if file were not changed
 	    if (!$cleanall) {
-		($diff, @output) = Llgal::Utils::system_with_output
-		    ("compare $_ with its original",
-		     "cmp", "-s", "$self->{destination_dir}$self->{local_llgal_dir}/$_", "$original") ;
-		if ($diff == -1) {
-		    $messages->warning (@output) ;
-		    die "Failed to execute 'cmp' to check whether $self->{destination_dir}$self->{local_llgal_dir}/$_ has been modified ($!).\n" ;
-		}
-		$messages->warning (@output) ;
-		# on other errors, assume files are different ($diff != 0)
+		$diff = compare ("$self->{destination_dir}$self->{local_llgal_dir}/$_", "$original") ;
+		die "Failed to check whether $self->{destination_dir}$self->{local_llgal_dir}/$_ has been modified ($!).\n"
+		    if $diff == -1 ;
 	    }
 	    if ($diff) {
 		$messages->warning ("Preserved $self->{destination_dir}$self->{local_llgal_dir}/$_ since it seems to be modified.") ;
@@ -120,20 +114,14 @@ sub clean_files {
 	    }
 	} elsif (/^$opts->{captions_filename}$/) {
 	    my $grep = 0 ;
-	    my @output ;
 	    # default is cleanall, which removes everything, as if the removal line was here
 	    if (!$cleanall) {
-		($grep, @output) = Llgal::Utils::system_with_output
-		    ("check for caption removal line",
-		     "grep", "-q", "$opts->{captions_removal_line}", "$self->{destination_dir}$self->{local_llgal_dir}/$_") ;
-		if ($grep == -1) {
-		    $messages->warning (@output) ;
-		    die "Failed to execute 'grep' to check whether $self->{destination_dir}$self->{local_llgal_dir}/$_ has been modified ($!).\n" ;
-		}
-		$messages->warning (@output) ;
-		# on other errors, assume file doesn't contain the caption removal line ($grep != 0)
+		open CAP, "$self->{destination_dir}$self->{local_llgal_dir}/$_" ;
+		my @lines = <CAP> ;
+		close CAP ;
+		$grep = scalar (grep { $_ =~ $opts->{captions_removal_line} } @lines) ;
 	    }
-	    if ($grep) {
+	    if (!$grep) {
 		$messages->warning ("Preserved $self->{destination_dir}$self->{local_llgal_dir}/$_ since it seems to be modified.") ;
 		$notdeleted++ ;
 	    } else {
@@ -434,7 +422,7 @@ sub create_file_entry {
 		$opts->{exiftool} = new Image::ExifTool;
 		# accept unknown tags, just in case...
 		$opts->{exiftool}->Options(Unknown => 1) ;
-		# dateFormat should be initialized with whatever the user said to --ctf
+		# dateFormat should be initialized with whatever the user said to --ct
 		$opts->{exiftool}->Options(DateFormat => $opts->{timestamp_format_in_caption}) ;
 
 		# initialize the list of tags, empty for all
@@ -813,7 +801,11 @@ sub create_nofile_entry {
 
     # make a safe url
     if (defined $url) {
-	$entry->{url} = make_safe_url ($url) ;
+	if ($type == $TYPE_LINK) {
+	    $entry->{url} = $url ;
+	} else {
+	    $entry->{url} = make_safe_url ($url) ;
+	}
     }
 
     # the link text (will be web-safe after caption file generation)
@@ -1301,8 +1293,8 @@ sub generate_captions_entries {
     }
 
     print CAP "TITLE: $opts->{index_title}\n"
-	if !defined $old_title
-	    or $old_title ne $opts->{index_title} ;
+	if defined $opts->{index_title}
+           and (!defined $old_title or $old_title ne $opts->{index_title}) ;
     print CAP "PARENT: $gallery->{parent_gallery_link_text}\n"
 	if ( defined $gallery->{parent_gallery_link_target}
 	     and ( !$old_parent_gallery_link
@@ -1608,7 +1600,7 @@ sub precompute_common_html_fields
     my $common_fields = () ;
 
     # index title
-    $common_fields->{"<!--TITLE-->"} = $opts->{index_title} ;
+    $common_fields->{"<!--TITLE-->"} = (defined $opts->{index_title} ? $opts->{index_title} : $opts->{index_title_default}) ;
 
     # index link text
     $common_fields->{"<!--INDEX-LINK-TEXT-->"} = $opts->{index_link_text} ;
@@ -2010,7 +2002,8 @@ sub generate_index {
 	for (my $j = 0; $j < $num; $j++) {
 	    my $entry = $entries[$i+$j] ;
 	    my $type = $entry->{type} ;
-	    my $title = $entry->{title} ;
+	    my $title ;
+	    my $linktext ;
 	    my $thumb_width = $entry->{thumb_xdim} ;
 	    my $thumb_height = $entry->{thumb_ydim} ;
 	    my $box_width = $thumb_width;
@@ -2020,68 +2013,66 @@ sub generate_index {
 	    $box_width = $opts->{thumbnail_width_max} if $opts->{thumbnail_width_max} ;
 
 	    if ($type == $TYPE_IMAGE) {
-		# IMG thumbnail
+		$linktext = "$opts->{alt_thumbnail_text}$entry->{title}" ;
+		$title = "$opts->{over_thumbnail_text}$entry->{title}" ;
+	    } else {
+		$title = $entry->{title} ;
+		$linktext = $entry->{linktext} ;
+	    }
+
+	    my $link = $entry->{url} ;
+	    # if making slide and not pointing to target, the thumbnail points to the slide
+	    if (!$opts->{make_no_slides}
+		and (
+		     ($type == $TYPE_IMAGE)
+		     or ($type == $TYPE_MOVIE and !$opts->{MVI_link_to_target})
+		     or ($type == $TYPE_FILE and !$opts->{FIL_link_to_target})
+		     or ($type == $TYPE_LINK and !$opts->{LNK_link_to_target})
+		     or ($type == $TYPE_DIR and !$opts->{DIR_link_to_target})
+		     or ($type == $TYPE_TEXT)
+		     )
+		) {
+		$link = $entry->{slide_url} ;
+	    }
+
+	    if ($entry->{thumb_url}) {
+		# either IMG, or with a user-given thumbnail
 
 		print IXW "    <td class=\"thumb\" style=\"width: ${box_width}px; height: ${box_height}px;\">\n" ;
-		if ($opts->{make_no_slides}) {
-		    print IXW "      <a href=\"$entry->{url}\"" ;
-		} else {
-		    print IXW "      <a href=\"$entry->{slide_url}\"" ;
-		}
-		print IXW " title=\"$opts->{over_thumbnail_text}$title $entry->{scaled_dimstring}\">\n" ;
-		print IXW "        <img src=\"$entry->{thumb_url}\" "
+
+		if ($type == $TYPE_TEXT and $opts->{make_no_slides}) {
+		    # thumbnail without any link
+		    print IXW "      <img src=\"$entry->{thumb_url}\" "
+			."title=\"$title $entry->{scaled_dimstring}\" "
 			."style=\"width: ${thumb_width}px; height: ${thumb_height}px;\" "
-			."alt=\"$opts->{alt_thumbnail_text}$title $entry->{thumb_dimstring}\" />\n" ;
-		print IXW "      </a>\n" ;
-		print IXW "    </td>\n" ;
+			."alt=\"$linktext $entry->{thumb_dimstring}\" />\n" ;
 
-	    } elsif ($entry->{thumb_url}) {
-		# not IMG, but with a user-given thumbnail
-
-		print IXW "    <td class=\"thumb\" style=\"width: ${box_width}px; height: ${box_height}px;\">\n" ;
-		if ($type == $TYPE_TEXT) {
-		    # TXT with a thumbnail ? ok...
-		    if ($opts->{make_no_slides}) {
-			# thumbnail linking to the TXT slide
-			print IXW "      <a href=\"$entry->{slide_url}\" "
-				."title=\"$title $entry->{scaled_dimstring}\">\n" ;
-			print IXW "        <img src=\"$entry->{thumb_url}\" "
-				."style=\"width: ${thumb_width}px; height: ${thumb_height}px;\" "
-				."alt=\"$entry->{linktext} $entry->{thumb_dimstring}\" />\n" ;
-			print IXW "      </a>" ;
-
-		    } else {
-			# thumbnail without any link
-			print IXW "      <img src=\"$entry->{thumb_url}\" "
-				."title=\"$title $entry->{scaled_dimstring}\" "
-				."style=\"width: ${thumb_width}px; height: ${thumb_height}px;\" "
-				."alt=\"$entry->{linktext} $entry->{thumb_dimstring}\" />\n" ;
-		    }
 		} else {
-		    # other types directly link to the target instead of the slide
-		    print IXW "      <a href=\"$entry->{url}\" "
-		    	."title=\"$title $entry->{scaled_dimstring}\">\n" ;
+		    # thumbnail linking to the slide
+		    print IXW "      <a href=\"$link\" "
+			."title=\"$title $entry->{scaled_dimstring}\">\n" ;
 		    print IXW "        <img src=\"$entry->{thumb_url}\" "
 			."style=\"width: ${thumb_width}px; height: ${thumb_height}px;\" "
-			."alt=\"$entry->{linktext} $entry->{thumb_dimstring}\" />\n" ;
-		    print IXW "      </a>\n" ;
+			."alt=\"$linktext $entry->{thumb_dimstring}\" />\n" ;
+		    print IXW "      </a>" ;
 		}
+
 		print IXW "    </td>\n" ;
+
 	    } else {
 		# not IMG, without thumbnail
+
 		print IXW "    <td class=\"text-thumb\" style=\"width: ${box_width}px; height: ${box_height}px;\">\n" ;
-		if ($type == $TYPE_TEXT) {
-		    if ($opts->{make_no_slides}) {
-			# thumbnail with basic text and that's it
-			print IXW "      $entry->{linktext}\n" ;
-		    } else {
-			# thumbnail linking to the slide
-			print IXW "      <a href=\"$entry->{slide_url}\" title=\"$title\">$entry->{linktext}</a>\n" ;
-		    }
+
+		if ($type == $TYPE_TEXT and $opts->{make_no_slides}) {
+		    # thumbnail with basic text and that's it
+		    print IXW "      $entry->{linktext}\n" ;
+
 		} else {
 		    # thumbnail directly linking to the target
-		    print IXW "      <a href=\"$entry->{url}\" title=\"$title $entry->{dimstring}\">$entry->{linktext}</a>\n" ;
+		    print IXW "      <a href=\"$link\" title=\"$title $entry->{dimstring}\">$entry->{linktext}</a>\n" ;
 		}
+
 		print IXW "    </td>\n" ;
 	    }
 
@@ -2172,18 +2163,30 @@ sub generate_index {
 
 sub make_readable {
     my $file = shift ;
-    my ($status, @output) = Llgal::Utils::system_with_output
-	("make world readable", "chmod", "a+r", $file) ;
-    $messages->warning (@output)
-	if $status ;
+    my @stats = stat $file ;
+    if (not scalar @stats) {
+	$messages->warning ("Failed to get mode of file '$file' ($!).\n") ;
+    } else {
+	my $perm = $stats[2] & 07777 ;
+	if (($perm & 0444) != 0444) {
+	    chmod ($perm | 0444, $file)
+		or $messages->warning ("Failed to set readable attributes to file '$file' ($!).\n") ;
+	}
+    }
 }
 
 sub make_readable_and_traversable {
     my $file = shift ;
-    my ($status, @output) = Llgal::Utils::system_with_output
-	("make world readable and traversable", "chmod", "a+rx", $file) ;
-    $messages->warning (@output)
-	if $status ;
+    my @stats = stat $file ;
+    if (not scalar @stats) {
+	$messages->warning ("Failed to get mode of file '$file' ($!).\n") ;
+    } else {
+	my $perm = $stats[2] & 07777 ;
+	if (($perm & 0555) != 0555) {
+	    chmod ($perm | 0555, $file)
+		or $messages->warning ("Failed to set readable and executable attributes to file '$file' ($!).\n") ;
+	}
+    }
 }
 
 sub make_www_rights {

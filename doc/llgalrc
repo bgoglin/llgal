@@ -129,6 +129,13 @@
 # Show a film effect in the index of thumbnails [--fe]
 # show_film_effect = 0
 
+# Make thumbnail links point to the target object instead of
+# the corresponding slide
+# MVI_link_to_target = 0
+# FIL_link_to_target = 0
+# DIR_link_to_target = 0
+# LNK_link_to_target = 0
+
 ##### Slides #####
 
 # Make no slides [-s]
@@ -216,8 +223,9 @@
 
 ##### Text #####
 
-# Title of the gallery [--title <s>]
-# index_title = "Index of pictures"
+# Default title of the gallery.
+# May be overriden with [--title <s>] or TITLE: in the captions file.
+# index_title_default = "Index of pictures"
 
 # Change text in links to parent directory.
 # parent_gallery_link_text = "Back to parent gallery"
@@ -279,7 +287,7 @@
 # Unit to be used when printing sizes [--asu <s>]
 # show_size_unit = "kB"
 
-# Set timestamp format in captions using strftime format [--ctf]
+# Set timestamp format in captions (when enabled) using strftime format [--ct <s>]
 # timestamp_format_in_caption = "%Y-%m-%d %H:%M:%S"
 
 # Credits line at the bottom of the index

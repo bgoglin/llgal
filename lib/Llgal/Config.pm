@@ -95,6 +95,10 @@ my $normal_opts_type = {
     thumbnail_width_max => $OPT_IS_NUMERIC, # > 0, 0 for unlimited, -1 for default
     show_caption_under_thumbnails => $OPT_IS_NUMERIC,
     show_film_effect => $OPT_IS_NUMERIC,
+    MVI_link_to_target => $OPT_IS_NUMERIC,
+    FIL_link_to_target => $OPT_IS_NUMERIC,
+    DIR_link_to_target => $OPT_IS_NUMERIC,
+    LNK_link_to_target => $OPT_IS_NUMERIC,
 # Slides
     make_no_slides => $OPT_IS_NUMERIC,
     make_slide_filename_from_filename => $OPT_IS_NUMERIC,
@@ -122,7 +126,7 @@ my $normal_opts_type = {
     show_size => $OPT_IS_NUMERIC,
     slide_counter_format => $OPT_IS_STRING,
 # Text
-    index_title => $OPT_IS_STRING,
+    index_title_default => $OPT_IS_STRING,
     index_link_text => $OPT_IS_NONEMPTY_STRING,
     parent_gallery_link_text => $OPT_IS_NONEMPTY_STRING,
     prev_gallery_link_text => $OPT_IS_STRING,
@@ -292,6 +296,11 @@ sub add_defaults {
 	show_caption_under_thumbnails => 0,
 # show the film effect in the index of thumbnails (--fe)
 	show_film_effect => 0,
+# link thumbnails to target instead of slide
+	MVI_link_to_target => 0,
+	FIL_link_to_target => 0,
+	DIR_link_to_target => 0,
+	LNK_link_to_target => 0,
 
 # Slides
 # make no slides, just thumbnail links to images (-s)
@@ -343,7 +352,7 @@ sub add_defaults {
 
 # Text
 # title of the gallery (--title)
-	index_title => llgal_gettext ("index_title|Index of pictures"),
+	index_title_default => llgal_gettext ("index_title|Index of pictures"),
 # label of link to the parent gallery
 	parent_gallery_link_text => llgal_gettext ("parent_gallery_link_text|Back to parent gallery"),
 # label of link to previous gallery
@@ -382,7 +391,7 @@ sub add_defaults {
 	over_next_slide_link_text => llgal_gettext ("over_next_slide_link_text|Next slide "),
 # change kB to another unit (--asu)
 	show_size_unit => llgal_gettext ("show_size_unit|kB"),
-# format of the timestamp in captions (--ctf)
+# format of the timestamp in captions, when enabled (--ct)
 	timestamp_format_in_caption => llgal_gettext ("timestamp_format_in_caption|%y-%m-%d %H:%M:%S"),
 # credits line at the bottom of the index
 	credits_text => llgal_gettext ("credits_text|created with <a href=\"http://home.gna.org/llgal\">llgal</a>"),
@@ -481,8 +490,7 @@ Layout Options:
     --asu <s>          change file size unit (kB)
     --cc [<s>]         use image comments as captions
     --cf               use file names as captions
-    --ct               use image timestamps as captions
-    --ctf <s>          timestamp format in captions
+    --ct [<format>]    use image timestamps as captions
     --codeset <s>      change the codeset in HTML pages
     --exif [<tags>]    show exif tags on each slide
     --fe               show a film effect in the indexof thumbnails
@@ -738,7 +746,11 @@ sub parse_cmdline_options {
 				else { $opts->{make_caption_from_image_comment} = $value ; }
 				},
 	'cf'		=> \$opts->{make_caption_from_filename},
-	'ct'		=> \$opts->{make_caption_from_image_timestamp},
+	'ct:s'		=> sub {
+	                        shift ; my $value = shift ;
+				$opts->{make_caption_from_image_timestamp} =  1 ;
+				if ($value ne "") { $opts->{timestamp_format_in_caption} = $value ; }
+			    },
 	'ctf=s'		=> \$opts->{timestamp_format_in_caption},
 	'codeset=s'     => \$opts->{codeset},
 	'exif:s'	=> sub {

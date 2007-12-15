@@ -244,7 +244,34 @@ Show film effect
 Default is
 .BR 0 " (" disabled ).
 .RE
-
+.I MVI_link_to_target = <0/1>
+.RS
+Make movie thumbnails links point to the movie instead of
+the corresponding slide.
+Default is
+.BR 1 " (" "link to the movie" ")."
+.RE
+.I FIL_link_to_target = <0/1>
+.RS
+Make file thumbnails links point to the file instead of
+the corresponding slide.
+Default is
+.BR 1 " (" "link to the file" ")."
+.RE
+.I DIR_link_to_target = <0/1>
+.RS
+Make directory thumbnails links point to the movie instead of
+the corresponding slide.
+Default is
+.BR 1 " (" "link to the directory" ")."
+.RE
+.I LNK_link_to_target = <0/1>
+.RS
+Make link thumbnails point to the movie instead of
+the corresponding slide.
+Default is
+.BR 1 " (" "link to the link target" ")."
+.RE
 
 
 
@@ -439,9 +466,10 @@ Slide counter may be disabled by setting to an empty string
 
 .SH Text:
 
-.I index_title = \fI"string"
+.I index_title_default = \fI"string"
 .RS
-Title of the gallery [--title <s>].
+Default title of the gallery.
+May be overriden with [--title <s>] or TITLE: in the captions file.
 Default is \fB"Index of pictures"\fR.
 .RE
 .I parent_gallery_link_text = \fI"string"
@@ -545,8 +573,8 @@ Default is \fB"kB"\fR.
 .RE
 .I timestamp_format_in_caption = "timestamp format"
 .RS
-Generate captions from image comment tag
-.RB [ "--ctf <s>" ].
+Change the strftime format used when generating captions from image date
+.RB [ "--ct <s>" ].
 Default is \fB"%Y-%m-%d %H:%M:%S"\fR.
 .RE
 .I credits_text = \fI"string"
