@@ -2,6 +2,9 @@
     a link to a file, directory, movie or URL.
     + Add MVI/FIL/DIR/LNK_link_to_target options to revert to the previous
       behavior (thumbnail pointing to the target).
+  * Add an optional parameter to --ct to pass the strfime format instead
+    of having to pass both --ct and --ctf. The old --ctf is kept for
+    backward compatibility but not documented anymore.
   * Do not escape URLs from LNK entries.
 
 

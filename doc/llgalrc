@@ -286,7 +286,7 @@
 # Unit to be used when printing sizes [--asu <s>]
 # show_size_unit = "kB"
 
-# Set timestamp format in captions using strftime format [--ctf]
+# Set timestamp format in captions (when enabled) using strftime format [--ct <s>]
 # timestamp_format_in_caption = "%Y-%m-%d %H:%M:%S"
 
 # Credits line at the bottom of the index

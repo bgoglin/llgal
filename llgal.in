@@ -434,7 +434,7 @@ sub create_file_entry {
 		$opts->{exiftool} = new Image::ExifTool;
 		# accept unknown tags, just in case...
 		$opts->{exiftool}->Options(Unknown => 1) ;
-		# dateFormat should be initialized with whatever the user said to --ctf
+		# dateFormat should be initialized with whatever the user said to --ct
 		$opts->{exiftool}->Options(DateFormat => $opts->{timestamp_format_in_caption}) ;
 
 		# initialize the list of tags, empty for all

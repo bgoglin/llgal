@@ -391,7 +391,7 @@ sub add_defaults {
 	over_next_slide_link_text => llgal_gettext ("over_next_slide_link_text|Next slide "),
 # change kB to another unit (--asu)
 	show_size_unit => llgal_gettext ("show_size_unit|kB"),
-# format of the timestamp in captions (--ctf)
+# format of the timestamp in captions, when enabled (--ct)
 	timestamp_format_in_caption => llgal_gettext ("timestamp_format_in_caption|%y-%m-%d %H:%M:%S"),
 # credits line at the bottom of the index
 	credits_text => llgal_gettext ("credits_text|created with <a href=\"http://home.gna.org/llgal\">llgal</a>"),
@@ -490,8 +490,7 @@ Layout Options:
     --asu <s>          change file size unit (kB)
     --cc [<s>]         use image comments as captions
     --cf               use file names as captions
-    --ct               use image timestamps as captions
-    --ctf <s>          timestamp format in captions
+    --ct [<format>]    use image timestamps as captions
     --codeset <s>      change the codeset in HTML pages
     --exif [<tags>]    show exif tags on each slide
     --fe               show a film effect in the indexof thumbnails
@@ -747,7 +746,11 @@ sub parse_cmdline_options {
 				else { $opts->{make_caption_from_image_comment} = $value ; }
 				},
 	'cf'		=> \$opts->{make_caption_from_filename},
-	'ct'		=> \$opts->{make_caption_from_image_timestamp},
+	'ct:s'		=> sub {
+	                        shift ; my $value = shift ;
+				$opts->{make_caption_from_image_timestamp} =  1 ;
+				if ($value ne "") { $opts->{timestamp_format_in_caption} = $value ; }
+			    },
 	'ctf=s'		=> \$opts->{timestamp_format_in_caption},
 	'codeset=s'     => \$opts->{codeset},
 	'exif:s'	=> sub {
