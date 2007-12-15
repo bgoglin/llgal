@@ -98,7 +98,6 @@ sub clean_files {
 		 or /^$opts->{css_filename}$/) {
 	    my $original = (Llgal::Templates::find_generic_template_file ($self, $opts, $_, 0))."/".$_ ;
 	    my $diff = 0 ;
-	    my @output ;
 	    # default is cleanall, which removes everything, as if file were not changed
 	    if (!$cleanall) {
 		$diff = compare ("$self->{destination_dir}$self->{local_llgal_dir}/$_", "$original") ;
@@ -115,20 +114,14 @@ sub clean_files {
 	    }
 	} elsif (/^$opts->{captions_filename}$/) {
 	    my $grep = 0 ;
-	    my @output ;
 	    # default is cleanall, which removes everything, as if the removal line was here
 	    if (!$cleanall) {
-		($grep, @output) = Llgal::Utils::system_with_output
-		    ("check for caption removal line",
-		     "grep", "-q", "$opts->{captions_removal_line}", "$self->{destination_dir}$self->{local_llgal_dir}/$_") ;
-		if ($grep == -1) {
-		    $messages->warning (@output) ;
-		    die "Failed to execute 'grep' to check whether $self->{destination_dir}$self->{local_llgal_dir}/$_ has been modified ($!).\n" ;
-		}
-		$messages->warning (@output) ;
-		# on other errors, assume file doesn't contain the caption removal line ($grep != 0)
+		open CAP, "$self->{destination_dir}$self->{local_llgal_dir}/$_" ;
+		my @lines = <CAP> ;
+		close CAP ;
+		$grep = scalar (grep { $_ =~ $opts->{captions_removal_line} } @lines) ;
 	    }
-	    if ($grep) {
+	    if (!$grep) {
 		$messages->warning ("Preserved $self->{destination_dir}$self->{local_llgal_dir}/$_ since it seems to be modified.") ;
 		$notdeleted++ ;
 	    } else {
