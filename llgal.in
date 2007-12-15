@@ -2170,18 +2170,30 @@ sub generate_index {
 
 sub make_readable {
     my $file = shift ;
-    my ($status, @output) = Llgal::Utils::system_with_output
-	("make world readable", "chmod", "a+r", $file) ;
-    $messages->warning (@output)
-	if $status ;
+    my @stats = stat $file ;
+    if (not scalar @stats) {
+	$messages->warning ("Failed to get mode of file '$file' ($!).\n") ;
+    } else {
+	my $perm = $stats[2] & 07777 ;
+	if (($perm & 0444) != 0444) {
+	    chmod ($perm | 0444, $file)
+		or $messages->warning ("Failed to set readable attributes to file '$file' ($!).\n") ;
+	}
+    }
 }
 
 sub make_readable_and_traversable {
     my $file = shift ;
-    my ($status, @output) = Llgal::Utils::system_with_output
-	("make world readable and traversable", "chmod", "a+rx", $file) ;
-    $messages->warning (@output)
-	if $status ;
+    my @stats = stat $file ;
+    if (not scalar @stats) {
+	$messages->warning ("Failed to get mode of file '$file' ($!).\n") ;
+    } else {
+	my $perm = $stats[2] & 07777 ;
+	if (($perm & 0555) != 0555) {
+	    chmod ($perm | 0555, $file)
+		or $messages->warning ("Failed to set readable and executable attributes to file '$file' ($!).\n") ;
+	}
+    }
 }
 
 sub make_www_rights {
