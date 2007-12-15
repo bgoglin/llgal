@@ -2,6 +2,8 @@ package Llgal::Templates ;
 
 use strict ;
 
+use File::Copy ;
+
 use Llgal::Utils ;
 
 # copy a file
@@ -11,14 +13,9 @@ sub copy_file {
     my $filename = shift ;
     my $srcdir = shift ;
     my $destdir = shift ;
-    my ($status, @output) = Llgal::Utils::system_with_output
-	("copy '$filename' from '$srcdir'",
-	"cp", "-f", "$srcdir/$filename", "$destdir/$filename") ;
-    if ($status) {
-	# die on whatever error
-	$messages->warning (@output) ;
-	die "Failed to get a copy of '$filename'.\n" ;
-    }
+    unlink "$destdir/$filename" ;
+    copy "$srcdir/$filename", "$destdir/$filename"
+	or die "Failed to get a copy of '$filename' ($!).\n" ;
 }
 
 # find path to the template file in generic directories
