@@ -2042,6 +2042,13 @@ sub generate_index {
 		if ($type == $TYPE_TEXT) {
 		    # TXT with a thumbnail ? ok...
 		    if ($opts->{make_no_slides}) {
+			# thumbnail without any link
+			print IXW "      <img src=\"$entry->{thumb_url}\" "
+				."title=\"$title $entry->{scaled_dimstring}\" "
+				."style=\"width: ${thumb_width}px; height: ${thumb_height}px;\" "
+				."alt=\"$entry->{linktext} $entry->{thumb_dimstring}\" />\n" ;
+
+		    } else {
 			# thumbnail linking to the TXT slide
 			print IXW "      <a href=\"$entry->{slide_url}\" "
 				."title=\"$title $entry->{scaled_dimstring}\">\n" ;
@@ -2049,13 +2056,6 @@ sub generate_index {
 				."style=\"width: ${thumb_width}px; height: ${thumb_height}px;\" "
 				."alt=\"$entry->{linktext} $entry->{thumb_dimstring}\" />\n" ;
 			print IXW "      </a>" ;
-
-		    } else {
-			# thumbnail without any link
-			print IXW "      <img src=\"$entry->{thumb_url}\" "
-				."title=\"$title $entry->{scaled_dimstring}\" "
-				."style=\"width: ${thumb_width}px; height: ${thumb_height}px;\" "
-				."alt=\"$entry->{linktext} $entry->{thumb_dimstring}\" />\n" ;
 		    }
 		} else {
 		    # other types directly link to the target instead of the slide
