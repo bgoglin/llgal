@@ -126,7 +126,7 @@ my $normal_opts_type = {
     show_size => $OPT_IS_NUMERIC,
     slide_counter_format => $OPT_IS_STRING,
 # Text
-    index_title => $OPT_IS_STRING,
+    index_title_default => $OPT_IS_STRING,
     index_link_text => $OPT_IS_NONEMPTY_STRING,
     parent_gallery_link_text => $OPT_IS_NONEMPTY_STRING,
     prev_gallery_link_text => $OPT_IS_STRING,
@@ -352,7 +352,7 @@ sub add_defaults {
 
 # Text
 # title of the gallery (--title)
-	index_title => llgal_gettext ("index_title|Index of pictures"),
+	index_title_default => llgal_gettext ("index_title|Index of pictures"),
 # label of link to the parent gallery
 	parent_gallery_link_text => llgal_gettext ("parent_gallery_link_text|Back to parent gallery"),
 # label of link to previous gallery

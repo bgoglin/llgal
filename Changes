@@ -5,6 +5,10 @@
   * Add an optional parameter to --ct to pass the strfime format instead
     of having to pass both --ct and --ctf. The old --ctf is kept for
     backward compatibility but not documented anymore.
+  * Do not insert the default index title in the captions file if it is
+    already defined (reported by Sebastian Schmidt in Debian bug #452945).
+    + The index_title configuration options is replaced with
+      index_title_default.
   * Do not escape URLs from LNK entries.
 
 

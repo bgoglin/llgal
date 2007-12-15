@@ -1305,8 +1305,8 @@ sub generate_captions_entries {
     }
 
     print CAP "TITLE: $opts->{index_title}\n"
-	if !defined $old_title
-	    or $old_title ne $opts->{index_title} ;
+	if defined $opts->{index_title}
+           and (!defined $old_title or $old_title ne $opts->{index_title}) ;
     print CAP "PARENT: $gallery->{parent_gallery_link_text}\n"
 	if ( defined $gallery->{parent_gallery_link_target}
 	     and ( !$old_parent_gallery_link
@@ -1612,7 +1612,7 @@ sub precompute_common_html_fields
     my $common_fields = () ;
 
     # index title
-    $common_fields->{"<!--TITLE-->"} = $opts->{index_title} ;
+    $common_fields->{"<!--TITLE-->"} = (defined $opts->{index_title} ? $opts->{index_title} : $opts->{index_title_default}) ;
 
     # index link text
     $common_fields->{"<!--INDEX-LINK-TEXT-->"} = $opts->{index_link_text} ;

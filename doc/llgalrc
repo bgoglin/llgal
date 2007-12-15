@@ -223,8 +223,9 @@
 
 ##### Text #####
 
-# Title of the gallery [--title <s>]
-# index_title = "Index of pictures"
+# Default title of the gallery.
+# May be overriden with [--title <s>] or TITLE: in the captions file.
+# index_title_default = "Index of pictures"
 
 # Change text in links to parent directory.
 # parent_gallery_link_text = "Back to parent gallery"
