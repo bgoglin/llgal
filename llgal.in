@@ -2010,7 +2010,8 @@ sub generate_index {
 	for (my $j = 0; $j < $num; $j++) {
 	    my $entry = $entries[$i+$j] ;
 	    my $type = $entry->{type} ;
-	    my $title = $entry->{title} ;
+	    my $title ;
+	    my $linktext ;
 	    my $thumb_width = $entry->{thumb_xdim} ;
 	    my $thumb_height = $entry->{thumb_ydim} ;
 	    my $box_width = $thumb_width;
@@ -2020,76 +2021,67 @@ sub generate_index {
 	    $box_width = $opts->{thumbnail_width_max} if $opts->{thumbnail_width_max} ;
 
 	    if ($type == $TYPE_IMAGE) {
-		# IMG thumbnail
+		$linktext = "$opts->{alt_thumbnail_text}$entry->{title}" ;
+		$title = "$opts->{over_thumbnail_text}$entry->{title}" ;
+	    } else {
+		$title = $entry->{title} ;
+		$linktext = $entry->{linktext} ;
+	    }
+
+	    my $link = $entry->{url} ;
+	    # if making slide and not pointing to target, the thumbnail points to the slide
+	    if (!$opts->{make_no_slides}
+		and (
+		     ($type == $TYPE_IMAGE)
+		     or ($type == $TYPE_MOVIE and !$opts->{MVI_thumb_link_to_target})
+		     or ($type == $TYPE_FILE and !$opts->{FIL_thumb_link_to_target})
+		     or ($type == $TYPE_LINK and !$opts->{LNK_thumb_link_to_target})
+		     or ($type == $TYPE_DIR and !$opts->{DIR_thumb_link_to_target})
+		     or ($type == $TYPE_TEXT)
+		     )
+		) {
+		$link = $entry->{slide_url} ;
+	    }
+
+	    if ($entry->{thumb_url}) {
+		# either IMG, or with a user-given thumbnail
 
 		print IXW "    <td class=\"thumb\" style=\"width: ${box_width}px; height: ${box_height}px;\">\n" ;
-		if ($opts->{make_no_slides}) {
-		    print IXW "      <a href=\"$entry->{url}\"" ;
-		} else {
-		    print IXW "      <a href=\"$entry->{slide_url}\"" ;
-		}
-		print IXW " title=\"$opts->{over_thumbnail_text}$title $entry->{scaled_dimstring}\">\n" ;
-		print IXW "        <img src=\"$entry->{thumb_url}\" "
+
+		if ($type == $TYPE_TEXT and $opts->{make_no_slides}) {
+		    # thumbnail without any link
+		    print IXW "      <img src=\"$entry->{thumb_url}\" "
+			."title=\"$title $entry->{scaled_dimstring}\" "
 			."style=\"width: ${thumb_width}px; height: ${thumb_height}px;\" "
-			."alt=\"$opts->{alt_thumbnail_text}$title $entry->{thumb_dimstring}\" />\n" ;
-		print IXW "      </a>\n" ;
+			."alt=\"$linktext $entry->{thumb_dimstring}\" />\n" ;
+
+		} else {
+		    # thumbnail linking to the slide
+		    print IXW "      <a href=\"$link\" "
+			."title=\"$title $entry->{scaled_dimstring}\">\n" ;
+		    print IXW "        <img src=\"$entry->{thumb_url}\" "
+			."style=\"width: ${thumb_width}px; height: ${thumb_height}px;\" "
+			."alt=\"$linktext $entry->{thumb_dimstring}\" />\n" ;
+		    print IXW "      </a>" ;
+		}
+
 		print IXW "    </td>\n" ;
 
 	    } else {
-		my $link = $entry->{url} ;
-		# if making slide and not pointing to target, the thumbnail points to the slide
-		if (!$opts->{make_no_slides}
-		    and (
-			 ($type == $TYPE_MOVIE and !$opts->{MVI_thumb_link_to_target})
-			 or ($type == $TYPE_FILE and !$opts->{FIL_thumb_link_to_target})
-			 or ($type == $TYPE_LINK and !$opts->{LNK_thumb_link_to_target})
-			 or ($type == $TYPE_DIR and !$opts->{DIR_thumb_link_to_target})
-			 or ($type == $TYPE_TEXT)
-			 )
-		    ) {
-		    $link = $entry->{slide_url} ;
-		}
+		# not IMG, without thumbnail
 
-		if ($entry->{thumb_url}) {
-		    # not IMG, but with a user-given thumbnail
+		print IXW "    <td class=\"text-thumb\" style=\"width: ${box_width}px; height: ${box_height}px;\">\n" ;
 
-		    print IXW "    <td class=\"thumb\" style=\"width: ${box_width}px; height: ${box_height}px;\">\n" ;
-
-		    if ($type == $TYPE_TEXT and $opts->{make_no_slides}) {
-			# thumbnail without any link
-			print IXW "      <img src=\"$entry->{thumb_url}\" "
-			    ."title=\"$title $entry->{scaled_dimstring}\" "
-			    ."style=\"width: ${thumb_width}px; height: ${thumb_height}px;\" "
-			    ."alt=\"$entry->{linktext} $entry->{thumb_dimstring}\" />\n" ;
-		    } else {
-			# thumbnail linking to the slide
-			print IXW "      <a href=\"$link\" "
-			    ."title=\"$title $entry->{scaled_dimstring}\">\n" ;
-			print IXW "        <img src=\"$entry->{thumb_url}\" "
-			    ."style=\"width: ${thumb_width}px; height: ${thumb_height}px;\" "
-			    ."alt=\"$entry->{linktext} $entry->{thumb_dimstring}\" />\n" ;
-			print IXW "      </a>" ;
-
-		    }
-
-		    print IXW "    </td>\n" ;
+		if ($type == $TYPE_TEXT and $opts->{make_no_slides}) {
+		    # thumbnail with basic text and that's it
+		    print IXW "      $entry->{linktext}\n" ;
 
 		} else {
-		    # not IMG, without thumbnail
-
-		    print IXW "    <td class=\"text-thumb\" style=\"width: ${box_width}px; height: ${box_height}px;\">\n" ;
-
-		    if ($type == $TYPE_TEXT and $opts->{make_no_slides}) {
-			# thumbnail with basic text and that's it
-			print IXW "      $entry->{linktext}\n" ;
-
-		    } else {
-			# thumbnail directly linking to the target
-			print IXW "      <a href=\"$link\" title=\"$title $entry->{dimstring}\">$entry->{linktext}</a>\n" ;
-		    }
-
-		    print IXW "    </td>\n" ;
+		    # thumbnail directly linking to the target
+		    print IXW "      <a href=\"$link\" title=\"$title $entry->{dimstring}\">$entry->{linktext}</a>\n" ;
 		}
+
+		print IXW "    </td>\n" ;
 	    }
 
 	    $messages->update_percentage ($i+$j+1) ;
