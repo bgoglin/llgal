@@ -1,3 +1,8 @@
+llgal (xxx)
+
+  * Fix typos in the german translation, thanks Nadar.
+
+
 llgal (0.13.15)
 
   * Thumbnails now always point to the slide, even if it just contains
