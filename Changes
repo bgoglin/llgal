@@ -1,6 +1,7 @@
 llgal (xxx)
 
   * Fix typos in the german translation, thanks Nadar.
+  * Fix replacing of <!--CSS-->, thanks Steffen Klatt.
 
 
 llgal (0.13.15)
