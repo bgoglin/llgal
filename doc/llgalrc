@@ -363,8 +363,8 @@
 # language = "locale"
 
 # Command to be used to generate scaled images and thumbnails
-# thumbnail_create_command = "convert -scale <MAXW>x<MAXH> <IN> <OUT>"
-# scaled_create_command = "convert -scale <MAXW>x<MAXH> <IN> <OUT>"
+# thumbnail_create_command = "convert -scale <MAXW>x<MAXH> -- <IN> <OUT>"
+# scaled_create_command = "convert -scale <MAXW>x<MAXH> -- <IN> <OUT>"
 
 # Force regeneration of thumbnails and scaled images [-f].
 # force_image_regeneration = 0

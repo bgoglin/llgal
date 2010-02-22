@@ -434,8 +434,8 @@ sub add_defaults {
 # user-added directories where templates might be found
 	template_dirs => [],
 # commands to generate thumbnails and scaled images
-	scaled_create_command => "convert -scale <MAXW>x<MAXH> <IN> <OUT>",
-	thumbnail_create_command => "convert -scale <MAXW>x<MAXH> <IN> <OUT>",
+	scaled_create_command => "convert -scale <MAXW>x<MAXH> -- <IN> <OUT>",
+	thumbnail_create_command => "convert -scale <MAXW>x<MAXH> -- <IN> <OUT>",
 # force thumbnails and scaled images regeneration
 	force_image_regeneration => 0,
 # makes everything world-readable (--www)
