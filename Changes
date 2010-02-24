@@ -6,6 +6,7 @@ llgal (xxx)
   * Fix replacing of <!--CSS-->, thanks Steffen Klatt.
   * Fix support for filenames with initial dash character in convert
     command-lines (thanks Tiago Bortoletto Vaz in Debian bug #570553).
+  * Display Exif coordinates in decimal format, thanks Fmiser.
 
 
 llgal (0.13.15)
