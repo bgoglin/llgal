@@ -403,8 +403,8 @@ Generates
 .I captions
 from image comment tag.
 If no argument is given, llgal first tries the standard comment (for
-instance JFIF or GIF), and then tries Exif comments if the previous
-one is empty.
+instance JFIF or GIF), then tries Exif comments if the previous
+one is empty, and then tries Exif image description.
 The corresponding configuration file option is
 .IR make_caption_from_image_comment .
 
@@ -412,22 +412,24 @@ An argument such as
 .I std
 or
 .I exif
-might be added to force the use of only standard comment
-or only Exif comment.
+or
+.I exifdesc
+might be added to force the use of only standard comment,
+only Exif comment, or only Exif image description.
 
 An argument such as
 .I exif,std
 will make llgal try Exif comment first.
 
 An argument such as
-.I std+exif
-will use the combination of standard and Exif comments.
+.I std+exifdesc
+will use the combination of standard comment and Exif description.
 
 Passing
 .B --cc
 without argument is thus equivalent to passing
 .B --cc
-.IR std,exif .
+.IR std,exif,exifdesc .
 
 
 .TP

@@ -294,6 +294,11 @@ sub generate_caption_from_image_comment {
 		my $comment = $exif_infos->{UserComment} ;
 		push (@texts, $comment)
 		    if $comment ;
+	    } elsif ($type =~ m/^exifdesc$/i) {
+		# Exif image description
+		my $comment = $exif_infos->{ImageDescription} ;
+		push (@texts, $comment)
+		    if $comment ;
 	    } else {
 		$messages->abort_percentage ;
 		die "Unrecognized image comment type '$type'.\n" ;
@@ -432,7 +437,7 @@ sub create_file_entry {
 		    @exif_tags = ('ImageWidth', 'ImageHeight', @{$opts->{show_exif_tags}}) ;
 		    @exif_tags = (@exif_tags, 'DateTimeOriginal')
 			if $opts->{make_caption_from_image_timestamp} ;
-		    @exif_tags = (@exif_tags, 'UserComment', 'Comment')
+		    @exif_tags = (@exif_tags, 'UserComment', 'Comment', 'ImageDescription')
 			if $opts->{make_caption_from_image_comment} ;
 		}
 		@{$opts->{cached_exif_tags_list}} = @exif_tags ;
