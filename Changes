@@ -12,6 +12,8 @@ llgal (xxx)
     (thanks to Gerfried Fuchs in Debian bug #478699).
   * Clarify in the manpage that replacing <!--FOO--> variables will never
     automatically add double-quotes (requested by Samuel Thibault).
+  * Document better how to provide custom thumbnails and scaled images
+    using mythumb_ and myscaled_ prefixes.
 
 
 llgal (0.13.15)

@@ -323,11 +323,15 @@ since there will be 2 hyperlinks on each slide.
 
 All non-image slides and thumbnails are usually basic text.
 It is possible to force <tt>llgal</tt> to use a special thumbnail or scaled image
-by adding a special file in the local <tt>.llgal</tt> directory.
+by adding a special file in the local <tt>.llgal</tt> directory with prefix
+<tt>mythumb_</tt> or <tt>myscaled_</tt>.
 
-<tt>mythumb_foo.jpg</tt> will be used as a thumbnail for the entry called <tt>foo</tt>
-while <tt>myscaled_bar.jpg</tt> will be used as a scaled image for <tt>bar</tt>.
-The extension may be any image extension that <tt>llgal</tt> recognizes.
+For instance, <tt>mythumb_image24.jpg</tt> will be used as a thumbnail for image
+<tt>image24.jpg</tt>.
+<tt>mythumb_subdir3.jpg</tt> will be used for sub-directory <tt>subdir3</tt>.
+And <tt>myscaled_bar.avi.jpg</tt> will be used as a scaled image for movie <tt>bar.avi</tt>.
+The extension for the thumbnail or scaled image may be any image extension
+that <tt>llgal</tt> recognizes.
 
 
 
