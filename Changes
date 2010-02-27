@@ -1,4 +1,4 @@
-llgal (xxx)
+llgal (0.13.16)
 
   * Add exifdesc to --cc to generate the caption from the Exif image
     description (thanks Fmiser).
@@ -19,7 +19,7 @@ llgal (xxx)
   * Document better how to provide custom thumbnails and scaled images
     using mythumb_ and myscaled_ prefixes.
 
- -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Sat, 27 Feb 2010 19:26:00 +0100
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Sat, 27 Feb 2010 20:46:00 +0100
 
 llgal (0.13.15)
 
