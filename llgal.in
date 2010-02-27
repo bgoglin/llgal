@@ -1544,16 +1544,22 @@ sub process_gallery_family {
     my $opts = shift ;
 
     if ($opts->{parent_gallery_link}) {
-	$gallery->{parent_gallery_link_text} = $opts->{parent_gallery_link_text} ;
+	$gallery->{parent_gallery_link_text} = $opts->{parent_gallery_link_text}
+	    unless defined $gallery->{parent_gallery_link_text} ;
 	$gallery->{parent_gallery_link_target} = "../$opts->{index_filename}.$opts->{www_extension}" ;
+	    unless defined $gallery->{parent_gallery_link_target} ;
     }
     if (defined $family->{prev_gallery_link_text}) {
-	$gallery->{prev_gallery_link_text} = $opts->{prev_gallery_link_text} . $family->{prev_gallery_link_text} ;
-	$gallery->{prev_gallery_link_target} = $family->{prev_gallery_link_target} ;
+	$gallery->{prev_gallery_link_text} = $opts->{prev_gallery_link_text} . $family->{prev_gallery_link_text}
+	    unless defined $gallery->{prev_gallery_link_text} ;
+	$gallery->{prev_gallery_link_target} = $family->{prev_gallery_link_target}
+	    unless defined $gallery->{prev_gallery_link_target} ;
     }
     if (defined $family->{next_gallery_link_text}) {
-	$gallery->{next_gallery_link_text} = $opts->{next_gallery_link_text} . $family->{next_gallery_link_text} ;
-	$gallery->{next_gallery_link_target} = $family->{next_gallery_link_target} ;
+	$gallery->{next_gallery_link_text} = $opts->{next_gallery_link_text} . $family->{next_gallery_link_text}
+	    unless defined $gallery->{next_gallery_link_text} ;
+	$gallery->{next_gallery_link_target} = $family->{next_gallery_link_target}
+	    unless defined $gallery->{next_gallery_link_target} ;
     }
 }
 
