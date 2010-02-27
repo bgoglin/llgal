@@ -116,6 +116,7 @@ my $normal_opts_type = {
     link_between_last_and_first => $OPT_IS_NUMERIC,
     make_slide_title_from_caption => $OPT_IS_NUMERIC,
     show_all_exif_tags => $OPT_IS_NUMERIC,
+    slide_link_to_full_image => $OPT_IS_NUMERIC,
 # Captions
     captions_removal_line => $OPT_IS_NONEMPTY_STRING,
     make_caption_from_image_comment => $OPT_IS_STRING,
@@ -332,6 +333,8 @@ sub add_defaults {
 	make_slide_title_from_caption => 0,
 # show a table of exif tags
 	show_exif_tags => [],
+# link scaled to full
+	slide_link_to_full_image => 1,
 
 # Captions
 # this line will be placed in caption generated file
@@ -502,6 +505,7 @@ Layout Options:
     --lt               use thumbnail preview for links in slides
     -n                 use image file names for the HTML slide files
     --nc               omit the image count from the captions
+    --nf               omit the link from slides' scaled images to full unscaled
     -p <n>             cellpadding value of thumbnail index tables (3)
     --parent-gal       add links to the parent gallery
     --php              use php extension for generated webpages
@@ -767,6 +771,7 @@ sub parse_cmdline_options {
 	'lt'		=> sub { $opts->{prev_slide_link_preview} = 1 ; $opts->{next_slide_link_preview} = 1 ; },
 	'n'		=> \$opts->{make_slide_filename_from_filename},
 	'nc'		=> sub { $opts->{slide_counter_format} = "" ; },
+	'nf'		=> sub { $opts->{slide_link_to_full_image} = 0 ; },
 	'option=s'	=> sub { shift ; process_option $self, $opts, shift ; },
 	'P=s'		=> \@{$opts->{section_dirs}},
 	'Pall'		=> \$opts->{recursive_sections},

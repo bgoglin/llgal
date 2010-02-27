@@ -1,4 +1,4 @@
-llgal (0.13.16-1) UNRELEASED; urgency=low
+llgal (0.13.16-1) unstable; urgency=low
 
   * New upstream release.
     + Fix support for filenames with initial dash character in convert
@@ -9,7 +9,7 @@ llgal (0.13.16-1) UNRELEASED; urgency=low
   * Add Vcs-Svn and Vcs-Browser fields.
   * Bump Standards-Version to 3.8.4, no changes needed.
 
- -- Brice Goglin <bgoglin@debian.org>  Sat, 27 Feb 2010 16:40:43 +0100
+ -- Brice Goglin <bgoglin@debian.org>  Sat, 27 Feb 2010 19:32:38 +0100
 
 llgal (0.13.15-1) unstable; urgency=low
 
