@@ -7,6 +7,7 @@ llgal (0.13.16-1) UNRELEASED; urgency=low
       in the captions file instead of overriding with the default values,
       closes: #478699.
   * Add Vcs-Svn and Vcs-Browser fields.
+  * Bump Standards-Version to 3.8.4, no changes needed.
 
  -- Brice Goglin <bgoglin@debian.org>  Sat, 27 Feb 2010 16:40:43 +0100
 
