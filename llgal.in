@@ -1546,7 +1546,7 @@ sub process_gallery_family {
     if ($opts->{parent_gallery_link}) {
 	$gallery->{parent_gallery_link_text} = $opts->{parent_gallery_link_text}
 	    unless defined $gallery->{parent_gallery_link_text} ;
-	$gallery->{parent_gallery_link_target} = "../$opts->{index_filename}.$opts->{www_extension}" ;
+	$gallery->{parent_gallery_link_target} = "../$opts->{index_filename}.$opts->{www_extension}"
 	    unless defined $gallery->{parent_gallery_link_target} ;
     }
     if (defined $family->{prev_gallery_link_text}) {
