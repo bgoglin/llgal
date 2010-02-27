@@ -1729,15 +1729,24 @@ sub generate_slides {
 	    # image slide
 
 	    if (defined $entry->{scaled_filename}) {
-		# scaled image with link to the real image
-		$THIS_SLIDE = "<a href=\"$entry->{url}\" "
-		    ."title=\"$opts->{over_scaled_text}$entry->{title} $entry->{dimstring}\">"
-		    ."<img src=\"$entry->{scaled_url}\" " ;
-		$THIS_SLIDE .= "style=\"width: $entry->{scaled_xdim}px; height: $entry->{scaled_ydim}px;\" "
-		    unless $opts->{slide_dimensions_from_css} ;
-		$THIS_SLIDE .= "alt=\"$opts->{alt_scaled_text}$entry->{title} $entry->{scaled_dimstring}\" />"
-		    ."</a>" ;
+		if ($opts->{slide_link_to_full_image}) {
+		    # scaled image with link to the real image
+		    $THIS_SLIDE = "<a href=\"$entry->{url}\" "
+			."title=\"$opts->{over_scaled_text}$entry->{title} $entry->{dimstring}\">"
+			."<img src=\"$entry->{scaled_url}\" " ;
+		    $THIS_SLIDE .= "style=\"width: $entry->{scaled_xdim}px; height: $entry->{scaled_ydim}px;\" "
+			unless $opts->{slide_dimensions_from_css} ;
+		    $THIS_SLIDE .= "alt=\"$opts->{alt_scaled_text}$entry->{title} $entry->{scaled_dimstring}\" />"
+			."</a>" ;
 
+		} else {
+		    # scaled image without link to the real image
+		    $THIS_SLIDE = "<img src=\"$entry->{scaled_url}\" " ;
+		    $THIS_SLIDE .= "style=\"width: $entry->{scaled_xdim}px; height: $entry->{scaled_ydim}px;\" "
+			unless $opts->{slide_dimensions_from_css} ;
+		    $THIS_SLIDE .= "alt=\"$opts->{alt_scaled_text}$entry->{title} $entry->{scaled_dimstring}\" />" ;
+
+		}
 	    } else {
 		# real image
 		$THIS_SLIDE = "<img src=\"$entry->{url}\" " ;

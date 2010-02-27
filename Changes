@@ -4,6 +4,8 @@ llgal (xxx)
     description (thanks Fmiser).
   * Add LNKNOSLIDE: entry support for direct links without slide, as if
     LNK_link_to_target was set to 1 (requested by Nathalie Furmento).
+  * Add --nf and slide_link_to_full_image to remove links from scaled
+    images in slides to full unscaled images (thanks Maximilian Wilhelm).
   * Display Exif coordinates in decimal format (thanks Fmiser).
   * Fix typos in the german translation (thanks Nadar).
   * Fix replacing of <!--CSS--> (thanks Steffen Klatt).
