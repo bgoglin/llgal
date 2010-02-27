@@ -204,6 +204,7 @@ my $TYPE_FILE = 4 ;
 my $TYPE_DIR = 5 ;
 my $TYPE_LINE = 6 ;
 my $TYPE_BREAK = 7 ;
+my $TYPE_LINKNOSLIDE = 8 ; # only used when calling create_nofile_entry, which changes it into $TYPE_LINK with no_slide set
 
 ###################################################################################
 # checking files
@@ -795,6 +796,12 @@ sub create_nofile_entry {
     my $url = shift ;
     my $linktext = shift ;
     my $caption = shift ;
+
+    # special type case
+    if ($type == $TYPE_LINKNOSLIDE) {
+	$entry->{no_slide} = 1 ;
+	$type = $TYPE_LINK ;
+    }
 
     # set the type
     $entry->{type} = $type ;
@@ -1446,6 +1453,10 @@ sub read_captions_file {
 		    # link slide
 		    $entry = create_nofile_entry ($TYPE_LINK, $1, $2, $3) ;
 
+		} elsif ($line =~ m/^LNKNOSLIDE:\s*(.+)\s+----\s*(?:\s(.*))?\s*$/) {
+		    # direct link without slide
+		    $entry = create_nofile_entry ($TYPE_LINKNOSLIDE, $1, $2, undef) ;
+
 		} elsif ($line =~ m/^DIR:\s*(.+)\s+----\s+(.+)\s+----\s*(?:\s(.*))?\s*$/) {
 		    # directory slide
 		    $entry = create_file_entry ($TYPE_DIR, $1, $2, $3) ;
@@ -2035,7 +2046,7 @@ sub generate_index {
 
 	    my $link = $entry->{url} ;
 	    # if making slide and not pointing to target, the thumbnail points to the slide
-	    if (!$opts->{make_no_slides}
+	    if (!$opts->{make_no_slides} and !$entry->{no_slide}
 		and (
 		     ($type == $TYPE_IMAGE)
 		     or ($type == $TYPE_MOVIE and !$opts->{MVI_link_to_target})
