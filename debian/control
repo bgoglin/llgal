@@ -5,6 +5,8 @@ Maintainer: Brice Goglin <bgoglin@debian.org>
 Build-Depends: debhelper (>= 4.0.2), quilt (>= 0.40)
 Homepage: http://home.gna.org/llgal/
 Standards-Version: 3.7.3
+Vcs-Svn: svn://svn.gna.org/svn/llgal/branches/debian
+Vcs-Browser: http://svn.gna.org/viewcvs/llgal/branches/debian/
 
 Package: llgal
 Architecture: all
