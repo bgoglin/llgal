@@ -67,13 +67,17 @@ directory with the
 prefix.
 Custom thumbnails for movies have to be suffixed with an image-type
 extension.
+For instance, to enforce the thumbnail for image
+.IR image.jpg " and movie " movie.avi ,
+thumbnails may be named
+.IR mythumb_image.jpg " and " mythumb_movie.avi.jpg .
 
 The slide pages may include a scaled image in the
 .B --sx
 or
 .B --sy
 option is passed.
-It is also possible to define custom scaled images with the
+Similarly, it is also possible to define custom scaled images with the
 .I myscaled_
 prefix to appear in the slides.
 
@@ -403,8 +407,8 @@ Generates
 .I captions
 from image comment tag.
 If no argument is given, llgal first tries the standard comment (for
-instance JFIF or GIF), and then tries Exif comments if the previous
-one is empty.
+instance JFIF or GIF), then tries Exif comments if the previous
+one is empty, and then tries Exif image description.
 The corresponding configuration file option is
 .IR make_caption_from_image_comment .
 
@@ -412,22 +416,24 @@ An argument such as
 .I std
 or
 .I exif
-might be added to force the use of only standard comment
-or only Exif comment.
+or
+.I exifdesc
+might be added to force the use of only standard comment,
+only Exif comment, or only Exif image description.
 
 An argument such as
 .I exif,std
 will make llgal try Exif comment first.
 
 An argument such as
-.I std+exif
-will use the combination of standard and Exif comments.
+.I std+exifdesc
+will use the combination of standard comment and Exif description.
 
 Passing
 .B --cc
 without argument is thus equivalent to passing
 .B --cc
-.IR std,exif .
+.IR std,exif,exifdesc .
 
 
 .TP
@@ -848,6 +854,10 @@ defines a text slide.
 .RS
 defines a link slide.
 .RE
+.B LNKNOSLIDE: <url> ---- <linktext>
+.RS
+defines a direct link to the target, without any slide.
+.RE
 .B FIL: <url> ---- <linktext> ---- <caption>
 .RS
 defines a link to another file (typically neither an image nor a movie)
@@ -967,10 +977,10 @@ was passed).
 The command lines used to generate those images from your original images
 are defined by the following configuration options:
 .RS
-.I scaled_create_command = "convert -scale <MAXW>x<MAXH> <IN> <OUT>"
+.I scaled_create_command = "convert -scale <MAXW>x<MAXH> -- <IN> <OUT>"
 .RE
 .RS
-.I thumbnail_create_command = "convert -scale <MAXW>x<MAXH> <IN> <OUT>"
+.I thumbnail_create_command = "convert -scale <MAXW>x<MAXH> -- <IN> <OUT>"
 .RE
 
 You may change the value of these options to change the way the generation
@@ -1101,6 +1111,18 @@ entries in the captions file.
 See
 .B CAPTIONS
 for details.
+
+When modifying the templates, beware that the HTML syntax requires
+double-quotes around filenames, URL, etc. These double-quotes will
+never be automatically added when replacing these automatic variables.
+So you must keep double-quotes around variables when needed, for instance:
+.RS
+.B <a href="<!--NEXT-SLIDE-->"><!--NEXT-SLIDE-LINK-TEXT--></a>
+.RE
+will be changed into
+.RS
+.B <a href="slide_04.html">Next slide</a>
+.RE
 
 
 

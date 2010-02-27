@@ -267,8 +267,12 @@ Default is
 .RE
 .I LNK_link_to_target = <0/1>
 .RS
-Make link thumbnails point to the movie instead of
+Make link thumbnails point to the link instead of
 the corresponding slide.
+It is similar to using
+.I LNKNOSLIDE:
+entries instead of
+.IR LNK: .
 Default is
 .BR 1 " (" "link to the link target" ")."
 .RE
@@ -728,7 +732,7 @@ environment variable might prevent this option from working.
 .I scaled_create_command = \fI"string"
 .RS
 Command to use to create scaled images for slides.
-Default is \fB"convert -scale <MAXW>x<MAXH> <IN> <OUT>"\fR.
+Default is \fB"convert -scale <MAXW>x<MAXH> -- <IN> <OUT>"\fR.
 See
 .B THUMBNAILS AND SCALED IMAGES GENERATION
 for details.
@@ -736,7 +740,7 @@ for details.
 .I thumbnail_create_command = \fI"string"
 .RS
 Command to use to create thumbnails for the index.
-Default is \fB"convert -scale <MAXW>x<MAXH> <IN> <OUT>"\fR.
+Default is \fB"convert -scale <MAXW>x<MAXH> -- <IN> <OUT>"\fR.
 See
 .B THUMBNAILS AND SCALED IMAGES GENERATION
 for details.

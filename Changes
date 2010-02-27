@@ -1,3 +1,24 @@
+llgal (0.13.16)
+
+  * Add exifdesc to --cc to generate the caption from the Exif image
+    description (thanks Fmiser).
+  * Add LNKNOSLIDE: entry support for direct links without slide, as if
+    LNK_link_to_target was set to 1 (requested by Nathalie Furmento).
+  * Display Exif coordinates in decimal format (thanks Fmiser).
+  * Fix typos in the german translation (thanks Nadar).
+  * Fix replacing of <!--CSS--> (thanks Steffen Klatt).
+  * Fix support for filenames with initial dash character in convert
+    command-lines (thanks Tiago Bortoletto Vaz in Debian bug #570553).
+  * Fix PARENT and PREV/NEXT links between galleries, honor user changes
+    in the captions file instead of overriding with the default values
+    (reported by Gerfried Fuchs in Debian bug #478699).
+  * Clarify in the manpage that replacing <!--FOO--> variables will never
+    automatically add double-quotes (requested by Samuel Thibault).
+  * Document better how to provide custom thumbnails and scaled images
+    using mythumb_ and myscaled_ prefixes.
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Sat, 27 Feb 2010 19:26:00 +0100
+
 llgal (0.13.15)
 
   * Thumbnails now always point to the slide, even if it just contains

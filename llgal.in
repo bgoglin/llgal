@@ -204,6 +204,7 @@ my $TYPE_FILE = 4 ;
 my $TYPE_DIR = 5 ;
 my $TYPE_LINE = 6 ;
 my $TYPE_BREAK = 7 ;
+my $TYPE_LINKNOSLIDE = 8 ; # only used when calling create_nofile_entry, which changes it into $TYPE_LINK with no_slide set
 
 ###################################################################################
 # checking files
@@ -292,6 +293,11 @@ sub generate_caption_from_image_comment {
 	    } elsif ($type =~ m/^exif$/i) {
 		# Exif comment
 		my $comment = $exif_infos->{UserComment} ;
+		push (@texts, $comment)
+		    if $comment ;
+	    } elsif ($type =~ m/^exifdesc$/i) {
+		# Exif image description
+		my $comment = $exif_infos->{ImageDescription} ;
 		push (@texts, $comment)
 		    if $comment ;
 	    } else {
@@ -422,6 +428,8 @@ sub create_file_entry {
 		$opts->{exiftool} = new Image::ExifTool;
 		# accept unknown tags, just in case...
 		$opts->{exiftool}->Options(Unknown => 1) ;
+		# set the GPS coodinate format  **HACK**
+		$opts->{exiftool}->Options(CoordFormat => "%.6f") ;
 		# dateFormat should be initialized with whatever the user said to --ct
 		$opts->{exiftool}->Options(DateFormat => $opts->{timestamp_format_in_caption}) ;
 
@@ -432,7 +440,7 @@ sub create_file_entry {
 		    @exif_tags = ('ImageWidth', 'ImageHeight', @{$opts->{show_exif_tags}}) ;
 		    @exif_tags = (@exif_tags, 'DateTimeOriginal')
 			if $opts->{make_caption_from_image_timestamp} ;
-		    @exif_tags = (@exif_tags, 'UserComment', 'Comment')
+		    @exif_tags = (@exif_tags, 'UserComment', 'Comment', 'ImageDescription')
 			if $opts->{make_caption_from_image_comment} ;
 		}
 		@{$opts->{cached_exif_tags_list}} = @exif_tags ;
@@ -788,6 +796,12 @@ sub create_nofile_entry {
     my $url = shift ;
     my $linktext = shift ;
     my $caption = shift ;
+
+    # special type case
+    if ($type == $TYPE_LINKNOSLIDE) {
+	$entry->{no_slide} = 1 ;
+	$type = $TYPE_LINK ;
+    }
 
     # set the type
     $entry->{type} = $type ;
@@ -1439,6 +1453,10 @@ sub read_captions_file {
 		    # link slide
 		    $entry = create_nofile_entry ($TYPE_LINK, $1, $2, $3) ;
 
+		} elsif ($line =~ m/^LNKNOSLIDE:\s*(.+)\s+----\s*(?:\s(.*))?\s*$/) {
+		    # direct link without slide
+		    $entry = create_nofile_entry ($TYPE_LINKNOSLIDE, $1, $2, undef) ;
+
 		} elsif ($line =~ m/^DIR:\s*(.+)\s+----\s+(.+)\s+----\s*(?:\s(.*))?\s*$/) {
 		    # directory slide
 		    $entry = create_file_entry ($TYPE_DIR, $1, $2, $3) ;
@@ -1537,16 +1555,22 @@ sub process_gallery_family {
     my $opts = shift ;
 
     if ($opts->{parent_gallery_link}) {
-	$gallery->{parent_gallery_link_text} = $opts->{parent_gallery_link_text} ;
-	$gallery->{parent_gallery_link_target} = "../$opts->{index_filename}.$opts->{www_extension}" ;
+	$gallery->{parent_gallery_link_text} = $opts->{parent_gallery_link_text}
+	    unless defined $gallery->{parent_gallery_link_text} ;
+	$gallery->{parent_gallery_link_target} = "../$opts->{index_filename}.$opts->{www_extension}"
+	    unless defined $gallery->{parent_gallery_link_target} ;
     }
     if (defined $family->{prev_gallery_link_text}) {
-	$gallery->{prev_gallery_link_text} = $opts->{prev_gallery_link_text} . $family->{prev_gallery_link_text} ;
-	$gallery->{prev_gallery_link_target} = $family->{prev_gallery_link_target} ;
+	$gallery->{prev_gallery_link_text} = $opts->{prev_gallery_link_text} . $family->{prev_gallery_link_text}
+	    unless defined $gallery->{prev_gallery_link_text} ;
+	$gallery->{prev_gallery_link_target} = $family->{prev_gallery_link_target}
+	    unless defined $gallery->{prev_gallery_link_target} ;
     }
     if (defined $family->{next_gallery_link_text}) {
-	$gallery->{next_gallery_link_text} = $opts->{next_gallery_link_text} . $family->{next_gallery_link_text} ;
-	$gallery->{next_gallery_link_target} = $family->{next_gallery_link_target} ;
+	$gallery->{next_gallery_link_text} = $opts->{next_gallery_link_text} . $family->{next_gallery_link_text}
+	    unless defined $gallery->{next_gallery_link_text} ;
+	$gallery->{next_gallery_link_target} = $family->{next_gallery_link_target}
+	    unless defined $gallery->{next_gallery_link_target} ;
     }
 }
 
@@ -1622,7 +1646,7 @@ sub precompute_common_html_fields
     # css
     $common_fields->{"<!--CSS-->"} = "$self->{local_llgal_dir}/$opts->{css_filename}" ;
     if ($opts->{css_location}) {
-	$common_fields->{"<!-- CSS -->"} = $opts->{css_location} ;
+	$common_fields->{"<!--CSS-->"} = $opts->{css_location} ;
     }
 
     # codeset
@@ -2022,7 +2046,7 @@ sub generate_index {
 
 	    my $link = $entry->{url} ;
 	    # if making slide and not pointing to target, the thumbnail points to the slide
-	    if (!$opts->{make_no_slides}
+	    if (!$opts->{make_no_slides} and !$entry->{no_slide}
 		and (
 		     ($type == $TYPE_IMAGE)
 		     or ($type == $TYPE_MOVIE and !$opts->{MVI_link_to_target})
