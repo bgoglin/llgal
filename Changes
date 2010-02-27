@@ -10,6 +10,8 @@ llgal (xxx)
   * Fix PARENT and PREV/NEXT links between galleries, honor user changes
     in the captions file instead of overriding with the default values
     (thanks to Gerfried Fuchs in Debian bug #478699).
+  * Clarify in the manpage that replacing <!--FOO--> variables will never
+    automatically add double-quotes (requested by Samuel Thibault).
 
 
 llgal (0.13.15)

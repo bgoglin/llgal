@@ -1104,6 +1104,18 @@ See
 .B CAPTIONS
 for details.
 
+When modifying the templates, beware that the HTML syntax requires
+double-quotes around filenames, URL, etc. These double-quotes will
+never be automatically added when replacing these automatic variables.
+So you must keep double-quotes around variables when needed, for instance:
+.RS
+.B <a href="<!--NEXT-SLIDE-->"><!--NEXT-SLIDE-LINK-TEXT--></a>
+.RE
+will be changed into
+.RS
+.B <a href="slide_04.html">Next slide</a>
+.RE
+
 
 
 
