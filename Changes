@@ -1,4 +1,4 @@
-llgal (0.13.16)
+llgal (xxx)
 
   * Add exifdesc to --cc to generate the caption from the Exif image
     description (thanks Fmiser).
