@@ -10,8 +10,9 @@ llgal (0.13.16-1) unstable; urgency=low
   * Bump Standards-Version to 3.8.4, no changes needed.
   * Bump debhelper compatibility level to 5, adjust Build-Depends,
     add {misc:Depends} to Depends.
+  * Wrap and reorder Build-Depends, Depends and Recommends.
 
- -- Brice Goglin <bgoglin@debian.org>  Sun, 28 Feb 2010 08:48:18 +0100
+ -- Brice Goglin <bgoglin@debian.org>  Sun, 28 Feb 2010 08:50:05 +0100
 
 llgal (0.13.15-1) unstable; urgency=low
 

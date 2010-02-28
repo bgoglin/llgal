@@ -2,7 +2,9 @@ Source: llgal
 Section: web
 Priority: optional
 Maintainer: Brice Goglin <bgoglin@debian.org>
-Build-Depends: debhelper (>= 5), quilt (>= 0.40)
+Build-Depends:
+ debhelper (>= 5),
+ quilt (>= 0.40)
 Homepage: http://home.gna.org/llgal/
 Standards-Version: 3.8.4
 Vcs-Svn: svn://svn.gna.org/svn/llgal/branches/debian
@@ -10,8 +12,15 @@ Vcs-Browser: http://svn.gna.org/viewcvs/llgal/branches/debian/
 
 Package: llgal
 Architecture: all
-Depends: imagemagick, ${misc:Depends}, ${perl:Depends}, libimage-size-perl, liburi-perl, liblocale-gettext-perl
-Recommends: libimage-exiftool-perl
+Depends:
+ ${misc:Depends},
+ ${perl:Depends},
+ libimage-size-perl,
+ liblocale-gettext-perl,
+ liburi-perl,
+ imagemagick
+Recommends:
+ libimage-exiftool-perl
 Description: Command-line online gallery generator
  llgal is a online gallery generator for images, videos, ...
  It is based on igal and adds multiple features including:
