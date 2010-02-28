@@ -8,8 +8,10 @@ llgal (0.13.16-1) unstable; urgency=low
       closes: #478699.
   * Add Vcs-Svn and Vcs-Browser fields.
   * Bump Standards-Version to 3.8.4, no changes needed.
+  * Bump debhelper compatibility level to 5, adjust Build-Depends,
+    no change needed.
 
- -- Brice Goglin <bgoglin@debian.org>  Sun, 28 Feb 2010 08:33:35 +0100
+ -- Brice Goglin <bgoglin@debian.org>  Sun, 28 Feb 2010 08:42:50 +0100
 
 llgal (0.13.15-1) unstable; urgency=low
 
