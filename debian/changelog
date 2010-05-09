@@ -1,3 +1,10 @@
+llgal (0.13.16-2) unstable; urgency=low
+
+  * Fix the description of -n in the manpage, thanks Paul Menzel,
+    closes: #579096.
+
+ -- Brice Goglin <bgoglin@debian.org>  Sun, 09 May 2010 12:09:29 +0200
+
 llgal (0.13.16-1) unstable; urgency=low
 
   * New upstream release.
