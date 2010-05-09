@@ -1,1 +1,3 @@
 debianize_dependencies_in_warnings.patch
+01_fix_-n_manpage.patch
+
