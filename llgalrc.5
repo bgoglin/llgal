@@ -15,7 +15,7 @@ llgalrc \- Configuration file for llgal
 
 .I captions_header_filename = \fI"filename"
 .RS
-Name of the captions header file that is inserted at the begining of
+Name of the captions header file that is inserted at the beginning of
 generated captions files.
 Default is
 .BR captions.header .
@@ -478,7 +478,7 @@ Slide counter may be disabled by setting to an empty string
 .I index_title_default = \fI"string"
 .RS
 Default title of the gallery.
-May be overriden with [--title <s>] or TITLE: in the captions file.
+May be overridden with [\-\-title <s>] or TITLE: in the captions file.
 Default is \fB"Index of pictures"\fR.
 .RE
 .I parent_gallery_link_text = \fI"string"
@@ -626,7 +626,7 @@ Default is
 Exclude files whose name matches
 .RB [ "--exclude <s>" ].
 This option may be used several times.
-Dot begining files and html files are excluded by default.
+Dot beginning files and html files are excluded by default.
 .RE
 .I include = \fI"string"
 .RS
@@ -663,14 +663,14 @@ Default is
 .RE
 .I entitle_sections = <0/1>
 .RS
-Add the subdirectory name as a title at the begining each section
+Add the subdirectory name as a title at the beginning each section
 .RB [ --Ps ].
 Default is
 .BR 0 " (" disabled ).
 .RE
 .I separate_sections = <0/1>
 .RS
-Add a horizontal line at the begining of each section in the index
+Add a horizontal line at the beginning of each section in the index
 .RB [ --Ps ].
 Default is
 .BR 0 " (" disabled ).
@@ -737,7 +737,7 @@ environment variable might prevent this option from working.
 .I scaled_create_command = \fI"string"
 .RS
 Command to use to create scaled images for slides.
-Default is \fB"convert -scale <MAXW>x<MAXH> -- <IN> <OUT>"\fR.
+Default is \fB"convert \-\-scale <MAXW>x<MAXH> \-\- <IN> <OUT>"\fR.
 See
 .B THUMBNAILS AND SCALED IMAGES GENERATION
 for details.
@@ -745,7 +745,7 @@ for details.
 .I thumbnail_create_command = \fI"string"
 .RS
 Command to use to create thumbnails for the index.
-Default is \fB"convert -scale <MAXW>x<MAXH> -- <IN> <OUT>"\fR.
+Default is \fB"convert \-\-scale <MAXW>x<MAXH> \-\- <IN> <OUT>"\fR.
 See
 .B THUMBNAILS AND SCALED IMAGES GENERATION
 for details.

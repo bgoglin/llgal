@@ -32,7 +32,7 @@ The following perl libraries are also needed:
 These dependencies are automatically installed when installing
 Debian or Gentoo prepackaged versions.
 
-Additionaly, some options (--cc, --ct and --exfi) require the following
+Additionally, some options (--cc, --ct and --exfi) require the following
 library to extract tags from images:
 * Image::ExifTool
 If not installed, llgal with work fine as long as none of these options

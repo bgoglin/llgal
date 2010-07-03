@@ -1,6 +1,7 @@
 
   * Fix the description of -n in the manpage (thanks Paul Menzel
     in Debian bug #579096).
+  * Fix miscellaneous typos everywhere, reported by Debian's lintian.
 
 
 llgal (0.13.16)
@@ -296,7 +297,7 @@ llgal (0.13.3)
     a unique gallery with photos from several subdirectories
     (requested by Samuel Mimram and Samuel Thibault).
     + Add --Ps (separate_sections) to automaticaly add BREAK and TXT
-      entries at the begining of each section.
+      entries at the beginning of each section.
   * When -n is passed, slide filename is generated from the image filename
     and the slide filename prefix (it helps cleaning HTML files).
     + Add a note about slide_filenameprefix == "" which could lead to removal
@@ -475,7 +476,7 @@ llgal (0.12)
   * Fix -d and -R by checking the destination directory after -d has been
     parsed (reported by Marcus Better in Debian bug #329168). This is done by
     parsing -d very early, which is required since it changes the location of
-    the local configuration file (hopefully, it cannot be overriden in a
+    the local configuration file (hopefully, it cannot be overridden in a
     configuration file).
   * Cleanup destination directory name printing.
   * Major cleanup of the manpage.
@@ -508,7 +509,7 @@ llgal (0.11.3)
   * Fix missing update of sanity checks, numerical options processing,
     and various other options that were broken since previous release
     (reported by Hanus Adler in Debian bug #337380).
-  * Do not parse behavior options at the begining since there's no more
+  * Do not parse behavior options at the beginning since there's no more
     any reason. Command line options are thus processed after all
     configuration files. This makes -f work if a config file contains
     force_image_regeneration = 0
@@ -587,7 +588,7 @@ llgal (0.11.1)
     options (scaled_image_filenameprefix and thumbnail_image_filenameprefix).
   * One more reorganization of options in llgalrc and generated config files.
     Hope this one will be fine.
-  * Fix compilation and installation when DESTDIR is overriden.
+  * Fix compilation and installation when DESTDIR is overridden.
   * Fix and cleanup documentation and Makefile.
 
  -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Wed, 14 Sep 2005 09:43:55 +0200
@@ -645,7 +646,7 @@ llgal (0.11)
   * caption_removal_line config option is now captions_removal_line.
   * Warning if it seems llgal is running inside .llgal.
   * Add all default values of configuration options in the manpage.
-  * Add captions.header file which contains what's inserted at the begining of
+  * Add captions.header file which contains what's inserted at the beginning of
     generated captions files.
   * Allow empty gallery.
   * Spaces are now supported in convert options.
@@ -879,7 +880,7 @@ llgal (0.8)
   * Show line number and contents when reporting an error while reading
     captions or config files.
   * Be more flexible with spaces in captions: the last one is facultative
-    when there's no caption; the one after TYP: at the begining too.
+    when there's no caption; the one after TYP: at the beginning too.
   * Rename several options:
     - no_film_effect => show_no_film_effect
     - no_slide_counter => show_no_slide_counter

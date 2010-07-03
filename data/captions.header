@@ -1,5 +1,5 @@
 
-# Use the following syntax (without the begining '# ') to define captions line:
+# Use the following syntax (without the beginning '# ') to define captions line:
 # TITLE: title of the index
 # PARENT: label of the link to the parent gallery
 # PREV: label of the link to the previous gallery ---- url of the previous gallery
