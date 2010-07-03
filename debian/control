@@ -3,8 +3,7 @@ Section: web
 Priority: optional
 Maintainer: Brice Goglin <bgoglin@debian.org>
 Build-Depends:
- debhelper (>= 5),
- quilt (>= 0.40)
+ debhelper (>= 5)
 Homepage: http://home.gna.org/llgal/
 Standards-Version: 3.8.4
 Vcs-Svn: svn://svn.gna.org/svn/llgal/branches/debian

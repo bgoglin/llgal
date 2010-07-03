@@ -1,8 +1,9 @@
 llgal (0.13.16-3) UNRELEASED; urgency=low
 
   * Add descriptions to patches.
+  * Switch to dpkg-source 3.0 (quilt) format
 
- -- Brice Goglin <bgoglin@debian.org>  Sat, 03 Jul 2010 16:31:44 +0200
+ -- Brice Goglin <bgoglin@debian.org>  Sat, 03 Jul 2010 16:50:14 +0200
 
 llgal (0.13.16-2) unstable; urgency=low
 
