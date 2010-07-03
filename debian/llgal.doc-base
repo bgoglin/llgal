@@ -1,0 +1,10 @@
+Document: llgal-howto
+Title: llgal Manual
+Author: Brice Goglin
+Abstract: This manual describes what llgal is, and how it can be used.
+Section: Web Development
+
+Format: HTML
+Index: /usr/share/doc/llgal/howto.html
+Files: /usr/share/doc/llgal/*.html
+

@@ -3,8 +3,9 @@ llgal (0.13.16-3) UNRELEASED; urgency=low
   * Add descriptions to patches.
   * Switch to dpkg-source 3.0 (quilt) format
   * Bump Standards-Version to 3.9.0, no changes needed.
+  * Register howto.html to doc-base.
 
- -- Brice Goglin <bgoglin@debian.org>  Sat, 03 Jul 2010 16:58:14 +0200
+ -- Brice Goglin <bgoglin@debian.org>  Sat, 03 Jul 2010 17:42:56 +0200
 
 llgal (0.13.16-2) unstable; urgency=low
 
