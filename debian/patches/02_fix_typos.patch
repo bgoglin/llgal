@@ -1,0 +1,317 @@
+Taken from upstream SVN repository to make lintian happy.
+
+Index: llgal.in
+===================================================================
+--- a/llgal.in	(révision 709)
++++ b/llgal.in	(révision 710)
+@@ -1444,7 +1444,7 @@
+ 		my $entry ;
+ 		# flexibility:
+ 		# - the last \s might be omitted when there's no caption
+-		# - \s is facultative after TYP: at the begining
++		# - \s is facultative after TYP: at the beginning
+ 		if ($line =~ m/^TXT:\s*(.+)\s+----\s*(?:\s(.*))?\s*$/) {
+ 		    # text slide
+ 		    $entry = create_nofile_entry ($TYPE_TEXT, undef, $1, $2) ;
+@@ -2360,7 +2360,7 @@
+     # setup the destination directory
+     setup_destination ;
+ 
+-    # add recursive specific opts first, so that they may be locally overriden
++    # add recursive specific opts first, so that they may be locally overridden
+     $opts_without_defaults = Llgal::Config::merge_opts_into ($generic_opts, $recursive_opts) ;
+ 
+     # evaluate gallery specific configuration, without modifying $generic_opts
+Index: llgalrc.5
+===================================================================
+--- a/llgalrc.5	(révision 709)
++++ b/llgalrc.5	(révision 710)
+@@ -15,7 +15,7 @@
+ 
+ .I captions_header_filename = \fI"filename"
+ .RS
+-Name of the captions header file that is inserted at the begining of
++Name of the captions header file that is inserted at the beginning of
+ generated captions files.
+ Default is
+ .BR captions.header .
+@@ -478,7 +478,7 @@
+ .I index_title_default = \fI"string"
+ .RS
+ Default title of the gallery.
+-May be overriden with [--title <s>] or TITLE: in the captions file.
++May be overridden with [\-\-title <s>] or TITLE: in the captions file.
+ Default is \fB"Index of pictures"\fR.
+ .RE
+ .I parent_gallery_link_text = \fI"string"
+@@ -626,7 +626,7 @@
+ Exclude files whose name matches
+ .RB [ "--exclude <s>" ].
+ This option may be used several times.
+-Dot begining files and html files are excluded by default.
++Dot beginning files and html files are excluded by default.
+ .RE
+ .I include = \fI"string"
+ .RS
+@@ -663,14 +663,14 @@
+ .RE
+ .I entitle_sections = <0/1>
+ .RS
+-Add the subdirectory name as a title at the begining each section
++Add the subdirectory name as a title at the beginning each section
+ .RB [ --Ps ].
+ Default is
+ .BR 0 " (" disabled ).
+ .RE
+ .I separate_sections = <0/1>
+ .RS
+-Add a horizontal line at the begining of each section in the index
++Add a horizontal line at the beginning of each section in the index
+ .RB [ --Ps ].
+ Default is
+ .BR 0 " (" disabled ).
+@@ -737,7 +737,7 @@
+ .I scaled_create_command = \fI"string"
+ .RS
+ Command to use to create scaled images for slides.
+-Default is \fB"convert -scale <MAXW>x<MAXH> -- <IN> <OUT>"\fR.
++Default is \fB"convert \-\-scale <MAXW>x<MAXH> \-\- <IN> <OUT>"\fR.
+ See
+ .B THUMBNAILS AND SCALED IMAGES GENERATION
+ for details.
+@@ -745,7 +745,7 @@
+ .I thumbnail_create_command = \fI"string"
+ .RS
+ Command to use to create thumbnails for the index.
+-Default is \fB"convert -scale <MAXW>x<MAXH> -- <IN> <OUT>"\fR.
++Default is \fB"convert \-\-scale <MAXW>x<MAXH> \-\- <IN> <OUT>"\fR.
+ See
+ .B THUMBNAILS AND SCALED IMAGES GENERATION
+ for details.
+Index: doc/llgalrc
+===================================================================
+--- a/doc/llgalrc	(révision 709)
++++ b/doc/llgalrc	(révision 710)
+@@ -2,7 +2,7 @@
+ # These options may be defined in /etc/llgal/llgalrc, a per-user
+ # ${HOME}/.llgal/llgalrc file or a directory-specific .llgal/llgalrc.
+ 
+-# Most of these options may later be overriden by command line options.
++# Most of these options may later be overridden by command line options.
+ # Default are shown in examples below.
+ # Syntax is one of these:
+ # variable = "string"
+@@ -13,7 +13,7 @@
+ 
+ ##### Name of generic llgal files #####
+ 
+-# Name of the captions header file that is inserted at the begining
++# Name of the captions header file that is inserted at the beginning
+ # of generated captions files.
+ # captions_header_filename = "captions.header"
+ 
+@@ -224,7 +224,7 @@
+ ##### Text #####
+ 
+ # Default title of the gallery.
+-# May be overriden with [--title <s>] or TITLE: in the captions file.
++# May be overridden with [--title <s>] or TITLE: in the captions file.
+ # index_title_default = "Index of pictures"
+ 
+ # Change text in links to parent directory.
+@@ -328,10 +328,10 @@
+ # Add all subdirectories to the list of sections [--Pall]
+ # recursive_sections = 0
+ 
+-# Add the subdirectory name as a title at the begining of each section [--Ps]
++# Add the subdirectory name as a title at the beginning of each section [--Ps]
+ # entitle_sections = 0
+ 
+-# Add a horizontal line at the begining of each section in the index [--Ps]
++# Add a horizontal line at the beginning of each section in the index [--Ps]
+ # separate_sections = 0
+ 
+ ##### Recursion #####
+Index: doc/howto.html
+===================================================================
+--- a/doc/howto.html	(révision 709)
++++ b/doc/howto.html	(révision 710)
+@@ -413,7 +413,7 @@
+ 
+ If you want these subdirectories to appear as sections, <tt>llgal</tt> can generate
+ a horizontal line between each subdirectory and add a title in the index with <tt>--Ps</tt>.
+-Additionaly, <tt>llgal</tt> can display the title as regular text in the index instead
++Additionally, <tt>llgal</tt> can display the title as regular text in the index instead
+ of a text thumbnail with <tt>-L</tt>.
+ 
+ <pre>
+Index: Changes
+===================================================================
+--- a/Changes	(révision 709)
++++ b/Changes	(révision 710)
+@@ -1,6 +1,7 @@
+ 
+   * Fix the description of -n in the manpage (thanks Paul Menzel
+     in Debian bug #579096).
++  * Fix miscellaneous typos everywhere, reported by Debian's lintian.
+ 
+ 
+ llgal (0.13.16)
+@@ -296,7 +297,7 @@
+     a unique gallery with photos from several subdirectories
+     (requested by Samuel Mimram and Samuel Thibault).
+     + Add --Ps (separate_sections) to automaticaly add BREAK and TXT
+-      entries at the begining of each section.
++      entries at the beginning of each section.
+   * When -n is passed, slide filename is generated from the image filename
+     and the slide filename prefix (it helps cleaning HTML files).
+     + Add a note about slide_filenameprefix == "" which could lead to removal
+@@ -475,7 +476,7 @@
+   * Fix -d and -R by checking the destination directory after -d has been
+     parsed (reported by Marcus Better in Debian bug #329168). This is done by
+     parsing -d very early, which is required since it changes the location of
+-    the local configuration file (hopefully, it cannot be overriden in a
++    the local configuration file (hopefully, it cannot be overridden in a
+     configuration file).
+   * Cleanup destination directory name printing.
+   * Major cleanup of the manpage.
+@@ -508,7 +509,7 @@
+   * Fix missing update of sanity checks, numerical options processing,
+     and various other options that were broken since previous release
+     (reported by Hanus Adler in Debian bug #337380).
+-  * Do not parse behavior options at the begining since there's no more
++  * Do not parse behavior options at the beginning since there's no more
+     any reason. Command line options are thus processed after all
+     configuration files. This makes -f work if a config file contains
+     force_image_regeneration = 0
+@@ -587,7 +588,7 @@
+     options (scaled_image_filenameprefix and thumbnail_image_filenameprefix).
+   * One more reorganization of options in llgalrc and generated config files.
+     Hope this one will be fine.
+-  * Fix compilation and installation when DESTDIR is overriden.
++  * Fix compilation and installation when DESTDIR is overridden.
+   * Fix and cleanup documentation and Makefile.
+ 
+  -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Wed, 14 Sep 2005 09:43:55 +0200
+@@ -645,7 +646,7 @@
+   * caption_removal_line config option is now captions_removal_line.
+   * Warning if it seems llgal is running inside .llgal.
+   * Add all default values of configuration options in the manpage.
+-  * Add captions.header file which contains what's inserted at the begining of
++  * Add captions.header file which contains what's inserted at the beginning of
+     generated captions files.
+   * Allow empty gallery.
+   * Spaces are now supported in convert options.
+@@ -879,7 +880,7 @@
+   * Show line number and contents when reporting an error while reading
+     captions or config files.
+   * Be more flexible with spaces in captions: the last one is facultative
+-    when there's no caption; the one after TYP: at the begining too.
++    when there's no caption; the one after TYP: at the beginning too.
+   * Rename several options:
+     - no_film_effect => show_no_film_effect
+     - no_slide_counter => show_no_slide_counter
+Index: data/captions.header
+===================================================================
+--- a/data/captions.header	(révision 709)
++++ b/data/captions.header	(révision 710)
+@@ -1,5 +1,5 @@
+ 
+-# Use the following syntax (without the begining '# ') to define captions line:
++# Use the following syntax (without the beginning '# ') to define captions line:
+ # TITLE: title of the index
+ # PARENT: label of the link to the parent gallery
+ # PREV: label of the link to the previous gallery ---- url of the previous gallery
+Index: llgal.1
+===================================================================
+--- a/llgal.1	(révision 709)
++++ b/llgal.1	(révision 710)
+@@ -265,7 +265,7 @@
+ will
+ .B not
+ check whether a subdirectory is in the captions file.
+-All not-dot-begining subdirectories will be cleaned.
++All not-dot-beginning subdirectories will be cleaned.
+ 
+ 
+ .TP
+@@ -283,7 +283,7 @@
+ .TP
+ .B -A
+ All files in the current directory will get a slides,
+-except .html or dot-begining files.
++except .html or dot-beginning files.
+ Files are matched as images or movies first, and then
+ reverted as simple files instead.
+ The corresponding configuration file option is
+@@ -334,7 +334,7 @@
+ .TP
+ .BI --Ps
+ Add a horizontal line and the subdirectory name as a title at
+-the begining of each section.
++the beginning of each section.
+ The corresponding configuration file options are
+ .IR entitle_sections " and " separate_sections .
+ 
+@@ -449,7 +449,7 @@
+ .B --ct " [strftime_format]"
+ Add image timestamp tag to the generated captions,
+ and change its format if the optional argument is given
+-(replaces the old --ctf option).
++(replaces the old \-\-ctf option).
+ The corresponding configuration file option are
+ .IR make_caption_from_image_timestamp " and " timestamp_format_in_caption .
+ 
+@@ -915,7 +915,7 @@
+ .TP
+ Note that you can use whatever HTML syntax in the captions.
+ .RE
+-Line begining with a
++Line beginning with a
+ .RI #
+ are ignored.
+ 
+@@ -984,10 +984,10 @@
+ The command lines used to generate those images from your original images
+ are defined by the following configuration options:
+ .RS
+-.I scaled_create_command = "convert -scale <MAXW>x<MAXH> -- <IN> <OUT>"
++.I scaled_create_command = "convert --scale <MAXW>x<MAXH> -- <IN> <OUT>"
+ .RE
+ .RS
+-.I thumbnail_create_command = "convert -scale <MAXW>x<MAXH> -- <IN> <OUT>"
++.I thumbnail_create_command = "convert --scale <MAXW>x<MAXH> -- <IN> <OUT>"
+ .RE
+ 
+ You may change the value of these options to change the way the generation
+@@ -1154,7 +1154,7 @@
+ .B Text
+ section.
+ 
+-The locale configuration might be overriden with the
++The locale configuration might be overridden with the
+ .B --lang
+ option or
+ .B language
+@@ -1177,7 +1177,7 @@
+ 
+ Character encoding is chosen from the locale configuration and set in
+ the HTML headers.
+-It may be overriden by using
++It may be overridden by using
+ .B --codeset
+ or the
+ .B codeset
+Index: README
+===================================================================
+--- a/README	(révision 709)
++++ b/README	(révision 710)
+@@ -32,7 +32,7 @@
+ These dependencies are automatically installed when installing
+ Debian or Gentoo prepackaged versions.
+ 
+-Additionaly, some options (--cc, --ct and --exfi) require the following
++Additionally, some options (--cc, --ct and --exfi) require the following
+ library to extract tags from images:
+ * Image::ExifTool
+ If not installed, llgal with work fine as long as none of these options
