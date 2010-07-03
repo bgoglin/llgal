@@ -1,4 +1,4 @@
-llgal (0.13.16-3) UNRELEASED; urgency=low
+llgal (0.13.16-3) unstable; urgency=low
 
   * Add descriptions to patches.
   * Switch to dpkg-source 3.0 (quilt) format
@@ -6,7 +6,7 @@ llgal (0.13.16-3) UNRELEASED; urgency=low
   * Register howto.html to doc-base.
   * Add 02_fix_typos.patch to make lintian happy.
 
- -- Brice Goglin <bgoglin@debian.org>  Sat, 03 Jul 2010 18:15:18 +0200
+ -- Brice Goglin <bgoglin@debian.org>  Sat, 03 Jul 2010 18:19:45 +0200
 
 llgal (0.13.16-2) unstable; urgency=low
 
