@@ -1,6 +1,8 @@
 llgal (0.13.17-1) unstable; urgency=low
 
   * New upstream release.
+    + Fix compatibility with graphicsmagick-imagemagick-compat,
+      closes: #604106.
   * Drop 01_fix_-n_manpage.patch and 02_fix_typos.patch, applied upstream.
   * Add dummy build-indep and build-arch rules to fix Lintian warnings.
 
