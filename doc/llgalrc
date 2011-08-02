@@ -2,7 +2,7 @@
 # These options may be defined in /etc/llgal/llgalrc, a per-user
 # ${HOME}/.llgal/llgalrc file or a directory-specific .llgal/llgalrc.
 
-# Most of these options may later be overriden by command line options.
+# Most of these options may later be overridden by command line options.
 # Default are shown in examples below.
 # Syntax is one of these:
 # variable = "string"
@@ -13,7 +13,7 @@
 
 ##### Name of generic llgal files #####
 
-# Name of the captions header file that is inserted at the begining
+# Name of the captions header file that is inserted at the beginning
 # of generated captions files.
 # captions_header_filename = "captions.header"
 
@@ -224,7 +224,7 @@
 ##### Text #####
 
 # Default title of the gallery.
-# May be overriden with [--title <s>] or TITLE: in the captions file.
+# May be overridden with [--title <s>] or TITLE: in the captions file.
 # index_title_default = "Index of pictures"
 
 # Change text in links to parent directory.
@@ -328,10 +328,10 @@
 # Add all subdirectories to the list of sections [--Pall]
 # recursive_sections = 0
 
-# Add the subdirectory name as a title at the begining of each section [--Ps]
+# Add the subdirectory name as a title at the beginning of each section [--Ps]
 # entitle_sections = 0
 
-# Add a horizontal line at the begining of each section in the index [--Ps]
+# Add a horizontal line at the beginning of each section in the index [--Ps]
 # separate_sections = 0
 
 ##### Recursion #####

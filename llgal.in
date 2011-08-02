@@ -1444,7 +1444,7 @@ sub read_captions_file {
 		my $entry ;
 		# flexibility:
 		# - the last \s might be omitted when there's no caption
-		# - \s is facultative after TYP: at the begining
+		# - \s is facultative after TYP: at the beginning
 		if ($line =~ m/^TXT:\s*(.+)\s+----\s*(?:\s(.*))?\s*$/) {
 		    # text slide
 		    $entry = create_nofile_entry ($TYPE_TEXT, undef, $1, $2) ;
@@ -2360,7 +2360,7 @@ sub main_process {
     # setup the destination directory
     setup_destination ;
 
-    # add recursive specific opts first, so that they may be locally overriden
+    # add recursive specific opts first, so that they may be locally overridden
     $opts_without_defaults = Llgal::Config::merge_opts_into ($generic_opts, $recursive_opts) ;
 
     # evaluate gallery specific configuration, without modifying $generic_opts

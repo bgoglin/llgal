@@ -1,3 +1,9 @@
+llgal (0.13.17-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Brice Goglin <bgoglin@debian.org>  Tue, 02 Aug 2011 12:35:18 +0200
+
 llgal (0.13.16-3) unstable; urgency=low
 
   * Add descriptions to patches.

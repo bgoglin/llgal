@@ -265,7 +265,7 @@ or
 will
 .B not
 check whether a subdirectory is in the captions file.
-All not-dot-begining subdirectories will be cleaned.
+All not-dot-beginning subdirectories will be cleaned.
 
 
 .TP
@@ -283,7 +283,7 @@ The corresponding configuration file option is
 .TP
 .B -A
 All files in the current directory will get a slides,
-except .html or dot-begining files.
+except .html or dot-beginning files.
 Files are matched as images or movies first, and then
 reverted as simple files instead.
 The corresponding configuration file option is
@@ -334,7 +334,7 @@ The corresponding configuration file option is
 .TP
 .BI --Ps
 Add a horizontal line and the subdirectory name as a title at
-the begining of each section.
+the beginning of each section.
 The corresponding configuration file options are
 .IR entitle_sections " and " separate_sections .
 
@@ -449,7 +449,7 @@ The corresponding configuration file option is
 .B --ct " [strftime_format]"
 Add image timestamp tag to the generated captions,
 and change its format if the optional argument is given
-(replaces the old --ctf option).
+(replaces the old \-\-ctf option).
 The corresponding configuration file option are
 .IR make_caption_from_image_timestamp " and " timestamp_format_in_caption .
 
@@ -562,7 +562,7 @@ while the image is for the link to the index is kept.
 .B -n
 Use the image file names for the HTML slide files.
 Otherwise the default behavior is to simply name your slides
-.IR 1.html ", " 2.html ", "
+.IR slide_1.html ", " slide_2.html ", "
 and so on.
 
 The corresponding configuration file option is
@@ -915,7 +915,7 @@ adds a substitution to be applied to generated HTML pages.
 .TP
 Note that you can use whatever HTML syntax in the captions.
 .RE
-Line begining with a
+Line beginning with a
 .RI #
 are ignored.
 
@@ -984,10 +984,10 @@ was passed).
 The command lines used to generate those images from your original images
 are defined by the following configuration options:
 .RS
-.I scaled_create_command = "convert -scale <MAXW>x<MAXH> -- <IN> <OUT>"
+.I scaled_create_command = "convert --scale <MAXW>x<MAXH> -- <IN> <OUT>"
 .RE
 .RS
-.I thumbnail_create_command = "convert -scale <MAXW>x<MAXH> -- <IN> <OUT>"
+.I thumbnail_create_command = "convert --scale <MAXW>x<MAXH> -- <IN> <OUT>"
 .RE
 
 You may change the value of these options to change the way the generation
@@ -1154,7 +1154,7 @@ update all configuration options of the
 .B Text
 section.
 
-The locale configuration might be overriden with the
+The locale configuration might be overridden with the
 .B --lang
 option or
 .B language
@@ -1177,7 +1177,7 @@ See also
 
 Character encoding is chosen from the locale configuration and set in
 the HTML headers.
-It may be overriden by using
+It may be overridden by using
 .B --codeset
 or the
 .B codeset
