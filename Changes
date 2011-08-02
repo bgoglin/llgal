@@ -2,6 +2,8 @@
   * Fix the description of -n in the manpage (thanks Paul Menzel
     in Debian bug #579096).
   * Fix miscellaneous typos everywhere, reported by Debian's lintian.
+  * Adapt default convert command-line for graphicsmagick compatibility
+    (reported by Kenyon Ralph in Debian bug #604106).
 
 
 llgal (0.13.16)
