@@ -1,8 +1,10 @@
 llgal (0.13.17-1) unstable; urgency=low
 
   * New upstream release.
+  * Drop 01_fix_-n_manpage.patch and 02_fix_typos.patch, applied upstream.
+  * Add dummy build-indep and build-arch rules to fix Lintian warnings.
 
- -- Brice Goglin <bgoglin@debian.org>  Tue, 02 Aug 2011 12:35:18 +0200
+ -- Brice Goglin <bgoglin@debian.org>  Tue, 02 Aug 2011 12:39:05 +0200
 
 llgal (0.13.16-3) unstable; urgency=low
 
