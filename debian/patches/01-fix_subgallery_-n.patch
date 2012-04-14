@@ -1,0 +1,13 @@
+Index: llgal.in
+===================================================================
+--- a/llgal.in	(révision 734)
++++ b/llgal.in	(révision 735)
+@@ -940,7 +940,7 @@
+ 	    if ($opts->{make_slide_filename_from_filename}) {
+ 		if ($type == $TYPE_TEXT or $type == $TYPE_LINK) {
+ 		    $slide_filename = "$opts->{slide_filenameprefix}$counter_with_zeros.$opts->{www_extension}" ;
+-		} elsif ($opts->{make_slide_filename_from_extension}) {
++		} elsif ($opts->{make_slide_filename_from_extension} or $type == $TYPE_DIR) {
+ 		    $slide_filename = "$opts->{slide_filenameprefix}$filename.$opts->{www_extension}" ;
+ 		} else {
+ 		    my @parts = split (/\./, $filename) ;
