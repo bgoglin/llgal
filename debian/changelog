@@ -1,11 +1,11 @@
-llgal (0.13.17-2) UNRELEASED; urgency=low
+llgal (0.13.17-2) unstable; urgency=low
 
   * Bump Standards-Version to 3.9.3, no changes needed.
   * Fix copyright-refers-to-symlink-license.
   * Add 01-fix_subgallery_-n.patch to fix the slidename of sugalleries
     when -n is used, closes: #652929.
 
- -- Brice Goglin <bgoglin@debian.org>  Sat, 14 Apr 2012 08:27:39 +0200
+ -- Brice Goglin <bgoglin@debian.org>  Sat, 14 Apr 2012 09:35:49 +0200
 
 llgal (0.13.17-1) unstable; urgency=low
 
