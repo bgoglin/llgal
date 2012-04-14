@@ -940,7 +940,7 @@ sub finalize_entries {
 	    if ($opts->{make_slide_filename_from_filename}) {
 		if ($type == $TYPE_TEXT or $type == $TYPE_LINK) {
 		    $slide_filename = "$opts->{slide_filenameprefix}$counter_with_zeros.$opts->{www_extension}" ;
-		} elsif ($opts->{make_slide_filename_from_extension}) {
+		} elsif ($opts->{make_slide_filename_from_extension} or $type == $TYPE_DIR) {
 		    $slide_filename = "$opts->{slide_filenameprefix}$filename.$opts->{www_extension}" ;
 		} else {
 		    my @parts = split (/\./, $filename) ;

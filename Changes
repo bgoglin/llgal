@@ -1,3 +1,9 @@
+
+  * Fix slidenames for subgalleries when -n is used
+    (reported by Richard Betham in Debian bug #652929).
+
+
+
 llgal (0.13.17)
 
   * Fix the description of -n in the manpage (thanks Paul Menzel
