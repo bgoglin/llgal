@@ -1,6 +1,8 @@
 
   * Fix slidenames for subgalleries when -n is used
     (reported by Richard Betham in Debian bug #652929).
+  * Fix the recognition of existing captions file entries when filenames
+    contain special characters.
 
 
 

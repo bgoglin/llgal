@@ -1335,28 +1335,28 @@ sub generate_captions_entries {
 	if ($type == $TYPE_IMAGE) {
 	    print CAP "IMG: ". $entry->{filename}
 		." ---- ". $entry->{caption} ."\n"
-		unless grep { $captions[$_] =~ m/^(\s*IMG:)?\s*$entry->{filename}\s+----\s/ }
+		unless grep { $captions[$_] =~ m/^(\s*IMG:)?\s*\Q$entry->{filename}\E\s+----\s/ }
 		    ( 0 .. $#captions ) ;
 
 	} elsif ($type == $TYPE_MOVIE) {
 	    print CAP "MVI: " . $entry->{filename}
 		." ---- ". $entry->{linktext}
 		." ---- ". $entry->{caption} ."\n"
-		unless grep { $captions[$_] =~ m/^\s*MVI:\s*$entry->{filename}\s+----\s/ }
+		unless grep { $captions[$_] =~ m/^\s*MVI:\s*\Q$entry->{filename}\E\s+----\s/ }
 		    ( 0 .. $#captions ) ;
 
 	} elsif ($type == $TYPE_FILE) {
 	    print CAP "FIL: " . $entry->{filename}
 		." ---- ". $entry->{linktext}
 		." ---- ". $entry->{caption} ."\n"
-		unless grep { $captions[$_] =~ m/^\s*FIL:\s*$entry->{filename}\s+----\s/ }
+		unless grep { $captions[$_] =~ m/^\s*FIL:\s*\Q$entry->{filename}\E\s+----\s/ }
 		    ( 0 .. $#captions ) ;
 
 	} elsif ($type == $TYPE_DIR) {
 	    print CAP "DIR: " . $entry->{filename}
 		." ---- ". $entry->{linktext}
 		." ---- ". $entry->{caption} ."\n"
-		unless grep { $captions[$_] =~ m/^\s*DIR:\s*$entry->{filename}\s+----\s/ }
+		unless grep { $captions[$_] =~ m/^\s*DIR:\s*\Q$entry->{filename}\E\s+----\s/ }
 		    ( 0 .. $#captions ) ;
 
 	} elsif ($type == $TYPE_TEXT) {
