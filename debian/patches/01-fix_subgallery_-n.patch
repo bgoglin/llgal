@@ -1,3 +1,8 @@
+Fix the slidename of sugalleries when -n is used, closes: #652929.
+---
+ llgal.in |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
 Index: llgal.in
 ===================================================================
 --- a/llgal.in	(révision 734)
