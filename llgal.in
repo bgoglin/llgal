@@ -476,10 +476,11 @@ sub create_file_entry {
 	if ($opts->{make_caption_from_extension}) {
 	    push (@texts, $filename) ;
 	} elsif ($opts->{make_caption_from_filename}) {
-	    # remove the extension
-	    my @parts = split (/\./, $filename) ;
-	    pop @parts ;
-	    my $basename = join ('.', @parts) ;
+	    my $basename = $filename ;
+	    if ($type != $TYPE_DIR) {
+		# remove the extension
+		$basename =~ s/\.[^\.]+$// ;
+	    }
 	    push (@texts, $basename) ;
 	}
 	push (@texts, generate_caption_from_image_infos $entry->{exif_infos})

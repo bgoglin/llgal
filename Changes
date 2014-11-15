@@ -3,6 +3,8 @@
     (reported by Richard Betham in Debian bug #652929).
   * Fix the recognition of existing captions file entries when filenames
     contain special characters.
+  * Make --cf work with subdirectory entries by not removing the extension
+    and just using the entire directory name (reported by Bruno Raoult).
 
 
 
