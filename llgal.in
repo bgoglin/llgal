@@ -2501,3 +2501,10 @@ my $root_gallery = main_process {}, {} ;
 if (defined $self->{generate_config} and not $self->{generate_config} eq "local") {
     Llgal::Config::generate_config ($self, $self->{generate_config}, $opts_without_defaults) ;
 }
+
+# Indent style for emacs
+# Local Variables:
+# perl-indent-level: 4
+# tab-width: 8
+# indent-tabs-mode: t
+# End:
