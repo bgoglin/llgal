@@ -5,8 +5,8 @@
     contain special characters.
   * Make --cf work with subdirectory entries by not removing the extension
     and just using the entire directory name (reported by Bruno Raoult).
-
-
+  * New option (thumbnails_dimensions_from_css) to avoid any thumbnail
+    dimension in generated HTML.
 
 llgal (0.13.17)
 

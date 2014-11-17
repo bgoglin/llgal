@@ -387,7 +387,6 @@ sub create_file_entry {
 	    $linktext = $opts->{DIR_link_text}.$filename ;
 	}
 	$linktext =~ s/&/&amp;/g ;
-#       $linktext =~ s/"/&\#34;/g ;
     }
     $entry->{linktext} = $linktext ;
 
@@ -2072,23 +2071,27 @@ sub generate_index {
 	    if ($entry->{thumb_url}) {
 		# either IMG, or with a user-given thumbnail
 
-		print IXW "    <td class=\"thumb\" style=\"width: ${box_width}px; height: ${box_height}px;\">\n" ;
+		print IXW "    <td class=\"thumb\" ";
+		print IXW "style=\"width: ${box_width}px; height: ${box_height}px;\" "
+		    unless $opts->{thumbnails_dimensions_from_css} ;
+		print IXW ">\n" ;
 
 		if ($type == $TYPE_TEXT and $opts->{make_no_slides}) {
 		    # thumbnail without any link
 		    print IXW "      <img src=\"$entry->{thumb_url}\" "
-			."title=\"$title $entry->{scaled_dimstring}\" "
-			."style=\"width: ${thumb_width}px; height: ${thumb_height}px;\" "
-			."alt=\"$linktext $entry->{thumb_dimstring}\" />\n" ;
-
+			."title=\"$title $entry->{scaled_dimstring}\" ";
+		    print IXW "style=\"width: ${thumb_width}px; height: ${thumb_height}px;\" "
+			unless $opts->{thumbnails_dimensions_from_css} ;
+		    print IXW "alt=\"$linktext $entry->{thumb_dimstring}\" />\n" ;
 		} else {
 		    # thumbnail linking to the slide
 		    print IXW "      <a href=\"$link\" "
 			."title=\"$title $entry->{scaled_dimstring}\">\n" ;
-		    print IXW "        <img src=\"$entry->{thumb_url}\" "
-			."style=\"width: ${thumb_width}px; height: ${thumb_height}px;\" "
-			."alt=\"$linktext $entry->{thumb_dimstring}\" />\n" ;
-		    print IXW "      </a>" ;
+		    print IXW "	       <img src=\"$entry->{thumb_url}\" ";
+		    print IXW "style=\"width: ${thumb_width}px; height: ${thumb_height}px;\" "
+			unless $opts->{thumbnails_dimensions_from_css} ;
+		    print IXW "alt=\"$linktext $entry->{thumb_dimstring}\" />\n" ;
+		    print IXW "	     </a>" ;
 		}
 
 		print IXW "    </td>\n" ;
@@ -2096,7 +2099,10 @@ sub generate_index {
 	    } else {
 		# not IMG, without thumbnail
 
-		print IXW "    <td class=\"text-thumb\" style=\"width: ${box_width}px; height: ${box_height}px;\">\n" ;
+		print IXW "    <td class=\"text-thumb\" ";
+		print IXW "style=\"width: ${box_width}px; height: ${box_height}px;\" "
+		    unless $opts->{thumbnails_dimensions_from_css} ;
+		print IXW ">\n";
 
 		if ($type == $TYPE_TEXT and $opts->{make_no_slides}) {
 		    # thumbnail with basic text and that's it
