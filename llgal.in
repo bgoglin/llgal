@@ -387,6 +387,7 @@ sub create_file_entry {
 	    $linktext = $opts->{DIR_link_text}.$filename ;
 	}
 	$linktext =~ s/&/&amp;/g ;
+	# $linktext =~ s/"/&\#34;/g ;
     }
     $entry->{linktext} = $linktext ;
 
