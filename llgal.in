@@ -1641,8 +1641,8 @@ sub precompute_common_html_fields
 	}
     }
 
-    # index file
-    $common_fields->{"<!--INDEX-FILE-->"} = "$opts->{index_filename}.$opts->{www_extension}";
+    # index file (ugly hack to also generate a title attribute right after the href)
+    $common_fields->{"<!--INDEX-FILE-->"} = "$opts->{index_filename}.$opts->{www_extension}\" title=\"$opts->{over_index_link_text}" ;
 
     # css
     $common_fields->{"<!--CSS-->"} = "$self->{local_llgal_dir}/$opts->{css_filename}" ;
