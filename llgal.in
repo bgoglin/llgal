@@ -900,8 +900,9 @@ sub finalize_entries {
     if ($opts->{list_links}) {
 	map {
 	    my $type = $_->{type} ;
-	    if ($type == $TYPE_LINK or $type == $TYPE_DIR or $type == $TYPE_MOVIE
-		or $type == $TYPE_FILE or $type == $TYPE_TEXT) {
+	    if (!$_->{thumb_filename}
+		and ($type == $TYPE_LINK or $type == $TYPE_DIR or $type == $TYPE_MOVIE
+		     or $type == $TYPE_FILE or $type == $TYPE_TEXT)) {
 		$_->{no_thumb} = 1 ;
 	    }
 	} @entries ;
