@@ -357,6 +357,7 @@ sub make_safe_url {
 
 sub create_file_entry {
     my $entry = () ;
+    my $gallery = shift ;
     my $type = shift ;
     my $filename = shift ;
     my $linktext = shift ;
@@ -1015,6 +1016,7 @@ sub sort_entries {
 }
 
 sub get_entries_from_directory {
+    my $gallery = shift;
     my $dir = shift ;
     my $subdir = shift ;
     my $add_subdirs = shift ;
@@ -1049,7 +1051,7 @@ sub get_entries_from_directory {
 	if (-d "$dir$filename") {
 	    # directory
 	    if ($add_subdirs) {
-		my $entry = create_file_entry ($TYPE_DIR, $filename, undef, undef) ;
+		my $entry = create_file_entry ($gallery, $TYPE_DIR, $filename, undef, undef) ;
 		push @entries, $entry
 		    if defined $entry ;
 	    }
@@ -1060,14 +1062,14 @@ sub get_entries_from_directory {
 
 	    if ($filename =~ m/($opts->{image_extensions})$/i) {
 		# image
-		my $entry = create_file_entry ($TYPE_IMAGE, $filename, undef, undef) ;
+		my $entry = create_file_entry ($gallery, $TYPE_IMAGE, $filename, undef, undef) ;
 		goto JUST_A_FILE
 		    if not defined $entry ;
 		push @entries, $entry ;
 
 	    } elsif ($filename =~ m/($opts->{movie_extensions})$/i) {
 		# movie
-		my $entry = create_file_entry ($TYPE_MOVIE, $filename, undef, undef) ;
+		my $entry = create_file_entry ($gallery, $TYPE_MOVIE, $filename, undef, undef) ;
 		goto JUST_A_FILE
 		    if not defined $entry ;
 		push @entries, $entry ;
@@ -1076,7 +1078,7 @@ sub get_entries_from_directory {
 	      JUST_A_FILE:
 		if ($add_others) {
 		    # not an image, not a movie, just a file
-		    my $entry = create_file_entry ($TYPE_FILE, $filename, undef, undef) ;
+		    my $entry = create_file_entry ($gallery, $TYPE_FILE, $filename, undef, undef) ;
 		    push @entries, $entry
 			if defined $entry ;
 		}
@@ -1124,6 +1126,7 @@ sub get_subdir_tree {
 }
 
 sub get_entries {
+    my $gallery = shift ;
     my $opts = shift ;
     my @entries = () ;
 
@@ -1147,6 +1150,7 @@ sub get_entries {
 	    }
 	    # section entries
 	    push @entries, get_entries_from_directory
+		$gallery,
 		$self->{destination_dir},
 		$subdir,
 		($opts->{add_subdirs} or $opts->{recursive}),
@@ -1155,6 +1159,7 @@ sub get_entries {
 
     } else {
 	@entries = get_entries_from_directory
+	    $gallery,
 	    $self->{destination_dir},
 	    "",
 	    ($opts->{add_subdirs} or $opts->{recursive}),
@@ -1463,15 +1468,15 @@ sub read_captions_file {
 
 		} elsif ($line =~ m/^DIR:\s*(.+)\s+----\s+(.+)\s+----\s*(?:\s(.*))?\s*$/) {
 		    # directory slide
-		    $entry = create_file_entry ($TYPE_DIR, $1, $2, $3) ;
+		    $entry = create_file_entry ($gallery, $TYPE_DIR, $1, $2, $3) ;
 
 		} elsif ($line =~ m/^MVI:\s*(.+)\s+----\s+(.+)\s+----\s*(?:\s(.*))?\s*$/) {
 		    # movie slide
-		    $entry = create_file_entry ($TYPE_MOVIE, $1, $2, $3) ;
+		    $entry = create_file_entry ($gallery, $TYPE_MOVIE, $1, $2, $3) ;
 
 		} elsif ($line =~ m/^FIL:\s*(.+)\s+----\s+(.+)\s+----\s*(?:\s(.*))?\s*$/) {
 		    # movie slide
-		    $entry = create_file_entry ($TYPE_FILE, $1, $2, $3) ;
+		    $entry = create_file_entry ($gallery, $TYPE_FILE, $1, $2, $3) ;
 
 		} elsif ($line =~ m/^LINE/) {
 		    # horizontal line
@@ -1484,7 +1489,7 @@ sub read_captions_file {
 		} elsif ($line =~ m/^IMG:\s*(.+)\s+----\s*(?:\s(.*))?\s*$/
 			 or $line =~ m/^(.+)\s+----\s*(?:\s(.*))?\s*$/) {
 		    # image slide (default)
-		    $entry = create_file_entry ($TYPE_IMAGE, $1, undef, $2) ;
+		    $entry = create_file_entry ($gallery, $TYPE_IMAGE, $1, undef, $2) ;
 
 		} else {
 		    $messages->abort_percentage ;
@@ -2422,7 +2427,7 @@ sub main_process {
 	Llgal::Config::prepare_captions_variables ($self, $opts) ;
 
 	my $gallery = init_gallery () ;
-	my @entries = get_entries $opts ;
+	my @entries = get_entries $gallery, $opts ;
 	@{$gallery->{entries}} = @entries ;
 	finalize_entries $gallery, $opts ;
 	process_gallery_family $gallery, $family, $opts ;
@@ -2466,7 +2471,7 @@ sub main_process {
 	    $messages->print ("Found ". (scalar @{$gallery->{entries}}) ." entries in the captions file.\n") ;
 	} else {
 	    # generate the gallery from scratch
-	    @{$gallery->{entries}} = get_entries $opts ;
+	    @{$gallery->{entries}} = get_entries $gallery, $opts ;
 	    fill_entries $gallery ;
 	    $messages->print ("Found ". (scalar @{$gallery->{entries}}) ." entries in $destination_string\n") ;
 	}
