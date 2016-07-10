@@ -10,6 +10,8 @@
     and just using the entire directory name (reported by Bruno Raoult).
   * New option (thumbnails_dimensions_from_css) to avoid any thumbnail
     dimension in generated HTML.
+  * Add support for replacing <!--EXIF-*--> with the corresponding Exif
+    tag in the slide template. Thanks to Charles Nepote.
   * Really initialize exiftool only once per gallery.
 
 

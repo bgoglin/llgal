@@ -165,6 +165,7 @@ sub init_gallery {
     %{$gallery->{user_fields}} = () ;
     $gallery->{indextemplate} = undef ;
     @{$gallery->{slidetemplate_text}} = () ;
+    @{$gallery->{template_exif_tags_list}} = () ;
     return $gallery ;
 }
 
@@ -415,6 +416,7 @@ sub create_file_entry {
 	# use ExifTool for both these and image dimensions validity checking
 	if ($opts->{show_all_exif_tags}
 	    or @{$opts->{show_exif_tags}}
+	    or @{$gallery->{template_exif_tags_list}}
 	    or $opts->{make_caption_from_image_timestamp}
 	    or $opts->{make_caption_from_image_comment}) {
 
@@ -440,7 +442,8 @@ sub create_file_entry {
 		my @exif_tags = () ;
 		if (!$opts->{show_all_exif_tags}) {
 		    # use the user provided Exif tags, and add ImageWidth/Height for ourself
-		    @exif_tags = ('ImageWidth', 'ImageHeight', @{$opts->{show_exif_tags}}) ;
+		    @exif_tags = @{$gallery->{template_exif_tags_list}} ;
+		    @exif_tags = (@exif_tags, 'ImageWidth', 'ImageHeight', @{$opts->{show_exif_tags}}) ;
 		    @exif_tags = (@exif_tags, 'DateTimeOriginal')
 			if $opts->{make_caption_from_image_timestamp} ;
 		    @exif_tags = (@exif_tags, 'UserComment', 'Comment', 'ImageDescription')
@@ -1885,6 +1888,16 @@ sub generate_slides {
 	    $line =~ s/<!--NEXT-SLIDE-->/$NEXT_SLIDE/g ;
 	    $line =~ s/<!--EXIF-TABLE-->/$EXIF_TABLE/ ;
 
+	    # only one replacement per line because earlier template parsing only detected one per line
+	    if ($line =~ /<!--EXIF-(.*)-->/) {
+		my $name = $1;
+		# EXIF-TABLE handled earlier, no need to ignore here
+		my $exif_infos = $entry->{exif_infos} ;
+		my $value = $exif_infos->{$name} ;
+		$value = "" unless $value ;
+		$line =~ s/<!--EXIF-$name-->/$value/ ;
+	    }
+
 	    # output the line
 	    print SW "$line" ;
 	}
@@ -2462,6 +2475,16 @@ sub main_process {
 		or die "Can't open the slide template file '$slidetemplate' ($!).\n" ;
 	    @{$gallery->{slidetemplate_text}} = <SR> ;
 	    close SR ;
+
+	    # list Exif tags needed by the template.
+	    # only one pattern per line is detected, other are ignored.
+	    foreach my $line (@{$gallery->{slidetemplate_text}}) {
+		if ($line =~ /<!--EXIF-(.*)-->/) {
+		    if ($1 ne "TABLE") { # TABLE is llgal-reserved, unused in EXIF
+			push (@{$gallery->{template_exif_tags_list}}, $1);
+		    }
+		}
+	    }
 	}
 
 	if (-e "$self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename}") {

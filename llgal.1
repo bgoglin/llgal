@@ -1099,6 +1099,13 @@ The caption of the slide.
 .RS
 The table of EXIF tags.
 .RE
+.B <!--EXIF-%tag%-->
+.RS
+The value of the image EXIF tag %tag%.
+The tag name %tag% must match the name reported by
+.BR "exiftool -s myimage" .
+Note that a single replacement may be performed per template line.
+.RE
 .B <!--THIS-SLIDE-->
 .RS
 The actual contents of the slide (might be an image).
