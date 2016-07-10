@@ -10,6 +10,8 @@
     and just using the entire directory name (reported by Bruno Raoult).
   * New option (thumbnails_dimensions_from_css) to avoid any thumbnail
     dimension in generated HTML.
+  * Really initialize exiftool only once per gallery.
+
 
 llgal (0.13.17)
 
