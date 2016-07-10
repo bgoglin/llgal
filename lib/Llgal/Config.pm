@@ -499,7 +499,7 @@ Layout Options:
     --ct [<format>]    use image timestamps as captions
     --codeset <s>      change the codeset in HTML pages
     --exif [<tags>]    show exif tags on each slide
-    --fe               show a film effect in the indexof thumbnails
+    --fe               show a film effect in the index of thumbnails
     -i <file>          name of the main thumbnail index file (index)
     -k                 use the image captions for the HTML slide titles
     -L                 list links outside of the table
