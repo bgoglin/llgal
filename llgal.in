@@ -163,6 +163,8 @@ sub init_gallery {
     @{$gallery->{footers}} = () ;
     @{$gallery->{entries}} = () ;
     %{$gallery->{user_fields}} = () ;
+    $gallery->{indextemplate} = undef ;
+    @{$gallery->{slidetemplate_text}} = () ;
     return $gallery ;
 }
 
@@ -1684,18 +1686,6 @@ sub generate_slides {
     }
     closedir DIR ;
 
-    # find the slidetemplate
-    my $slidetemplate = (Llgal::Templates::find_template_file ($self, $opts, $opts->{slidetemplate_filename}, 1))
-	. "/$opts->{slidetemplate_filename}" ;
-    $messages->print ("Using '$slidetemplate' as HTML slide template.\n") ;
-
-    # keep the slidetemplate in memory instead of always reopening it
-    my @slidetemplate_text ;
-    open(SR,"$slidetemplate")
-	or die "Can't open the slide template file '$slidetemplate' ($!).\n" ;
-    @slidetemplate_text = <SR> ;
-    close SR ;
-
     # create slides
     $messages->print ("Creating individual slides: ") ;
     $messages->init_percentage (scalar @entries) ;
@@ -1861,7 +1851,7 @@ sub generate_slides {
 	#################################
 	# Replace fields in the template
 
-	my @slidetemplate_text_copy = @slidetemplate_text ; # don't touch the original template
+	my @slidetemplate_text_copy = @{$gallery->{slidetemplate_text}} ; # don't touch the original template
         for my $line (@slidetemplate_text_copy) {
 
 	    # user-defined fields
@@ -1908,11 +1898,7 @@ sub generate_index {
     my @entries = @{$gallery->{entries}} ;
     my @headers = @{$gallery->{headers}} ;
     my @footers = @{$gallery->{footers}} ;
-
-    # find the indextemplate
-    my $indextemplate = (Llgal::Templates::find_template_file ($self, $opts, $opts->{indextemplate_filename}, 1))
-	. "/$opts->{indextemplate_filename}" ;
-    $messages->print ("Using '$indextemplate' as HTML index template.\n") ;
+    my $indextemplate = $gallery->{indextemplate};
 
     # open the template and the destination
     $messages->print ("Creating the $opts->{index_filename}.$opts->{www_extension} file: ") ;
@@ -2454,6 +2440,24 @@ sub main_process {
 	Llgal::Config::prepare_gallery_variables ($self, $opts) ;
 
 	my $gallery = init_gallery () ;
+
+	# find the indextemplate
+	$gallery->{indextemplate} = (Llgal::Templates::find_template_file ($self, $opts, $opts->{indextemplate_filename}, 1))
+	    . "/$opts->{indextemplate_filename}" ;
+	$messages->print ("Using '".$gallery->{indextemplate}."' as HTML index template.\n") ;
+
+	if (!$opts->{make_no_slides}) {
+	    # find the slidetemplate
+	    my $slidetemplate = (Llgal::Templates::find_template_file ($self, $opts, $opts->{slidetemplate_filename}, 1))
+		. "/$opts->{slidetemplate_filename}" ;
+	    $messages->print ("Using '$slidetemplate' as HTML slide template.\n") ;
+
+	    # keep the slidetemplate in memory instead of always reopening it
+	    open(SR,"$slidetemplate")
+		or die "Can't open the slide template file '$slidetemplate' ($!).\n" ;
+	    @{$gallery->{slidetemplate_text}} = <SR> ;
+	    close SR ;
+	}
 
 	if (-e "$self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename}") {
 	    # generate the gallery using the caption file
