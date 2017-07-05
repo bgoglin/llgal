@@ -405,7 +405,7 @@ sub add_defaults {
 # What files to insert in the gallery
 # image and movie extensions
 	image_extensions => "jpg|jpeg|png|gif|tif|tiff|bmp",
-	movie_extensions => "mpg|mpeg|avi|mov|ogm|wmv",
+	movie_extensions => "mpg|mpeg|avi|mov|ogm|wmv|mp4|3gp",
 # add all files, not only images and movies (-A)
 	add_all_files => 0,
 # add subdirectories to entry list (-S)
