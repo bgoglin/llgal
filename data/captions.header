@@ -9,8 +9,8 @@
 # TXT: text ---- caption
 # LNK: url ---- slide link text ---- caption
 # LNKNOSLIDE: url ---- direct link text without slide
-# IMG: imagefile.{gif,png,jpg,jpeg} ---- caption
-# MVI: movie.{avi,mpg,mpeg} ---- slide link text ---- caption
+# IMG: imagefile ---- caption
+# MVI: moviefile ---- slide link text ---- caption
 # FIL: file ---- slide link text ---- caption
 # DIR: directory ---- slide link text ---- caption
 # BREAK
