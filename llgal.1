@@ -395,7 +395,7 @@ The corresponding configuration file option is
 
 .TP
 .BI --asu " <s>"
-Allow to define the unit used to show file sizes.
+Define the unit used to show file sizes.
 Default is \fB"kB"\fR.
 The corresponding configuration file option is
 .IR show_size_unit .
@@ -440,7 +440,7 @@ without argument is thus equivalent to passing
 .B --cf
 Generates
 .I captions
-from file names (strips suffix).
+from file names (strips extension, except for directories).
 The corresponding configuration file option is
 .IR make_caption_from_filename .
 
@@ -1037,7 +1037,8 @@ The version of the program used to generate the gallery.
 .RE
 .B <!--INDEX-FILE-->
 .RS
-The filename of the index.
+The filename of the index to used in <a href=""> attributes.
+May also contain additional attributes to be appended after href.
 .RE
 .B <!--INDEX-LINK-TEXT-->
 .RS
@@ -1097,6 +1098,13 @@ The caption of the slide.
 .B <!--EXIF-TABLE-->
 .RS
 The table of EXIF tags.
+.RE
+.B <!--EXIF-%tag%-->
+.RS
+The value of the image EXIF tag %tag%.
+The tag name %tag% must match the name reported by
+.BR "exiftool -s myimage" .
+Note that a single replacement may be performed per template line.
 .RE
 .B <!--THIS-SLIDE-->
 .RS
@@ -1187,7 +1195,7 @@ configuration option.
 
 
 .SH NOTES
-Note that all numerical options may be resetted to their default value
+Note that all numerical options may be reset to their default value
 by setting them a negative value.
 
 

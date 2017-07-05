@@ -1,3 +1,15 @@
+llgal (0.13.18-1) unstable; urgency=low
+
+  * New upstream release.
+    + Check whether there is a user-given thumbnail before listing
+      as links when -L is given, closes: #683809.
+  * Drop 01-fix_subgallery_-n.patch, applied upstream.
+  * Bump Standards-Version to 3.9.8, no changes needed.
+  * Bump debhelper compatibility level to 9, no change needed.
+  * Use dh_prep instead of dh_clean -k.
+
+ -- Brice Goglin <bgoglin@debian.org>  Mon, 01 Aug 2016 22:41:09 +0200
+
 llgal (0.13.17-2) unstable; urgency=low
 
   * Bump Standards-Version to 3.9.3, no changes needed.

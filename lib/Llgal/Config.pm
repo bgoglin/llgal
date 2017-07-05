@@ -91,6 +91,7 @@ my $normal_opts_type = {
     list_links => $OPT_IS_NUMERIC,
     pixels_per_row => $OPT_IS_NUMERIC, # > 0, 0 for unlimited, -1 for default
     thumbnails_per_row => $OPT_IS_NUMERIC, # > 0, 0 for unlimited, -1 for default
+    thumbnails_dimensions_from_css => $OPT_IS_NUMERIC,
     thumbnail_height_max => $OPT_IS_NUMERIC, # > 0, -1 for default
     thumbnail_width_max => $OPT_IS_NUMERIC, # > 0, 0 for unlimited, -1 for default
     show_caption_under_thumbnails => $OPT_IS_NUMERIC,
@@ -289,6 +290,8 @@ sub add_defaults {
 	pixels_per_row => $pixels_per_row_default,
 # how many thumbnails per row at most in index (-w)
 	thumbnails_per_row => $thumbnails_per_row_default,
+# do not output thumbnails dimensions
+	thumbnails_dimensions_from_css => 0,
 # max height of a thumbnail (--ty)
 	thumbnail_height_max => $thumbnail_height_max_default,
 # scale thumb longer dimension (--tx)
@@ -496,7 +499,7 @@ Layout Options:
     --ct [<format>]    use image timestamps as captions
     --codeset <s>      change the codeset in HTML pages
     --exif [<tags>]    show exif tags on each slide
-    --fe               show a film effect in the indexof thumbnails
+    --fe               show a film effect in the index of thumbnails
     -i <file>          name of the main thumbnail index file (index)
     -k                 use the image captions for the HTML slide titles
     -L                 list links outside of the table

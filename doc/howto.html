@@ -23,9 +23,7 @@
 
 
 
-<a name="basic_use">
-<h3 class="question">How do I use llgal?</h3>
-</a>
+<h3 class="question"><a id="basic_use">How do I use llgal?</a></h3>
 
 Place some images and movies in a directory and simply run
 <tt>llgal</tt> inside it.
@@ -33,9 +31,7 @@ It will generate an index file and some slides.
 
 
 
-<a name="basic_modify">
-<h3 class="question">How do I modify a gallery?</h3>
-</a>
+<h3 class="question"><a id="basic_modify">How do I modify a gallery?</a></h3>
 
 You may add or remove some images in the working directory, and re-run
 <tt>llgal</tt> with different options to update the gallery contents
@@ -46,9 +42,7 @@ of thumbnails and scaled images with <tt>-f</tt>.
 
 
 
-<a name="basic_reduce_slide">
-<h3 class="question">How do I reduce the size of the slides?</h3>
-</a>
+<h3 class="question"><a id="basic_reduce_slide">How do I reduce the size of the slides?</a></h3>
 
 If your images are large, you should try
 <pre>
@@ -65,9 +59,7 @@ to the original unscaled full images.
 
 
 
-<a name="basic_title_captions">
-<h3 class="question">How do I set the title and captions?</h3>
-</a>
+<h3 class="question"><a id="basic_title_captions">How do I set the title and captions?</a></h3>
 
 You may set the title on the command line through:
 <pre>
@@ -93,9 +85,7 @@ of the captions file and use it.
 
 
 
-<a name="captions_generate">
-<h3 class="question">How do I generate captions from images?</h3>
-</a>
+<h3 class="question"><a id="captions_generate">How do I generate captions from images?</a></h3>
 
 When generating the captions file with <tt>--gc</tt>, <tt>llgal</tt>
 may automatically generate several fields for each image.
@@ -137,9 +127,7 @@ Image::ExifTool Perl module to be installed.
 
 
 
-<a name="captions_text_link">
-<h3 class="question">How do I add a slide containing some text or link?</h3>
-</a>
+<h3 class="question"><a id="captions_text_link">How do I add a slide containing some text or link?</a></h3>
 
 After generating the captions file with <tt>--gc</tt>, you might add
 a special slide containing only some text by inserting the following
@@ -162,9 +150,7 @@ You may also use <tt>LNKNOSLIDE:</tt> entries to add links without slides.
 
 
 
-<a name="captions_add">
-<h3 class="question">How do I add new entries to a captions file?</h3>
-</a>
+<h3 class="question"><a id="captions_add">How do I add new entries to a captions file?</a></h3>
 
 Re-running <tt>llgal</tt> with <tt>--gc</tt> will rescan the existing files and
 add the missing ones at the end of the captions file.
@@ -172,9 +158,7 @@ You then re-run <tt>llgal</tt> to update the gallery regarding the new captions 
 
 
 
-<a name="captions_keep">
-<h3 class="question">How do I keep the list of images involved in a gallery?</h3>
-</a>
+<h3 class="question"><a id="captions_keep">How do I keep the list of images involved in a gallery?</a></h3>
 
 The captions file may also be used to keep track of the contents of a gallery.
 Even if you do not add some captions or title in the captions file, you may use
@@ -186,9 +170,7 @@ it to list the exact set of images that you want to appear in the gallery.
 
 
 
-<a name="slides_order">
-<h3 class="question">How do I change the order of the slides?</h3>
-</a>
+<h3 class="question"><a id="slides_order">How do I change the order of the slides?</a></h3>
 
 The order of the slides might be changed with the <tt>sort</tt> option
 on command-line.
@@ -200,9 +182,7 @@ in the captions file.
 
 
 
-<a name="slides_select">
-<h3 class="question">How do I select which files are included in a gallery?</h3>
-</a>
+<h3 class="question"><a id="slides_select">How do I select which files are included in a gallery?</a></h3>
 
 By default, <tt>llgal</tt> does only include images and movies in the
 gallery.
@@ -234,9 +214,7 @@ are involved in the gallery, even if you do not want any caption.
 
 
 
-<a name="layout_slide_index">
-<h3 class="question">How do I change the layout of the slides and index?</h3>
-</a>
+<h3 class="question"><a id="layout_slide_index">How do I change the layout of the slides and index?</a></h3>
 
 The main layout of generated webpages is based on HTML templates
 (<tt>indextemplate.html</tt> and <tt>slidetemplate.html</tt>)
@@ -247,9 +225,7 @@ directory (or in <tt>$HOME/.llgal/</tt>) to change the layout.
 
 
 
-<a name="layout_image_size">
-<h3 class="question">Why does llgal ignore the image dimension limits that I give?</h3>
-</a>
+<h3 class="question"><a id="layout_image_size">Why does llgal ignore the image dimension limits that I give?</a></h3>
 
 Since <a href="#misc_slow">converting images might be slow</a>, <tt>llgal</tt> does
 not always regenerate thumbnails and scaled images. By default, it only does if the
@@ -261,9 +237,7 @@ you may use <tt>-f</tt> (or <tt>force_image_regeneration</tt>).
 
 
 
-<a name="layout_thumbnail_size">
-<h3 class="question">Does changing the maximal thumbnail dimensions really work?</h3>
-</a>
+<h3 class="question"><a id="layout_thumbnail_size">Does changing the maximal thumbnail dimensions really work?</a></h3>
 
 By default, the width and height of thumbnails are both limited. Both dimension
 limits may be changed with <tt>--tx</tt> or <tt>--ty</tt>, but changing a single
@@ -275,9 +249,7 @@ Note that changing one of these options requires to
 
 
 
-<a name-"layout_slide_dimensions_from_css">
-<h3 class="question">How can I get the images in slides to adapt their size to the window?</h3>
-</a>
+<h3 class="question"><a id="layout_slide_dimensions_from_css">How can I get the images in slides to adapt their size to the window?</a></h3>
 
 <tt>llgal</tt> has been designed to create fixed-size slides. If, instead, you would like your
 images in slides to follow the size of the window, you may use the <tt>slide_dimensions_from_css</tt>
@@ -289,9 +261,7 @@ for instance by adding <tt>width: 100%</tt> in <tt>table.slide td.image-slide im
 
 
 
-<a name="layout_text">
-<h3 class="question">How do I change the text that llgal generates in slides and index?</h3>
-</a>
+<h3 class="question"><a id="layout_text">How do I change the text that llgal generates in slides and index?</a></h3>
 
 All text that appears in generated slides might be configured through configuration
 options.
@@ -300,9 +270,7 @@ One day, there might be a full internationalization support through <tt>gettext<
 
 
 
-<a name="layout_click_to_next_slide">
-<h3 class="question">How can I go the next slide when clicking on the current one?</h3>
-<a>
+<h3 class="question"><a id="layout_click_to_next_slide">How can I go to the next slide when clicking on the current one?</a></h3>
 
 By default, you need to click on <tt>Next</tt> to go to the next slide.
 If you passed <tt>--sx</tt> or <tt>--sy</tt>, clicking on the slide will lead you to the
@@ -323,9 +291,7 @@ since there will be 2 hyperlinks on each slide.
 
 
 
-<a name="layout_thumnail_video_subdir">
-<h3 class="question">How do I set a thumbnail for a video or a subgallery?</h3>
-</a>
+<h3 class="question"><a id="layout_thumnail_video_subdir">How do I set a thumbnail for a video or a subgallery?</a></h3>
 
 All non-image slides and thumbnails are usually basic text.
 It is possible to force <tt>llgal</tt> to use a special thumbnail or scaled image
@@ -341,9 +307,7 @@ that <tt>llgal</tt> recognizes.
 
 
 
-<a name="layout_exif">
-<h3 class="question">How do I get image EXIF tags in my slides?</h3>
-</a>
+<h3 class="question"><a id="layout_exif">How do I get image EXIF tags in my slides?</a></h3>
 
 Most images contains some meta-data called EXIF tags that may be useful to some people.
 <tt>llgal</tt> can display a table of some EXIF values under each image slide.
@@ -362,9 +326,7 @@ Note that <tt>--exif</tt> requires the Image::ExifTool Perl module to be install
 
 
 
-<a name="config_save_restore">
-<h3 class="question">How do I save/restore a configuration?</h3>
-</a>
+<h3 class="question"><a id="config_save_restore">How do I save/restore a configuration?</a></h3>
 
 If you like using the same options for all your galleries and don't
 want to remember the option, you may ask <tt>llgal</tt> to generate
@@ -399,9 +361,7 @@ match to find movies, use:
 
 
 
-<a name="subdirs_include">
-<h3 class="question">How do I include several subdirectories in a unique gallery?</h3>
-</a>
+<h3 class="question"><a id="subdirs_include">How do I include several subdirectories in a unique gallery?</a></h3>
 
 If your photos are organized in several subdirectories of the working directory,
 you can use <tt>-P</tt> to take the photos from them instead of from the working
@@ -432,9 +392,7 @@ edit it and then generate the gallery.
 
 
 
-<a name="subdirs_include_all">
-<h3 class="question">How do I include all subdirectories in a unique gallery?</h3>
-</a>
+<h3 class="question"><a id="subdirs_include_all">How do I include all subdirectories in a unique gallery?</a></h3>
 
 Instead of passing <tt>-P</tt> for each subdirectory, you may ask
 <tt>llgal</tt> to include all images from all subdirectories.
@@ -445,9 +403,7 @@ Instead of passing <tt>-P</tt> for each subdirectory, you may ask
 
 
 
-<a name="subdirs_add">
-<h3 class="question">How do I add a new subdirectory contents to a gallery?</h3>
-</a>
+<h3 class="question"><a id="subdirs_add">How do I add a new subdirectory contents to a gallery?</a></h3>
 
 You may a the list of files of a subdirectory to an existing gallery if its
 captions file if available, by regenerating it:
@@ -463,9 +419,7 @@ The gallery may then be regenerated from the new captions file by re-running
 
 
 
-<a name="subdirs_recursive">
-<h3 class="question">How do I create multiple subgalleries at once?</h3>
-</a>
+<h3 class="question"><a id="subdirs_recursive">How do I create multiple subgalleries at once?</a></h3>
 
 If your directory contains subdirectories, you might use <tt>-S</tt>
 to create slides linking to these subgalleries.
@@ -478,9 +432,7 @@ entries in the captions file.
 
 
 
-<a name="subdirs_modify_single">
-<h3 class="question">How do I modify a single gallery in a set of subgalleries?</h3>
-</a>
+<h3 class="question"><a id="subdirs_modify_single">How do I modify a single gallery in a set of subgalleries?</a></h3>
 
 Galleries that were created recursively (with <tt>-R</tt>) may be
 linked with their parents, children and brothers.
@@ -494,9 +446,7 @@ Regeneration is then easy (with <tt>--config</tt> in the first case).
 
 
 
-<a name="subdirs_text_menu">
-<h3 class="question">How do I create a text menu linking to multiple galleries?</h3>
-</a>
+<h3 class="question"><a id="subdirs_text_menu">How do I create a text menu linking to multiple galleries?</a></h3>
 
 Assuming you have a main directory containing multiple subdirectories where you
 <b>already</b> created sub-galleries, you may do:
@@ -523,9 +473,7 @@ affect sub-galleries.
 
 
 
-<a name="misc_accesskey">
-<h3 class="question">How do I add keyboard shortcuts to my gallery?</h3>
-</a>
+<h3 class="question"><a id="misc_accesskey">How do I add keyboard shortcuts to my gallery?</a></h3>
 
 The HTML accesskey feature may be use to navigate in <tt>llgal</tt>'s
 galleries with keyboard shortcuts. But as this feature is very browser
@@ -543,7 +491,7 @@ be the actual shortcuts in Mozilla Firefox.
 <pre>
       &lt;a href="&lt;!--PREV-SLIDE--&gt;" accesskey=p&gt;&lt;!--PREV-SLIDE-LINK-TEXT--&gt;&lt;/a&gt;
       &amp;nbsp; &amp;nbsp; &amp;nbsp;
-      &lt;a href="&gt;!--INDEX-FILE--&gt;" accesskey=i&gt;&lt;!--INDEX-LINK-TEXT--&gt;&lt;/a&gt;
+      &lt;a href="&lt;!--INDEX-FILE--&gt;" accesskey=i&gt;&lt;!--INDEX-LINK-TEXT--&gt;&lt;/a&gt;
       &amp;nbsp; &amp;nbsp; &amp;nbsp;
       &lt;a href="&lt;!--NEXT-SLIDE--&gt;" accesskey=n&gt;&lt;!--NEXT-SLIDE-LINK-TEXT--&gt;&lt;/a&gt;
 </pre>
@@ -553,9 +501,7 @@ in the local or user-wide configuration directory using <tt>--gt</tt>.
 
 
 
-<a name="misc_erase_captions">
-<h3 class="question">How do I prevent llgal from erasing my captions file?</h3>
-</a>
+<h3 class="question"><a id="misc_erase_captions">How do I prevent llgal from erasing my captions file?</a></h3>
 
 <tt>llgal --clean</tt> erases all files that have not been modified regarding to their
 original template. The <tt>captions</tt> file does not have a template, so <tt>llgal</tt>
@@ -575,22 +521,18 @@ in the <tt>captions</tt> file.
 
 
 
-<a name="misc_dynamic comments">
-<h3 class="question">How do I let people add comments to my slides dynamically?</h3>
-</a>
+<h3 class="question"><a id="misc_dynamic_comments">How do I let people add comments to my slides dynamically?</a></h3>
 
 The <tt>--php</tt> option of <tt>llgal</tt> enables generation of PHP slides
 instead of HTML. By default, no PHP code is inserted. But, you may change the
 templates to add some PHP code to do whatever you want, including handle
 dynamic comments that people may add to your slides.
 <tt>llgal</tt> comes with some examples, including the directory
-<tt>dynamic_comments_in_slides/</tt> which describes how exactely to do so.
+<tt>dynamic_comments_in_slides/</tt> which gives a quick and dirty example to do so.
 
 
 
-<a name="misc_slow">
-<h3 class="question">Why is llgal so slow?</h3>
-</a>
+<h3 class="question"><a id="misc_slow">Why is llgal so slow?</a></h3>
 
 <tt>llgal</tt> uses <tt>ImageMagick</tt> (and especially <tt>convert</tt>) to generate
 thumbnails (and scaled images if <tt>--sx</tt> or <tt>--sy</tt> was passed). It can be
@@ -609,9 +551,7 @@ See tweak_image_generation.txt in the examples in the documentation for details.
 
 
 
-<a name="misc_rotate">
-<h3 class="question">Why does llgal not provide any feature to rotate or modify images?</h3>
-</a>
+<h3 class="question"><a id="misc_rotate">Why does llgal not provide any feature to rotate or modify images?</a></h3>
 
 <tt>llgal</tt> is only a gallery generator. Adding features to rotate images (for instance
 using Exif tags) or modify images (for instance to apply some filters) would open the door
@@ -619,14 +559,12 @@ for thousands of options that <tt>llgal</tt> does not really require (and the co
 interface is already pretty complex). We prefer keeping those features in other softwares
 that the user runs before using <tt>llgal</tt>. Also, there is no technical reason to
 include such filters in <tt>llgal</tt>. Applying them with another specialized software
-before generating the gallery is as easy, and such software will ever provide more features
+before generating the gallery is as easy, and such software will always provide more features
 than <tt>llgal</tt>.
 
 
 
-<a name="misc_drop_originals">
-<h3 class="question">How do I scale my images to a smaller size and drop the originals?</h3>
-</a>
+<h3 class="question"><a id="misc_drop_originals">How do I scale my images to a smaller size and drop the originals?</a></h3>
 
 <tt>llgal</tt> is not supposed to be used for this
 (see <a href="#misc_rotate"><em>Why does llgal not provide any feature to rotate or modify images?</em></a>).
@@ -650,20 +588,6 @@ original images.
 </div>
 
 <hr />
-
-<p style="text-align: center">
-<a href="http://validator.w3.org/check/referer">
- <img src="http://www.w3.org/Icons/valid-xhtml11" alt="Valid XHTML 1.1!" class="icon" />
-</a>
-
-<a href="http://jigsaw.w3.org/css-validator/check/referer">
- <img src="http://jigsaw.w3.org/css-validator/images/vcss" alt="Valid CSS!" class="icon" />
-</a>
-
-<a href="http://validator.loulous.org/check?uri=referer">
- <img style="border:0;width:88px;height:31px;" src="http://loulous.org/loulous.png" alt="Loulous Compliant" />
-</a>
-</p>
 
 <address id="addr">
  The <a href="mailto:llgal-users AT gna.org">llgal team</a>.

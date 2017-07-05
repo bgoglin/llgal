@@ -206,6 +206,13 @@ Thumbnails per row in index
 Default is
 .BR 5 .
 .RE
+.I thumbnails_dimensions_from_css = <0/1>
+.RS
+Do not output any absolute thumbnails size in HTML code and assume the
+CSS style sheet will take care of it (in table.index [td.thumb [img]]).
+Default is
+.BR 0 " (" disabled ).
+.RE
 .I thumbnail_height_max = <pixels>
 .RS
 Maximal height of thumbnails
@@ -422,7 +429,8 @@ Default is \fB"REMOVE THIS LINE IF LLGAL SHOULD NOT REMOVE THIS FILE"\fR.
 .RE
 .I make_caption_from_filename = <0/1>
 .RS
-Generate captions from filenames without their extension
+Generate captions from filenames.
+The extension is removed, except for directories.
 .RB [ --cf ].
 Default is
 .BR 0 " (" disabled ).
@@ -439,7 +447,7 @@ Generate captions from image comment tag
 Default is \fB""\fR
 .RB ( disabled ).
 .RE
-.I make_caption_from_image_comment = <0/1>
+.I make_caption_from_image_timestamp = <0/1>
 .RS
 Add image timestamp to generated captions
 .RB [ --ct ].

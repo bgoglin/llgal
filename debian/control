@@ -3,11 +3,13 @@ Section: web
 Priority: optional
 Maintainer: Brice Goglin <bgoglin@debian.org>
 Build-Depends:
- debhelper (>= 5)
+ debhelper (>= 9)
 Homepage: http://home.gna.org/llgal/
-Standards-Version: 3.9.3
+Standards-Version: 3.9.8
 Vcs-Svn: svn://svn.gna.org/svn/llgal/branches/debian
 Vcs-Browser: http://svn.gna.org/viewcvs/llgal/branches/debian/
+# gna.org doesn't support https for Vcs-*
+# (vcs-field-uses-insecure-uri lintian info)
 
 Package: llgal
 Architecture: all

@@ -163,6 +163,9 @@ sub init_gallery {
     @{$gallery->{footers}} = () ;
     @{$gallery->{entries}} = () ;
     %{$gallery->{user_fields}} = () ;
+    $gallery->{indextemplate} = undef ;
+    @{$gallery->{slidetemplate_text}} = () ;
+    @{$gallery->{template_exif_tags_list}} = () ;
     return $gallery ;
 }
 
@@ -355,6 +358,7 @@ sub make_safe_url {
 
 sub create_file_entry {
     my $entry = () ;
+    my $gallery = shift ;
     my $type = shift ;
     my $filename = shift ;
     my $linktext = shift ;
@@ -387,7 +391,7 @@ sub create_file_entry {
 	    $linktext = $opts->{DIR_link_text}.$filename ;
 	}
 	$linktext =~ s/&/&amp;/g ;
-#       $linktext =~ s/"/&\#34;/g ;
+	# $linktext =~ s/"/&\#34;/g ;
     }
     $entry->{linktext} = $linktext ;
 
@@ -412,11 +416,12 @@ sub create_file_entry {
 	# use ExifTool for both these and image dimensions validity checking
 	if ($opts->{show_all_exif_tags}
 	    or @{$opts->{show_exif_tags}}
+	    or @{$gallery->{template_exif_tags_list}}
 	    or $opts->{make_caption_from_image_timestamp}
 	    or $opts->{make_caption_from_image_comment}) {
 
 	    # only load Image::ExifTool when really required
-	    if (not defined $opts->{exif_info}) {
+	    if (not defined $opts->{exiftool}) {
 
 		# Try to load the module
 		if (not eval { require Image::ExifTool ; }) {
@@ -437,7 +442,8 @@ sub create_file_entry {
 		my @exif_tags = () ;
 		if (!$opts->{show_all_exif_tags}) {
 		    # use the user provided Exif tags, and add ImageWidth/Height for ourself
-		    @exif_tags = ('ImageWidth', 'ImageHeight', @{$opts->{show_exif_tags}}) ;
+		    @exif_tags = @{$gallery->{template_exif_tags_list}} ;
+		    @exif_tags = (@exif_tags, 'ImageWidth', 'ImageHeight', @{$opts->{show_exif_tags}}) ;
 		    @exif_tags = (@exif_tags, 'DateTimeOriginal')
 			if $opts->{make_caption_from_image_timestamp} ;
 		    @exif_tags = (@exif_tags, 'UserComment', 'Comment', 'ImageDescription')
@@ -476,10 +482,11 @@ sub create_file_entry {
 	if ($opts->{make_caption_from_extension}) {
 	    push (@texts, $filename) ;
 	} elsif ($opts->{make_caption_from_filename}) {
-	    # remove the extension
-	    my @parts = split (/\./, $filename) ;
-	    pop @parts ;
-	    my $basename = join ('.', @parts) ;
+	    my $basename = $filename ;
+	    if ($type != $TYPE_DIR) {
+		# remove the extension
+		$basename =~ s/\.[^\.]+$// ;
+	    }
 	    push (@texts, $basename) ;
 	}
 	push (@texts, generate_caption_from_image_infos $entry->{exif_infos})
@@ -899,8 +906,9 @@ sub finalize_entries {
     if ($opts->{list_links}) {
 	map {
 	    my $type = $_->{type} ;
-	    if ($type == $TYPE_LINK or $type == $TYPE_DIR or $type == $TYPE_MOVIE
-		or $type == $TYPE_FILE or $type == $TYPE_TEXT) {
+	    if (!$_->{thumb_filename}
+		and ($type == $TYPE_LINK or $type == $TYPE_DIR or $type == $TYPE_MOVIE
+		     or $type == $TYPE_FILE or $type == $TYPE_TEXT)) {
 		$_->{no_thumb} = 1 ;
 	    }
 	} @entries ;
@@ -940,7 +948,7 @@ sub finalize_entries {
 	    if ($opts->{make_slide_filename_from_filename}) {
 		if ($type == $TYPE_TEXT or $type == $TYPE_LINK) {
 		    $slide_filename = "$opts->{slide_filenameprefix}$counter_with_zeros.$opts->{www_extension}" ;
-		} elsif ($opts->{make_slide_filename_from_extension}) {
+		} elsif ($opts->{make_slide_filename_from_extension} or $type == $TYPE_DIR) {
 		    $slide_filename = "$opts->{slide_filenameprefix}$filename.$opts->{www_extension}" ;
 		} else {
 		    my @parts = split (/\./, $filename) ;
@@ -1011,6 +1019,7 @@ sub sort_entries {
 }
 
 sub get_entries_from_directory {
+    my $gallery = shift;
     my $dir = shift ;
     my $subdir = shift ;
     my $add_subdirs = shift ;
@@ -1045,7 +1054,7 @@ sub get_entries_from_directory {
 	if (-d "$dir$filename") {
 	    # directory
 	    if ($add_subdirs) {
-		my $entry = create_file_entry ($TYPE_DIR, $filename, undef, undef) ;
+		my $entry = create_file_entry ($gallery, $TYPE_DIR, $filename, undef, undef) ;
 		push @entries, $entry
 		    if defined $entry ;
 	    }
@@ -1056,14 +1065,14 @@ sub get_entries_from_directory {
 
 	    if ($filename =~ m/($opts->{image_extensions})$/i) {
 		# image
-		my $entry = create_file_entry ($TYPE_IMAGE, $filename, undef, undef) ;
+		my $entry = create_file_entry ($gallery, $TYPE_IMAGE, $filename, undef, undef) ;
 		goto JUST_A_FILE
 		    if not defined $entry ;
 		push @entries, $entry ;
 
 	    } elsif ($filename =~ m/($opts->{movie_extensions})$/i) {
 		# movie
-		my $entry = create_file_entry ($TYPE_MOVIE, $filename, undef, undef) ;
+		my $entry = create_file_entry ($gallery, $TYPE_MOVIE, $filename, undef, undef) ;
 		goto JUST_A_FILE
 		    if not defined $entry ;
 		push @entries, $entry ;
@@ -1072,7 +1081,7 @@ sub get_entries_from_directory {
 	      JUST_A_FILE:
 		if ($add_others) {
 		    # not an image, not a movie, just a file
-		    my $entry = create_file_entry ($TYPE_FILE, $filename, undef, undef) ;
+		    my $entry = create_file_entry ($gallery, $TYPE_FILE, $filename, undef, undef) ;
 		    push @entries, $entry
 			if defined $entry ;
 		}
@@ -1120,6 +1129,7 @@ sub get_subdir_tree {
 }
 
 sub get_entries {
+    my $gallery = shift ;
     my $opts = shift ;
     my @entries = () ;
 
@@ -1143,6 +1153,7 @@ sub get_entries {
 	    }
 	    # section entries
 	    push @entries, get_entries_from_directory
+		$gallery,
 		$self->{destination_dir},
 		$subdir,
 		($opts->{add_subdirs} or $opts->{recursive}),
@@ -1151,6 +1162,7 @@ sub get_entries {
 
     } else {
 	@entries = get_entries_from_directory
+	    $gallery,
 	    $self->{destination_dir},
 	    "",
 	    ($opts->{add_subdirs} or $opts->{recursive}),
@@ -1335,28 +1347,28 @@ sub generate_captions_entries {
 	if ($type == $TYPE_IMAGE) {
 	    print CAP "IMG: ". $entry->{filename}
 		." ---- ". $entry->{caption} ."\n"
-		unless grep { $captions[$_] =~ m/^(\s*IMG:)?\s*$entry->{filename}\s+----\s/ }
+		unless grep { $captions[$_] =~ m/^(\s*IMG:)?\s*\Q$entry->{filename}\E\s+----\s/ }
 		    ( 0 .. $#captions ) ;
 
 	} elsif ($type == $TYPE_MOVIE) {
 	    print CAP "MVI: " . $entry->{filename}
 		." ---- ". $entry->{linktext}
 		." ---- ". $entry->{caption} ."\n"
-		unless grep { $captions[$_] =~ m/^\s*MVI:\s*$entry->{filename}\s+----\s/ }
+		unless grep { $captions[$_] =~ m/^\s*MVI:\s*\Q$entry->{filename}\E\s+----\s/ }
 		    ( 0 .. $#captions ) ;
 
 	} elsif ($type == $TYPE_FILE) {
 	    print CAP "FIL: " . $entry->{filename}
 		." ---- ". $entry->{linktext}
 		." ---- ". $entry->{caption} ."\n"
-		unless grep { $captions[$_] =~ m/^\s*FIL:\s*$entry->{filename}\s+----\s/ }
+		unless grep { $captions[$_] =~ m/^\s*FIL:\s*\Q$entry->{filename}\E\s+----\s/ }
 		    ( 0 .. $#captions ) ;
 
 	} elsif ($type == $TYPE_DIR) {
 	    print CAP "DIR: " . $entry->{filename}
 		." ---- ". $entry->{linktext}
 		." ---- ". $entry->{caption} ."\n"
-		unless grep { $captions[$_] =~ m/^\s*DIR:\s*$entry->{filename}\s+----\s/ }
+		unless grep { $captions[$_] =~ m/^\s*DIR:\s*\Q$entry->{filename}\E\s+----\s/ }
 		    ( 0 .. $#captions ) ;
 
 	} elsif ($type == $TYPE_TEXT) {
@@ -1459,15 +1471,15 @@ sub read_captions_file {
 
 		} elsif ($line =~ m/^DIR:\s*(.+)\s+----\s+(.+)\s+----\s*(?:\s(.*))?\s*$/) {
 		    # directory slide
-		    $entry = create_file_entry ($TYPE_DIR, $1, $2, $3) ;
+		    $entry = create_file_entry ($gallery, $TYPE_DIR, $1, $2, $3) ;
 
 		} elsif ($line =~ m/^MVI:\s*(.+)\s+----\s+(.+)\s+----\s*(?:\s(.*))?\s*$/) {
 		    # movie slide
-		    $entry = create_file_entry ($TYPE_MOVIE, $1, $2, $3) ;
+		    $entry = create_file_entry ($gallery, $TYPE_MOVIE, $1, $2, $3) ;
 
 		} elsif ($line =~ m/^FIL:\s*(.+)\s+----\s+(.+)\s+----\s*(?:\s(.*))?\s*$/) {
 		    # movie slide
-		    $entry = create_file_entry ($TYPE_FILE, $1, $2, $3) ;
+		    $entry = create_file_entry ($gallery, $TYPE_FILE, $1, $2, $3) ;
 
 		} elsif ($line =~ m/^LINE/) {
 		    # horizontal line
@@ -1480,7 +1492,7 @@ sub read_captions_file {
 		} elsif ($line =~ m/^IMG:\s*(.+)\s+----\s*(?:\s(.*))?\s*$/
 			 or $line =~ m/^(.+)\s+----\s*(?:\s(.*))?\s*$/) {
 		    # image slide (default)
-		    $entry = create_file_entry ($TYPE_IMAGE, $1, undef, $2) ;
+		    $entry = create_file_entry ($gallery, $TYPE_IMAGE, $1, undef, $2) ;
 
 		} else {
 		    $messages->abort_percentage ;
@@ -1640,7 +1652,7 @@ sub precompute_common_html_fields
 	}
     }
 
-    # index file
+    # index file (ugly hack to also generate a title attribute right after the href)
     $common_fields->{"<!--INDEX-FILE-->"} = "$opts->{index_filename}.$opts->{www_extension}\" title=\"$opts->{over_index_link_text}" ;
 
     # css
@@ -1681,18 +1693,6 @@ sub generate_slides {
 	}
     }
     closedir DIR ;
-
-    # find the slidetemplate
-    my $slidetemplate = (Llgal::Templates::find_template_file ($self, $opts, $opts->{slidetemplate_filename}, 1))
-	. "/$opts->{slidetemplate_filename}" ;
-    $messages->print ("Using '$slidetemplate' as HTML slide template.\n") ;
-
-    # keep the slidetemplate in memory instead of always reopening it
-    my @slidetemplate_text ;
-    open(SR,"$slidetemplate")
-	or die "Can't open the slide template file '$slidetemplate' ($!).\n" ;
-    @slidetemplate_text = <SR> ;
-    close SR ;
 
     # create slides
     $messages->print ("Creating individual slides: ") ;
@@ -1859,7 +1859,7 @@ sub generate_slides {
 	#################################
 	# Replace fields in the template
 
-	my @slidetemplate_text_copy = @slidetemplate_text ; # don't touch the original template
+	my @slidetemplate_text_copy = @{$gallery->{slidetemplate_text}} ; # don't touch the original template
         for my $line (@slidetemplate_text_copy) {
 
 	    # user-defined fields
@@ -1888,6 +1888,16 @@ sub generate_slides {
 	    $line =~ s/<!--NEXT-SLIDE-->/$NEXT_SLIDE/g ;
 	    $line =~ s/<!--EXIF-TABLE-->/$EXIF_TABLE/ ;
 
+	    # only one replacement per line because earlier template parsing only detected one per line
+	    if ($line =~ /<!--EXIF-(.*)-->/) {
+		my $name = $1;
+		# EXIF-TABLE handled earlier, no need to ignore here
+		my $exif_infos = $entry->{exif_infos} ;
+		my $value = $exif_infos->{$name} ;
+		$value = "" unless $value ;
+		$line =~ s/<!--EXIF-$name-->/$value/ ;
+	    }
+
 	    # output the line
 	    print SW "$line" ;
 	}
@@ -1906,11 +1916,7 @@ sub generate_index {
     my @entries = @{$gallery->{entries}} ;
     my @headers = @{$gallery->{headers}} ;
     my @footers = @{$gallery->{footers}} ;
-
-    # find the indextemplate
-    my $indextemplate = (Llgal::Templates::find_template_file ($self, $opts, $opts->{indextemplate_filename}, 1))
-	. "/$opts->{indextemplate_filename}" ;
-    $messages->print ("Using '$indextemplate' as HTML index template.\n") ;
+    my $indextemplate = $gallery->{indextemplate};
 
     # open the template and the destination
     $messages->print ("Creating the $opts->{index_filename}.$opts->{www_extension} file: ") ;
@@ -2071,23 +2077,27 @@ sub generate_index {
 	    if ($entry->{thumb_url}) {
 		# either IMG, or with a user-given thumbnail
 
-		print IXW "    <td class=\"thumb\" style=\"width: ${box_width}px; height: ${box_height}px;\">\n" ;
+		print IXW "    <td class=\"thumb\" ";
+		print IXW "style=\"width: ${box_width}px; height: ${box_height}px;\" "
+		    unless $opts->{thumbnails_dimensions_from_css} ;
+		print IXW ">\n" ;
 
 		if ($type == $TYPE_TEXT and $opts->{make_no_slides}) {
 		    # thumbnail without any link
 		    print IXW "      <img src=\"$entry->{thumb_url}\" "
-			."title=\"$title $entry->{scaled_dimstring}\" "
-			."style=\"width: ${thumb_width}px; height: ${thumb_height}px;\" "
-			."alt=\"$linktext $entry->{thumb_dimstring}\" />\n" ;
-
+			."title=\"$title $entry->{scaled_dimstring}\" ";
+		    print IXW "style=\"width: ${thumb_width}px; height: ${thumb_height}px;\" "
+			unless $opts->{thumbnails_dimensions_from_css} ;
+		    print IXW "alt=\"$linktext $entry->{thumb_dimstring}\" />\n" ;
 		} else {
 		    # thumbnail linking to the slide
 		    print IXW "      <a href=\"$link\" "
 			."title=\"$title $entry->{scaled_dimstring}\">\n" ;
-		    print IXW "        <img src=\"$entry->{thumb_url}\" "
-			."style=\"width: ${thumb_width}px; height: ${thumb_height}px;\" "
-			."alt=\"$linktext $entry->{thumb_dimstring}\" />\n" ;
-		    print IXW "      </a>" ;
+		    print IXW "	       <img src=\"$entry->{thumb_url}\" ";
+		    print IXW "style=\"width: ${thumb_width}px; height: ${thumb_height}px;\" "
+			unless $opts->{thumbnails_dimensions_from_css} ;
+		    print IXW "alt=\"$linktext $entry->{thumb_dimstring}\" />\n" ;
+		    print IXW "	     </a>" ;
 		}
 
 		print IXW "    </td>\n" ;
@@ -2095,7 +2105,10 @@ sub generate_index {
 	    } else {
 		# not IMG, without thumbnail
 
-		print IXW "    <td class=\"text-thumb\" style=\"width: ${box_width}px; height: ${box_height}px;\">\n" ;
+		print IXW "    <td class=\"text-thumb\" ";
+		print IXW "style=\"width: ${box_width}px; height: ${box_height}px;\" "
+		    unless $opts->{thumbnails_dimensions_from_css} ;
+		print IXW ">\n";
 
 		if ($type == $TYPE_TEXT and $opts->{make_no_slides}) {
 		    # thumbnail with basic text and that's it
@@ -2427,7 +2440,7 @@ sub main_process {
 	Llgal::Config::prepare_captions_variables ($self, $opts) ;
 
 	my $gallery = init_gallery () ;
-	my @entries = get_entries $opts ;
+	my @entries = get_entries $gallery, $opts ;
 	@{$gallery->{entries}} = @entries ;
 	finalize_entries $gallery, $opts ;
 	process_gallery_family $gallery, $family, $opts ;
@@ -2446,6 +2459,34 @@ sub main_process {
 
 	my $gallery = init_gallery () ;
 
+	# find the indextemplate
+	$gallery->{indextemplate} = (Llgal::Templates::find_template_file ($self, $opts, $opts->{indextemplate_filename}, 1))
+	    . "/$opts->{indextemplate_filename}" ;
+	$messages->print ("Using '".$gallery->{indextemplate}."' as HTML index template.\n") ;
+
+	if (!$opts->{make_no_slides}) {
+	    # find the slidetemplate
+	    my $slidetemplate = (Llgal::Templates::find_template_file ($self, $opts, $opts->{slidetemplate_filename}, 1))
+		. "/$opts->{slidetemplate_filename}" ;
+	    $messages->print ("Using '$slidetemplate' as HTML slide template.\n") ;
+
+	    # keep the slidetemplate in memory instead of always reopening it
+	    open(SR,"$slidetemplate")
+		or die "Can't open the slide template file '$slidetemplate' ($!).\n" ;
+	    @{$gallery->{slidetemplate_text}} = <SR> ;
+	    close SR ;
+
+	    # list Exif tags needed by the template.
+	    # only one pattern per line is detected, other are ignored.
+	    foreach my $line (@{$gallery->{slidetemplate_text}}) {
+		if ($line =~ /<!--EXIF-(.*)-->/) {
+		    if ($1 ne "TABLE") { # TABLE is llgal-reserved, unused in EXIF
+			push (@{$gallery->{template_exif_tags_list}}, $1);
+		    }
+		}
+	    }
+	}
+
 	if (-e "$self->{destination_dir}$self->{local_llgal_dir}/$opts->{captions_filename}") {
 	    # generate the gallery using the caption file
 	    read_captions_file $gallery ;
@@ -2453,7 +2494,7 @@ sub main_process {
 	    $messages->print ("Found ". (scalar @{$gallery->{entries}}) ." entries in the captions file.\n") ;
 	} else {
 	    # generate the gallery from scratch
-	    @{$gallery->{entries}} = get_entries $opts ;
+	    @{$gallery->{entries}} = get_entries $gallery, $opts ;
 	    fill_entries $gallery ;
 	    $messages->print ("Found ". (scalar @{$gallery->{entries}}) ." entries in $destination_string\n") ;
 	}
@@ -2500,3 +2541,10 @@ my $root_gallery = main_process {}, {} ;
 if (defined $self->{generate_config} and not $self->{generate_config} eq "local") {
     Llgal::Config::generate_config ($self, $self->{generate_config}, $opts_without_defaults) ;
 }
+
+# Indent style for emacs
+# Local Variables:
+# perl-indent-level: 4
+# tab-width: 8
+# indent-tabs-mode: t
+# End:

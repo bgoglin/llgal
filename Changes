@@ -1,3 +1,22 @@
+llgal (0.13.18)
+
+  * Fix slidenames for subgalleries when -n is used
+    (reported by Richard Betham in Debian bug #652929).
+  * Fix the recognition of existing captions file entries when filenames
+    contain special characters.
+  * Check whether there is a user-given thumbnail before listing as links
+    when -L is given.
+    Thanks to Gabor Kiss for the patch in Debian bug #683809.
+  * Make --cf work with subdirectory entries by not removing the extension
+    and just using the entire directory name (reported by Bruno Raoult).
+  * New option (thumbnails_dimensions_from_css) to avoid any thumbnail
+    dimension in generated HTML.
+  * Add support for replacing <!--EXIF-*--> with the corresponding Exif
+    tag in the slide template. Thanks to Charles Nepote.
+  * Really initialize exiftool only once per gallery.
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Mon, 01 Aug 2016 22:25:00 +0200
+
 llgal (0.13.17)
 
   * Fix the description of -n in the manpage (thanks Paul Menzel
