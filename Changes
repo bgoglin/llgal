@@ -1,3 +1,4 @@
+llgal (0.13.18)
 
   * Fix slidenames for subgalleries when -n is used
     (reported by Richard Betham in Debian bug #652929).
@@ -14,6 +15,7 @@
     tag in the slide template. Thanks to Charles Nepote.
   * Really initialize exiftool only once per gallery.
 
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Mon, 01 Aug 2016 22:25:00 +0200
 
 llgal (0.13.17)
 
