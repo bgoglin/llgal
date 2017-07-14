@@ -1,3 +1,9 @@
+
+  * The llgal website has moved to http://bgoglin.free.fr/llgal
+  * The repository moved to http://github.com/bgoglin/llgal
+  * The mailing list is now llgal@googlegroups.com
+
+
 llgal (0.13.18)
 
   * Fix slidenames for subgalleries when -n is used
