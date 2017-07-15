@@ -1,4 +1,3 @@
 version=3
 
-opts="pgpsigurlmangle=s/$/.sig/" \
-http://download.gna.org/llgal/llgal-([\d\w\.]+).tar.bz2 debian uupdate
+https://github.com/bgoglin/llgal/tags .*/llgal-([\d\w\.]+).tar.gz debian uupdate

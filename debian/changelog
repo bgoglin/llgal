@@ -1,6 +1,6 @@
 llgal (0.13.18-2) UNRELEASED; urgency=low
 
-  * Add signature information to debian/watch.
+  * Update to new webpage and repository URLs.
   * Really bump debhelper compatibility level to 9.
 
  -- Brice Goglin <bgoglin@debian.org>  Thu, 04 Aug 2016 08:13:46 +0200
