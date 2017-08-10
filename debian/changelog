@@ -1,10 +1,10 @@
-llgal (0.13.19-1) UNRELEASED; urgency=low
+llgal (0.13.19-1) unstable; urgency=low
 
   * Update to new webpage and repository URLs.
   * Really bump debhelper compatibility level to 9.
   * Bump Standards-Version to 4.0.1, no changes needed.
 
- -- Brice Goglin <bgoglin@debian.org>  Thu, 10 Aug 2017 20:29:34 +0200
+ -- Brice Goglin <bgoglin@debian.org>  Thu, 10 Aug 2017 20:31:15 +0200
 
 llgal (0.13.18-1) unstable; urgency=low
 
