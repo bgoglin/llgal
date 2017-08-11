@@ -1,3 +1,4 @@
 version=3
 
-https://github.com/bgoglin/llgal/tags .*/llgal-([\d\w\.]+).tar.gz debian uupdate
+opts=pgpsigurlmangle=s/archive\/(\d\S+)\.tar\.gz/releases\/download\/$1\/$1\.tar\.gz\.asc/ \
+ https://github.com/bgoglin/llgal/releases .*/llgal-([\d\w\.]+).tar.gz

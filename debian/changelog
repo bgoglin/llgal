@@ -1,3 +1,9 @@
+llgal (0.13.19-2) UNRELEASED; urgency=low
+
+  * Enable release signature on github.
+
+ -- Brice Goglin <bgoglin@debian.org>  Fri, 11 Aug 2017 09:33:37 +0200
+
 llgal (0.13.19-1) unstable; urgency=low
 
   * Update to new webpage and repository URLs.
