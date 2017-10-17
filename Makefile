@@ -37,7 +37,7 @@ llgal:: llgal.in VERSION build-lib update-po
 clean:: clean-lib clean-po
 	rm -f llgal
 
-install:: install-lib install-po
+install:: install-lib install-po llgal
 	install -d -m 0755 $(DESTDIR)$(BINDIR)/ $(DESTDIR)$(DATADIR)/llgal/ $(DESTDIR)$(SYSCONFDIR)/llgal/
 	install -m 0755 llgal $(DESTDIR)$(BINDIR)/llgal
 	install -m 0644 $(DATA_SUBDIR)/* $(DESTDIR)$(DATADIR)/llgal/
