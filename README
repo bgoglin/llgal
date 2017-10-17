@@ -8,7 +8,7 @@ llgal installation instructions
 ===============================
 
 You don't care about this if you use Debian or Gentoo or any other
-distribution that includes prepackaged lltag versions.
+distribution that includes prepackaged llgal versions.
 
 Run 'make' followed by 'make install' as root.
 

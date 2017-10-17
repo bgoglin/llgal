@@ -72,7 +72,7 @@ $(LIB_SUBDIR)/Makefile.PL: $(LIB_SUBDIR)/Makefile.PL.in VERSION
 	sed -e 's!@VERSION@!$(VERSION)!g' < $(LIB_SUBDIR)/Makefile.PL.in > $(LIB_SUBDIR)/Makefile.PL
 
 $(LIB_SUBDIR)/Makefile: $(LIB_SUBDIR)/Makefile.PL
-	cd $(LIB_SUBDIR) && perl Makefile.PL INSTALLDIRS=$(PERL_INSTALLDIRS)	
+	cd $(LIB_SUBDIR) && perl Makefile.PL INSTALLDIRS=$(PERL_INSTALLDIRS)
 
 prepare-lib: $(LIB_SUBDIR)/Makefile
 
