@@ -984,10 +984,10 @@ was passed).
 The command lines used to generate those images from your original images
 are defined by the following configuration options:
 .RS
-.I scaled_create_command = "convert --scale <MAXW>x<MAXH> -- <IN> <OUT>"
+.I scaled_create_command = "convert -scale <MAXW>x<MAXH> -- <IN> <OUT>"
 .RE
 .RS
-.I thumbnail_create_command = "convert --scale <MAXW>x<MAXH> -- <IN> <OUT>"
+.I thumbnail_create_command = "convert -scale <MAXW>x<MAXH> -- <IN> <OUT>"
 .RE
 
 You may change the value of these options to change the way the generation
