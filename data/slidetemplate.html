@@ -20,11 +20,11 @@
          works just compare the template file with a generated slide. -->
 
     <p class="center">
-      <a href="<!--PREV-SLIDE-->"><!--PREV-SLIDE-LINK-TEXT--></a>
+      <a id="get-to-prev" href="<!--PREV-SLIDE-->"><!--PREV-SLIDE-LINK-TEXT--></a>
       &nbsp; &nbsp; &nbsp;
       <a href="<!--INDEX-FILE-->"><!--INDEX-LINK-TEXT--></a>
       &nbsp; &nbsp; &nbsp;
-      <a href="<!--NEXT-SLIDE-->"><!--NEXT-SLIDE-LINK-TEXT--></a>
+      <a id="get-to-next" href="<!--NEXT-SLIDE-->"><!--NEXT-SLIDE-LINK-TEXT--></a>
     </p>
 
     <div class="center"><table class="slide"><tr><td class="<!--THIS-SLIDE-STYLE-->">
@@ -47,5 +47,7 @@
       <!--EXIF-TABLE-->
     </div>
 
+    <script>document.onkeydown=function(e){e=e||window.event;if(e.keyCode=='37'){document.getElementById('get-to-prev').click();}else if(e.keyCode=='39'){document.getElementById('get-to-next').click();}}</script>
+    
   </body>
 </html>
