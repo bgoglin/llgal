@@ -400,7 +400,7 @@ sub add_defaults {
 # format of the timestamp in captions, when enabled (--ct)
 	timestamp_format_in_caption => llgal_gettext ("timestamp_format_in_caption|%y-%m-%d %H:%M:%S"),
 # credits line at the bottom of the index
-	credits_text => llgal_gettext ("credits_text|created with <a href=\"http://home.gna.org/llgal\">llgal</a>"),
+	credits_text => llgal_gettext ("credits_text|created with <a href=\"http://bgoglin.free.fr/llgal\">llgal</a>"),
 
 # What files to insert in the gallery
 # image and movie extensions
@@ -529,8 +529,8 @@ Layout Options:
     --wx <n>           rows in thumbnail index are at most <n> pixels wide
   Default values are given in parentheses (where applicable).
 Author:  Brice Goglin
-Homepage:  http://home.gna.org/llgal
-Report bugs to:  <llgal-users AT gna.org>
+Homepage:  http://bgoglin.free.fr/llgal
+Report bugs to:  <llgal AT googlegroups.com>
 END_OF_USAGE
     die $usage ;
 }

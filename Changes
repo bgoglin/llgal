@@ -1,3 +1,11 @@
+llgal (0.13.19)
+
+  * The llgal website has moved to http://bgoglin.free.fr/llgal
+  * The repository moved to http://github.com/bgoglin/llgal
+  * The mailing list is now llgal@googlegroups.com
+
+ -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Thu, 10 Aug 2017 20:24:00 +0200
+
 llgal (0.13.18)
 
   * Fix slidenames for subgalleries when -n is used
@@ -71,7 +79,7 @@ llgal (0.13.15)
 
 llgal (0.13.14)
 
-  * Add German translation, thanks Thomas He√üling!
+  * Add German translation, thanks Thomas He√É≈∏ling!
   * Add Italian translation, thanks Gianelle Alessio!
 
  -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Sun, 18 Nov 2007 16:20:00 +0100
@@ -218,14 +226,14 @@ llgal (0.13.6)
 
   * Fix a major bug in slides' layout, which led to always use text-slide
     style even for images, making the margins wrong.
-  * Fix the locale of gettext translations (such as "PrÈcÈdent" in French)
+  * Fix the locale of gettext translations (such as "Pr√©c√©dent" in French)
     by adding missing headers in the po files (thanks to Samuel Thibault
-    for the fix and Nicolas GuÈnot for the report).
+    for the fix and Nicolas Gu√©not for the report).
   * Fix linking between subgalleries when making no slides.
   * Fix computing of thumbnail row width when deciding how many thumbnails
     to output on a row, use the correct width for padded thumbnail boxes.
   * Fix missing link from listed text in the index to the corresponding
-    text slide when -L is passed (reported by …milie Le Roux).
+    text slide when -L is passed (reported by √âmilie Le Roux).
   * Fix uninitialized dimensions string when not generating any slide.
   * Fix verbose configuration option definition in recursive mode since
     it was breaking generated config file (reported by Gerfried Fuchs).
@@ -266,7 +274,7 @@ llgal (0.13.5)
 
   * When linking to galleries, add the index filename to the URL so
     that these links work even without a web server
-    (thanks to Michael Waschb¸sch for the patch).
+    (thanks to Michael Waschb√ºsch for the patch).
   * Document how to add keyboard shortcuts to the gallery with
     HTML accesskeys (see the How-To file).
   * Various fix for links to previous/next galleries:
@@ -653,7 +661,7 @@ llgal (0.11)
     + Don't use basename anymore, always use the whole filename instead.
     + When possible, the HTML title parameter is in href instead of img.
   * Cleanup location and copying of special llgal files
-    (requested by LoÔs Taulelle) :
+    (requested by Lo√Øs Taulelle) :
     + index/slidetemplate.html are not copied to .llgal anymore.
     + The user might put a special revision of index/slidetemplate.html
       in .llgal, llgal will use it.

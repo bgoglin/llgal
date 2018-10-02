@@ -1,6 +1,6 @@
 NAME	=	llgal
-ifeq ($(shell [ -d .svn ] && echo 1),1)
-	VERSION	=	$(shell cat VERSION)+svn.$(shell date +%Y%m%d)
+ifeq ($(shell [ -d .git ] && echo 1),1)
+	VERSION =       $(shell cat VERSION)+git$(shell date +%Y%m%d).$(shell git show -s --pretty=format:%h)
 else
 	VERSION	=	$(shell cat VERSION)
 endif
@@ -37,7 +37,7 @@ llgal:: llgal.in VERSION build-lib update-po
 clean:: clean-lib clean-po
 	rm -f llgal
 
-install:: install-lib install-po
+install:: install-lib install-po llgal
 	install -d -m 0755 $(DESTDIR)$(BINDIR)/ $(DESTDIR)$(DATADIR)/llgal/ $(DESTDIR)$(SYSCONFDIR)/llgal/
 	install -m 0755 llgal $(DESTDIR)$(BINDIR)/llgal
 	install -m 0644 $(DATA_SUBDIR)/* $(DESTDIR)$(DATADIR)/llgal/
@@ -72,7 +72,7 @@ $(LIB_SUBDIR)/Makefile.PL: $(LIB_SUBDIR)/Makefile.PL.in VERSION
 	sed -e 's!@VERSION@!$(VERSION)!g' < $(LIB_SUBDIR)/Makefile.PL.in > $(LIB_SUBDIR)/Makefile.PL
 
 $(LIB_SUBDIR)/Makefile: $(LIB_SUBDIR)/Makefile.PL
-	cd $(LIB_SUBDIR) && perl Makefile.PL INSTALLDIRS=$(PERL_INSTALLDIRS)	
+	cd $(LIB_SUBDIR) && perl Makefile.PL INSTALLDIRS=$(PERL_INSTALLDIRS)
 
 prepare-lib: $(LIB_SUBDIR)/Makefile
 
