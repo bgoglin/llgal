@@ -1,6 +1,10 @@
 llgal (0.13.19-2) UNRELEASED; urgency=low
 
+  [ Brice Goglin ]
   * Enable release signature on github.
+
+  [ Debian Janitor ]
+  * Trim trailing whitespace.
 
  -- Brice Goglin <bgoglin@debian.org>  Fri, 11 Aug 2017 09:33:37 +0200
 
@@ -250,7 +254,7 @@ llgal (0.11.4-1) unstable; urgency=low
 llgal (0.11.3-1) unstable; urgency=low
 
   * New upstream release.
-  * Fix the order of command line and configuration file options 
+  * Fix the order of command line and configuration file options
     processing, and of sanity checks, closes: #337380.
   * Fix the copyright.
 
@@ -334,14 +338,14 @@ llgal (0.9.3-1) unstable; urgency=low
 
 llgal (0.9.2-1) unstable; urgency=low
 
-  * New upstream release. 
+  * New upstream release.
 
  -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Sat,  9 Apr 2005 20:10:38 +0200
 
 llgal (0.9.1-1) unstable; urgency=low
 
   * Add homepage to debian/copyright.
-  * New upstream release. 
+  * New upstream release.
 
  -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Sun, 27 Mar 2005 00:29:05 +0100
 
@@ -417,4 +421,3 @@ llgal (0.1-1) unstable; urgency=low
   * Initial upstream release.
 
  -- Brice Goglin <Brice.Goglin@ens-lyon.org>  Mon, 07 Feb 2005 20:30:00 +0200
-
