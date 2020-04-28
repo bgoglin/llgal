@@ -3,7 +3,7 @@ Section: web
 Priority: optional
 Maintainer: Brice Goglin <bgoglin@debian.org>
 Build-Depends:
- debhelper (>= 12~)
+ debhelper-compat (= 12)
 Homepage: http://bgoglin.free.fr/llgal/
 Standards-Version: 4.0.1
 Vcs-Git: https://github.com/bgoglin/llgal.git
