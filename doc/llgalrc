@@ -300,10 +300,10 @@
 ##### What files to insert in the gallery #####
 
 # Extensions that are matched when searching images (|-separated list)
-# image_extensions = "jpg|jpeg|gif|png|tif|tiff|bmp"
+# image_extensions = "jpg|jpeg|gif|png|tif|tiff|bmp|webp"
 
 # Extensions that are matched when searching movies (|-separated list)
-# movie_extensions = "mpg|mpeg|avi|mov|ogm|wmv|mp4|3gp"
+# movie_extensions = "mpg|mpeg|avi|mov|ogm|wmv|mp4|3gp|webm"
 
 # Add all files to the list of entries
 # not only images and movies [-A]
